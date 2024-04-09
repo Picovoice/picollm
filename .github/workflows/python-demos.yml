@@ -1,0 +1,45 @@
+name: Python Demos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/python-demos.yml'
+      - 'demo/python/**'
+      - '!demo/python/README.md'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - '.github/workflows/python-demos.yml'
+      - 'demo/python/**'
+      - '!demo/python/README.md'
+
+defaults:
+  run:
+    working-directory: demo/python
+
+jobs:
+  build-self-hosted:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      matrix:
+        machine: [pv-linux, pv-ios, pv-windows]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build dependencies
+      run: |
+        python3 -m pip install -U pip setuptools
+        pip3 install wheel
+        cd ../../binding/python
+        python3 setup.py sdist bdist_wheel
+        pip3 install --force-reinstall dist/pvmvm-0.1.0-py3-none-any.whl
+
+    # - name: Download resource files
+    #   run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/xpu/res/mvm-weights-4096x4096x256.bin/latest/mvm-weights-4096x4096x256.bin -o mvm-weights-4096x4096x256.bin
+
+    - name: Test
+      run: python3 mvm_demo_file.py --input_weight_file ./mvm-weights-4096x4096x256.bin

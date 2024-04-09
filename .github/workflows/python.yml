@@ -1,0 +1,57 @@
+name: Python
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/python.yml'
+      - 'binding/python/**'
+      - '!binding/python/README.md'
+      - 'lib/beaglebone/**'
+      - 'lib/jetson/**'
+      - 'lib/linux/**'
+      - 'lib/mac/**'
+      - 'lib/raspberry-pi/**'
+      - 'lib/windows/**'
+      - 'res/audio/**'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - '.github/workflows/python.yml'
+      - 'binding/python/**'
+      - '!binding/python/README.md'
+      - 'lib/beaglebone/**'
+      - 'lib/jetson/**'
+      - 'lib/linux/**'
+      - 'lib/mac/**'
+      - 'lib/raspberry-pi/**'
+      - 'lib/windows/**'
+      - 'res/audio/**'
+
+defaults:
+  run:
+    working-directory: binding/python
+
+jobs:
+  build-self-hosted:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      matrix:
+        machine: [pv-linux, pv-ios, pv-windows]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Pre-build dependencies
+      run: python3 -m pip install --upgrade pip
+
+    - name: Install dependencies
+      run: pip3 install -r requirements.txt
+
+    - name: Download resource files
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/xpu/res/mvm-weights-4096x4096x256.bin/latest/mvm-weights-4096x4096x256.bin -o mvm-weights-4096x4096x256.bin
+
+    - name: Test
+      run: python3 test_mvm.py ./mvm-weights-4096x4096x256.bin

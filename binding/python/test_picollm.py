@@ -12,8 +12,6 @@
 import sys
 import unittest
 
-import numpy as np
-
 from _picollm import PicoLLM
 from _util import *
 

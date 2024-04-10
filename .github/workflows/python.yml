@@ -38,6 +38,7 @@ jobs:
     runs-on: ${{ matrix.machine }}
 
     strategy:
+      fail-fast: false
       matrix:
         machine: [pv-linux, pv-ios, pv-windows]
 

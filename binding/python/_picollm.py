@@ -19,7 +19,7 @@ from ctypes import (
     c_char_p,
     c_float,
     c_int32,
-    cdll,
+    CDLL,
 )
 from enum import Enum
 from typing import (
@@ -197,9 +197,9 @@ class PicoLLM(object):
             device_string: str = "cpu:8",
             library_path: Optional[str] = None) -> None:
         if library_path is None:
-            library_path = \
-                os.path.join(os.path.dirname(__file__), '../../../../build/release/x86_64/src/picollm/libpv_picollm.so')
-        library = cdll.LoadLibrary(library_path)
+            library_path = pv_library_path('')
+
+        library = CDLL(library_path, winmode=0)
 
         self._get_error_stack_func = library.pv_get_error_stack
         self._get_error_stack_func.argtypes = [POINTER(POINTER(c_char_p)), POINTER(c_int32)]
@@ -222,7 +222,7 @@ class PicoLLM(object):
         if status is not self.PicovoiceStatuses.SUCCESS:
             raise self._PICOVOICE_STATUS_TO_EXCEPTION[status](
                 message='`pv_picollm_init` failed.',
-                message_stack=self._get_error_stack_func()
+                message_stack=self._get_error_stack()
             )
 
         self._delete_func = library.pv_picollm_delete

@@ -33,10 +33,10 @@ jobs:
     - name: Build dependencies
       run: |
         python3 -m pip install -U pip setuptools
-        pip3 install wheel
+        python3 -m pip install wheel
         cd ../../binding/python
         python3 setup.py sdist bdist_wheel
-        pip3 install --force-reinstall dist/pvmvm-0.1.0-py3-none-any.whl
+        python3 -m pip install --force-reinstall dist/pvmvm-0.1.0-py3-none-any.whl
 
     - name: Download resource files
       run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.bin/latest/phi2-290.bin -o phi2-290.bin

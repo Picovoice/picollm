@@ -51,7 +51,7 @@ jobs:
       run: pip3 install -r requirements.txt
 
     - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/xpu/res/mvm-weights-4096x4096x256.bin/latest/mvm-weights-4096x4096x256.bin -o mvm-weights-4096x4096x256.bin
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.bin/latest/phi2-290.bin -o phi2-290.bin
 
     - name: Test
-      run: python3 test_mvm.py ./mvm-weights-4096x4096x256.bin
+      run: python3 test_picollm.py ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.bin

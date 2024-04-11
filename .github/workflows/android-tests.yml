@@ -1,0 +1,46 @@
+name: Android Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/android-tests.yml'
+      - 'binding/android/PicoLLM/**'
+      - '!binding/android/PicoLLM/README.md'
+      - 'demo/android/Activity/**'
+      - '!demo/android/Activity/README.md'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+']
+    paths:
+      - '.github/workflows/android-tests.yml'
+      - 'binding/android/PicoLLM/**'
+      - '!binding/android/PicoLLM/README.md'
+      - 'demo/android/Activity/**'
+      - '!demo/android/Activity/README.md'
+
+defaults:
+  run:
+    working-directory: demo/android/Activity
+
+jobs:
+  build:
+    name: Run Android Tests
+    runs-on: pv-android
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build binding
+      run: ./gradlew assembleRelease
+      working-directory: binding/android/PicoLLM
+
+    - name: Inject Android keystore variables
+      run: |
+        echo modelDownloadUrl="http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.bin/latest/phi2-290.bin" >> local.properties
+
+    - name: Build androidTest
+      run: ./gradlew assembleDebugAndroidTest
+
+    - name: Run tests
+      run: ./gradlew connectedAndroidTest --info

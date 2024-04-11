@@ -26,7 +26,7 @@ shutil.copy(os.path.join(os.path.dirname(__file__), '_picollm.py'), os.path.join
 shutil.copy(os.path.join(os.path.dirname(__file__), '_factory.py'), os.path.join(package_folder, '_factory.py'))
 shutil.copy(os.path.join(os.path.dirname(__file__), '_util.py'), os.path.join(package_folder, '_util.py'))
 
-platforms = ('linux', 'mac', 'windows')
+platforms = ('linux', 'mac', 'windows', 'raspberry-pi')
 
 os.mkdir(os.path.join(package_folder, 'lib'))
 for platform in platforms:
@@ -41,9 +41,10 @@ include pvpicollm/_picollm.py
 include pvpicollm/_factory.py
 include pvpicollm/_util.py
 include pvpicollm/lib/linux/x86_64/libpv_picollm.so
-include pvpicollm/lib/mac/x86_64/libpv_picollm.dylib
-include pvpicollm/lib/mac/arm64/libpv_picollm.dylib
+include pvpicollm/lib/mac/x86_64/*.dylib
+include pvpicollm/lib/mac/arm64/*.dylib
 include pvpicollm/lib/windows/amd64/*.dll
+include pvpicollm/lib/raspberry-pi/**/*.so
 """
 
 with open(os.path.join(os.path.dirname(__file__), 'MANIFEST.in'), 'w') as f:

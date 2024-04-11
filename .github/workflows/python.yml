@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [pv-linux, pv-ios, pv-windows]
+        machine: [rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows]
 
     steps:
     - uses: actions/checkout@v3

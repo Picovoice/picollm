@@ -18,11 +18,29 @@ def _is_64bit():
     return '64bit' in platform.architecture()[0]
 
 
-def _pv_linux_machine(machine):
+def _linux_machine():
+    machine = platform.machine()
     if machine == 'x86_64':
         return machine
+    elif machine in ['aarch64', 'armv7l']:
+        arch_info = ('-' + machine) if _is_64bit() else ''
     else:
         raise NotImplementedError("Unsupported CPU architecture: `%s`" % machine)
+
+    cpu_info = ''
+    try:
+        cpu_info = subprocess.check_output(['cat', '/proc/cpuinfo']).decode('utf-8')
+        cpu_part_list = [x for x in cpu_info.split('\n') if 'CPU part' in x]
+        cpu_part = cpu_part_list[0].split(' ')[-1].lower()
+    except Exception as e:
+        raise RuntimeError("Failed to identify the CPU with `%s`\nCPU info: `%s`" % (e, cpu_info))
+
+    if '0xd08' == cpu_part:
+        return 'cortex-a72' + arch_info
+    elif "0xd0b" == cpu_part:
+        return "cortex-a76" + arch_info
+    else:
+        raise NotImplementedError("Unsupported CPU: `%s`." % cpu_part)
 
 
 def _pv_platform():
@@ -40,6 +58,13 @@ def _pv_platform():
 
 _PV_SYSTEM, _PV_MACHINE = _pv_platform()
 
+_RASPBERRY_PI_MACHINES = {
+    "cortex-a72",
+    "cortex-a76",
+    "cortex-a72-aarch64",
+    "cortex-a76-aarch64"
+}
+
 
 def pv_library_path(relative):
     if _PV_SYSTEM == 'Darwin':
@@ -50,9 +75,17 @@ def pv_library_path(relative):
     elif _PV_SYSTEM == 'Linux':
         if _PV_MACHINE == 'x86_64':
             return os.path.join(os.path.dirname(__file__), relative, 'lib/linux/x86_64/libpv_picollm.so')
+        elif linux_machine in _RASPBERRY_PI_MACHINES:
+            return os.path.join(
+                os.path.dirname(__file__),
+                relative,
+                'lib/raspberry-pi/%s/libpv_picollm.so' % linux_machine)
     elif _PV_SYSTEM == 'Windows':
         library_file = os.path.join(os.path.dirname(__file__), relative, 'lib/windows/amd64/libpv_picollm.dll')
         os.environ["PATH"] += os.pathsep + os.path.join(os.path.dirname(library_file))
         return library_file
 
     raise NotImplementedError('Unsupported platform.')
+
+
+__all__ = ['pv_library_path']

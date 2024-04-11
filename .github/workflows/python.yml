@@ -45,10 +45,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Setup Python virtualenv
+    - name: Setup Python virtualenv (*nix)
+      if: ${{ matrix.machine != 'pv-windows' }}
       run: |
         python3 -m venv .venv
         . .venv/bin/activate
+        echo PATH=$PATH >> $GITHUB_ENV
+
+    - name: Setup Python virtualenv (windows)
+      if: ${{ matrix.machine == 'pv-windows' }}
+      run: |
+        python3 -m venv .venv
+        .venv\Scripts\activate
         echo PATH=$PATH >> $GITHUB_ENV
 
     - name: Install Python dependencies

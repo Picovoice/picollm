@@ -45,10 +45,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Pre-build dependencies
-      run: python3 -m pip install --upgrade pip
+    - name: Setup Python virtualenv
+      run: |
+        python3 -m venv .venv
+        . .venv/bin/activate
+        echo PATH=$PATH >> $GITHUB_ENV
 
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: python3 -m pip install -r requirements.txt
 
     - name: Download resource files

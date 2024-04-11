@@ -18,7 +18,7 @@ def _is_64bit():
     return '64bit' in platform.architecture()[0]
 
 
-def _linux_machine():
+def _pv_linux_machine():
     machine = platform.machine()
     if machine == 'x86_64':
         return machine
@@ -75,11 +75,11 @@ def pv_library_path(relative):
     elif _PV_SYSTEM == 'Linux':
         if _PV_MACHINE == 'x86_64':
             return os.path.join(os.path.dirname(__file__), relative, 'lib/linux/x86_64/libpv_picollm.so')
-        elif linux_machine in _RASPBERRY_PI_MACHINES:
+        elif _PV_MACHINE in _RASPBERRY_PI_MACHINES:
             return os.path.join(
                 os.path.dirname(__file__),
                 relative,
-                'lib/raspberry-pi/%s/libpv_picollm.so' % linux_machine)
+                'lib/raspberry-pi/%s/libpv_picollm.so' % _PV_MACHINE)
     elif _PV_SYSTEM == 'Windows':
         library_file = os.path.join(os.path.dirname(__file__), relative, 'lib/windows/amd64/libpv_picollm.dll')
         os.environ["PATH"] += os.pathsep + os.path.join(os.path.dirname(library_file))

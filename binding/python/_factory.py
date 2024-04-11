@@ -19,13 +19,13 @@ def create(
         access_key: str,
         model_path: str,
         device_string: Optional[str] = None,
-        library_path: Optional[str] = None) -> Picollm:
+        library_path: Optional[str] = None) -> PicoLLM:
     """
-    Factory method for Picollm.
+    Factory method for PicoLLM.
 
     :param device_string: String to select runtime device.
-    :param library_path: Absolute path to Picollm's dynamic library. If not set it will be set to the default
-    :return: An instance of Picollm.
+    :param library_path: Absolute path to PicoLLM's dynamic library. If not set it will be set to the default
+    :return: An instance of PicoLLM.
     """
 
     pass
@@ -36,7 +36,7 @@ def create(
     if library_path is None:
         library_path = pv_library_path('')
 
-    return Picollm(access_key=access_key, model_path=model_path, device_string=device_string, library_path=library_path)
+    return PicoLLM(access_key=access_key, model_path=model_path, device_string=device_string, library_path=library_path)
 
 
 __all__ = [

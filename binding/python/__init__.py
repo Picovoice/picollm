@@ -9,5 +9,6 @@
 # specific language governing permissions and limitations under the License.
 #
 
+from ._factory import *
 from ._picollm import *
 from ._util import *

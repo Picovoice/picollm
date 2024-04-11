@@ -49,7 +49,7 @@ def _pv_platform():
         raise ValueError("Unsupported system '%s'." % pv_system)
 
     if pv_system == 'Linux':
-        pv_machine = _pv_linux_machine(platform.machine())
+        pv_machine = _pv_linux_machine()
     else:
         pv_machine = platform.machine()
 

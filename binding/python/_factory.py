@@ -16,6 +16,8 @@ from ._util import *
 
 
 def create(
+        access_key: str,
+        model_path: str,
         device_string: Optional[str] = None,
         library_path: Optional[str] = None) -> Picollm:
     """
@@ -28,13 +30,13 @@ def create(
 
     pass
 
-    # if device_string is None:
-    #     device_string = "best:0"
+    if device_string is None:
+        device_string = "cpu:8"
 
-    # if library_path is None:
-    #     library_path = pv_library_path('')
+    if library_path is None:
+        library_path = pv_library_path('')
 
-    # return Picollm(device_string=device_string, library_path=library_path)
+    return Picollm(access_key=access_key, model_path=model_path, device_string=device_string, library_path=library_path)
 
 
 __all__ = [

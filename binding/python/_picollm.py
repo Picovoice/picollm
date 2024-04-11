@@ -194,10 +194,8 @@ class PicoLLM(object):
             self,
             access_key: str,
             model_path: str,
-            device_string: str = "cpu:8",
-            library_path: Optional[str] = None) -> None:
-        if library_path is None:
-            library_path = pv_library_path('')
+            device_string: str,
+            library_path: str) -> None:
 
         library = CDLL(library_path, winmode=0)
 

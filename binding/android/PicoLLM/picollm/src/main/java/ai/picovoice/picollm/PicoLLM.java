@@ -8,17 +8,17 @@
     limitations under the License.
 */
 
-package ai.picovoice.mvm;
+package ai.picovoice.picollm;
 
 import java.io.File;
 
 /**
- * Android binding for Mvm.
+ * Android binding for PicoLLM.
  */
-public class Mvm {
+public class PicoLLM {
 
     static {
-        System.loadLibrary("pv_mvm");
+        System.loadLibrary("pv_picollm");
     }
 
     private long handle;
@@ -26,25 +26,25 @@ public class Mvm {
     private boolean isModelLoadComplete;
 
     public static int getMinChunkSize() {
-        return MvmNative.getMinChunkSize();
+        return PicoLLMNative.getMinChunkSize();
     }
 
     public static int getMaxChunkSize() {
-        return MvmNative.getMaxChunkSize();
+        return PicoLLMNative.getMaxChunkSize();
     }
 
-    public static String getVersion() throws MvmException {
-        return MvmNative.getVersion();
+    public static String getVersion() throws PicoLLMException {
+        return PicoLLMNative.getVersion();
     }
 
-    private Mvm(String deviceString) throws MvmException {
-        handle = MvmNative.init(deviceString);
+    private PicoLLM(String deviceString) throws PicoLLMException {
+        handle = PicoLLMNative.init(deviceString);
 
     }
 
     public void delete() {
         if (handle != 0) {
-            MvmNative.delete(handle);
+            PicoLLMNative.delete(handle);
             handle = 0;
             isModelLoadComplete = false;
         }
@@ -54,48 +54,48 @@ public class Mvm {
         return isModelLoadComplete;
     }
 
-    public MvmMatrixDimensions getMatrixDimensions() throws MvmException {
+    public PicoLLMMatrixDimensions getMatrixDimensions() throws PicoLLMException {
         if (handle == 0) {
-            throw new MvmInvalidStateException(
+            throw new PicoLLMInvalidStateException(
                     "Attempted to call `getMatrixDimensions` after delete."
             );
         }
 
         if (!isModelLoadComplete) {
-            throw new MvmInvalidStateException(
+            throw new PicoLLMInvalidStateException(
                     "Attempted to call `getMatrixDimensions` before a model has been fully loaded."
             );
         }
 
-        return MvmNative.getMatrixDimensions(handle);
+        return PicoLLMNative.getMatrixDimensions(handle);
     }
 
-    public void loadModelFile(String filepath) throws MvmException {
+    public void loadModelFile(String filepath) throws PicoLLMException {
         loadModelFile(filepath, 1024 * 1024);
     }
 
     public void loadModelFile(
             String filepath,
-            int chunkSizeBytes) throws MvmException {
+            int chunkSizeBytes) throws PicoLLMException {
         if (handle == 0) {
-            throw new MvmInvalidStateException(
+            throw new PicoLLMInvalidStateException(
                     "Attempted to call `loadModelFile` after delete."
             );
         }
 
         if (isModelLoadComplete) {
-            throw new MvmInvalidStateException(
+            throw new PicoLLMInvalidStateException(
                     "Attempted to call `loadModelFile` after a model has already been loaded."
             );
         }
 
         File f = new File(filepath);
         if (!f.exists()) {
-            throw new MvmIOException(
+            throw new PicoLLMIOException(
                     String.format("File `%s` does not exist on device", filepath));
         }
 
-        MvmNative.loadModelFile(
+        PicoLLMNative.loadModelFile(
                 handle,
                 filepath,
                 chunkSizeBytes);
@@ -103,26 +103,26 @@ public class Mvm {
         isModelLoadComplete = true;
     }
 
-    public boolean loadModelChunk(byte[] chunk) throws MvmException {
+    public boolean loadModelChunk(byte[] chunk) throws PicoLLMException {
         return loadModelChunk(chunk, chunk.length);
     }
 
     public boolean loadModelChunk(
             byte[] chunk,
-            int chunkSizeBytes) throws MvmException {
+            int chunkSizeBytes) throws PicoLLMException {
         if (handle == 0) {
-            throw new MvmInvalidStateException(
+            throw new PicoLLMInvalidStateException(
                     "Attempted to call `loadModelChunk` after delete."
             );
         }
 
         if (isModelLoadComplete) {
-            throw new MvmInvalidStateException(
+            throw new PicoLLMInvalidStateException(
                     "Attempted to call `loadModelChunk` after a model has already been loaded."
             );
         }
 
-        isModelLoadComplete = MvmNative.loadModelChunk(
+        isModelLoadComplete = PicoLLMNative.loadModelChunk(
                 handle,
                 chunk,
                 chunkSizeBytes);
@@ -132,20 +132,20 @@ public class Mvm {
 
     public float[] chainMultiply(
             float[] vector,
-            int iterations) throws MvmException {
+            int iterations) throws PicoLLMException {
         if (handle == 0) {
-            throw new MvmInvalidStateException(
+            throw new PicoLLMInvalidStateException(
                     "Attempted to call `chainMultiply` after delete."
             );
         }
 
         if (!isModelLoadComplete) {
-            throw new MvmInvalidStateException(
+            throw new PicoLLMInvalidStateException(
                     "Attempted to call `chainMultiply` without a model fully loaded."
             );
         }
 
-        return MvmNative.chainMultiply(
+        return PicoLLMNative.chainMultiply(
                 handle,
                 vector,
                 iterations);
@@ -160,13 +160,13 @@ public class Mvm {
             return this;
         }
 
-        public Mvm build() throws MvmException {
+        public PicoLLM build() throws PicoLLMException {
 
             if (deviceString == null || deviceString.equals("")) {
-                throw new MvmInvalidArgumentException("No device string provided to Mvm.");
+                throw new PicoLLMInvalidArgumentException("No device string provided to PicoLLM.");
             }
 
-            return new Mvm(deviceString);
+            return new PicoLLM(deviceString);
         }
     }
 }

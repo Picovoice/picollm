@@ -10,25 +10,25 @@
     limitations under the License.
 */
 
-package ai.picovoice.mvm;
+package ai.picovoice.picollm;
 
-public class MvmException extends Exception {
+public class PicoLLMException extends Exception {
     private final String message;
     private final String[] messageStack;
 
-    public MvmException(Throwable cause) {
+    public PicoLLMException(Throwable cause) {
         super(cause);
         this.message = cause.getMessage();
         this.messageStack = null;
     }
 
-    public MvmException(String message) {
+    public PicoLLMException(String message) {
         super(message);
         this.message = message;
         this.messageStack = null;
     }
 
-    public MvmException(String message, String[] messageStack) {
+    public PicoLLMException(String message, String[] messageStack) {
         super(message);
         this.message = message;
         this.messageStack = messageStack;

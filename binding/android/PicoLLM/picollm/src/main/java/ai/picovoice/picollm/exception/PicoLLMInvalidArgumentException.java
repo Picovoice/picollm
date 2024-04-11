@@ -10,18 +10,18 @@
     limitations under the License.
 */
 
-package ai.picovoice.mvm;
+package ai.picovoice.picollm;
 
-public class MvmActivationLimitException extends MvmException {
-    public MvmActivationLimitException(Throwable cause) {
+public class PicoLLMInvalidArgumentException extends PicoLLMException {
+    public PicoLLMInvalidArgumentException(Throwable cause) {
         super(cause);
     }
 
-    public MvmActivationLimitException(String message) {
+    public PicoLLMInvalidArgumentException(String message) {
         super(message);
     }
 
-    public MvmActivationLimitException(String message, String[] messageStack) {
+    public PicoLLMInvalidArgumentException(String message, String[] messageStack) {
         super(message, messageStack);
     }
 }

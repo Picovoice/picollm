@@ -10,18 +10,8 @@
     limitations under the License.
 */
 
-package ai.picovoice.mvm;
+package ai.picovoice.picollm;
 
-public class MvmInvalidStateException extends MvmException {
-    public MvmInvalidStateException(Throwable cause) {
-        super(cause);
-    }
-
-    public MvmInvalidStateException(String message) {
-        super(message);
-    }
-
-    public MvmInvalidStateException(String message, String[] messageStack) {
-        super(message, messageStack);
-    }
+public interface PicoLLMStreamCallback {
+    void callback(String completion);
 }

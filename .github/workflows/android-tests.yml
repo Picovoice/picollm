@@ -33,12 +33,17 @@ jobs:
       run: ./gradlew assembleRelease
       working-directory: binding/android/PicoLLM
 
+    - name: Download resource files
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.bin/latest/phi2-290.bin -o phi2-290.bin
+
+    - name: Copy resource files
+      run: adb push --sync phi2-290.bin /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/test_resources/phi2-290.bin
+
     - name: Inject AccessKey
       run: echo pvTestingAccessKey="${{secrets.PV_VALID_ACCESS_KEY}}" >> local.properties
 
     - name: Inject Android keystore variables
-      run: |
-        echo modelDownloadUrl="http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.bin/latest/phi2-290.bin" >> local.properties
+      run: echo pvTestingModelName="phi2-290.bin" >> local.properties
 
     - name: Build androidTest
       run: ./gradlew assembleDebugAndroidTest

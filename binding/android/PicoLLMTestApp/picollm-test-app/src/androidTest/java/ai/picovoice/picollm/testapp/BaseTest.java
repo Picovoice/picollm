@@ -50,6 +50,9 @@ public class BaseTest {
     Context testContext;
     Context appContext;
     AssetManager assetManager;
+    File externalFilesDir;
+    File filesDir;
+
     String testResourcesPath;
     String defaultModelPath;
 
@@ -65,9 +68,12 @@ public class BaseTest {
         testContext = InstrumentationRegistry.getInstrumentation().getContext();
         appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assetManager = testContext.getAssets();
-        // extractAssetsRecursively("test_resources");
-        // testResourcesPath = new File(appContext.getFilesDir(), "test_resources").getAbsolutePath();
-        // defaultModelPath = new File(testResourcesPath, "model_files/picollm_params.pv").getAbsolutePath();
+        externalFilesDir = appContext.getExternalFilesDir("external");
+        filesDir = appContext.getFilesDir();
+
+        extractExternalAssestsRecursively("test_resources");
+        testResourcesPath = new File(appContext.getFilesDir(), "test_resources").getAbsolutePath();
+        defaultModelPath = new File(testResourcesPath, appContext.getString(R.string.pvTestingModelName)).getAbsolutePath();
 
         accessKey = appContext.getString(R.string.pvTestingAccessKey);
     }
@@ -91,7 +97,7 @@ public class BaseTest {
     private void extractAssetsRecursively(String path) throws IOException {
         String[] list = assetManager.list(path);
         if (list.length > 0) {
-            File outputFile = new File(appContext.getFilesDir(), path);
+            File outputFile = new File(filesDir, path);
             if (!outputFile.exists()) {
                 outputFile.mkdirs();
             }
@@ -106,9 +112,8 @@ public class BaseTest {
     }
 
     private void extractTestFile(String filepath) throws IOException {
-
         InputStream is = new BufferedInputStream(assetManager.open(filepath), 256);
-        File absPath = new File(appContext.getFilesDir(), filepath);
+        File absPath = new File(filesDir, filepath);
         OutputStream os = new BufferedOutputStream(new FileOutputStream(absPath), 256);
         int r;
         while ((r = is.read()) != -1) {
@@ -119,4 +124,43 @@ public class BaseTest {
         is.close();
         os.close();
     }
+
+    private void extractExternalAssestsRecursively(String path) throws IOException {
+        File absPath = new File(externalFilesDir, path);
+
+        if (absPath.isDirectory()) {
+            String[] list = absPath.list();
+
+            File outputFile = new File(filesDir, path);
+            if (!outputFile.exists()) {
+                outputFile.mkdirs();
+            }
+
+            for (String file : list) {
+                String filepath = path + "/" + file;
+                extractExternalAssestsRecursively(filepath);
+            }
+        } else if (absPath.isFile()) {
+            extractExternalTestFile(path);
+        }
+    }
+
+    private void extractExternalTestFile(String filepath) throws IOException {
+        // Log.i("ZooDevTestRunner", String.format("Extracting external %s ...", filepath));
+        File absInputPath = new File(externalFilesDir, filepath);
+        File absOutputPath = new File(filesDir, filepath);
+        InputStream is = new BufferedInputStream(new FileInputStream(absInputPath), 256);
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(absOutputPath), 256);
+
+        int numBytesRead;
+        byte[] buffer = new byte[256];
+        while ((numBytesRead = is.read(buffer)) != -1) {
+            os.write(buffer, 0, numBytesRead);
+        }
+
+        os.flush();
+        is.close();
+        os.close();
+    }
+
 }

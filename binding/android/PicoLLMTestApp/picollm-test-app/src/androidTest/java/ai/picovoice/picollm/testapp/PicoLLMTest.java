@@ -39,6 +39,18 @@ public class PicoLLMTest {
     public static class StandardTests extends BaseTest {
 
         @Test
+        public void getVersion() throws PicoLLMException {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(defaultModelPath)
+                    .build();
+
+            assertTrue(picollm.getVersion() != null && !picollm.getVersion().equals(""));
+
+            picollm.delete();
+        }
+
+        @Test
         public void testInitFailWithInvalidAccessKey() {
             boolean didFail = false;
             try {
@@ -96,17 +108,6 @@ public class PicoLLMTest {
     //         }
 
     //         assertTrue(didFail);
-    //     }
-
-    //     @Test
-    //     public void getVersion() throws PicoLLMException {
-    //         PicoLLM picollm = new PicoLLM.Builder().setAccessKey(accessKey)
-    //                 .setModelPath(defaultModelPath)
-    //                 .build(appContext);
-
-    //         assertTrue(picollm.getVersion() != null && !picollm.getVersion().equals(""));
-
-    //         picollm.delete();
     //     }
 
     //     @Test

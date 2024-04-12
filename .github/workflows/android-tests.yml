@@ -8,20 +8,18 @@ on:
       - '.github/workflows/android-tests.yml'
       - 'binding/android/PicoLLM/**'
       - '!binding/android/PicoLLM/README.md'
-      - 'demo/android/Activity/**'
-      - '!demo/android/Activity/README.md'
+      - 'binding/android/PicoLLMTestApp/**'
   pull_request:
     branches: [ main, 'v[0-9]+.[0-9]+']
     paths:
       - '.github/workflows/android-tests.yml'
       - 'binding/android/PicoLLM/**'
       - '!binding/android/PicoLLM/README.md'
-      - 'demo/android/Activity/**'
-      - '!demo/android/Activity/README.md'
+      - 'binding/android/PicoLLMTestApp/**'
 
 defaults:
   run:
-    working-directory: demo/android/Activity
+    working-directory: binding/android/PicoLLMTestApp
 
 jobs:
   build:
@@ -34,6 +32,9 @@ jobs:
     - name: Build binding
       run: ./gradlew assembleRelease
       working-directory: binding/android/PicoLLM
+
+    - name: Inject AccessKey
+      run: echo pvTestingAccessKey="${{secrets.PV_VALID_ACCESS_KEY}}" >> local.properties
 
     - name: Inject Android keystore variables
       run: |

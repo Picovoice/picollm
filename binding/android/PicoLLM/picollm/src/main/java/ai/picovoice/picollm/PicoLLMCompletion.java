@@ -10,7 +10,7 @@
     limitations under the License.
 */
 
-package ai.picovoice.leopard;
+package ai.picovoice.picollm;
 
 public class PicoLLMCompletion {
 

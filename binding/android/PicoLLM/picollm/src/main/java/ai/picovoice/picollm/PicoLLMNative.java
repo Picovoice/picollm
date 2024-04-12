@@ -25,7 +25,7 @@ class PicoLLMNative {
     static native long init(
             String accessKey,
             String modelPath,
-            String device) throws LeopardException;
+            String device) throws PicoLLMException;
 
     static native void delete(long object);
 
@@ -40,7 +40,7 @@ class PicoLLMNative {
             float temperature,
             float topP,
             int numTopChoices,
-            PicoLLMStreamCallback streamCallback) throws LeopardException;
+            PicoLLMStreamCallback streamCallback) throws PicoLLMException;
 
     static native int[] tokenize(
             long object,

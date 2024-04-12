@@ -41,7 +41,7 @@ dependencies {
 
 tasks.register('copyLibs', Copy) {
     from("${rootDir}/../../../lib/android")
-    into("${rootDir}/mvm/src/main/jniLibs")
+    into("${rootDir}/picollm/src/main/jniLibs")
 }
 
 preBuild.dependsOn copyLibs

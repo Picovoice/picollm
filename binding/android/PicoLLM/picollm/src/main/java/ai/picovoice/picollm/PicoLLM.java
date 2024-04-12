@@ -60,7 +60,7 @@ public class PicoLLM {
             float temperature,
             float topP,
             int numTopChoices,
-            PicoLLMStreamCallback streamCallback) throws LeopardException {
+            PicoLLMStreamCallback streamCallback) throws PicoLLMException {
         return PicoLLMNative.generate(
             handle,
             prompt,
@@ -78,7 +78,7 @@ public class PicoLLM {
     public int[] tokenize(
             String text,
             boolean bos,
-            boolean eos) throws LeopardException {
+            boolean eos) throws PicoLLMException {
         return PicoLLMNative.tokenize(
             handle,
             text,
@@ -86,26 +86,20 @@ public class PicoLLM {
             eos);
     }
 
-    public float[] forward(
-            int token) throws LeopardException {
-        return PicoLLMNative.tokenize(
-            handle,
-            token);
+    public float[] forward(int token) throws PicoLLMException {
+        return PicoLLMNative.forward(handle, token);
     }
 
-    public void reset() throws LeopardException {
-        return PicoLLMNative.reset(
-            handle);
+    public void reset() throws PicoLLMException {
+        PicoLLMNative.reset(handle);
     }
 
-    public String getModel() throws LeopardException {
-        return PicoLLMNative.getModel(
-            handle);
+    public String getModel() throws PicoLLMException {
+        return PicoLLMNative.getModel(handle);
     }
 
-    public int getContextLength() throws LeopardException {
-        return PicoLLMNative.getContextLength(
-            handle);
+    public int getContextLength() throws PicoLLMException {
+        return PicoLLMNative.getContextLength(handle);
     }
 
     public static class Builder {
@@ -123,7 +117,7 @@ public class PicoLLM {
                 throw new PicoLLMInvalidArgumentException("No device provided to PicoLLM.");
             }
 
-            return new PicoLLM(accessKey, modelPath, deviceString);
+            return new PicoLLM(accessKey, modelPath, device);
         }
     }
 
@@ -139,47 +133,47 @@ public class PicoLLM {
         private int numTopChoices = 0;
         private PicoLLMStreamCallback streamCallback = null;
 
-        public Builder setCompletionTokenLimit(int completionTokenLimit) {
+        public GenerateBuilder setCompletionTokenLimit(int completionTokenLimit) {
             this.completionTokenLimit = completionTokenLimit;
             return this;
         }
 
-        public Builder setStopPhrases(String[] stopPhrases) {
+        public GenerateBuilder setStopPhrases(String[] stopPhrases) {
             this.stopPhrases = stopPhrases;
             return this;
         }
 
-        public Builder setSeed(int seed) {
+        public GenerateBuilder setSeed(int seed) {
             this.seed = seed;
             return this;
         }
 
-        public Builder setPresencePenalty(float presencePenalty) {
+        public GenerateBuilder setPresencePenalty(float presencePenalty) {
             this.presencePenalty = presencePenalty;
             return this;
         }
 
-        public Builder setFrequencyPenalty(float frequencyPenalty) {
+        public GenerateBuilder setFrequencyPenalty(float frequencyPenalty) {
             this.frequencyPenalty = frequencyPenalty;
             return this;
         }
 
-        public Builder setTemperature(float temperature) {
+        public GenerateBuilder setTemperature(float temperature) {
             this.temperature = temperature;
             return this;
         }
 
-        public Builder setTopP(float topP) {
+        public GenerateBuilder setTopP(float topP) {
             this.topP = topP;
             return this;
         }
 
-        public Builder setNumTopChoices(int numTopChoices) {
+        public GenerateBuilder setNumTopChoices(int numTopChoices) {
             this.numTopChoices = numTopChoices;
             return this;
         }
 
-        public Builder setStreamCallback(PicoLLMStreamCallback streamCallback) {
+        public GenerateBuilder setStreamCallback(PicoLLMStreamCallback streamCallback) {
             this.streamCallback = streamCallback;
             return this;
         }

@@ -17,7 +17,7 @@ public class PicoLLMCompletion {
     private final Usage usage;
     private final Endpoint endpoint;
     private final CompletionToken[] completionTokens;
-    private final string completion;
+    private final String completion;
 
     /**
      * Constructor.
@@ -29,7 +29,7 @@ public class PicoLLMCompletion {
             Usage usage,
             Endpoint endpoint,
             CompletionToken[] completionTokens,
-            string completion) {
+            String completion) {
         this.usage = usage;
         this.endpoint = endpoint;
         this.completionTokens = completionTokens;
@@ -113,7 +113,7 @@ public class PicoLLMCompletion {
     }
 
     public static class Token {
-        private final string token;
+        private final String token;
         private final float logProb;
 
         /**
@@ -122,7 +122,7 @@ public class PicoLLMCompletion {
          * @param endSec     End of word in seconds.
          * @param speakerTag Speaker tag. It is set to `-1` if speaker diarization is not enabled during initialization.
          */
-        public Token(string token, float logProb) {
+        public Token(String token, float logProb) {
             this.token = token;
             this.logProb = logProb;
         }
@@ -132,7 +132,7 @@ public class PicoLLMCompletion {
          *
          * @return Transcribed word.
          */
-        public string getToken() {
+        public String getToken() {
             return token;
         }
 

@@ -104,14 +104,33 @@ public class PicoLLM {
 
     public static class Builder {
 
+        private String accessKey = null;
+        private String modelPath = null;
         private String device = "best:0";
+
+        public Builder setAccessKey(String accessKey) {
+            this.accessKey = accessKey;
+            return this;
+        }
+
+        public Builder setModelPath(String modelPath) {
+            this.modelPath = modelPath;
+            return this;
+        }
 
         public Builder setDevice(String device) {
             this.device = device;
             return this;
         }
 
-        public PicoLLM build(String accessKey, String modelPath) throws PicoLLMException {
+        public PicoLLM build() throws PicoLLMException {
+            if (accessKey == null || accessKey.equals("")) {
+                throw new PicoLLMInvalidArgumentException("No accessKey provided to PicoLLM.");
+            }
+
+            if (modelPath == null || modelPath.equals("")) {
+                throw new PicoLLMInvalidArgumentException("No modelPath provided to PicoLLM.");
+            }
 
             if (device == null || device.equals("")) {
                 throw new PicoLLMInvalidArgumentException("No device provided to PicoLLM.");

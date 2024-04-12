@@ -40,7 +40,6 @@ import java.util.HashMap;
 
 import ai.picovoice.picollm.PicoLLM;
 import ai.picovoice.picollm.PicoLLMException;
-import ai.picovoice.picollm.PicoLLMTranscript;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,166 +59,166 @@ public class MainActivity extends AppCompatActivity {
         testButton.setBackground(ContextCompat.getDrawable(
                 getApplicationContext(),
                 R.drawable.button_disabled));
-        runTest();
+        // runTest();
 
         testButton.setBackground(ContextCompat.getDrawable(
                 getApplicationContext(),
                 R.drawable.button_background));
     }
 
-    public void runTest() {
-        String accessKey = getApplicationContext().getString(R.string.pvTestingAccessKey);
+    // public void runTest() {
+    //     String accessKey = getApplicationContext().getString(R.string.pvTestingAccessKey);
 
-        ArrayList<TestResult> results = new ArrayList<>();
+    //     ArrayList<TestResult> results = new ArrayList<>();
 
-        String modelFile = getModelFile();
+    //     String modelFile = getModelFile();
 
-        TestResult result = new TestResult();
-        result.testName = "Test Init";
-        PicoLLM picollm = null;
-        try {
-            picollm = new PicoLLM.Builder()
-                    .setAccessKey(accessKey)
-                    .setModelPath(modelFile)
-                    .build(getApplicationContext());
-            result.success = true;
-        } catch (PicoLLMException e) {
-            result.success = false;
-            result.errorMessage = String.format("Failed to init picollm with '%s'", e);
-        } finally {
-            results.add(result);
-        }
+    //     TestResult result = new TestResult();
+    //     result.testName = "Test Init";
+    //     PicoLLM picollm = null;
+    //     try {
+    //         picollm = new PicoLLM.Builder()
+    //                 .setAccessKey(accessKey)
+    //                 .setModelPath(modelFile)
+    //                 .build(getApplicationContext());
+    //         result.success = true;
+    //     } catch (PicoLLMException e) {
+    //         result.success = false;
+    //         result.errorMessage = String.format("Failed to init picollm with '%s'", e);
+    //     } finally {
+    //         results.add(result);
+    //     }
 
-        result = new TestResult();
-        result.testName = "Test Process";
-        try {
-            String suffix = "_" + BuildConfig.FLAVOR;
-            if (BuildConfig.FLAVOR == "en") {
-                suffix = "";
-            }
+    //     result = new TestResult();
+    //     result.testName = "Test Process";
+    //     try {
+    //         String suffix = "_" + BuildConfig.FLAVOR;
+    //         if (BuildConfig.FLAVOR == "en") {
+    //             suffix = "";
+    //         }
 
-            String audioPath = "audio_samples/test" + suffix + ".wav";
+    //         String audioPath = "audio_samples/test" + suffix + ".wav";
 
-            PicoLLMTranscript processResult = processTestAudio(picollm, audioPath);
-            if (processResult != null) {
-                result.success = true;
-            } else {
-                result.success = false;
-                result.errorMessage = "Process returned invalid result.";
-            }
-        } catch (Exception e) {
-            result.success = false;
-            result.errorMessage = String.format("Failed to process with '%s'", e);
-        } finally {
-            results.add(result);
-        }
+    //         PicoLLMTranscript processResult = processTestAudio(picollm, audioPath);
+    //         if (processResult != null) {
+    //             result.success = true;
+    //         } else {
+    //             result.success = false;
+    //             result.errorMessage = "Process returned invalid result.";
+    //         }
+    //     } catch (Exception e) {
+    //         result.success = false;
+    //         result.errorMessage = String.format("Failed to process with '%s'", e);
+    //     } finally {
+    //         results.add(result);
+    //     }
 
-        result = new TestResult();
-        result.testName = "Test Exception";
-        try {
-            new PicoLLM.Builder()
-                    .setAccessKey("")
-                    .setModelPath(modelFile)
-                    .build(getApplicationContext());
-            result.success = false;
-            result.errorMessage = "Init should have throw an exception";
-        } catch (PicoLLMException e) {
-            result.success = true;
-        } finally {
-            results.add(result);
-        }
+    //     result = new TestResult();
+    //     result.testName = "Test Exception";
+    //     try {
+    //         new PicoLLM.Builder()
+    //                 .setAccessKey("")
+    //                 .setModelPath(modelFile)
+    //                 .build(getApplicationContext());
+    //         result.success = false;
+    //         result.errorMessage = "Init should have throw an exception";
+    //     } catch (PicoLLMException e) {
+    //         result.success = true;
+    //     } finally {
+    //         results.add(result);
+    //     }
 
-        displayTestResults(results);
-    }
+    //     displayTestResults(results);
+    // }
 
-    private void displayTestResults(ArrayList<TestResult> results) {
-        ListView resultList = findViewById(R.id.resultList);
+    // private void displayTestResults(ArrayList<TestResult> results) {
+    //     ListView resultList = findViewById(R.id.resultList);
 
-        int passed = 0;
-        int failed = 0;
+    //     int passed = 0;
+    //     int failed = 0;
 
-        ArrayList<HashMap<String, String>> list = new ArrayList<>();
-        for (TestResult result : results) {
-            HashMap<String, String> map = new HashMap<>();
-            map.put("testName", result.testName);
+    //     ArrayList<HashMap<String, String>> list = new ArrayList<>();
+    //     for (TestResult result : results) {
+    //         HashMap<String, String> map = new HashMap<>();
+    //         map.put("testName", result.testName);
 
-            String message;
-            if (result.success) {
-                message = "Test Passed";
-                passed += 1;
-            } else {
-                message = String.format("Test Failed: %s", result.errorMessage);
-                failed += 1;
-            }
+    //         String message;
+    //         if (result.success) {
+    //             message = "Test Passed";
+    //             passed += 1;
+    //         } else {
+    //             message = String.format("Test Failed: %s", result.errorMessage);
+    //             failed += 1;
+    //         }
 
-            map.put("testMessage", message);
-            list.add(map);
-        }
+    //         map.put("testMessage", message);
+    //         list.add(map);
+    //     }
 
-        SimpleAdapter adapter = new SimpleAdapter(
-                getApplicationContext(),
-                list,
-                R.layout.list_view,
-                new String[]{"testName", "testMessage"},
-                new int[]{R.id.testName, R.id.testMessage});
+    //     SimpleAdapter adapter = new SimpleAdapter(
+    //             getApplicationContext(),
+    //             list,
+    //             R.layout.list_view,
+    //             new String[]{"testName", "testMessage"},
+    //             new int[]{R.id.testName, R.id.testMessage});
 
-        resultList.setAdapter(adapter);
+    //     resultList.setAdapter(adapter);
 
-        TextView passedView = findViewById(R.id.testNumPassed);
-        TextView failedView = findViewById(R.id.testNumFailed);
+    //     TextView passedView = findViewById(R.id.testNumPassed);
+    //     TextView failedView = findViewById(R.id.testNumFailed);
 
-        passedView.setText(String.valueOf(passed));
-        failedView.setText(String.valueOf(failed));
+    //     passedView.setText(String.valueOf(passed));
+    //     failedView.setText(String.valueOf(failed));
 
-        TextView resultView = findViewById(R.id.testResult);
-        if (passed == 0 || failed > 0) {
-            resultView.setText("Failed");
-        } else {
-            resultView.setText("Passed");
-        }
-    }
+    //     TextView resultView = findViewById(R.id.testResult);
+    //     if (passed == 0 || failed > 0) {
+    //         resultView.setText("Failed");
+    //     } else {
+    //         resultView.setText("Passed");
+    //     }
+    // }
 
-    private String getModelFile() {
-        String suffix = (!BuildConfig.FLAVOR.equals("en")) ? String.format("_%s", BuildConfig.FLAVOR) : "";
-        return String.format("models/picollm_params%s.pv", suffix);
-    }
+    // private String getModelFile() {
+    //     String suffix = (!BuildConfig.FLAVOR.equals("en")) ? String.format("_%s", BuildConfig.FLAVOR) : "";
+    //     return String.format("models/picollm_params%s.pv", suffix);
+    // }
 
-    private PicoLLMTranscript processTestAudio(@NonNull PicoLLM l, String audioPath) throws Exception {
-        File testAudio = new File(getApplicationContext().getFilesDir(), audioPath);
+    // private PicoLLMTranscript processTestAudio(@NonNull PicoLLM l, String audioPath) throws Exception {
+    //     File testAudio = new File(getApplicationContext().getFilesDir(), audioPath);
 
-        if (!testAudio.exists()) {
-            testAudio.getParentFile().mkdirs();
-            extractFile(audioPath);
-        }
+    //     if (!testAudio.exists()) {
+    //         testAudio.getParentFile().mkdirs();
+    //         extractFile(audioPath);
+    //     }
 
-        FileInputStream audioInputStream = new FileInputStream(testAudio);
-        ByteArrayOutputStream audioByteBuffer = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        for (int length; (length = audioInputStream.read(buffer)) != -1; ) {
-            audioByteBuffer.write(buffer, 0, length);
-        }
-        byte[] rawData = audioByteBuffer.toByteArray();
+    //     FileInputStream audioInputStream = new FileInputStream(testAudio);
+    //     ByteArrayOutputStream audioByteBuffer = new ByteArrayOutputStream();
+    //     byte[] buffer = new byte[1024];
+    //     for (int length; (length = audioInputStream.read(buffer)) != -1; ) {
+    //         audioByteBuffer.write(buffer, 0, length);
+    //     }
+    //     byte[] rawData = audioByteBuffer.toByteArray();
 
-        short[] pcm = new short[rawData.length / 2];
-        ByteBuffer pcmBuff = ByteBuffer.wrap(rawData).order(ByteOrder.LITTLE_ENDIAN);
-        pcmBuff.asShortBuffer().get(pcm);
-        pcm = Arrays.copyOfRange(pcm, 44, pcm.length);
+    //     short[] pcm = new short[rawData.length / 2];
+    //     ByteBuffer pcmBuff = ByteBuffer.wrap(rawData).order(ByteOrder.LITTLE_ENDIAN);
+    //     pcmBuff.asShortBuffer().get(pcm);
+    //     pcm = Arrays.copyOfRange(pcm, 44, pcm.length);
 
-        return l.process(pcm);
-    }
+    //     return l.process(pcm);
+    // }
 
-    private void extractFile(String filepath) throws IOException {
-        System.out.println(filepath);
-        InputStream is = new BufferedInputStream(getAssets().open(filepath), 256);
-        File absPath = new File(getApplicationContext().getFilesDir(), filepath);
-        OutputStream os = new BufferedOutputStream(new FileOutputStream(absPath), 256);
-        int r;
-        while ((r = is.read()) != -1) {
-            os.write(r);
-        }
-        os.flush();
+    // private void extractFile(String filepath) throws IOException {
+    //     System.out.println(filepath);
+    //     InputStream is = new BufferedInputStream(getAssets().open(filepath), 256);
+    //     File absPath = new File(getApplicationContext().getFilesDir(), filepath);
+    //     OutputStream os = new BufferedOutputStream(new FileOutputStream(absPath), 256);
+    //     int r;
+    //     while ((r = is.read()) != -1) {
+    //         os.write(r);
+    //     }
+    //     os.flush();
 
-        is.close();
-        os.close();
-    }
+    //     is.close();
+    //     os.close();
+    // }
 }

@@ -31,7 +31,6 @@ import java.util.List;
 
 import ai.picovoice.picollm.PicoLLM;
 import ai.picovoice.picollm.PicoLLMException;
-import ai.picovoice.picollm.PicoLLMTranscript;
 
 
 @RunWith(Enclosed.class)
@@ -46,7 +45,8 @@ public class PicoLLMTest {
                 new PicoLLM.Builder()
                         .setAccessKey("")
                         .setModelPath(defaultModelPath)
-                        .build(appContext);
+                        .build();
+                        // .build(appContext);
             } catch (PicoLLMException e) {
                 didFail = true;
             }
@@ -422,5 +422,5 @@ public class PicoLLMTest {
     //         }
     //         picollm.delete();
     //     }
-    // }
+    }
 }

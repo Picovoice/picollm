@@ -48,23 +48,23 @@ android {
         resValue 'string', 'procPerformanceThresholdSec', properties.getProperty("procPerformanceThresholdSec", "")
     }
 
-    signingConfigs {
-        release {
-            storePassword properties.getProperty("storePassword")
-            storeFile file(properties.getProperty("storeFile", ".dummy.jks"))
-            keyAlias properties.getProperty("keyAlias")
-            keyPassword properties.getProperty("keyPassword")
-        }
-    }
+    // signingConfigs {
+    //     release {
+    //         storePassword properties.getProperty("storePassword")
+    //         storeFile file(properties.getProperty("storeFile", ".dummy.jks"))
+    //         keyAlias properties.getProperty("keyAlias")
+    //         keyPassword properties.getProperty("keyPassword")
+    //     }
+    // }
 
     buildTypes {
         debug {
-            signingConfig signingConfigs.release
+            // signingConfig signingConfigs.release
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            // signingConfig signingConfigs.release
         }
     }
 
@@ -72,44 +72,44 @@ android {
         testBuildType("release")
     }
 
-    def testDataFile = file('../../../../resources/.test/test_data.json')
-    def parsedJson = new groovy.json.JsonSlurper().parseText(testDataFile.text)
-    def languages = []
-    parsedJson.tests.parameters.each { a ->
-        languages.add(a.language)
-    }
+    // def testDataFile = file('../../../../resources/.test/test_data.json')
+    // def parsedJson = new groovy.json.JsonSlurper().parseText(testDataFile.text)
+    // def languages = []
+    // parsedJson.tests.parameters.each { a ->
+    //     languages.add(a.language)
+    // }
 
-    flavorDimensions "language"
-    productFlavors {
-        en {
-            getIsDefault().set(true)
-        }
+    // flavorDimensions "language"
+    // productFlavors {
+    //     en {
+    //         getIsDefault().set(true)
+    //     }
 
-        languages.each { language ->
-            "$language" {
-                applicationIdSuffix ".$language"
+    //     languages.each { language ->
+    //         "$language" {
+    //             applicationIdSuffix ".$language"
 
-            }
-        }
+    //         }
+    //     }
 
-        all { flavor ->
-            delete fileTree("$projectDir/src/main/assets") {
-                exclude '**/.gitkeep'
-            }
-            String suffix = (flavor.name != "en") ? "_${flavor.name}" : ""
-            task("${flavor.name}CopyParams", type: Copy) {
-                from("$projectDir/../../../../lib/common/")
-                include("picollm_params${suffix}.pv")
-                into("$projectDir/src/main/assets/models")
-            }
-            task("${flavor.name}CopyAudio", type: Copy) {
-                description = "Copy ${flavor.name} audio resources"
-                from("$projectDir/../../../../resources/audio_samples/")
-                include("test${suffix}.wav")
-                into("$projectDir/src/main/assets/audio_samples")
-            }
-        }
-    }
+    //     all { flavor ->
+    //         delete fileTree("$projectDir/src/main/assets") {
+    //             exclude '**/.gitkeep'
+    //         }
+    //         String suffix = (flavor.name != "en") ? "_${flavor.name}" : ""
+    //         task("${flavor.name}CopyParams", type: Copy) {
+    //             from("$projectDir/../../../../lib/common/")
+    //             include("picollm_params${suffix}.pv")
+    //             into("$projectDir/src/main/assets/models")
+    //         }
+    //         task("${flavor.name}CopyAudio", type: Copy) {
+    //             description = "Copy ${flavor.name} audio resources"
+    //             from("$projectDir/../../../../resources/audio_samples/")
+    //             include("test${suffix}.wav")
+    //             into("$projectDir/src/main/assets/audio_samples")
+    //         }
+    //     }
+    // }
     sourceSets {
         androidTest {
             java {
@@ -152,12 +152,12 @@ dependencies {
     androidTestImplementation('androidx.test.espresso:espresso-intents:3.5.1')
 }
 
-afterEvaluate {
-    android.productFlavors.all {
-        flavor ->
-            tasks."merge${flavor.name.capitalize()}DebugAssets".dependsOn "${flavor.name}CopyParams"
-            tasks."merge${flavor.name.capitalize()}ReleaseAssets".dependsOn "${flavor.name}CopyParams"
-            tasks."merge${flavor.name.capitalize()}DebugAssets".dependsOn "${flavor.name}CopyAudio"
-            tasks."merge${flavor.name.capitalize()}ReleaseAssets".dependsOn "${flavor.name}CopyAudio"
-    }
-}
+// afterEvaluate {
+//     android.productFlavors.all {
+//         flavor ->
+//             tasks."merge${flavor.name.capitalize()}DebugAssets".dependsOn "${flavor.name}CopyParams"
+//             tasks."merge${flavor.name.capitalize()}ReleaseAssets".dependsOn "${flavor.name}CopyParams"
+//             tasks."merge${flavor.name.capitalize()}DebugAssets".dependsOn "${flavor.name}CopyAudio"
+//             tasks."merge${flavor.name.capitalize()}ReleaseAssets".dependsOn "${flavor.name}CopyAudio"
+//     }
+// }

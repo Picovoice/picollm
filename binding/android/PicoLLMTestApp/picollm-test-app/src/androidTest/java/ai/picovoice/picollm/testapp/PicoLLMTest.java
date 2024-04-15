@@ -77,7 +77,7 @@ public class PicoLLMTest {
                     .setCompletionTokenLimit(10)
                     .generate(picollm, "Hello my name is");
 
-            assertTrue(result.getCompletion() == " John and I am a student at XYZ school");
+            assertTrue(result.getCompletion().equals(" John and I am a student at XYZ school"));
 
             picollm.delete();
         }

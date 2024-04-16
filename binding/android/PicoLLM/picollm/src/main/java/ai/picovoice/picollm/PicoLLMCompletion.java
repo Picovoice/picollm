@@ -12,6 +12,9 @@
 
 package ai.picovoice.picollm;
 
+/**
+ * Class.
+ */
 public class PicoLLMCompletion {
 
     private final Usage usage;
@@ -22,8 +25,6 @@ public class PicoLLMCompletion {
     /**
      * Constructor.
      *
-     * @param transcriptString Inferred transcription.
-     * @param wordArray        Transcribed words and their associated metadata.
      */
     public PicoLLMCompletion(
             Usage usage,
@@ -72,6 +73,9 @@ public class PicoLLMCompletion {
         return completion;
     }
 
+    /**
+     * Class.
+     */
     public static class Usage {
         private final int promptTokens;
         private final int completionTokens;
@@ -79,8 +83,6 @@ public class PicoLLMCompletion {
         /**
          * Constructor.
          *
-         * @param endSec     End of word in seconds.
-         * @param speakerTag Speaker tag. It is set to `-1` if speaker diarization is not enabled during initialization.
          */
         public Usage(int promptTokens, int completionTokens) {
             this.promptTokens = promptTokens;
@@ -112,6 +114,9 @@ public class PicoLLMCompletion {
       STOP_PHRASE_ENCOUNTERED
     }
 
+    /**
+     * Class.
+     */
     public static class Token {
         private final String token;
         private final float logProb;
@@ -119,8 +124,6 @@ public class PicoLLMCompletion {
         /**
          * Constructor.
          *
-         * @param endSec     End of word in seconds.
-         * @param speakerTag Speaker tag. It is set to `-1` if speaker diarization is not enabled during initialization.
          */
         public Token(String token, float logProb) {
             this.token = token;
@@ -146,6 +149,9 @@ public class PicoLLMCompletion {
         }
     }
 
+    /**
+     * Class.
+     */
     public static class CompletionToken {
         private final Token token;
         private final Token[] topChoices;
@@ -153,8 +159,6 @@ public class PicoLLMCompletion {
         /**
          * Constructor.
          *
-         * @param endSec     End of word in seconds.
-         * @param speakerTag Speaker tag. It is set to `-1` if speaker diarization is not enabled during initialization.
          */
         public CompletionToken(Token token, Token[] topChoices) {
             this.token = token;

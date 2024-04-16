@@ -9,6 +9,7 @@
     express or implied. See the License for the specific language governing permissions and
     limitations under the License.
 */
+
 package ai.picovoice.picollm;
 
 import java.io.File;
@@ -43,6 +44,9 @@ public class PicoLLM {
         handle = PicoLLMNative.init(accessKey, modelPath, device);
     }
 
+    /**
+     * Function.
+     */
     public void delete() {
         if (handle != 0) {
             PicoLLMNative.delete(handle);
@@ -50,6 +54,9 @@ public class PicoLLM {
         }
     }
 
+    /**
+     * Function.
+     */
     public PicoLLMCompletion generate(
             String prompt,
             int completionTokenLimit,
@@ -75,6 +82,9 @@ public class PicoLLM {
             streamCallback);
     }
 
+    /**
+     * Function.
+     */
     public int[] tokenize(
             String text,
             boolean bos,
@@ -86,22 +96,37 @@ public class PicoLLM {
             eos);
     }
 
+    /**
+     * Function.
+     */
     public float[] forward(int token) throws PicoLLMException {
         return PicoLLMNative.forward(handle, token);
     }
 
+    /**
+     * Function.
+     */
     public void reset() throws PicoLLMException {
         PicoLLMNative.reset(handle);
     }
 
+    /**
+     * Function.
+     */
     public String getModel() throws PicoLLMException {
         return PicoLLMNative.getModel(handle);
     }
 
+    /**
+     * Function.
+     */
     public int getContextLength() throws PicoLLMException {
         return PicoLLMNative.getContextLength(handle);
     }
 
+    /**
+     * Class.
+     */
     public static class Builder {
 
         private String accessKey = null;
@@ -123,6 +148,9 @@ public class PicoLLM {
             return this;
         }
 
+        /**
+         * Function.
+         */
         public PicoLLM build() throws PicoLLMException {
             if (accessKey == null || accessKey.equals("")) {
                 throw new PicoLLMInvalidArgumentException("No accessKey provided to PicoLLM.");
@@ -140,6 +168,9 @@ public class PicoLLM {
         }
     }
 
+    /**
+     * Class.
+     */
     public static class GenerateBuilder {
 
         private int completionTokenLimit = -1;
@@ -197,6 +228,9 @@ public class PicoLLM {
             return this;
         }
 
+        /**
+         * Function.
+         */
         public PicoLLMCompletion generate(PicoLLM object, String prompt) throws PicoLLMException {
             return object.generate(
                 prompt,

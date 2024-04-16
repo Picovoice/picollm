@@ -73,7 +73,8 @@ public class BaseTest {
 
         extractExternalAssestsRecursively("test_resources");
         testResourcesPath = new File(appContext.getFilesDir(), "test_resources").getAbsolutePath();
-        defaultModelPath = new File(testResourcesPath, appContext.getString(R.string.pvTestingModelName)).getAbsolutePath();
+        defaultModelPath = new File(testResourcesPath, appContext.getString(R.string.pvTestingModelName))
+                .getAbsolutePath();
 
         accessKey = appContext.getString(R.string.pvTestingAccessKey);
     }

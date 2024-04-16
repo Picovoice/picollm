@@ -114,7 +114,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    ActivityResultLauncher<String[]> modelSelection = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
+    ActivityResultLauncher<String[]> modelSelection = registerForActivityResult(
+            new ActivityResultContracts.OpenDocument(),
             new ActivityResultCallback<Uri>() {
                 @Override
                 public void onActivityResult(Uri uri) {

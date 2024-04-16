@@ -3,15 +3,6 @@ apply plugin: 'com.android.application'
 Properties properties = new Properties()
 if (rootProject.file("local.properties").exists()) {
     properties.load(rootProject.file("local.properties").newDataInputStream())
-    if (project.hasProperty("picollmFilePath")) {
-        properties.put("picollmFilePath", project.getProperty("picollmFilePath"))
-    }
-    if (project.hasProperty("picollmDownloadUrl")) {
-        properties.put("picollmDownloadUrl", project.getProperty("picollmDownloadUrl"))
-    }
-    if (project.hasProperty("picollmIterations")) {
-        properties.put("picollmIterations", project.getProperty("picollmIterations"))
-    }
 }
 
 android {
@@ -22,10 +13,6 @@ android {
         targetSdkVersion defaultTargetSdkVersion
         versionCode 1
         versionName "1.0"
-
-        resValue 'string', 'picollmFilePath', properties.getProperty("picollmFilePath", "")
-        resValue 'string', 'picollmDownloadUrl', properties.getProperty("picollmDownloadUrl", "")
-        resValue 'string', 'picollmIterations', properties.getProperty("picollmIterations", "")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

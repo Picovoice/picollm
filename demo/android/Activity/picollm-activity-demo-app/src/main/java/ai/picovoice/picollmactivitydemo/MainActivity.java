@@ -14,21 +14,33 @@
 package ai.picovoice.picollmactivitydemo;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
@@ -36,28 +48,26 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import ai.picovoice.picollm.PicoLLM;
+import ai.picovoice.picollm.PicoLLMCompletion;
 import ai.picovoice.picollm.PicoLLMException;
-import ai.picovoice.picollm.PicoLLMMatrixDimensions;
+import ai.picovoice.picollm.PicoLLMStreamCallback;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int PICOLLM_ITERATIONS = 10;
-    private final String PICOLLM_FILE_NAME = "picollm-weights-4096x4096x256.bin";
-
-    private final String PICOLLM_DOWNLOAD_URL = null; // define to stream remote model file
-
     private PicoLLM picollm;
 
-    private File picollmFile;
+    private Uri picollmModelUri;
+    private File picollmModelFile;
 
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private Future<?> backgroundTask;
 
-    private Button startButton;
-    private ProgressBar progressBar;
-    private TextView progressText;
+    private EditText promptEditText;
+    private Button uploadModelButton;
+    private Button generateButton;
+    private TextView completionText;
 
     @SuppressLint({"DefaultLocale", "SetTextI18n"})
     @Override
@@ -65,53 +75,214 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.picollm_activity_demo);
 
-        startButton = findViewById(R.id.startButton);
-        progressBar = findViewById(R.id.progressBar);
-        progressText = findViewById(R.id.progressText);
+        promptEditText = findViewById(R.id.promptEditText);
+        uploadModelButton = findViewById(R.id.uploadModelButton);
+        generateButton = findViewById(R.id.generateButton);
+        completionText = findViewById(R.id.completionText);
 
-        picollmFile = new File(getApplicationContext().getFilesDir(), PICOLLM_FILE_NAME);
+        uploadModelButton.setBackground(
+                ContextCompat.getDrawable(this, R.drawable.button_background)
+        );
+        generateButton.setBackground(
+                ContextCompat.getDrawable(this, R.drawable.button_background)
+        );
 
-        try {
-            picollm = new PicoLLM.Builder().build();
-        } catch (PicoLLMException e) {
-            onPicoLLMError("PicoLLM init failed\n" + e.getMessage());
+        uploadModelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                modelSelection.launch(new String[]{"application/octet-stream"});
+            }
+        });
+
+        generateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (picollm != null) {
+                    try {
+                        generatePicollm();
+                    } catch (PicoLLMException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
+    }
+
+    ActivityResultLauncher<String[]> modelSelection = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
+            new ActivityResultCallback<Uri>() {
+                @Override
+                public void onActivityResult(Uri uri) {
+                    picollmModelUri = uri;
+
+                    try {
+                        completionText.setText("Loading model file...");
+                        extractModelFile(picollmModelUri);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    try {
+                        loadPicollm();
+                    } catch (PicoLLMException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+
+
+    private void extractModelFile(Uri uri) throws IOException, FileNotFoundException {
+        Log.i("PICOVOICE", "Copying model...");
+        picollmModelFile = new File(getApplicationContext().getFilesDir(), "model.pllm");
+
+        if (picollmModelFile.isFile()) {
+            return;
         }
 
-        progressBar.setVisibility(View.VISIBLE);
-        disableStartButton();
+        InputStream is = new BufferedInputStream(getContentResolver().openInputStream(uri), 256);
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(picollmModelFile), 256);
 
-        if (PICOLLM_DOWNLOAD_URL != null) {
-            backgroundTask = executor.submit(() -> {
-                progressText.setText("Loading file from remote storage...");
-                boolean isDownloadSuccessful = executeDownloadTask(PICOLLM_DOWNLOAD_URL, picollmFile);
-                mainHandler.post(() -> {
-                    if (isDownloadSuccessful) {
-                        progressText.setText("Downloading complete!");
-                        enableStartButton();
-                        progressBar.setVisibility(View.INVISIBLE);
-                    } else {
-                        onPicoLLMError("Failed to download file");
-                    }
-                });
+        int numBytesRead;
+        byte[] buffer = new byte[256];
+        while ((numBytesRead = is.read(buffer)) != -1) {
+            os.write(buffer, 0, numBytesRead);
+        }
+
+        os.flush();
+        is.close();
+        os.close();
+    }
+
+    private void loadPicollm() throws PicoLLMException {
+        completionText.setText("Loading Picollm...");
+        disableUploadModelButton();
+        disableGenerateButton();
+
+        backgroundTask = executor.submit(() -> {
+            try {
+                picollm = new PicoLLM.Builder()
+                        .setModelPath(picollmModelFile.toString())
+                        .build();
+            } catch (PicoLLMException e) {
+                throw new RuntimeException(e);
+            }
+
+            mainHandler.post(() -> {
+                completionText.setText("Enter prompt!");
+                enableGenerateButton();
             });
-        } else {
-            progressText.setText("Loading file from local storage...");
-            backgroundTask = executor.submit(() -> {
-                try {
-                    picollm.loadModelFile(picollmFile.getAbsolutePath());
-                    progressText.setText("File loaded");
-                    mainHandler.post(() -> {
-                        enableStartButton();
-                        progressBar.setVisibility(View.INVISIBLE);
-                    });
-                } catch (PicoLLMException e) {
-                    mainHandler.post(() -> {
-                        onPicoLLMError("Failed to load file from storage\n" + e.getMessage());
-                    });
+        });
+    }
+
+    class DemoStreamCallback implements PicoLLMStreamCallback {
+
+        @Override
+        public void callback(String completion) {
+            Log.i("PICOVOICE", "Completion" + completion);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    completionText.setText(completionText.getText() + completion);
                 }
             });
         }
     }
+
+    private void generatePicollm() throws PicoLLMException {
+        disableUploadModelButton();
+        disableGenerateButton();
+
+        backgroundTask = executor.submit(() -> {
+            try {
+                String prompt = promptEditText.getText().toString();
+
+                completionText.setText(prompt);
+
+                PicoLLMCompletion result = new PicoLLM.GenerateBuilder()
+                        .setCompletionTokenLimit(20)
+                        .setStreamCallback(new DemoStreamCallback())
+                        .generate(picollm, prompt);
+            } catch (PicoLLMException e) {
+                throw new RuntimeException(e);
+            }
+
+            mainHandler.post(() -> {
+                enableGenerateButton();
+            });
+        });
+    }
+
+    private void disableGenerateButton() {
+        generateButton.setEnabled(false);
+        generateButton.setBackground(
+                ContextCompat.getDrawable(this, R.drawable.button_disabled)
+        );
+    }
+
+    private void enableGenerateButton() {
+        generateButton.setEnabled(true);
+        generateButton.setBackground(
+                ContextCompat.getDrawable(this, R.drawable.button_background)
+        );
+    }
+
+    private void disableUploadModelButton() {
+        uploadModelButton.setEnabled(false);
+        uploadModelButton.setBackground(
+                ContextCompat.getDrawable(this, R.drawable.button_disabled)
+        );
+    }
+
+    private void enableUploadModelButton() {
+        uploadModelButton.setEnabled(true);
+        uploadModelButton.setBackground(
+                ContextCompat.getDrawable(this, R.drawable.button_background)
+        );
+    }
+
+//
+//        picollmFile = new File(getApplicationContext().getFilesDir(), PICOLLM_FILE_NAME);
+//
+//        try {
+//            picollm = new PicoLLM.Builder().build();
+//        } catch (PicoLLMException e) {
+//            onPicoLLMError("PicoLLM init failed\n" + e.getMessage());
+//        }
+//
+//        progressBar.setVisibility(View.VISIBLE);
+//        disableStartButton();
+//
+//        if (PICOLLM_DOWNLOAD_URL != null) {
+//            backgroundTask = executor.submit(() -> {
+//                progressText.setText("Loading file from remote storage...");
+//                boolean isDownloadSuccessful = executeDownloadTask(PICOLLM_DOWNLOAD_URL, picollmFile);
+//                mainHandler.post(() -> {
+//                    if (isDownloadSuccessful) {
+//                        progressText.setText("Downloading complete!");
+//                        enableStartButton();
+//                        progressBar.setVisibility(View.INVISIBLE);
+//                    } else {
+//                        onPicoLLMError("Failed to download file");
+//                    }
+//                });
+//            });
+//        } else {
+//            progressText.setText("Loading file from local storage...");
+//            backgroundTask = executor.submit(() -> {
+//                try {
+//                    picollm.loadModelFile(picollmFile.getAbsolutePath());
+//                    progressText.setText("File loaded");
+//                    mainHandler.post(() -> {
+//                        enableStartButton();
+//                        progressBar.setVisibility(View.INVISIBLE);
+//                    });
+//                } catch (PicoLLMException e) {
+//                    mainHandler.post(() -> {
+//                        onPicoLLMError("Failed to load file from storage\n" + e.getMessage());
+//                    });
+//                }
+//            });
+//        }
+//    }
 
     @Override
     protected void onDestroy() {
@@ -127,112 +298,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onPicoLLMError(String error) {
-        disableStartButton();
-
         TextView errorMessage = findViewById(R.id.errorMessage);
         errorMessage.setText(error);
         errorMessage.setVisibility(View.VISIBLE);
     }
 
-    private void disableStartButton() {
-        startButton.setEnabled(false);
-        startButton.setBackground(
-                ContextCompat.getDrawable(this, R.drawable.button_disabled)
-        );
-    }
-
-    private void enableStartButton() {
-        startButton.setEnabled(true);
-        startButton.setBackground(
-                ContextCompat.getDrawable(this, R.drawable.button_background)
-        );
-    }
-
     @SuppressLint({"DefaultLocale", "SetTextI18n"})
     public void onClickStart(View view) {
-        progressBar.setVisibility(View.VISIBLE);
-        disableStartButton();
-        progressText.setText("Running PICOLLM calculation...");
-
-        backgroundTask = executor.submit(() -> {
-            try {
-
-                PicoLLMMatrixDimensions dimensions = picollm.getMatrixDimensions();
-
-                float[] vector = new float[dimensions.getN()];
-                for (int i = 0; i < vector.length; i++) {
-                    vector[i] = (float) i;
-                }
-
-                final long startTime = System.currentTimeMillis();
-                float[] result = picollm.chainMultiply(
-                        vector,
-                        PICOLLM_ITERATIONS);
-                final double elapsedSeconds = (double)(System.currentTimeMillis() - startTime) / 1000;
-                for (int i = 0; i < result.length; i++) {
-                    Log.i("PICOVOICE", String.format("%d: %f", i, result[i]));
-                }
-                mainHandler.post(() -> {
-                    progressBar.setVisibility(View.INVISIBLE);
-                    enableStartButton();
-                    progressText.setText(String.format("PicoLLM calculation completed in %.2f seconds", elapsedSeconds));
-                });
-            } catch (PicoLLMException e) {
-                mainHandler.post(() -> {
-                    onPicoLLMError("Chain multiply failed\n" + e.getMessage());
-                });
-            }
-        });
-    }
-
-
-    @SuppressLint("DefaultLocale")
-    private boolean executeDownloadTask(String srcUrl, File dstFile) {
-        try {
-            HttpURLConnection urlConnection = (HttpURLConnection) new URL(srcUrl).openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setDoOutput(false);
-            urlConnection.connect();
-
-            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-
-                InputStream inputStream = urlConnection.getInputStream();
-                FileOutputStream outputStream = new FileOutputStream(dstFile);
-
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                long total = 0;
-                boolean isModelLoadComplete = false;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    total += bytesRead;
-
-                    final long updateValue = total / 1024 / 1024;
-                    mainHandler.post(() -> {
-                        progressText.setText(String.format("Downloaded %d MB...", updateValue));
-                    });
-                    outputStream.write(buffer, 0, bytesRead);
-
-                    isModelLoadComplete = picollm.loadModelChunk(buffer, bytesRead);
-                }
-
-                inputStream.close();
-                outputStream.close();
-
-                return isModelLoadComplete;
-            } else {
-                Log.e("PICOVOICE", String.format(
-                        "File server responded with %d: %s",
-                        urlConnection.getResponseCode(),
-                        urlConnection.getResponseMessage())
-                );
-            }
-
-            urlConnection.disconnect();
-
-        } catch (Exception e) {
-            Log.e("PICOVOICE", "Error: " + e);
-        }
-
-        return false;
+//        progressBar.setVisibility(View.VISIBLE);
+//        disableStartButton();
+//        progressText.setText("Running PICOLLM calculation...");
+//
+//        backgroundTask = executor.submit(() -> {
+//            try {
+//
+//                PicoLLMMatrixDimensions dimensions = picollm.getMatrixDimensions();
+//
+//                float[] vector = new float[dimensions.getN()];
+//                for (int i = 0; i < vector.length; i++) {
+//                    vector[i] = (float) i;
     }
 }

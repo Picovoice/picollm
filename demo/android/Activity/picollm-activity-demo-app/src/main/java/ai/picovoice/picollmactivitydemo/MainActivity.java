@@ -53,12 +53,12 @@ import ai.picovoice.picollm.PicoLLMException;
 import ai.picovoice.picollm.PicoLLMStreamCallback;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}";
 
     private PicoLLM picollm;
 
     private Uri picollmModelUri;
     private File picollmModelFile;
-
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -68,6 +68,11 @@ public class MainActivity extends AppCompatActivity {
     private Button uploadModelButton;
     private Button generateButton;
     private TextView completionText;
+    private TextView statsText;
+
+    private long timerTick;
+    private long timerTock;
+    private int numTokens;
 
     @SuppressLint({"DefaultLocale", "SetTextI18n"})
     @Override
@@ -79,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         uploadModelButton = findViewById(R.id.uploadModelButton);
         generateButton = findViewById(R.id.generateButton);
         completionText = findViewById(R.id.completionText);
+        statsText = findViewById(R.id.statsText);
 
         uploadModelButton.setBackground(
                 ContextCompat.getDrawable(this, R.drawable.button_background)
@@ -160,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         backgroundTask = executor.submit(() -> {
             try {
                 picollm = new PicoLLM.Builder()
+                        .setAccessKey(ACCESS_KEY)
                         .setModelPath(picollmModelFile.toString())
                         .build();
             } catch (PicoLLMException e) {
@@ -177,11 +184,17 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void callback(String completion) {
-            Log.i("PICOVOICE", "Completion" + completion);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     completionText.setText(completionText.getText() + completion);
+
+                    if (numTokens == 0) {
+                        timerTick = System.nanoTime();
+                    }
+
+                    timerTock = System.nanoTime();
+                    numTokens += 1;
                 }
             });
         }
@@ -191,16 +204,19 @@ public class MainActivity extends AppCompatActivity {
         disableUploadModelButton();
         disableGenerateButton();
 
+        statsText.setText("");
+        numTokens = 0;
+
         backgroundTask = executor.submit(() -> {
             try {
                 String prompt = promptEditText.getText().toString();
-
                 completionText.setText(prompt);
 
                 PicoLLMCompletion result = new PicoLLM.GenerateBuilder()
                         .setCompletionTokenLimit(20)
                         .setStreamCallback(new DemoStreamCallback())
                         .generate(picollm, prompt);
+                updateStats(result);
             } catch (PicoLLMException e) {
                 throw new RuntimeException(e);
             }
@@ -208,6 +224,30 @@ public class MainActivity extends AppCompatActivity {
             mainHandler.post(() -> {
                 enableGenerateButton();
             });
+        });
+    }
+
+    private void updateStats(PicoLLMCompletion result) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                double secondElapsed = (timerTock - timerTick) / 1e9;
+                double tokensPerSecond = numTokens / secondElapsed;
+                String stats = new StringBuilder()
+                        .append("Usage:\n")
+                        .append("\t")
+                        .append(result.getUsage().getPromptTokens())
+                        .append(" prompt tokens\n")
+                        .append("\t")
+                        .append(result.getUsage().getCompletionTokens())
+                        .append(" completion tokens\n")
+                        .append("Performance:\n")
+                        .append("\t")
+                        .append(tokensPerSecond)
+                        .append(" tokens per second\n")
+                        .toString();
+                statsText.setText(stats);
+            }
         });
     }
 
@@ -239,51 +279,6 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-//
-//        picollmFile = new File(getApplicationContext().getFilesDir(), PICOLLM_FILE_NAME);
-//
-//        try {
-//            picollm = new PicoLLM.Builder().build();
-//        } catch (PicoLLMException e) {
-//            onPicoLLMError("PicoLLM init failed\n" + e.getMessage());
-//        }
-//
-//        progressBar.setVisibility(View.VISIBLE);
-//        disableStartButton();
-//
-//        if (PICOLLM_DOWNLOAD_URL != null) {
-//            backgroundTask = executor.submit(() -> {
-//                progressText.setText("Loading file from remote storage...");
-//                boolean isDownloadSuccessful = executeDownloadTask(PICOLLM_DOWNLOAD_URL, picollmFile);
-//                mainHandler.post(() -> {
-//                    if (isDownloadSuccessful) {
-//                        progressText.setText("Downloading complete!");
-//                        enableStartButton();
-//                        progressBar.setVisibility(View.INVISIBLE);
-//                    } else {
-//                        onPicoLLMError("Failed to download file");
-//                    }
-//                });
-//            });
-//        } else {
-//            progressText.setText("Loading file from local storage...");
-//            backgroundTask = executor.submit(() -> {
-//                try {
-//                    picollm.loadModelFile(picollmFile.getAbsolutePath());
-//                    progressText.setText("File loaded");
-//                    mainHandler.post(() -> {
-//                        enableStartButton();
-//                        progressBar.setVisibility(View.INVISIBLE);
-//                    });
-//                } catch (PicoLLMException e) {
-//                    mainHandler.post(() -> {
-//                        onPicoLLMError("Failed to load file from storage\n" + e.getMessage());
-//                    });
-//                }
-//            });
-//        }
-//    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -301,21 +296,5 @@ public class MainActivity extends AppCompatActivity {
         TextView errorMessage = findViewById(R.id.errorMessage);
         errorMessage.setText(error);
         errorMessage.setVisibility(View.VISIBLE);
-    }
-
-    @SuppressLint({"DefaultLocale", "SetTextI18n"})
-    public void onClickStart(View view) {
-//        progressBar.setVisibility(View.VISIBLE);
-//        disableStartButton();
-//        progressText.setText("Running PICOLLM calculation...");
-//
-//        backgroundTask = executor.submit(() -> {
-//            try {
-//
-//                PicoLLMMatrixDimensions dimensions = picollm.getMatrixDimensions();
-//
-//                float[] vector = new float[dimensions.getN()];
-//                for (int i = 0; i < vector.length; i++) {
-//                    vector[i] = (float) i;
     }
 }

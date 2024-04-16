@@ -9,8 +9,8 @@
 
     <TextView
         android:id="@+id/completionText"
-        android:layout_width="305dp"
-        android:layout_height="371dp"
+        android:layout_width="301dp"
+        android:layout_height="286dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="24dp"
@@ -53,16 +53,16 @@
         android:id="@+id/errorMessage"
         android:layout_width="0sp"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textSize="18sp"
-        android:gravity="center"
-        android:textColor="@android:color/white"
         android:background="@drawable/error_view"
+        android:gravity="center"
         android:padding="10sp"
+        android:text="TextView"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@id/guidelineButton"
-        app:layout_constraintStart_toStartOf="@id/guidelineStart"
-        app:layout_constraintEnd_toEndOf="@id/guidelineEnd" />
+        app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
+        app:layout_constraintStart_toStartOf="@id/guidelineStart" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineAnalogY"
@@ -103,5 +103,18 @@
         android:text="Generate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/promptEditText" />
+
+    <TextView
+        android:id="@+id/statsText"
+        android:layout_width="291dp"
+        android:layout_height="111dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/errorMessage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/completionText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

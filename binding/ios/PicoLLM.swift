@@ -9,6 +9,68 @@
 
 import PvPicoLLM
 
+public struct PicoLLMUsage {
+    public let promptTokens: Int
+
+    public let completionTokens: Int
+
+    public init(
+        promptTokens: Int,
+        completionTokens: Int) {
+        self.promptTokens = promptTokens
+        self.completionTokens = completionTokens
+    }
+}
+
+public enum PicoLLMEndpoint {
+    case endOfSentence
+    case completionTokenLimitReached
+    case stopPhraseEncountered
+}
+
+public struct PicoLLMToken {
+    public let token: String
+
+    public let logProb: Float
+
+    public init(
+        token: String,
+        logProb: Float) {
+        self.token = token
+        self.logProb = logProb
+    }
+}
+
+public struct PicoLLMCompletionToken {
+    public let token: PicoLLMToken
+
+    public let topChoices: [PicoLLMToken]
+
+    public init(
+        token: PicoLLMToken,
+        topChoices: [PicoLLMToken]) {
+        self.token = token
+        self.topChoices = topChoices
+    }
+}
+
+public struct PicoLLMCompletion {
+    public let usage: PicoLLMUsage
+
+    public let endpoint: PicoLLMEndpoint
+
+    public let completionTokens: [PicoLLMCompletionToken]
+
+    public init(
+        usage: PicoLLMUsage,
+        endpoint: PicoLLMEndpoint,
+        completionTokens: [PicoLLMCompletionToken]) {
+        self.usage = usage
+        self.endpoint = endpoint
+        self.completionTokens = completionTokens
+    }
+}
+
 /// Low-level iOS binding for PicoLLM wake word engine. Provides a Swift interface to the PicoLLM library.
 public class PicoLLM {
 
@@ -26,8 +88,7 @@ public class PicoLLM {
     }()
 
     private var handle: OpaquePointer?
-    public static let minChunkSize = Int32(pv_picollm_min_chunk_size())
-    public static let maxChunkSize = Int32(pv_picollm_max_chunk_size())
+    public static let maxTopChoices = Int32(pv_picollm_max_top_choices())
     public static let version = String(cString: pv_picollm_version())
     private static var sdk = "ios"
 
@@ -39,17 +100,21 @@ public class PicoLLM {
     ///
     /// - Throws: PicoLLMError
     public init(
-        deviceString: String = "best:0"
+        accessKey: String,
+        modelPath: String,
+        device: String = "best:0"
     ) throws {
 
-        if deviceString.count == 0 {
-            throw PicoLLMInvalidArgumentError("deviceString is required for PicoLLM initialization")
+        if device.count == 0 {
+            throw PicoLLMInvalidArgumentError("device is required for PicoLLM initialization")
         }
 
         pv_set_sdk(PicoLLM.sdk)
 
         let status = pv_picollm_init(
-            deviceString,
+            accessKey,
+            modelPath,
+            device,
             &handle)
 
         if status != PV_STATUS_SUCCESS {
@@ -70,85 +135,117 @@ public class PicoLLM {
         }
     }
 
-    public func loadModelFile(
-        filepath: String,
-        chunk_size_bytes: Int32 = PicoLLM.maxChunkSize
+    public func generate(
+        prompt: String,
+        completionTokenLimit: Int32 = -1,
+        stopPhrases: [String]? = nil,
+        seed: Int32 = -1,
+        presencePenalty: Float = 0.0,
+        frequencyPenalty: Float = 0.0,
+        temperature: Float = 0.0,
+        topP: Float = 0.9,
+        numTopChoices: Int32 = 0,
+        streamCallback: ((String) -> Void)? = nil)
     ) throws {
         if handle == nil {
             throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
 
-        var chunk_size_bytes_inner: Int32 = chunk_size_bytes
+        let stopPhrasesArg = stopPhrases ? stopPhrases.map { UnsafePointer(strdup($0)) } : nil
+        let numStopPhrasesArg = stopPhrases ? Int32(stopPhrases.count) : 0
 
-        let status = pv_picollm_load_model_file(self.handle, filepath, chunk_size_bytes_inner)
-        if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM load model file failed", messageStack)
-        }
-    }
+        var cUsage: pv_picollm_usage_t
+        var cEndpoint: pv_picollm_endpoint_t
+        var cCompletionTokens: UnsafeMutablePointer<pv_picollm_completion_token_t>?
+        var numCompletionTokens: Int32 = 0
+        var cCompletion: UnsafeMutablePointer<Int8>?
 
-    public func loadModelChunk(
-        filepath: String,
-        chunk: [UInt8],
-        chunk_size_bytes: Int32? = nil
-    ) throws -> Bool {
-        if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-        }
-
-        var  chunk_size_bytes_inner: Int32 = Int32(chunk.count)
-        if chunk_size_bytes != nil {
-            chunk_size_bytes_inner = chunk_size_bytes!
-        }
-
-        var mutable_chunk = chunk
-        var is_model_complete: Bool = false
-        let status = pv_picollm_load_model_chunk(
+        let status = pv_picollm_generate(
             self.handle,
-            &mutable_chunk,
-            chunk_size_bytes_inner,
-            &is_model_complete)
+            prompt,
+            completionTokenLimit,
+            stopPhrasesArg,
+            numStopPhrasesArg,
+            seed,
+            presencePenalty,
+            frequencyPenalty,
+            temperature,
+            topP,
+            numTopChoices,
+            cStreamCallback,
+            &cUsage,
+            &cEndpoint,
+            &cCompletionTokens,
+            &numCompletionTokens,
+            &cCompletion)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM load model chunk failed", messageStack)
+            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
-
-        return is_model_complete
     }
 
-    public func chainMultiply(vector: [Float32], iterations: Int32 = 10) throws -> [Float32] {
-        if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-        }
+    // public func loadModelChunk(
+    //     filepath: String,
+    //     chunk: [UInt8],
+    //     chunk_size_bytes: Int32? = nil
+    // ) throws -> Bool {
+    //     if handle == nil {
+    //         throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+    //     }
 
-        var iterations_inner: Int32 = iterations
+    //     var  chunk_size_bytes_inner: Int32 = Int32(chunk.count)
+    //     if chunk_size_bytes != nil {
+    //         chunk_size_bytes_inner = chunk_size_bytes!
+    //     }
 
-        var resultVector: [Float32] = Array(repeating: 0.0, count: vector.count)
-        let status = pv_picollm_chain_multiply(self.handle, vector, iterations_inner, &resultVector)
-        if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM chain multiply failed", messageStack)
-        }
+    //     var mutable_chunk = chunk
+    //     var is_model_complete: Bool = false
+    //     let status = pv_picollm_load_model_chunk(
+    //         self.handle,
+    //         &mutable_chunk,
+    //         chunk_size_bytes_inner,
+    //         &is_model_complete)
+    //     if status != PV_STATUS_SUCCESS {
+    //         let messageStack = try getMessageStack()
+    //         throw pvStatusToPicoLLMError(status, "PicoLLM load model chunk failed", messageStack)
+    //     }
 
-        return resultVector
-    }
+    //     return is_model_complete
+    // }
 
-    public func matrixDimensions() throws -> (matrix_m: Int32, matrix_n: Int32) {
-        if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-        }
+    // public func chainMultiply(vector: [Float32], iterations: Int32 = 10) throws -> [Float32] {
+    //     if handle == nil {
+    //         throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+    //     }
 
-        var matrix_m: Int32 = 0
-        var matrix_n: Int32 = 0
+    //     var iterations_inner: Int32 = iterations
 
-        let status = pv_picollm_matrix_dimensions(self.handle, &matrix_m, &matrix_n)
-        if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM chain multiply failed", messageStack)
-        }
+    //     var resultVector: [Float32] = Array(repeating: 0.0, count: vector.count)
+    //     let status = pv_picollm_chain_multiply(self.handle, vector, iterations_inner, &resultVector)
+    //     if status != PV_STATUS_SUCCESS {
+    //         let messageStack = try getMessageStack()
+    //         throw pvStatusToPicoLLMError(status, "PicoLLM chain multiply failed", messageStack)
+    //     }
 
-        return (matrix_m: matrix_m, matrix_n: matrix_n)
-    }
+    //     return resultVector
+    // }
+
+    // public func matrixDimensions() throws -> (matrix_m: Int32, matrix_n: Int32) {
+    //     if handle == nil {
+    //         throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+    //     }
+
+    //     var matrix_m: Int32 = 0
+    //     var matrix_n: Int32 = 0
+
+    //     let status = pv_picollm_matrix_dimensions(self.handle, &matrix_m, &matrix_n)
+    //     if status != PV_STATUS_SUCCESS {
+    //         let messageStack = try getMessageStack()
+    //         throw pvStatusToPicoLLMError(status, "PicoLLM chain multiply failed", messageStack)
+    //     }
+
+    //     return (matrix_m: matrix_m, matrix_n: matrix_n)
+    // }
 
     private func pvStatusToPicoLLMError(
         _ status: pv_status_t,

@@ -10,20 +10,20 @@
 import AVFoundation
 import XCTest
 
-import Mvm
+import PicoLLM
 
-class MvmAppTestUITests: BaseTest {
+class PicoLLMAppTestUITests: BaseTest {
 
     func testInitSuccess() throws {
-        let m = try Mvm.init(deviceString: "best:0")
-        XCTAssert(Mvm.version != "")
-        XCTAssert(Mvm.minChunkSize > 0)
-        XCTAssert(Mvm.maxChunkSize > 0)
+        let m = try PicoLLM.init(deviceString: "best:0")
+        XCTAssert(PicoLLM.version != "")
+        XCTAssert(PicoLLM.minChunkSize > 0)
+        XCTAssert(PicoLLM.maxChunkSize > 0)
         m.delete()
     }
 
     func testModelLoadSuccess() throws {
-        let m = try Mvm.init(deviceString: "best:0")
+        let m = try PicoLLM.init(deviceString: "best:0")
 
         try self.downloadFileSync(url: weightsURL!) { (path, _) in
             try m.loadModelFile(filepath: path!)
@@ -35,7 +35,7 @@ class MvmAppTestUITests: BaseTest {
     }
 
     func testChainMultiplySuccess() throws {
-        let m = try Mvm.init(deviceString: "best:0")
+        let m = try PicoLLM.init(deviceString: "best:0")
 
         try self.downloadFileSync(url: weightsURL!) { (path, _) in
             try m.loadModelFile(filepath: path!)

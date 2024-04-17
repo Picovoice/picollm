@@ -1,10 +1,10 @@
 source 'https://cdn.cocoapods.org/'
 platform :ios, '13.0'
 
-target 'MvmAppTest' do
-  pod 'Mvm-iOS', :path => '../'
+target 'PicoLLMAppTest' do
+  pod 'PicoLLM-iOS', :path => '../'
 end
 
-target 'MvmAppTestUITests' do
-  pod 'Mvm-iOS', :path => '../'
+target 'PicoLLMAppTestUITests' do
+  pod 'PicoLLM-iOS', :path => '../'
 end

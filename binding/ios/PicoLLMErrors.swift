@@ -7,7 +7,7 @@
 //  specific language governing permissions and limitations under the License.
 //
 
-public class MvmError: LocalizedError {
+public class PicoLLMError: LocalizedError {
     private let message: String
     private let messageStack: [String]
 
@@ -34,24 +34,24 @@ public class MvmError: LocalizedError {
     }
 }
 
-public class MvmMemoryError: MvmError {}
+public class PicoLLMMemoryError: PicoLLMError {}
 
-public class MvmIOError: MvmError {}
+public class PicoLLMIOError: PicoLLMError {}
 
-public class MvmInvalidArgumentError: MvmError {}
+public class PicoLLMInvalidArgumentError: PicoLLMError {}
 
-public class MvmStopIterationError: MvmError {}
+public class PicoLLMStopIterationError: PicoLLMError {}
 
-public class MvmKeyError: MvmError {}
+public class PicoLLMKeyError: PicoLLMError {}
 
-public class MvmInvalidStateError: MvmError {}
+public class PicoLLMInvalidStateError: PicoLLMError {}
 
-public class MvmRuntimeError: MvmError {}
+public class PicoLLMRuntimeError: PicoLLMError {}
 
-public class MvmActivationError: MvmError {}
+public class PicoLLMActivationError: PicoLLMError {}
 
-public class MvmActivationLimitError: MvmError {}
+public class PicoLLMActivationLimitError: PicoLLMError {}
 
-public class MvmActivationThrottledError: MvmError {}
+public class PicoLLMActivationThrottledError: PicoLLMError {}
 
-public class MvmActivationRefusedError: MvmError {}
+public class PicoLLMActivationRefusedError: PicoLLMError {}

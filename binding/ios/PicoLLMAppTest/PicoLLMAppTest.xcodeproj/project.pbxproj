@@ -12,9 +12,9 @@
 		1E7744BB27CD9D7E00491D0B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1E7744B927CD9D7E00491D0B /* Main.storyboard */; };
 		1E7744BD27CD9D7F00491D0B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E7744BC27CD9D7F00491D0B /* Assets.xcassets */; };
 		1E7744C027CD9D7F00491D0B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1E7744BE27CD9D7F00491D0B /* LaunchScreen.storyboard */; };
-		1E7744D527CD9D7F00491D0B /* MvmAppTestUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7744D427CD9D7F00491D0B /* MvmAppTestUITests.swift */; };
-		4A22E640019BA3ECBF044BFD /* libPods-MvmAppTestUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 294FADF72A91D4790191B72F /* libPods-MvmAppTestUITests.a */; };
-		9002F3251AFE11CB58B4AF91 /* libPods-MvmAppTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC1458495139C3C6B186FB0 /* libPods-MvmAppTest.a */; };
+		1E7744D527CD9D7F00491D0B /* PicoLLMAppTestUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7744D427CD9D7F00491D0B /* PicoLLMAppTestUITests.swift */; };
+		4A22E640019BA3ECBF044BFD /* libPods-PicoLLMAppTestUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 294FADF72A91D4790191B72F /* libPods-PicoLLMAppTestUITests.a */; };
+		9002F3251AFE11CB58B4AF91 /* libPods-PicoLLMAppTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2EC1458495139C3C6B186FB0 /* libPods-PicoLLMAppTest.a */; };
 		A52A78ED18AA4EDB33D95C4D /* BaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A7583A49E7ACAA9C7A0C5 /* BaseTest.swift */; };
 /* End PBXBuildFile section */
 
@@ -24,32 +24,32 @@
 			containerPortal = 1E7744A827CD9D7E00491D0B /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 1E7744AF27CD9D7E00491D0B;
-			remoteInfo = MvmAppTest;
+			remoteInfo = PicoLLMAppTest;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		107FED2B859E7EE9AC12C374 /* Pods-PerformanceTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PerformanceTest.release.xcconfig"; path = "Target Support Files/Pods-PerformanceTest/Pods-PerformanceTest.release.xcconfig"; sourceTree = "<group>"; };
-		1E50C3F5EFC139AC9F72C389 /* Pods-MvmAppTestUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MvmAppTestUITests.debug.xcconfig"; path = "Target Support Files/Pods-MvmAppTestUITests/Pods-MvmAppTestUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		1E7744B027CD9D7E00491D0B /* MvmAppTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MvmAppTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E50C3F5EFC139AC9F72C389 /* Pods-PicoLLMAppTestUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMAppTestUITests.debug.xcconfig"; path = "Target Support Files/Pods-PicoLLMAppTestUITests/Pods-PicoLLMAppTestUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		1E7744B027CD9D7E00491D0B /* PicoLLMAppTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PicoLLMAppTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E7744B327CD9D7E00491D0B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1E7744B727CD9D7E00491D0B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		1E7744BA27CD9D7E00491D0B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1E7744BC27CD9D7F00491D0B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1E7744BF27CD9D7F00491D0B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1E7744C127CD9D7F00491D0B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1E7744D027CD9D7F00491D0B /* MvmAppTestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MvmAppTestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1E7744D427CD9D7F00491D0B /* MvmAppTestUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MvmAppTestUITests.swift; sourceTree = "<group>"; };
+		1E7744D027CD9D7F00491D0B /* PicoLLMAppTestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PicoLLMAppTestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E7744D427CD9D7F00491D0B /* PicoLLMAppTestUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PicoLLMAppTestUITests.swift; sourceTree = "<group>"; };
 		1E7744E327CDA13600491D0B /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = info.plist; sourceTree = "<group>"; };
-		294FADF72A91D4790191B72F /* libPods-MvmAppTestUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MvmAppTestUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2B19DDB15B3549F2A0CEA808 /* Pods-MvmAppTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MvmAppTest.release.xcconfig"; path = "Target Support Files/Pods-MvmAppTest/Pods-MvmAppTest.release.xcconfig"; sourceTree = "<group>"; };
-		2EC1458495139C3C6B186FB0 /* libPods-MvmAppTest.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MvmAppTest.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3B9010DF1EC4645C3AFCD069 /* Pods-MvmAppTestUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MvmAppTestUITests.release.xcconfig"; path = "Target Support Files/Pods-MvmAppTestUITests/Pods-MvmAppTestUITests.release.xcconfig"; sourceTree = "<group>"; };
+		294FADF72A91D4790191B72F /* libPods-PicoLLMAppTestUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PicoLLMAppTestUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B19DDB15B3549F2A0CEA808 /* Pods-PicoLLMAppTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMAppTest.release.xcconfig"; path = "Target Support Files/Pods-PicoLLMAppTest/Pods-PicoLLMAppTest.release.xcconfig"; sourceTree = "<group>"; };
+		2EC1458495139C3C6B186FB0 /* libPods-PicoLLMAppTest.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PicoLLMAppTest.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B9010DF1EC4645C3AFCD069 /* Pods-PicoLLMAppTestUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMAppTestUITests.release.xcconfig"; path = "Target Support Files/Pods-PicoLLMAppTestUITests/Pods-PicoLLMAppTestUITests.release.xcconfig"; sourceTree = "<group>"; };
 		797233CF30E7017467863A8D /* Pods-PerformanceTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PerformanceTest.debug.xcconfig"; path = "Target Support Files/Pods-PerformanceTest/Pods-PerformanceTest.debug.xcconfig"; sourceTree = "<group>"; };
-		859BCC69EB5B3DEE304174D9 /* Pods-MvmAppTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MvmAppTest.debug.xcconfig"; path = "Target Support Files/Pods-MvmAppTest/Pods-MvmAppTest.debug.xcconfig"; sourceTree = "<group>"; };
+		859BCC69EB5B3DEE304174D9 /* Pods-PicoLLMAppTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMAppTest.debug.xcconfig"; path = "Target Support Files/Pods-PicoLLMAppTest/Pods-PicoLLMAppTest.debug.xcconfig"; sourceTree = "<group>"; };
 		8EA77D43CC5ED0D3506A9A0F /* libPods-PerformanceTest.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PerformanceTest.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A52A7583A49E7ACAA9C7A0C5 /* BaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseTest.swift; sourceTree = "<group>"; };
-		C7FA703F2B6B145800F480F3 /* libMvm-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libMvm-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7FA703F2B6B145800F480F3 /* libPicoLLM-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libPicoLLM-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9002F3251AFE11CB58B4AF91 /* libPods-MvmAppTest.a in Frameworks */,
+				9002F3251AFE11CB58B4AF91 /* libPods-PicoLLMAppTest.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,7 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A22E640019BA3ECBF044BFD /* libPods-MvmAppTestUITests.a in Frameworks */,
+				4A22E640019BA3ECBF044BFD /* libPods-PicoLLMAppTestUITests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,10 +75,10 @@
 		1AF96756F2A5FC2840F81D99 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				859BCC69EB5B3DEE304174D9 /* Pods-MvmAppTest.debug.xcconfig */,
-				2B19DDB15B3549F2A0CEA808 /* Pods-MvmAppTest.release.xcconfig */,
-				1E50C3F5EFC139AC9F72C389 /* Pods-MvmAppTestUITests.debug.xcconfig */,
-				3B9010DF1EC4645C3AFCD069 /* Pods-MvmAppTestUITests.release.xcconfig */,
+				859BCC69EB5B3DEE304174D9 /* Pods-PicoLLMAppTest.debug.xcconfig */,
+				2B19DDB15B3549F2A0CEA808 /* Pods-PicoLLMAppTest.release.xcconfig */,
+				1E50C3F5EFC139AC9F72C389 /* Pods-PicoLLMAppTestUITests.debug.xcconfig */,
+				3B9010DF1EC4645C3AFCD069 /* Pods-PicoLLMAppTestUITests.release.xcconfig */,
 				797233CF30E7017467863A8D /* Pods-PerformanceTest.debug.xcconfig */,
 				107FED2B859E7EE9AC12C374 /* Pods-PerformanceTest.release.xcconfig */,
 			);
@@ -88,8 +88,8 @@
 		1E7744A727CD9D7E00491D0B = {
 			isa = PBXGroup;
 			children = (
-				1E7744B227CD9D7E00491D0B /* MvmAppTest */,
-				1E7744D327CD9D7F00491D0B /* MvmAppTestUITests */,
+				1E7744B227CD9D7E00491D0B /* PicoLLMAppTest */,
+				1E7744D327CD9D7F00491D0B /* PicoLLMAppTestUITests */,
 				1E7744B127CD9D7E00491D0B /* Products */,
 				1AF96756F2A5FC2840F81D99 /* Pods */,
 				CF8A3E0166575C420DB0878C /* Frameworks */,
@@ -99,13 +99,13 @@
 		1E7744B127CD9D7E00491D0B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1E7744B027CD9D7E00491D0B /* MvmAppTest.app */,
-				1E7744D027CD9D7F00491D0B /* MvmAppTestUITests.xctest */,
+				1E7744B027CD9D7E00491D0B /* PicoLLMAppTest.app */,
+				1E7744D027CD9D7F00491D0B /* PicoLLMAppTestUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1E7744B227CD9D7E00491D0B /* MvmAppTest */ = {
+		1E7744B227CD9D7E00491D0B /* PicoLLMAppTest */ = {
 			isa = PBXGroup;
 			children = (
 				1E7744B327CD9D7E00491D0B /* AppDelegate.swift */,
@@ -115,25 +115,25 @@
 				1E7744BE27CD9D7F00491D0B /* LaunchScreen.storyboard */,
 				1E7744C127CD9D7F00491D0B /* Info.plist */,
 			);
-			path = MvmAppTest;
+			path = PicoLLMAppTest;
 			sourceTree = "<group>";
 		};
-		1E7744D327CD9D7F00491D0B /* MvmAppTestUITests */ = {
+		1E7744D327CD9D7F00491D0B /* PicoLLMAppTestUITests */ = {
 			isa = PBXGroup;
 			children = (
-				1E7744D427CD9D7F00491D0B /* MvmAppTestUITests.swift */,
+				1E7744D427CD9D7F00491D0B /* PicoLLMAppTestUITests.swift */,
 				1E7744E327CDA13600491D0B /* info.plist */,
 				A52A7583A49E7ACAA9C7A0C5 /* BaseTest.swift */,
 			);
-			path = MvmAppTestUITests;
+			path = PicoLLMAppTestUITests;
 			sourceTree = "<group>";
 		};
 		CF8A3E0166575C420DB0878C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C7FA703F2B6B145800F480F3 /* libMvm-iOS.a */,
-				2EC1458495139C3C6B186FB0 /* libPods-MvmAppTest.a */,
-				294FADF72A91D4790191B72F /* libPods-MvmAppTestUITests.a */,
+				C7FA703F2B6B145800F480F3 /* libPicoLLM-iOS.a */,
+				2EC1458495139C3C6B186FB0 /* libPods-PicoLLMAppTest.a */,
+				294FADF72A91D4790191B72F /* libPods-PicoLLMAppTestUITests.a */,
 				8EA77D43CC5ED0D3506A9A0F /* libPods-PerformanceTest.a */,
 			);
 			name = Frameworks;
@@ -142,9 +142,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1E7744AF27CD9D7E00491D0B /* MvmAppTest */ = {
+		1E7744AF27CD9D7E00491D0B /* PicoLLMAppTest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1E7744DA27CD9D7F00491D0B /* Build configuration list for PBXNativeTarget "MvmAppTest" */;
+			buildConfigurationList = 1E7744DA27CD9D7F00491D0B /* Build configuration list for PBXNativeTarget "PicoLLMAppTest" */;
 			buildPhases = (
 				B1385005372F1469CA69F7B1 /* [CP] Check Pods Manifest.lock */,
 				1E7744AC27CD9D7E00491D0B /* Sources */,
@@ -156,14 +156,14 @@
 			);
 			dependencies = (
 			);
-			name = MvmAppTest;
-			productName = MvmAppTest;
-			productReference = 1E7744B027CD9D7E00491D0B /* MvmAppTest.app */;
+			name = PicoLLMAppTest;
+			productName = PicoLLMAppTest;
+			productReference = 1E7744B027CD9D7E00491D0B /* PicoLLMAppTest.app */;
 			productType = "com.apple.product-type.application";
 		};
-		1E7744CF27CD9D7F00491D0B /* MvmAppTestUITests */ = {
+		1E7744CF27CD9D7F00491D0B /* PicoLLMAppTestUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1E7744E027CD9D7F00491D0B /* Build configuration list for PBXNativeTarget "MvmAppTestUITests" */;
+			buildConfigurationList = 1E7744E027CD9D7F00491D0B /* Build configuration list for PBXNativeTarget "PicoLLMAppTestUITests" */;
 			buildPhases = (
 				56CEA52AE3D3B600B4DCD856 /* [CP] Check Pods Manifest.lock */,
 				1E7744CC27CD9D7F00491D0B /* Sources */,
@@ -176,9 +176,9 @@
 			dependencies = (
 				1E7744D227CD9D7F00491D0B /* PBXTargetDependency */,
 			);
-			name = MvmAppTestUITests;
-			productName = MvmAppTestUITests;
-			productReference = 1E7744D027CD9D7F00491D0B /* MvmAppTestUITests.xctest */;
+			name = PicoLLMAppTestUITests;
+			productName = PicoLLMAppTestUITests;
+			productReference = 1E7744D027CD9D7F00491D0B /* PicoLLMAppTestUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -200,7 +200,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1E7744AB27CD9D7E00491D0B /* Build configuration list for PBXProject "MvmAppTest" */;
+			buildConfigurationList = 1E7744AB27CD9D7E00491D0B /* Build configuration list for PBXProject "PicoLLMAppTest" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -213,8 +213,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1E7744AF27CD9D7E00491D0B /* MvmAppTest */,
-				1E7744CF27CD9D7F00491D0B /* MvmAppTestUITests */,
+				1E7744AF27CD9D7E00491D0B /* PicoLLMAppTest */,
+				1E7744CF27CD9D7F00491D0B /* PicoLLMAppTestUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -246,15 +246,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MvmAppTest/Pods-MvmAppTest-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-PicoLLMAppTest/Pods-PicoLLMAppTest-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MvmAppTest/Pods-MvmAppTest-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-PicoLLMAppTest/Pods-PicoLLMAppTest-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MvmAppTest/Pods-MvmAppTest-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PicoLLMAppTest/Pods-PicoLLMAppTest-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		56CEA52AE3D3B600B4DCD856 /* [CP] Check Pods Manifest.lock */ = {
@@ -272,7 +272,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MvmAppTestUITests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-PicoLLMAppTestUITests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -294,7 +294,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MvmAppTest-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-PicoLLMAppTest-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -307,15 +307,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MvmAppTestUITests/Pods-MvmAppTestUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-PicoLLMAppTestUITests/Pods-PicoLLMAppTestUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MvmAppTestUITests/Pods-MvmAppTestUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-PicoLLMAppTestUITests/Pods-PicoLLMAppTestUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MvmAppTestUITests/Pods-MvmAppTestUITests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PicoLLMAppTestUITests/Pods-PicoLLMAppTestUITests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -334,7 +334,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E7744D527CD9D7F00491D0B /* MvmAppTestUITests.swift in Sources */,
+				1E7744D527CD9D7F00491D0B /* PicoLLMAppTestUITests.swift in Sources */,
 				A52A78ED18AA4EDB33D95C4D /* BaseTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -344,7 +344,7 @@
 /* Begin PBXTargetDependency section */
 		1E7744D227CD9D7F00491D0B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1E7744AF27CD9D7E00491D0B /* MvmAppTest */;
+			target = 1E7744AF27CD9D7E00491D0B /* PicoLLMAppTest */;
 			targetProxy = 1E7744D127CD9D7F00491D0B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -491,7 +491,7 @@
 		};
 		1E7744DB27CD9D7F00491D0B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 859BCC69EB5B3DEE304174D9 /* Pods-MvmAppTest.debug.xcconfig */;
+			baseConfigurationReference = 859BCC69EB5B3DEE304174D9 /* Pods-PicoLLMAppTest.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -500,7 +500,7 @@
 				DEVELOPMENT_TEAM = 65723695GD;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MvmAppTest/Info.plist;
+				INFOPLIST_FILE = PicoLLMAppTest/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -513,7 +513,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.picovoice.MvmAppTest;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.picovoice.PicoLLMAppTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -523,7 +523,7 @@
 		};
 		1E7744DC27CD9D7F00491D0B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2B19DDB15B3549F2A0CEA808 /* Pods-MvmAppTest.release.xcconfig */;
+			baseConfigurationReference = 2B19DDB15B3549F2A0CEA808 /* Pods-PicoLLMAppTest.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -532,7 +532,7 @@
 				DEVELOPMENT_TEAM = 65723695GD;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MvmAppTest/Info.plist;
+				INFOPLIST_FILE = PicoLLMAppTest/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -544,7 +544,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.picovoice.MvmAppTest;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.picovoice.PicoLLMAppTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -554,7 +554,7 @@
 		};
 		1E7744E127CD9D7F00491D0B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1E50C3F5EFC139AC9F72C389 /* Pods-MvmAppTestUITests.debug.xcconfig */;
+			baseConfigurationReference = 1E50C3F5EFC139AC9F72C389 /* Pods-PicoLLMAppTestUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -567,18 +567,18 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.picovoice.MvmAppTestUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.picovoice.PicoLLMAppTestUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MvmAppTest;
+				TEST_TARGET_NAME = PicoLLMAppTest;
 			};
 			name = Debug;
 		};
 		1E7744E227CD9D7F00491D0B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B9010DF1EC4645C3AFCD069 /* Pods-MvmAppTestUITests.release.xcconfig */;
+			baseConfigurationReference = 3B9010DF1EC4645C3AFCD069 /* Pods-PicoLLMAppTestUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -591,19 +591,19 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.picovoice.MvmAppTestUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.picovoice.PicoLLMAppTestUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MvmAppTest;
+				TEST_TARGET_NAME = PicoLLMAppTest;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1E7744AB27CD9D7E00491D0B /* Build configuration list for PBXProject "MvmAppTest" */ = {
+		1E7744AB27CD9D7E00491D0B /* Build configuration list for PBXProject "PicoLLMAppTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1E7744D827CD9D7F00491D0B /* Debug */,
@@ -612,7 +612,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1E7744DA27CD9D7F00491D0B /* Build configuration list for PBXNativeTarget "MvmAppTest" */ = {
+		1E7744DA27CD9D7F00491D0B /* Build configuration list for PBXNativeTarget "PicoLLMAppTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1E7744DB27CD9D7F00491D0B /* Debug */,
@@ -621,7 +621,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1E7744E027CD9D7F00491D0B /* Build configuration list for PBXNativeTarget "MvmAppTestUITests" */ = {
+		1E7744E027CD9D7F00491D0B /* Build configuration list for PBXNativeTarget "PicoLLMAppTestUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1E7744E127CD9D7F00491D0B /* Debug */,

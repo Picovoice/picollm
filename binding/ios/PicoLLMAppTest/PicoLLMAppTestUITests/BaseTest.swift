@@ -9,7 +9,7 @@
 
 import XCTest
 
-import Mvm
+import PicoLLM
 
 class BaseTest: XCTestCase {
 

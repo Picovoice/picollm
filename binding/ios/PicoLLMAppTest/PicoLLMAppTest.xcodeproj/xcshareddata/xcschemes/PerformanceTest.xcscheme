@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1E7744AF27CD9D7E00491D0B"
-               BuildableName = "MvmAppTest.app"
-               BlueprintName = "MvmAppTest"
-               ReferencedContainer = "container:MvmAppTest.xcodeproj">
+               BuildableName = "PicoLLMAppTest.app"
+               BlueprintName = "PicoLLMAppTest"
+               ReferencedContainer = "container:PicoLLMAppTest.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
                BlueprintIdentifier = "1E5B7A9B27FFC12000F8BDDB"
                BuildableName = "PerformanceTest.xctest"
                BlueprintName = "PerformanceTest"
-               ReferencedContainer = "container:MvmAppTest.xcodeproj">
+               ReferencedContainer = "container:PicoLLMAppTest.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1E7744AF27CD9D7E00491D0B"
-            BuildableName = "MvmAppTest.app"
-            BlueprintName = "MvmAppTest"
-            ReferencedContainer = "container:MvmAppTest.xcodeproj">
+            BuildableName = "PicoLLMAppTest.app"
+            BlueprintName = "PicoLLMAppTest"
+            ReferencedContainer = "container:PicoLLMAppTest.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1E7744AF27CD9D7E00491D0B"
-            BuildableName = "MvmAppTest.app"
-            BlueprintName = "MvmAppTest"
-            ReferencedContainer = "container:MvmAppTest.xcodeproj">
+            BuildableName = "PicoLLMAppTest.app"
+            BlueprintName = "PicoLLMAppTest"
+            ReferencedContainer = "container:PicoLLMAppTest.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

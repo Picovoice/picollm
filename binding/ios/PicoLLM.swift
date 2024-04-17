@@ -7,28 +7,28 @@
 //  specific language governing permissions and limitations under the License.
 //
 
-import PvMvm
+import PvPicoLLM
 
-/// Low-level iOS binding for Mvm wake word engine. Provides a Swift interface to the Mvm library.
-public class Mvm {
+/// Low-level iOS binding for PicoLLM wake word engine. Provides a Swift interface to the PicoLLM library.
+public class PicoLLM {
 
     static let resourceBundle: Bundle = {
-        let myBundle = Bundle(for: Mvm.self)
+        let myBundle = Bundle(for: PicoLLM.self)
 
         guard let resourceBundleURL = myBundle.url(
-             forResource: "MvmResources", withExtension: "bundle")
-        else { fatalError("MvmResources.bundle not found") }
+             forResource: "PicoLLMResources", withExtension: "bundle")
+        else { fatalError("PicoLLMResources.bundle not found") }
 
         guard let resourceBundle = Bundle(url: resourceBundleURL)
-            else { fatalError("Could not open MvmResources.bundle") }
+            else { fatalError("Could not open PicoLLMResources.bundle") }
 
         return resourceBundle
     }()
 
     private var handle: OpaquePointer?
-    public static let minChunkSize = Int32(pv_mvm_min_chunk_size())
-    public static let maxChunkSize = Int32(pv_mvm_max_chunk_size())
-    public static let version = String(cString: pv_mvm_version())
+    public static let minChunkSize = Int32(pv_picollm_min_chunk_size())
+    public static let maxChunkSize = Int32(pv_picollm_max_chunk_size())
+    public static let version = String(cString: pv_picollm_version())
     private static var sdk = "ios"
 
     public static func setSdk(sdk: String) {
@@ -37,24 +37,24 @@ public class Mvm {
 
     /// Constructor.
     ///
-    /// - Throws: MvmError
+    /// - Throws: PicoLLMError
     public init(
         deviceString: String = "best:0"
     ) throws {
 
         if deviceString.count == 0 {
-            throw MvmInvalidArgumentError("deviceString is required for Mvm initialization")
+            throw PicoLLMInvalidArgumentError("deviceString is required for PicoLLM initialization")
         }
 
-        pv_set_sdk(Mvm.sdk)
+        pv_set_sdk(PicoLLM.sdk)
 
-        let status = pv_mvm_init(
+        let status = pv_picollm_init(
             deviceString,
             &handle)
 
         if status != PV_STATUS_SUCCESS {
             let messageStack = try getMessageStack()
-            throw pvStatusToMvmError(status, "Mvm init failed", messageStack)
+            throw pvStatusToPicoLLMError(status, "PicoLLM init failed", messageStack)
         }
     }
 
@@ -62,28 +62,28 @@ public class Mvm {
         self.delete()
     }
 
-    /// Releases native resources that were allocated to Mvm
+    /// Releases native resources that were allocated to PicoLLM
     public func delete() {
         if handle != nil {
-            pv_mvm_delete(handle)
+            pv_picollm_delete(handle)
             handle = nil
         }
     }
 
     public func loadModelFile(
         filepath: String,
-        chunk_size_bytes: Int32 = Mvm.maxChunkSize
+        chunk_size_bytes: Int32 = PicoLLM.maxChunkSize
     ) throws {
         if handle == nil {
-            throw MvmInvalidStateError("Mvm must be initialized before processing")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
 
         var chunk_size_bytes_inner: Int32 = chunk_size_bytes
 
-        let status = pv_mvm_load_model_file(self.handle, filepath, chunk_size_bytes_inner)
+        let status = pv_picollm_load_model_file(self.handle, filepath, chunk_size_bytes_inner)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try getMessageStack()
-            throw pvStatusToMvmError(status, "Mvm load model file failed", messageStack)
+            throw pvStatusToPicoLLMError(status, "PicoLLM load model file failed", messageStack)
         }
     }
 
@@ -93,7 +93,7 @@ public class Mvm {
         chunk_size_bytes: Int32? = nil
     ) throws -> Bool {
         if handle == nil {
-            throw MvmInvalidStateError("Mvm must be initialized before processing")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
 
         var  chunk_size_bytes_inner: Int32 = Int32(chunk.count)
@@ -103,14 +103,14 @@ public class Mvm {
 
         var mutable_chunk = chunk
         var is_model_complete: Bool = false
-        let status = pv_mvm_load_model_chunk(
+        let status = pv_picollm_load_model_chunk(
             self.handle,
             &mutable_chunk,
             chunk_size_bytes_inner,
             &is_model_complete)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try getMessageStack()
-            throw pvStatusToMvmError(status, "Mvm load model chunk failed", messageStack)
+            throw pvStatusToPicoLLMError(status, "PicoLLM load model chunk failed", messageStack)
         }
 
         return is_model_complete
@@ -118,16 +118,16 @@ public class Mvm {
 
     public func chainMultiply(vector: [Float32], iterations: Int32 = 10) throws -> [Float32] {
         if handle == nil {
-            throw MvmInvalidStateError("Mvm must be initialized before processing")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
 
         var iterations_inner: Int32 = iterations
 
         var resultVector: [Float32] = Array(repeating: 0.0, count: vector.count)
-        let status = pv_mvm_chain_multiply(self.handle, vector, iterations_inner, &resultVector)
+        let status = pv_picollm_chain_multiply(self.handle, vector, iterations_inner, &resultVector)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try getMessageStack()
-            throw pvStatusToMvmError(status, "Mvm chain multiply failed", messageStack)
+            throw pvStatusToPicoLLMError(status, "PicoLLM chain multiply failed", messageStack)
         }
 
         return resultVector
@@ -135,51 +135,51 @@ public class Mvm {
 
     public func matrixDimensions() throws -> (matrix_m: Int32, matrix_n: Int32) {
         if handle == nil {
-            throw MvmInvalidStateError("Mvm must be initialized before processing")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
 
         var matrix_m: Int32 = 0
         var matrix_n: Int32 = 0
 
-        let status = pv_mvm_matrix_dimensions(self.handle, &matrix_m, &matrix_n)
+        let status = pv_picollm_matrix_dimensions(self.handle, &matrix_m, &matrix_n)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try getMessageStack()
-            throw pvStatusToMvmError(status, "Mvm chain multiply failed", messageStack)
+            throw pvStatusToPicoLLMError(status, "PicoLLM chain multiply failed", messageStack)
         }
 
         return (matrix_m: matrix_m, matrix_n: matrix_n)
     }
 
-    private func pvStatusToMvmError(
+    private func pvStatusToPicoLLMError(
         _ status: pv_status_t,
         _ message: String,
-        _ messageStack: [String] = []) -> MvmError {
+        _ messageStack: [String] = []) -> PicoLLMError {
         switch status {
         case PV_STATUS_OUT_OF_MEMORY:
-            return MvmMemoryError(message, messageStack)
+            return PicoLLMMemoryError(message, messageStack)
         case PV_STATUS_IO_ERROR:
-            return MvmIOError(message, messageStack)
+            return PicoLLMIOError(message, messageStack)
         case PV_STATUS_INVALID_ARGUMENT:
-            return MvmInvalidArgumentError(message, messageStack)
+            return PicoLLMInvalidArgumentError(message, messageStack)
         case PV_STATUS_STOP_ITERATION:
-            return MvmStopIterationError(message, messageStack)
+            return PicoLLMStopIterationError(message, messageStack)
         case PV_STATUS_KEY_ERROR:
-            return MvmKeyError(message, messageStack)
+            return PicoLLMKeyError(message, messageStack)
         case PV_STATUS_INVALID_STATE:
-            return MvmInvalidStateError(message, messageStack)
+            return PicoLLMInvalidStateError(message, messageStack)
         case PV_STATUS_RUNTIME_ERROR:
-            return MvmRuntimeError(message, messageStack)
+            return PicoLLMRuntimeError(message, messageStack)
         case PV_STATUS_ACTIVATION_ERROR:
-            return MvmActivationError(message, messageStack)
+            return PicoLLMActivationError(message, messageStack)
         case PV_STATUS_ACTIVATION_LIMIT_REACHED:
-            return MvmActivationLimitError(message, messageStack)
+            return PicoLLMActivationLimitError(message, messageStack)
         case PV_STATUS_ACTIVATION_THROTTLED:
-            return MvmActivationThrottledError(message, messageStack)
+            return PicoLLMActivationThrottledError(message, messageStack)
         case PV_STATUS_ACTIVATION_REFUSED:
-            return MvmActivationRefusedError(message, messageStack)
+            return PicoLLMActivationRefusedError(message, messageStack)
         default:
             let pvStatusString = String(cString: pv_status_to_string(status))
-            return MvmError("\(pvStatusString): \(message)", messageStack)
+            return PicoLLMError("\(pvStatusString): \(message)", messageStack)
         }
     }
 
@@ -188,7 +188,7 @@ public class Mvm {
         var messageStackDepth: Int32 = 0
         let status = pv_get_error_stack(&messageStackRef, &messageStackDepth)
         if status != PV_STATUS_SUCCESS {
-            throw pvStatusToMvmError(status, "Unable to get Mvm error state")
+            throw pvStatusToPicoLLMError(status, "Unable to get PicoLLM error state")
         }
 
         var messageStack: [String] = []

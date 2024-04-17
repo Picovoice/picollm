@@ -19,5 +19,5 @@ xcuserdata
 Pods
 ddp
 
-MvmAppTestUITests/test_resources/*
-!MvmAppTestUITests/test_resources/.gitkeep
+PicoLLMAppTestUITests/test_resources/*
+!PicoLLMAppTestUITests/test_resources/.gitkeep

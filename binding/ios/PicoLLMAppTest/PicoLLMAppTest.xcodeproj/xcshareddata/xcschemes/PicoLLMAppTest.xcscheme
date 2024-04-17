@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1E7744AF27CD9D7E00491D0B"
-               BuildableName = "MvmAppTest.app"
-               BlueprintName = "MvmAppTest"
-               ReferencedContainer = "container:MvmAppTest.xcodeproj">
+               BuildableName = "PicoLLMAppTest.app"
+               BlueprintName = "PicoLLMAppTest"
+               ReferencedContainer = "container:PicoLLMAppTest.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1E7744CF27CD9D7F00491D0B"
-               BuildableName = "MvmAppTestUITests.xctest"
-               BlueprintName = "MvmAppTestUITests"
-               ReferencedContainer = "container:MvmAppTest.xcodeproj">
+               BuildableName = "PicoLLMAppTestUITests.xctest"
+               BlueprintName = "PicoLLMAppTestUITests"
+               ReferencedContainer = "container:PicoLLMAppTest.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1E7744AF27CD9D7E00491D0B"
-            BuildableName = "MvmAppTest.app"
-            BlueprintName = "MvmAppTest"
-            ReferencedContainer = "container:MvmAppTest.xcodeproj">
+            BuildableName = "PicoLLMAppTest.app"
+            BlueprintName = "PicoLLMAppTest"
+            ReferencedContainer = "container:PicoLLMAppTest.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1E7744AF27CD9D7E00491D0B"
-            BuildableName = "MvmAppTest.app"
-            BlueprintName = "MvmAppTest"
-            ReferencedContainer = "container:MvmAppTest.xcodeproj">
+            BuildableName = "PicoLLMAppTest.app"
+            BlueprintName = "PicoLLMAppTest"
+            ReferencedContainer = "container:PicoLLMAppTest.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

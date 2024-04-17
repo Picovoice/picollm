@@ -22,7 +22,7 @@ public struct PicoLLMUsage {
     }
 }
 
-public enum PicoLLMEndpoint {
+public enum PicoLLMEndpoint: Int {
     case endOfSentence
     case completionTokenLimitReached
     case stopPhraseEncountered
@@ -61,13 +61,17 @@ public struct PicoLLMCompletion {
 
     public let completionTokens: [PicoLLMCompletionToken]
 
+    public let completion: String
+
     public init(
         usage: PicoLLMUsage,
         endpoint: PicoLLMEndpoint,
-        completionTokens: [PicoLLMCompletionToken]) {
+        completionTokens: [PicoLLMCompletionToken],
+        completion) {
         self.usage = usage
         self.endpoint = endpoint
         self.completionTokens = completionTokens
+        self.completion = completion
     }
 }
 
@@ -146,7 +150,7 @@ public class PicoLLM {
         topP: Float = 0.9,
         numTopChoices: Int32 = 0,
         streamCallback: ((String) -> Void)? = nil)
-    ) throws {
+    ) throws -> PicoLLMCompletion {
         if handle == nil {
             throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
@@ -182,6 +186,30 @@ public class PicoLLM {
             let messageStack = try getMessageStack()
             throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
+
+        let usage = PicoLLMUsage(cUsage.prompt_tokens, cUsage.completion_tokens)
+
+        let endpoint = PicoLLMEndpoint(rawValue: cEndpoint)
+
+        var completionTokens = [PicoLLMCompletionToken]()
+        for cCompletionToken in UnsafeBufferPointer(start: cCompletionTokens, count: Int(numCompletionTokens)) {
+            let token = PicoLLMToken(String(cString: cCompletionToken.token.token), cCompletionToken.token.log_prob)
+            var topChoices = [PicoLLMToken]()
+            for cTopChoice in UnsafeBufferPointer(start: cCompletionToken.top_choices, count: Int(cCompletionToken.num_top_choices)) {
+                let topChoice = PicoLLMToken(String(cString: cTopChoice.token), cTopChoice.logProb)
+                topChoices.append(topChoice)
+            }
+
+            let completionToken = PicoLLMCompletionToken(token, topChoices)
+            completionTokens.append(completionToken)
+        }
+
+        let completion = String(cString: cCompletion)
+
+        pv_picollm_delete_completion_tokens(cCompletionTokens, numCompletionTokens)
+        pv_picollm_delete_completion(cCompletion)
+
+        return PicoLLMCompletion(usage, endpoint, completionTokens, completion)
     }
 
     // public func loadModelChunk(

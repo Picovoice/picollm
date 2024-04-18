@@ -13,7 +13,8 @@ import PicoLLM
 
 class BaseTest: XCTestCase {
 
-    let weightsURL = URL(string: "{TESTING_WEIGHTS_URL_HERE}")
+    let accessKey: String = "{TESTING_ACCESS_KEY_HERE}"
+    let modelURL = URL(string: "{TESTING_MODEL_URL_HERE}")
 
     override func setUp() {
         super.setUp()

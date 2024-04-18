@@ -13,41 +13,45 @@ import XCTest
 import PicoLLM
 
 class PicoLLMAppTestUITests: BaseTest {
-
+    
     func testInitSuccess() throws {
-        let m = try PicoLLM.init(deviceString: "best:0")
+        var modelPath: String = ""
+        try downloadFileSync(url: modelURL!) { (path, _) in
+            modelPath = path!
+        }
+        
+        let m = try PicoLLM.init(accessKey: accessKey, modelPath: modelPath)
         XCTAssert(PicoLLM.version != "")
-        XCTAssert(PicoLLM.minChunkSize > 0)
-        XCTAssert(PicoLLM.maxChunkSize > 0)
+        XCTAssert(try m.model() != "")
         m.delete()
     }
 
-    func testModelLoadSuccess() throws {
-        let m = try PicoLLM.init(deviceString: "best:0")
-
-        try self.downloadFileSync(url: weightsURL!) { (path, _) in
-            try m.loadModelFile(filepath: path!)
-            XCTAssert(try m.matrixDimensions().matrix_n > 0)
-            XCTAssert(try m.matrixDimensions().matrix_m > 0)
-        }
-
-        m.delete()
-    }
-
-    func testChainMultiplySuccess() throws {
-        let m = try PicoLLM.init(deviceString: "best:0")
-
-        try self.downloadFileSync(url: weightsURL!) { (path, _) in
-            try m.loadModelFile(filepath: path!)
-
-            let matrixDimensions = try m.matrixDimensions()
-            var vector: [Float32] = Array(repeating: 1.0, count: Int(matrixDimensions.matrix_n))
-
-            let resultVector = try m.chainMultiply(vector: vector)
-
-            XCTAssert(vector.count == resultVector.count)
-        }
-
-        m.delete()
-    }
+//    func testModelLoadSuccess() throws {
+//        let m = try PicoLLM.init(deviceString: "best:0")
+//
+//        try self.downloadFileSync(url: weightsURL!) { (path, _) in
+//            try m.loadModelFile(filepath: path!)
+//            XCTAssert(try m.matrixDimensions().matrix_n > 0)
+//            XCTAssert(try m.matrixDimensions().matrix_m > 0)
+//        }
+//
+//        m.delete()
+//    }
+//
+//    func testChainMultiplySuccess() throws {
+//        let m = try PicoLLM.init(deviceString: "best:0")
+//
+//        try self.downloadFileSync(url: weightsURL!) { (path, _) in
+//            try m.loadModelFile(filepath: path!)
+//
+//            let matrixDimensions = try m.matrixDimensions()
+//            var vector: [Float32] = Array(repeating: 1.0, count: Int(matrixDimensions.matrix_n))
+//
+//            let resultVector = try m.chainMultiply(vector: vector)
+//
+//            XCTAssert(vector.count == resultVector.count)
+//        }
+//
+//        m.delete()
+//    }
 }

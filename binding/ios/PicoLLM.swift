@@ -212,68 +212,143 @@ public class PicoLLM {
         return PicoLLMCompletion(usage, endpoint, completionTokens, completion)
     }
 
-    // public func loadModelChunk(
-    //     filepath: String,
-    //     chunk: [UInt8],
-    //     chunk_size_bytes: Int32? = nil
-    // ) throws -> Bool {
-    //     if handle == nil {
-    //         throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-    //     }
+    public func tokenize(
+        text: String,
+        bos: Bool,
+        eos: Bool)
+    ) throws -> [Int32] {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+        }
 
-    //     var  chunk_size_bytes_inner: Int32 = Int32(chunk.count)
-    //     if chunk_size_bytes != nil {
-    //         chunk_size_bytes_inner = chunk_size_bytes!
-    //     }
+        var numTokens: Int32 = 0
+        var cTokens: UnsafeMutablePointer<Int32>?
 
-    //     var mutable_chunk = chunk
-    //     var is_model_complete: Bool = false
-    //     let status = pv_picollm_load_model_chunk(
-    //         self.handle,
-    //         &mutable_chunk,
-    //         chunk_size_bytes_inner,
-    //         &is_model_complete)
-    //     if status != PV_STATUS_SUCCESS {
-    //         let messageStack = try getMessageStack()
-    //         throw pvStatusToPicoLLMError(status, "PicoLLM load model chunk failed", messageStack)
-    //     }
+        let status = pv_picollm_tokenize(
+            self.handle,
+            text,
+            bos,
+            eos,
+            &numTokens,
+            &cTokens)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try getMessageStack()
+            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+        }
 
-    //     return is_model_complete
-    // }
+        var tokens = [Int32]()
+        for cToken in UnsafeBufferPointer(start: cTokens, count: Int(numTokens)) {
+            tokens.append(cToken)
+        }
 
-    // public func chainMultiply(vector: [Float32], iterations: Int32 = 10) throws -> [Float32] {
-    //     if handle == nil {
-    //         throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-    //     }
+        pv_picollm_delete_tokens(cTokens)
 
-    //     var iterations_inner: Int32 = iterations
+        return tokens
+    }
 
-    //     var resultVector: [Float32] = Array(repeating: 0.0, count: vector.count)
-    //     let status = pv_picollm_chain_multiply(self.handle, vector, iterations_inner, &resultVector)
-    //     if status != PV_STATUS_SUCCESS {
-    //         let messageStack = try getMessageStack()
-    //         throw pvStatusToPicoLLMError(status, "PicoLLM chain multiply failed", messageStack)
-    //     }
+    public func forward(
+        token: Int32
+    ) throws -> [Float] {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+        }
 
-    //     return resultVector
-    // }
+        var numLogits: Int32 = 0
+        var cLogits: UnsafeMutablePointer<Float>?
 
-    // public func matrixDimensions() throws -> (matrix_m: Int32, matrix_n: Int32) {
-    //     if handle == nil {
-    //         throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-    //     }
+        let status = pv_picollm_tokenize(
+            self.handle,
+            token,
+            &numLogits,
+            &cLogits)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try getMessageStack()
+            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+        }
 
-    //     var matrix_m: Int32 = 0
-    //     var matrix_n: Int32 = 0
+        var logits = [Int32]()
+        for cLogit in UnsafeBufferPointer(start: cLogits, count: Int(numLogits)) {
+            logits.append(cLogit)
+        }
 
-    //     let status = pv_picollm_matrix_dimensions(self.handle, &matrix_m, &matrix_n)
-    //     if status != PV_STATUS_SUCCESS {
-    //         let messageStack = try getMessageStack()
-    //         throw pvStatusToPicoLLMError(status, "PicoLLM chain multiply failed", messageStack)
-    //     }
+        pv_picollm_delete_logits(cLogits)
 
-    //     return (matrix_m: matrix_m, matrix_n: matrix_n)
-    // }
+        return logits
+    }
+
+    public func reset() throws {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+        }
+
+        let status = pv_picollm_reset(self.handle)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try getMessageStack()
+            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+        }
+    }
+
+    public func model() throws -> String {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+        }
+
+        var cModel: UnsafeMutablePointer<Int8>?
+
+        let status = pv_picollm_model(
+            self.handle,
+            &cModel)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try getMessageStack()
+            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+        }
+
+        return String(cString: cModel)
+    }
+
+    public func contextLength() throws -> String {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+        }
+
+        var contextLength: Int32 = 0
+
+        let status = pv_picollm_context_length(
+            self.handle,
+            &contextLength)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try getMessageStack()
+            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+        }
+
+        return contextLength
+    }
+
+    public func listHardwareDevices() throws -> [String] {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+        }
+
+        var numTokens: Int32 = 0
+        var cTokens: UnsafeMutablePointer<Int32>?
+
+        var cHardwareDevices: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?
+        var numHardwareDevices: Int32 = 0
+        let status = pv_picollm_list_hardware_devices(&cHardwareDevices, &numHardwareDevices)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try getMessageStack()
+            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+        }
+
+        var hardwareDevices: [String] = []
+        for i in 0..<messageStackDepth {
+            hardwareDevices.append(String(cString: cHardwareDevices!.advanced(by: Int(i)).pointee!))
+        }
+
+        pv_picollm_free_hardware_devices(cHardwareDevices, numHardwareDevices)
+
+        return hardwareDevices
+    }
 
     private func pvStatusToPicoLLMError(
         _ status: pv_status_t,

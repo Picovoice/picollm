@@ -22,10 +22,23 @@ public struct PicoLLMUsage {
     }
 }
 
-public enum PicoLLMEndpoint: Int {
+public enum PicoLLMEndpoint {
     case endOfSentence
     case completionTokenLimitReached
     case stopPhraseEncountered
+    
+    public static func fromC(cEndpoint: pv_picollm_endpoint_t) -> PicoLLMEndpoint? {
+        switch cEndpoint {
+        case PV_PICOLLM_ENDPOINT_END_OF_SENTENCE:
+            return PicoLLMEndpoint.endOfSentence
+        case PV_PICOLLM_ENDPOINT_COMPLETION_TOKEN_LIMIT_REACHED:
+            return PicoLLMEndpoint.completionTokenLimitReached
+        case PV_PICOLLM_ENDPOINT_STOP_PHRASE_ENCOUNTERED:
+            return PicoLLMEndpoint.stopPhraseEncountered
+        default:
+            return nil
+        }
+    }
 }
 
 public struct PicoLLMToken {
@@ -67,11 +80,18 @@ public struct PicoLLMCompletion {
         usage: PicoLLMUsage,
         endpoint: PicoLLMEndpoint,
         completionTokens: [PicoLLMCompletionToken],
-        completion) {
+        completion: String) {
         self.usage = usage
         self.endpoint = endpoint
         self.completionTokens = completionTokens
         self.completion = completion
+    }
+}
+
+private var streamCallbackFunc: ((String) -> Void)? = nil
+private func cStreamCallback (completion: UnsafePointer<CChar>?) {
+    if (streamCallbackFunc != nil) {
+        streamCallbackFunc!(String(cString: completion!))
     }
 }
 
@@ -122,8 +142,8 @@ public class PicoLLM {
             &handle)
 
         if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM init failed", messageStack)
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM init failed", messageStack)
         }
     }
 
@@ -138,7 +158,7 @@ public class PicoLLM {
             handle = nil
         }
     }
-
+    
     public func generate(
         prompt: String,
         completionTokenLimit: Int32 = -1,
@@ -149,17 +169,19 @@ public class PicoLLM {
         temperature: Float = 0.0,
         topP: Float = 0.9,
         numTopChoices: Int32 = 0,
-        streamCallback: ((String) -> Void)? = nil)
+        streamCallback: ((String) -> Void)? = nil
     ) throws -> PicoLLMCompletion {
         if handle == nil {
             throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
 
-        let stopPhrasesArg = stopPhrases ? stopPhrases.map { UnsafePointer(strdup($0)) } : nil
-        let numStopPhrasesArg = stopPhrases ? Int32(stopPhrases.count) : 0
+        let stopPhrasesArg = (stopPhrases != nil) ? stopPhrases!.map { UnsafePointer(strdup($0)) } : nil
+        let numStopPhrasesArg = (stopPhrases != nil) ? Int32(stopPhrases!.count) : 0
 
-        var cUsage: pv_picollm_usage_t
-        var cEndpoint: pv_picollm_endpoint_t
+        streamCallbackFunc = streamCallback
+
+        var cUsage: pv_picollm_usage_t = pv_picollm_usage_t()
+        var cEndpoint: pv_picollm_endpoint_t = pv_picollm_endpoint_t(0)
         var cCompletionTokens: UnsafeMutablePointer<pv_picollm_completion_token_t>?
         var numCompletionTokens: Int32 = 0
         var cCompletion: UnsafeMutablePointer<Int8>?
@@ -183,39 +205,49 @@ public class PicoLLM {
             &numCompletionTokens,
             &cCompletion)
         if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
 
-        let usage = PicoLLMUsage(cUsage.prompt_tokens, cUsage.completion_tokens)
+        let usage = PicoLLMUsage(
+            promptTokens: Int(cUsage.prompt_tokens),
+            completionTokens: Int(cUsage.completion_tokens))
 
-        let endpoint = PicoLLMEndpoint(rawValue: cEndpoint)
+        let endpoint = PicoLLMEndpoint.fromC(cEndpoint: cEndpoint)!
 
         var completionTokens = [PicoLLMCompletionToken]()
         for cCompletionToken in UnsafeBufferPointer(start: cCompletionTokens, count: Int(numCompletionTokens)) {
-            let token = PicoLLMToken(String(cString: cCompletionToken.token.token), cCompletionToken.token.log_prob)
+            let token = PicoLLMToken(
+                token: String(cString: cCompletionToken.token.token),
+                logProb: cCompletionToken.token.log_prob)
             var topChoices = [PicoLLMToken]()
             for cTopChoice in UnsafeBufferPointer(start: cCompletionToken.top_choices, count: Int(cCompletionToken.num_top_choices)) {
-                let topChoice = PicoLLMToken(String(cString: cTopChoice.token), cTopChoice.logProb)
+                let topChoice = PicoLLMToken(
+                    token: String(cString: cTopChoice.token),
+                    logProb: cTopChoice.log_prob)
                 topChoices.append(topChoice)
             }
 
-            let completionToken = PicoLLMCompletionToken(token, topChoices)
+            let completionToken = PicoLLMCompletionToken(token: token, topChoices: topChoices)
             completionTokens.append(completionToken)
         }
 
-        let completion = String(cString: cCompletion)
+        let completion = String(cString: cCompletion!)
 
         pv_picollm_delete_completion_tokens(cCompletionTokens, numCompletionTokens)
         pv_picollm_delete_completion(cCompletion)
 
-        return PicoLLMCompletion(usage, endpoint, completionTokens, completion)
+        return PicoLLMCompletion(
+            usage: usage,
+            endpoint: endpoint,
+            completionTokens: completionTokens,
+            completion: completion)
     }
 
     public func tokenize(
         text: String,
         bos: Bool,
-        eos: Bool)
+        eos: Bool
     ) throws -> [Int32] {
         if handle == nil {
             throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
@@ -232,8 +264,8 @@ public class PicoLLM {
             &numTokens,
             &cTokens)
         if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
 
         var tokens = [Int32]()
@@ -256,17 +288,17 @@ public class PicoLLM {
         var numLogits: Int32 = 0
         var cLogits: UnsafeMutablePointer<Float>?
 
-        let status = pv_picollm_tokenize(
+        let status = pv_picollm_forward(
             self.handle,
             token,
             &numLogits,
             &cLogits)
         if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
 
-        var logits = [Int32]()
+        var logits = [Float]()
         for cLogit in UnsafeBufferPointer(start: cLogits, count: Int(numLogits)) {
             logits.append(cLogit)
         }
@@ -283,8 +315,8 @@ public class PicoLLM {
 
         let status = pv_picollm_reset(self.handle)
         if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
     }
 
@@ -293,20 +325,20 @@ public class PicoLLM {
             throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
 
-        var cModel: UnsafeMutablePointer<Int8>?
+        var cModel: UnsafePointer<Int8>?
 
         let status = pv_picollm_model(
             self.handle,
             &cModel)
         if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
 
-        return String(cString: cModel)
+        return String(cString: cModel!)
     }
 
-    public func contextLength() throws -> String {
+    public func contextLength() throws -> Int32 {
         if handle == nil {
             throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
         }
@@ -317,21 +349,14 @@ public class PicoLLM {
             self.handle,
             &contextLength)
         if status != PV_STATUS_SUCCESS {
-            let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
 
         return contextLength
     }
 
-    public func listHardwareDevices() throws -> [String] {
-        if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-        }
-
-        var numTokens: Int32 = 0
-        var cTokens: UnsafeMutablePointer<Int32>?
-
+    public static func listHardwareDevices() throws -> [String] {
         var cHardwareDevices: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?
         var numHardwareDevices: Int32 = 0
         let status = pv_picollm_list_hardware_devices(&cHardwareDevices, &numHardwareDevices)
@@ -341,7 +366,7 @@ public class PicoLLM {
         }
 
         var hardwareDevices: [String] = []
-        for i in 0..<messageStackDepth {
+        for i in 0..<numHardwareDevices {
             hardwareDevices.append(String(cString: cHardwareDevices!.advanced(by: Int(i)).pointee!))
         }
 
@@ -350,7 +375,7 @@ public class PicoLLM {
         return hardwareDevices
     }
 
-    private func pvStatusToPicoLLMError(
+    private static func pvStatusToPicoLLMError(
         _ status: pv_status_t,
         _ message: String,
         _ messageStack: [String] = []) -> PicoLLMError {
@@ -383,7 +408,7 @@ public class PicoLLM {
         }
     }
 
-    private func getMessageStack() throws -> [String] {
+    private static func getMessageStack() throws -> [String] {
         var messageStackRef: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?
         var messageStackDepth: Int32 = 0
         let status = pv_get_error_stack(&messageStackRef, &messageStackDepth)

@@ -26,32 +26,17 @@ class PicoLLMAppTestUITests: BaseTest {
         m.delete()
     }
 
-//    func testModelLoadSuccess() throws {
-//        let m = try PicoLLM.init(deviceString: "best:0")
-//
-//        try self.downloadFileSync(url: weightsURL!) { (path, _) in
-//            try m.loadModelFile(filepath: path!)
-//            XCTAssert(try m.matrixDimensions().matrix_n > 0)
-//            XCTAssert(try m.matrixDimensions().matrix_m > 0)
-//        }
-//
-//        m.delete()
-//    }
-//
-//    func testChainMultiplySuccess() throws {
-//        let m = try PicoLLM.init(deviceString: "best:0")
-//
-//        try self.downloadFileSync(url: weightsURL!) { (path, _) in
-//            try m.loadModelFile(filepath: path!)
-//
-//            let matrixDimensions = try m.matrixDimensions()
-//            var vector: [Float32] = Array(repeating: 1.0, count: Int(matrixDimensions.matrix_n))
-//
-//            let resultVector = try m.chainMultiply(vector: vector)
-//
-//            XCTAssert(vector.count == resultVector.count)
-//        }
-//
-//        m.delete()
-//    }
+    func testGenerate() throws {
+        var modelPath: String = ""
+        try downloadFileSync(url: modelURL!) { (path, _) in
+            modelPath = path!
+        }
+        
+        let m = try PicoLLM.init(accessKey: accessKey, modelPath: modelPath)
+        
+        let result = try m.generate(prompt: "Hello my name is", completionTokenLimit: 10)
+        XCTAssert(result.completion == " John and I am a student at XYZ school")
+        
+        m.delete()
+    }
 }

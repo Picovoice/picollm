@@ -1,0 +1,16 @@
+PODS:
+  - PicoLLM-iOS (1.0.0)
+
+DEPENDENCIES:
+  - PicoLLM-iOS (from `../../../binding/ios`)
+
+EXTERNAL SOURCES:
+  PicoLLM-iOS:
+    :path: "../../../binding/ios"
+
+SPEC CHECKSUMS:
+  PicoLLM-iOS: a1a469c28b2acce8e5b357e72a31cb66628a207a
+
+PODFILE CHECKSUM: fc431caf7bfc8be691650d6aa65097535692f18d
+
+COCOAPODS: 1.12.1

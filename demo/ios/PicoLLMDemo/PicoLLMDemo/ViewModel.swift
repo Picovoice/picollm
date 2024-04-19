@@ -13,31 +13,31 @@ import Combine
 class ViewModel: ObservableObject {
 
     private let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"
-    
+
     private var picollm: PicoLLM?
 
     private var timerTick = CFAbsoluteTimeGetCurrent()
     private var timerTock = CFAbsoluteTimeGetCurrent()
     private var numTokens = 0
-    
+
     @Published var promptText = ""
-    
+
     @Published var completionText = ""
     @Published var statsText = ""
-    
+
     @Published var errorMessage = ""
-    
+
     @Published var showFileImporter = false
     @Published var enableLoadModelButton = true
     @Published var enableGenerateButton = false
-    @Published var selectedModelUrl: URL? = nil
+    @Published var selectedModelUrl: URL?
 
     deinit {
-        if (picollm != nil) {
+        if picollm != nil {
             picollm!.delete()
         }
     }
-    
+
     public func extractModelFile() {
         showFileImporter = true
     }
@@ -46,14 +46,14 @@ class ViewModel: ObservableObject {
         completionText = "Loading Picollm..."
         enableLoadModelButton = false
         enableGenerateButton = false
-        
+
         let modelAccess = selectedModelUrl!.startAccessingSecurityScopedResource()
-        if (!modelAccess) {
+        if !modelAccess {
             errorMessage = "Cann't get permissions to access model file"
             enableLoadModelButton = true
             return
         }
-        
+
         DispatchQueue.global(qos: .userInitiated).async { [self] in
             do {
                 picollm = try PicoLLM(accessKey: ACCESS_KEY, modelPath: selectedModelUrl!.path)
@@ -67,31 +67,31 @@ class ViewModel: ObservableObject {
                     enableLoadModelButton = true
                 }
             }
-            
+
             DispatchQueue.main.async { [self] in
                 selectedModelUrl!.stopAccessingSecurityScopedResource()
             }
         }
     }
-    
+
     private func streamCallback(completion: String) {
         DispatchQueue.main.async { [self] in
             completionText += completion
-            
-            if (numTokens == 0) {
+
+            if numTokens == 0 {
                 timerTick = CFAbsoluteTimeGetCurrent()
             }
-            
+
             timerTock = CFAbsoluteTimeGetCurrent()
             numTokens += 1
         }
     }
-    
+
     public func generate() {
         enableGenerateButton = false
         completionText = promptText
         numTokens = 0
-        
+
         DispatchQueue.global(qos: .userInitiated).async { [self] in
             do {
                 let result = try picollm!.generate(
@@ -107,17 +107,17 @@ class ViewModel: ObservableObject {
                     enableLoadModelButton = true
                 }
             }
-            
+
             DispatchQueue.main.async { [self] in
                 enableGenerateButton = true
             }
         }
     }
-    
+
     public func updateStats(result: PicoLLMCompletion) {
         let secondsElapsed: Double = (timerTock - timerTick)
         let tokensPerSecond: Double = Double(numTokens) / secondsElapsed
-        
+
         statsText = """
 Usage:
 \t \(result.usage.promptTokens) prompt tokens
@@ -125,6 +125,6 @@ Usage:
 Perormance:
 \t \(tokensPerSecond) tokens per second
 """
-        
+
     }
 }

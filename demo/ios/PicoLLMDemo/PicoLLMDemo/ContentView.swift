@@ -11,7 +11,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject var viewModel = ViewModel()
-    
+
     let activeBlue = Color(red: 55/255, green: 125/255, blue: 1, opacity: 1)
     let dangerRed = Color(red: 1, green: 14/255, blue: 14/255, opacity: 1)
     let secondaryGrey = Color(red: 118/255, green: 131/255, blue: 142/255, opacity: 1)
@@ -39,7 +39,7 @@ struct ContentView: View {
                 )
                     .padding(12)
                     .disabled(isError || !viewModel.enableLoadModelButton)
-                
+
                 Button(action: viewModel.generate) {
                     Text("Generate")
                         .background(btnColor)
@@ -64,11 +64,11 @@ struct ContentView: View {
                 case .success(let files):
                     viewModel.selectedModelUrl = files[0]
                     viewModel.loadPicollm()
-                case .failure(_):
+                case .failure:
                     break
                 }
             }
-            
+
             Text(viewModel.completionText)
                 .frame(minWidth: 0, maxWidth: UIScreen.main.bounds.width - 50)
                 .padding(.vertical, 10)
@@ -77,7 +77,7 @@ struct ContentView: View {
                 .cornerRadius(.infinity)
 
             Spacer()
-            
+
             Text(viewModel.statsText)
                 .frame(minWidth: 0, maxWidth: UIScreen.main.bounds.width - 50)
                 .padding(.vertical, 10)

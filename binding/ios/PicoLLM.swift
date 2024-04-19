@@ -26,7 +26,7 @@ public enum PicoLLMEndpoint {
     case endOfSentence
     case completionTokenLimitReached
     case stopPhraseEncountered
-    
+
     public static func fromC(cEndpoint: pv_picollm_endpoint_t) -> PicoLLMEndpoint? {
         switch cEndpoint {
         case PV_PICOLLM_ENDPOINT_END_OF_SENTENCE:
@@ -88,9 +88,9 @@ public struct PicoLLMCompletion {
     }
 }
 
-private var streamCallbackFunc: ((String) -> Void)? = nil
+private var streamCallbackFunc: ((String) -> Void)?
 private func cStreamCallback (completion: UnsafePointer<CChar>?) {
-    if (streamCallbackFunc != nil) {
+    if streamCallbackFunc != nil {
         streamCallbackFunc!(String(cString: completion!))
     }
 }
@@ -158,7 +158,7 @@ public class PicoLLM {
             handle = nil
         }
     }
-    
+
     public func generate(
         prompt: String,
         completionTokenLimit: Int32 = -1,
@@ -221,7 +221,9 @@ public class PicoLLM {
                 token: String(cString: cCompletionToken.token.token),
                 logProb: cCompletionToken.token.log_prob)
             var topChoices = [PicoLLMToken]()
-            for cTopChoice in UnsafeBufferPointer(start: cCompletionToken.top_choices, count: Int(cCompletionToken.num_top_choices)) {
+            for cTopChoice in UnsafeBufferPointer(
+                    start: cCompletionToken.top_choices,
+                    count: Int(cCompletionToken.num_top_choices)) {
                 let topChoice = PicoLLMToken(
                     token: String(cString: cTopChoice.token),
                     logProb: cTopChoice.log_prob)

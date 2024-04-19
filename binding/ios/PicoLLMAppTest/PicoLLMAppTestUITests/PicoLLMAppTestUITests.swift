@@ -13,13 +13,13 @@ import XCTest
 import PicoLLM
 
 class PicoLLMAppTestUITests: BaseTest {
-    
+
     func testInitSuccess() throws {
         var modelPath: String = ""
         try downloadFileSync(url: modelURL!) { (path, _) in
             modelPath = path!
         }
-        
+
         let m = try PicoLLM.init(accessKey: accessKey, modelPath: modelPath)
         XCTAssert(PicoLLM.version != "")
         XCTAssert(try m.model() != "")
@@ -31,12 +31,12 @@ class PicoLLMAppTestUITests: BaseTest {
         try downloadFileSync(url: modelURL!) { (path, _) in
             modelPath = path!
         }
-        
+
         let m = try PicoLLM.init(accessKey: accessKey, modelPath: modelPath)
-        
+
         let result = try m.generate(prompt: "Hello my name is", completionTokenLimit: 10)
         XCTAssert(result.completion == " John and I am a student at XYZ school")
-        
+
         m.delete()
     }
 }

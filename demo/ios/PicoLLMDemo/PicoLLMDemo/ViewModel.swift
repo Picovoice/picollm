@@ -12,68 +12,119 @@ import Combine
 
 class ViewModel: ObservableObject {
 
-    private let MODEL_FILE_URL = URL(string: "${YOUR_MODEL_FILE_URL_HERE}")
+    private let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"
+    
+    private var picollm: PicoLLM?
 
-    private var picollm: PicoLLM!
-
-    private var timer: Timer?
-
+    private var timerTick = CFAbsoluteTimeGetCurrent()
+    private var timerTock = CFAbsoluteTimeGetCurrent()
+    private var numTokens = 0
+    
+    @Published var promptText = ""
+    
+    @Published var completionText = ""
+    @Published var statsText = ""
+    
     @Published var errorMessage = ""
-    @Published var statusText = ""
-
-    init() {
-        do {
-            try picollm = PicoLLM(deviceString: "gpu")
-        } catch let error as PicoLLMInvalidArgumentError {
-            errorMessage = error.localizedDescription
-        } catch {
-            errorMessage = "\(error)"
-        }
-    }
+    
+    @Published var showFileImporter = false
+    @Published var enableLoadModelButton = true
+    @Published var enableGenerateButton = false
+    @Published var selectedModelUrl: URL? = nil
 
     deinit {
-        picollm.delete()
-    }
-
-    func downloadFileSync(url: URL, completion: @escaping (String?, Error?) throws -> Void) throws {
-        let documentsUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let destinationUrl = documentsUrl.appendingPathComponent(url.lastPathComponent)
-
-        if FileManager().fileExists(atPath: destinationUrl.path) {
-            try completion(destinationUrl.path, nil)
-        } else if let dataFromURL = NSData(contentsOf: url) {
-            if dataFromURL.write(to: destinationUrl, atomically: true) {
-                try completion(destinationUrl.path, nil)
-            } else {
-                let error = NSError(domain: "Error saving file", code: 1001, userInfo: nil)
-                try completion(destinationUrl.path, error)
-            }
-        } else {
-            let error = NSError(domain: "Error downloading file ", code: 1002, userInfo: nil)
-            try completion(destinationUrl.path, error)
+        if (picollm != nil) {
+            picollm!.delete()
         }
     }
+    
+    public func extractModelFile() {
+        showFileImporter = true
+    }
 
-    public func start() {
-        do {
-            self.statusText = "Downloading model to device"
-            var filePath = ""
-            try downloadFileSync(url: MODEL_FILE_URL!) { (path, _ ) in
-                filePath = path!
-            }
-
-            self.statusText = "Loading model"
-            try self.picollm.loadModelFile(filepath: filePath)
-
-            self.statusText = "Running chain multiply"
-            let matrixDimensions = try self.picollm.matrixDimensions()
-            var vector: [Float32] = Array(repeating: 1.0, count: Int(matrixDimensions.matrix_n))
-
-            let resultVector = try self.picollm.chainMultiply(vector: vector)
-
-            self.statusText = "Done!"
-        } catch {
-            self.errorMessage = "Failed to run chain multiply."
+    public func loadPicollm() {
+        completionText = "Loading Picollm..."
+        enableLoadModelButton = false
+        enableGenerateButton = false
+        
+        let modelAccess = selectedModelUrl!.startAccessingSecurityScopedResource()
+        if (!modelAccess) {
+            errorMessage = "Cann't get permissions to access model file"
+            enableLoadModelButton = true
+            return
         }
+        
+        DispatchQueue.global(qos: .userInitiated).async { [self] in
+            do {
+                picollm = try PicoLLM(accessKey: ACCESS_KEY, modelPath: selectedModelUrl!.path)
+                DispatchQueue.main.async { [self] in
+                    completionText = "Enter prompt!"
+                    enableGenerateButton = true
+                }
+            } catch {
+                DispatchQueue.main.async { [self] in
+                    errorMessage = "\(error)"
+                    enableLoadModelButton = true
+                }
+            }
+            
+            DispatchQueue.main.async { [self] in
+                selectedModelUrl!.stopAccessingSecurityScopedResource()
+            }
+        }
+    }
+    
+    private func streamCallback(completion: String) {
+        DispatchQueue.main.async { [self] in
+            completionText += completion
+            
+            if (numTokens == 0) {
+                timerTick = CFAbsoluteTimeGetCurrent()
+            }
+            
+            timerTock = CFAbsoluteTimeGetCurrent()
+            numTokens += 1
+        }
+    }
+    
+    public func generate() {
+        enableGenerateButton = false
+        completionText = promptText
+        numTokens = 0
+        
+        DispatchQueue.global(qos: .userInitiated).async { [self] in
+            do {
+                let result = try picollm!.generate(
+                    prompt: promptText,
+                    completionTokenLimit: 20,
+                    streamCallback: streamCallback)
+                DispatchQueue.main.async { [self] in
+                    updateStats(result: result)
+                }
+            } catch {
+                DispatchQueue.main.async { [self] in
+                    errorMessage = "\(error)"
+                    enableLoadModelButton = true
+                }
+            }
+            
+            DispatchQueue.main.async { [self] in
+                enableGenerateButton = true
+            }
+        }
+    }
+    
+    public func updateStats(result: PicoLLMCompletion) {
+        let secondsElapsed: Double = (timerTock - timerTick)
+        let tokensPerSecond: Double = Double(numTokens) / secondsElapsed
+        
+        statsText = """
+Usage:
+\t \(result.usage.promptTokens) prompt tokens
+\t \(result.usage.completionTokens) completion tokens
+Perormance:
+\t \(tokensPerSecond) tokens per second
+"""
+        
     }
 }

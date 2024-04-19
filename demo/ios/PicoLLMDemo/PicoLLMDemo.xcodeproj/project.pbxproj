@@ -11,7 +11,7 @@
 		02A1194B268D39A700A2AC99 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A1194A268D39A700A2AC99 /* ContentView.swift */; };
 		02A1194D268D39AB00A2AC99 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02A1194C268D39AB00A2AC99 /* Assets.xcassets */; };
 		02A1195F268D3FD600A2AC99 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A1195E268D3FD600A2AC99 /* ViewModel.swift */; };
-		4A00B7EF2D4C1FA9D1C474E1 /* libPods-PicoLLMDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C8FD0A21A7AA22B5EB1EB2D /* libPods-PicoLLMDemo.a */; };
+		CBF7B4B3EDD3801404643F1B /* libPods-PicoLLMDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F28B40097630AC2A6F1FB1F3 /* libPods-PicoLLMDemo.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,12 +21,9 @@
 		02A1194C268D39AB00A2AC99 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		02A11951268D39AB00A2AC99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		02A1195E268D3FD600A2AC99 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
-		25220F02E797CC78BF7E6619 /* libPods-PicoLLMDemoUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PicoLLMDemoUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		544345CBBDA09211F4620F3E /* Pods-PicoLLMDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMDemo.release.xcconfig"; path = "Target Support Files/Pods-PicoLLMDemo/Pods-PicoLLMDemo.release.xcconfig"; sourceTree = "<group>"; };
-		72F8162D9843C0A1C546BE64 /* Pods-PicoLLMDemoUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMDemoUITests.debug.xcconfig"; path = "Target Support Files/Pods-PicoLLMDemoUITests/Pods-PicoLLMDemoUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		7C8FD0A21A7AA22B5EB1EB2D /* libPods-PicoLLMDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PicoLLMDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		8DC160B174C3E4AE3F56942D /* Pods-PicoLLMDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMDemo.debug.xcconfig"; path = "Target Support Files/Pods-PicoLLMDemo/Pods-PicoLLMDemo.debug.xcconfig"; sourceTree = "<group>"; };
-		D2D9DCA10D9D1AB213098AEF /* Pods-PicoLLMDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-PicoLLMDemoUITests/Pods-PicoLLMDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
+		657C5A071A7628ECDC714D25 /* Pods-PicoLLMDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMDemo.debug.xcconfig"; path = "Target Support Files/Pods-PicoLLMDemo/Pods-PicoLLMDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		687212B5149CCA100470035C /* Pods-PicoLLMDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMDemo.release.xcconfig"; path = "Target Support Files/Pods-PicoLLMDemo/Pods-PicoLLMDemo.release.xcconfig"; sourceTree = "<group>"; };
+		F28B40097630AC2A6F1FB1F3 /* libPods-PicoLLMDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PicoLLMDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,7 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A00B7EF2D4C1FA9D1C474E1 /* libPods-PicoLLMDemo.a in Frameworks */,
+				CBF7B4B3EDD3801404643F1B /* libPods-PicoLLMDemo.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,8 +43,8 @@
 			children = (
 				02A11947268D39A700A2AC99 /* PicoLLMDemo */,
 				02A11946268D39A700A2AC99 /* Products */,
-				02A11957268D39D100A2AC99 /* Frameworks */,
 				8DB92FF3DC81AB04D3FF7242 /* Pods */,
+				8C457DABA377FC98D7F4897A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -71,11 +68,10 @@
 			path = PicoLLMDemo;
 			sourceTree = "<group>";
 		};
-		02A11957268D39D100A2AC99 /* Frameworks */ = {
+		8C457DABA377FC98D7F4897A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7C8FD0A21A7AA22B5EB1EB2D /* libPods-PicoLLMDemo.a */,
-				25220F02E797CC78BF7E6619 /* libPods-PicoLLMDemoUITests.a */,
+				F28B40097630AC2A6F1FB1F3 /* libPods-PicoLLMDemo.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -83,10 +79,8 @@
 		8DB92FF3DC81AB04D3FF7242 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				8DC160B174C3E4AE3F56942D /* Pods-PicoLLMDemo.debug.xcconfig */,
-				544345CBBDA09211F4620F3E /* Pods-PicoLLMDemo.release.xcconfig */,
-				72F8162D9843C0A1C546BE64 /* Pods-PicoLLMDemoUITests.debug.xcconfig */,
-				D2D9DCA10D9D1AB213098AEF /* Pods-PicoLLMDemoUITests.release.xcconfig */,
+				657C5A071A7628ECDC714D25 /* Pods-PicoLLMDemo.debug.xcconfig */,
+				687212B5149CCA100470035C /* Pods-PicoLLMDemo.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -98,11 +92,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 02A11954268D39AB00A2AC99 /* Build configuration list for PBXNativeTarget "PicoLLMDemo" */;
 			buildPhases = (
-				9E7C8E83BA330F7017CD5C56 /* [CP] Check Pods Manifest.lock */,
+				23B919BCB2263EC2D4221374 /* [CP] Check Pods Manifest.lock */,
 				02A11941268D39A700A2AC99 /* Sources */,
 				02A11942268D39A700A2AC99 /* Frameworks */,
 				02A11943268D39A700A2AC99 /* Resources */,
-				B387D574F16D312B6FFB5B42 /* [CP] Embed Pods Frameworks */,
+				D8CEF87532270DCEEAF4B6EC /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -157,7 +151,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		9E7C8E83BA330F7017CD5C56 /* [CP] Check Pods Manifest.lock */ = {
+		23B919BCB2263EC2D4221374 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -179,7 +173,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		B387D574F16D312B6FFB5B42 /* [CP] Embed Pods Frameworks */ = {
+		D8CEF87532270DCEEAF4B6EC /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -263,7 +257,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -318,7 +312,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -330,7 +324,7 @@
 		};
 		02A11955268D39AB00A2AC99 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8DC160B174C3E4AE3F56942D /* Pods-PicoLLMDemo.debug.xcconfig */;
+			baseConfigurationReference = 657C5A071A7628ECDC714D25 /* Pods-PicoLLMDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -339,7 +333,7 @@
 				DEVELOPMENT_TEAM = EU9HUJJU2X;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = PicoLLMDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -353,7 +347,7 @@
 		};
 		02A11956268D39AB00A2AC99 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 544345CBBDA09211F4620F3E /* Pods-PicoLLMDemo.release.xcconfig */;
+			baseConfigurationReference = 687212B5149CCA100470035C /* Pods-PicoLLMDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -362,7 +356,7 @@
 				DEVELOPMENT_TEAM = EU9HUJJU2X;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = PicoLLMDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

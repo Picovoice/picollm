@@ -1,0 +1,7 @@
+framework module PvPicoLLM {
+  umbrella header "PvPicoLLM.h"
+  header "pv_picollm.h"
+  header "picovoice.h"
+  export *
+  module * {export *}
+}

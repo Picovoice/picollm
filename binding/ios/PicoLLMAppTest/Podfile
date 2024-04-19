@@ -1,0 +1,10 @@
+source 'https://cdn.cocoapods.org/'
+platform :ios, '13.0'
+
+target 'PicoLLMAppTest' do
+  pod 'PicoLLM-iOS', :path => '../'
+end
+
+target 'PicoLLMAppTestUITests' do
+  pod 'PicoLLM-iOS', :path => '../'
+end

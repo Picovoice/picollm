@@ -1,0 +1,6 @@
+source 'https://cdn.cocoapods.org/'
+platform :ios, '14.0'
+
+target 'PicoLLMDemo' do
+  pod 'PicoLLM-iOS', :path => '../../../binding/ios'
+end

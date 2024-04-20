@@ -24,15 +24,12 @@ const X86_64 = 'x64';
 const ARM_32 = 'arm';
 const ARM_64 = 'arm64';
 
-const PLATFORM_JETSON = 'jetson';
 const PLATFORM_LINUX = 'linux';
 const PLATFORM_MAC = 'mac';
 const PLATFORM_RASPBERRY_PI = 'raspberry-pi';
 const PLATFORM_WINDOWS = 'windows';
 
 const ARM_CPU_64 = '-aarch64';
-const ARM_CPU_CORTEX_A53 = 'cortex-a53';
-const ARM_CPU_CORTEX_A57 = 'cortex-a57';
 const ARM_CPU_CORTEX_A72 = 'cortex-a72';
 const ARM_CPU_CORTEX_A76 = 'cortex-a76';
 
@@ -57,14 +54,6 @@ SYSTEM_TO_LIBRARY_PATH.set(
   `${PLATFORM_LINUX}/x86_64/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
-  `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A53}`,
-  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A53}/pv_picollm.node`
-);
-SYSTEM_TO_LIBRARY_PATH.set(
-  `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A53}${ARM_CPU_64}`,
-  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A53}${ARM_CPU_64}/pv_picollm.node`
-);
-SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A72}`,
   `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A72}/pv_picollm.node`
 );
@@ -79,10 +68,6 @@ SYSTEM_TO_LIBRARY_PATH.set(
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A76}${ARM_CPU_64}`,
   `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A76}${ARM_CPU_64}/pv_picollm.node`
-);
-SYSTEM_TO_LIBRARY_PATH.set(
-  `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A57}${ARM_CPU_64}`,
-  `${PLATFORM_JETSON}/${ARM_CPU_CORTEX_A57}${ARM_CPU_64}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_WINDOWS}/${X86_64}`,
@@ -107,12 +92,9 @@ function getCpuPart(): string {
 function getLinuxPlatform(): string {
   const cpuPart = getCpuPart();
   switch (cpuPart) {
-    case '0xd03':
     case '0xd08':
     case '0xd0b':
       return PLATFORM_RASPBERRY_PI;
-    case '0xd07':
-      return PLATFORM_JETSON;
     default:
       throw new PicoLLMRuntimeError(`Unsupported CPU: '${cpuPart}'`);
   }
@@ -126,10 +108,6 @@ function getLinuxMachine(arch: string): string {
 
   const cpuPart = getCpuPart();
   switch (cpuPart) {
-    case '0xd03':
-      return ARM_CPU_CORTEX_A53 + archInfo;
-    case '0xd07':
-      return ARM_CPU_CORTEX_A57 + archInfo;
     case '0xd08':
       return ARM_CPU_CORTEX_A72 + archInfo;
     case '0xd0b':

@@ -15,19 +15,7 @@ const ncp = require("ncp").ncp;
 
 console.log("Copying library files...");
 
-// Library & Model
-mkdirp.sync("./lib/common");
-ncp(
-  "../../lib/common/picollm_params.pv",
-  "./lib/common/picollm_params.pv",
-  function (err) {
-    if (err) {
-      return console.error(err);
-    }
-    console.log("../../lib/common copied.");
-  }
-);
-
+// Library
 ncp("../../lib/node", "./lib", function (err) {
   if (err) {
     return console.error(err);

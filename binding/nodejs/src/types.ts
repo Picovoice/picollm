@@ -7,35 +7,51 @@
   specific language governing permissions and limitations under the License.
 */
 
-export type PicoLLMWord = {
-  /** Transcribed word. */
-  word: string;
-  /** Start of word in seconds. */
-  startSec: number;
-  /** End of word in seconds. */
-  endSec: number;
-  /** Transcription confidence. It is a number within [0, 1]. */
-  confidence: number;
-  /** The speaker tag is `-1` if diarization is not enabled during initialization
-   * otherwise, it's a non-negative integer identifying unique speakers, with `0` reserved
-   * for unknown speakers */
-  speakerTag: number;
+export type PicoLLMUsage = {
+  promptTokens: number;
+  completionTokens: number;
 };
 
-export type PicoLLMTranscript = {
-  /** Inferred transcription. */
-  transcript: string;
-  /** Transcribed words and their associated metadata. */
-  words: PicoLLMWord[];
+export enum PicoLLMEndpoint = {
+  EndOfSentence = 0,
+  CompletionTokenLimitReached = 1,
+  StopPhraseEncountered = 2,
 };
+
+export type PicoLLMToken = {
+  token: string;
+  logProb: float;
+};
+
+export type PicoLLMCompletionToken = {
+  token: PicoLLMToken;
+  topChoices: PicoLLMToken[];
+};
+
+export type PicoLLMCompletion = {
+  usage: PicoLLMUsage;
+  endpoint: PicoLLMEndpoint;
+  completionTokens: PicoLLMCompletionToken[];
+  completion: string;
+};
+
+export type PicoLLMGenerateOptions = {
+  completionTokenLimit?: number;
+  stopPhrases?: string[];
+  seed?: number;
+  presencePenalty?: float;
+  frequencyPenalty?: float;
+  temperature?: float;
+  topP?: float;
+  numTopChoices?: number;
+  streamCallback?: (string) => void;
+}
 
 export type PicoLLMInitOptions = {
-  enableAutomaticPunctuation?: boolean;
-  enableDiarization?: boolean;
+  device?: string;
 };
 
 export type PicoLLMInputOptions = {
-  modelPath?: string;
   libraryPath?: string;
 };
 

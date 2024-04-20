@@ -19,29 +19,46 @@ import {
   pvStatusToException,
 } from './errors';
 
-import { PicoLLMWord, PicoLLMTranscript, PicoLLMOptions } from './types';
+import {
+  PicoLLMUsage,
+  PicoLLMEndpoint,
+  PicoLLMToken,
+  PicoLLMCompletionToken,
+  PicoLLMCompletion,
+  PicoLLMOptions,
+} from './types';
 
 import { getSystemLibraryPath } from './platforms';
 
-const DEFAULT_MODEL_PATH = '../lib/common/picollm_params.pv';
-
-const VALID_AUDIO_EXTENSIONS = [
-  '.flac',
-  '.mp3',
-  '.ogg',
-  '.opus',
-  '.vorbis',
-  '.wav',
-  '.webm',
-  '.mp4',
-  '.m4a',
-  '.3gp',
-];
-
-type PicoLLMHandleAndStatus = { handle: any; status: PvStatus };
+type PicoLLMInitResult = {
+  handle: any;
+  status: PvStatus
+};
+type PicoLLMGenerateResult = {
+  completion: PicoLLMCompletion;
+  status: PvStatus;
+};
+type PicoLLMTokenizeResult = {
+  tokens: number[];
+  status: PvStatus;
+};
+type PicoLLMForwardResult = {
+  logits: number[];
+  status: PvStatus;
+};
+type PicoLLMModelResult = {
+  model: string;
+  status: PvStatus;
+};
+type PicoLLMContextLengthResult = {
+  contextLength: string;
+  status: PvStatus;
+};
+type PicoLLMHardwareDevicesResult = {
+  hardwareDevices: string[];
+  status: PvStatus;
+};
 type PicoLLMResult = {
-  transcript: string;
-  words: PicoLLMWord[];
   status: PvStatus;
 };
 
@@ -57,20 +74,12 @@ export class PicoLLM {
   private _handle: any;
 
   private readonly _version: string;
-  private readonly _sampleRate: number;
+  private readonly _maxTopChoices: number;
 
   /**
    * Creates an instance of PicoLLM.
-   * @param {string} accessKey AccessKey obtained from Picovoice Console (https://console.picovoice.ai/).
-   * @param {PicoLLMOptions} options Optional configuration arguments.
-   * @param {string} options.modelPath The path to save and use the model from (.pv extension)
-   * @param {string} options.libraryPath the path to the PicoLLM dynamic library (.node extension)
-   * @param {boolean} options.enableAutomaticPunctuation Flag to enable automatic punctuation insertion.
-   * @param {boolean} options.enableDiarization Flag to enable speaker diarization, which allows PicoLLM to
-   * differentiate speakers as part of the transcription process. Word metadata will include a `speakerTag`
-   * to identify unique speakers.
    */
-  constructor(accessKey: string, options: PicoLLMOptions = {}) {
+  constructor(accessKey: string, modelPath: string, options: PicoLLMOptions = {}) {
     if (
       accessKey === null ||
       accessKey === undefined ||
@@ -80,10 +89,8 @@ export class PicoLLM {
     }
 
     const {
-      modelPath = path.resolve(__dirname, DEFAULT_MODEL_PATH),
       libraryPath = getSystemLibraryPath(),
-      enableAutomaticPunctuation = false,
-      enableDiarization = false,
+      device = "best",
     } = options;
 
     if (!fs.existsSync(libraryPath)) {
@@ -101,54 +108,41 @@ export class PicoLLM {
     const pvPicoLLM = require(libraryPath); // eslint-disable-line
     this._pvPicoLLM = pvPicoLLM;
 
-    let picollmHandleAndStatus: PicoLLMHandleAndStatus | null = null;
+    let picoLLMInitResult: PicoLLMInitResult | null = null;
     try {
       pvPicoLLM.set_sdk('nodejs');
 
-      picollmHandleAndStatus = pvPicoLLM.init(
+      picoLLMInitResult = pvPicoLLM.init(
         accessKey,
         modelPath,
-        enableAutomaticPunctuation,
-        enableDiarization
+        device
       );
     } catch (err: any) {
       pvStatusToException(<PvStatus>err.code, err);
     }
 
-    const status = picollmHandleAndStatus!.status;
+    const status = picoLLMInitResult!.status;
     if (status !== PvStatus.SUCCESS) {
       this.handlePvStatus(status, 'PicoLLM failed to initialize');
     }
 
-    this._handle = picollmHandleAndStatus!.handle;
-    this._sampleRate = pvPicoLLM.sample_rate();
+    this._handle = picoLLMInitResult!.handle;
+    this._maxTopChoices = pvPicoLLM.max_top_choices();
     this._version = pvPicoLLM.version();
   }
 
-  /**
-   * @returns the audio sampling rate accepted by the process function
-   * @see {@link process}
-   */
-  get sampleRate(): number {
-    return this._sampleRate;
+  get maxTopChoices(): number {
+    return this._maxTopChoices;
   }
 
-  /**
-   * @returns the version of the PicoLLM engine
-   */
   get version(): string {
     return this._version;
   }
 
   /**
    * Processes a given audio data and returns its transcription.
-   *
-   * @param {Int16Array} pcm Audio data. The audio needs to have a sample rate equal to `PicoLLM.sampleRate` and be 16-bit linearly-encoded.
-   * This function operates on single-channel audio. If you wish to process data in a different
-   * sample rate or format consider using `PicoLLM.processFile()`.
-   * @returns {PicoLLMTranscript} PicoLLMTranscript object which contains the transcription results of the engine.
    */
-  process(pcm: Int16Array): PicoLLMTranscript {
+  generate(prompt: string, options: PicoLLMGenerateOptions = {}): PicoLLMTranscript {
     if (
       this._handle === 0 ||
       this._handle === null ||
@@ -157,83 +151,49 @@ export class PicoLLM {
       throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
     }
 
-    if (pcm === undefined || pcm === null) {
+    const {
+      completionTokenLimit = -1,
+      stopPhrases = null,
+      seed = -1,
+      presencePenalty = 0.0,
+      frequencyPenalty = 0.0,
+      temperature = 0.0,
+      topP = 1,
+      numTopChoices = 0,
+      streamCallback = null,
+    } = options;
+
+
+    if (prompt === undefined || prompt === null) {
       throw new PicoLLMInvalidArgumentError(
-        `PCM array provided to 'PicoLLM.process()' is undefined or null`
-      );
-    } else if (pcm.length === 0) {
-      throw new PicoLLMInvalidArgumentError(
-        `PCM array provided to 'PicoLLM.process()' is empty`
+        `prompt provided to 'PicoLLM.generate()' is undefined or null`
       );
     }
 
-    let picollmResult: PicoLLMResult | null = null;
+    let picollmGenerateResult: PicoLLMGenerateResult | null = null;
     try {
-      picollmResult = this._pvPicoLLM.process(this._handle, pcm, pcm.length);
+      picollmGenerateResult = this._pvPicoLLM.generate(
+        this._handle,
+        prompt,
+        completionTokenLimit,
+        stopPhrases,
+        seed,
+        presencePenalty,
+        frequencyPenalty,
+        temperature,
+        topP,
+        numTopChoices,
+        streamCallback);
     } catch (err: any) {
       pvStatusToException(<PvStatus>err.code, err);
     }
 
-    const status = picollmResult!.status;
+    const status = picollmGenerateResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to process the audio data');
+      this.handlePvStatus(status, 'PicoLLM failed to generate');
     }
 
-    return {
-      transcript: picollmResult!.transcript,
-      words: picollmResult!.words,
-    };
-  }
-
-  /**
-   * Processes a given audio file and returns its transcription.
-   *
-   * @param {string} audioPath Absolute path to the audio file.
-   * The file needs to have a sample rate equal to or greater than `.sampleRate`.
-   * The supported formats are: `FLAC`, `MP3`, `Ogg`, `WAV`, `WebM`, `MP4/m4a (AAC)`, and `3gp (AMR)`
-   * @returns {PicoLLMTranscript} object which contains the transcription results of the engine.
-   */
-  processFile(audioPath: string): PicoLLMTranscript {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
-
-    if (!fs.existsSync(audioPath)) {
-      throw new PicoLLMInvalidArgumentError(
-        `Could not find the audio file at '${audioPath}'`
-      );
-    }
-
-    let picollmResult: PicoLLMResult | null = null;
-    try {
-      picollmResult = this._pvPicoLLM.process_file(this._handle, audioPath);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
-
-    const status = picollmResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      if (
-        status === PvStatus.INVALID_ARGUMENT &&
-        !VALID_AUDIO_EXTENSIONS.includes(path.extname(audioPath.toLowerCase()))
-      ) {
-        pvStatusToException(
-          status,
-          `Specified file with extension '${path.extname(
-            audioPath.toLowerCase()
-          )}' is not supported`
-        );
-      }
-      this.handlePvStatus(status, 'PicoLLM failed to process the audio file');
-    }
-    return {
-      transcript: picollmResult!.transcript,
-      words: picollmResult!.words,
-    };
+    return picollmGenerateResult!.completion;
   }
 
   /**

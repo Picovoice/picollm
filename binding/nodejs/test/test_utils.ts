@@ -31,7 +31,7 @@ export function getModelPathByLanguage(language: string): string {
   );
 }
 
-export function getAudioFile(audioFile: string): string {
+export function getModelFile(modelFile: string): string {
   return path.join(ROOT_DIR, 'resources/audio_samples', audioFile);
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@picovoice/picollm-node",
-  "version": "2.0.2",
+  "version": "0.0.1",
   "description": "Picovoice PicoLLM Node.js binding",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",

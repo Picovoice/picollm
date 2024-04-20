@@ -25,6 +25,7 @@ import {
   PicoLLMToken,
   PicoLLMCompletionToken,
   PicoLLMCompletion,
+  PicoLLMGenerateOptions,
   PicoLLMOptions,
 } from './types';
 
@@ -142,7 +143,7 @@ export class PicoLLM {
   /**
    * Processes a given audio data and returns its transcription.
    */
-  generate(prompt: string, options: PicoLLMGenerateOptions = {}): PicoLLMTranscript {
+  generate(prompt: string, options: PicoLLMGenerateOptions = {}): PicoLLMCompletion {
     if (
       this._handle === 0 ||
       this._handle === null ||

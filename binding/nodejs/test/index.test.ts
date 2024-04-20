@@ -18,58 +18,6 @@ const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]
   .split('--access_key=')[1];
 
-const testPicoLLMGenerate = (
-  language: string,
-  transcript: string,
-  enableAutomaticPunctuation: boolean,
-  enableDiarization: boolean,
-  errorRate: number,
-  audioFile: string,
-  words: PicoLLMWord[]
-) => {
-  const modelPath = getModelPathByLanguage(language);
-  const pcm = loadPcm(audioFile);
-
-  let picollmEngine = new PicoLLM(ACCESS_KEY, {
-    modelPath,
-    enableAutomaticPunctuation,
-    enableDiarization,
-  });
-
-  let res = picollmEngine.process(pcm);
-
-  expect(
-    characterErrorRate(res.transcript, transcript) < errorRate
-  ).toBeTruthy();
-  validateMetadata(res.words, words, enableDiarization);
-
-  picollmEngine.release();
-};
-
-const testPicoLLMProcessFile = (
-  language: string,
-  transcript: string,
-  enableAutomaticPunctuation: boolean,
-  enableDiarization: boolean,
-  errorRate: number,
-  audioFile: string,
-  words: PicoLLMWord[]
-) => {
-  const modelPath = getModelPathByLanguage(language);
-
-
-
-  const waveFilePath = getAudioFile(audioFile);
-  let res = picollmEngine.processFile(waveFilePath);
-
-  expect(
-    characterErrorRate(res.transcript, transcript) < errorRate
-  ).toBeTruthy();
-  validateMetadata(res.words, words, enableDiarization);
-
-  picollmEngine.release();
-};
-
 describe('successful processes', () => {
   test('generate', () => {
     let picollmEngine = new PicoLLM(

@@ -28,11 +28,13 @@ import {
 } from './errors';
 
 import {
+  PicoLLMUsage,
+  PicoLLMEndpoint,
+  PicoLLMToken,
+  PicoLLMCompletionToken,
+  PicoLLMCompletion,
+  PicoLLMGenerateOptions,
   PicoLLMOptions,
-  PicoLLMInitOptions,
-  PicoLLMInputOptions,
-  PicoLLMWord,
-  PicoLLMTranscript,
 } from './types';
 
 export {
@@ -41,10 +43,7 @@ export {
   PicoLLMActivationLimitReachedError,
   PicoLLMActivationRefusedError,
   PicoLLMActivationThrottledError,
-  PicoLLMOptions,
   PicoLLMError,
-  PicoLLMInitOptions,
-  PicoLLMInputOptions,
   PicoLLMInvalidArgumentError,
   PicoLLMInvalidStateError,
   PicoLLMIOError,
@@ -52,6 +51,11 @@ export {
   PicoLLMOutOfMemoryError,
   PicoLLMRuntimeError,
   PicoLLMStopIterationError,
-  PicoLLMTranscript,
-  PicoLLMWord,
+  PicoLLMUsage,
+  PicoLLMEndpoint,
+  PicoLLMToken,
+  PicoLLMCompletionToken,
+  PicoLLMCompletion,
+  PicoLLMGenerateOptions,
+  PicoLLMOptions,
 };

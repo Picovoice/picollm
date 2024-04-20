@@ -12,7 +12,7 @@ export type PicoLLMUsage = {
   completionTokens: number;
 };
 
-export enum PicoLLMEndpoint = {
+export enum PicoLLMEndpoint {
   EndOfSentence = 0,
   CompletionTokenLimitReached = 1,
   StopPhraseEncountered = 2,
@@ -20,7 +20,7 @@ export enum PicoLLMEndpoint = {
 
 export type PicoLLMToken = {
   token: string;
-  logProb: float;
+  logProb: number;
 };
 
 export type PicoLLMCompletionToken = {
@@ -39,12 +39,12 @@ export type PicoLLMGenerateOptions = {
   completionTokenLimit?: number;
   stopPhrases?: string[];
   seed?: number;
-  presencePenalty?: float;
-  frequencyPenalty?: float;
-  temperature?: float;
-  topP?: float;
+  presencePenalty?: number;
+  frequencyPenalty?: number;
+  temperature?: number;
+  topP?: number;
   numTopChoices?: number;
-  streamCallback?: (string) => void;
+  streamCallback?: (completion: string) => void;
 }
 
 export type PicoLLMInitOptions = {

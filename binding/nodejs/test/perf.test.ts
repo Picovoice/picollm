@@ -10,7 +10,7 @@
 //
 'use strict';
 
-import { Leopard } from '../src';
+import { PicoLLM } from '../src';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
 
@@ -41,10 +41,10 @@ describe('Performance', () => {
     let perfResults = [];
     for (let i = 0; i < NUM_TEST_ITERATIONS; i++) {
       const before = performance.now();
-      let leopardEngine = new Leopard(ACCESS_KEY);
+      let picollmEngine = new PicoLLM(ACCESS_KEY);
       let initTime = performance.now() - before;
 
-      leopardEngine.release();
+      picollmEngine.release();
 
       if (i > 0) {
         perfResults.push(initTime);
@@ -61,19 +61,19 @@ describe('Performance', () => {
 
   test('proc performance', () => {
     const waveFilePath = path.join(__dirname, WAV_PATH);
-    let leopardEngine = new Leopard(ACCESS_KEY);
+    let picollmEngine = new PicoLLM(ACCESS_KEY);
 
     let perfResults = [];
     for (let i = 0; i < NUM_TEST_ITERATIONS; i++) {
       const before = performance.now();
-      leopardEngine.processFile(waveFilePath);
+      picollmEngine.processFile(waveFilePath);
       let procTime = performance.now() - before;
 
       if (i > 0) {
         perfResults.push(procTime);
       }
     }
-    leopardEngine.release();
+    picollmEngine.release();
 
     let avgPerfMs =
       perfResults.reduce((acc, a) => acc + a, 0) / NUM_TEST_ITERATIONS;

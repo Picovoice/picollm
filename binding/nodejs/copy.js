@@ -18,8 +18,8 @@ console.log("Copying library files...");
 // Library & Model
 mkdirp.sync("./lib/common");
 ncp(
-  "../../lib/common/leopard_params.pv",
-  "./lib/common/leopard_params.pv",
+  "../../lib/common/picollm_params.pv",
+  "./lib/common/picollm_params.pv",
   function (err) {
     if (err) {
       return console.error(err);

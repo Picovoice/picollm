@@ -1,7 +1,7 @@
 {
-  "name": "@picovoice/leopard-node",
+  "name": "@picovoice/picollm-node",
   "version": "2.0.2",
-  "description": "Picovoice Leopard Node.js binding",
+  "description": "Picovoice PicoLLM Node.js binding",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Picovoice/leopard.git",
+    "url": "git+https://github.com/Picovoice/picollm.git",
     "directory": "binding/nodejs"
   },
   "keywords": [
@@ -33,9 +33,9 @@
   "author": "Picovoice Inc.",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Picovoice/leopard/issues"
+    "url": "https://github.com/Picovoice/picollm/issues"
   },
-  "homepage": "https://picovoice.ai/platform/leopard/",
+  "homepage": "https://picovoice.ai/platform/picollm/",
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@types/node": "^18.11.9",

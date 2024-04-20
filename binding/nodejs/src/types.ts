@@ -7,7 +7,7 @@
   specific language governing permissions and limitations under the License.
 */
 
-export type LeopardWord = {
+export type PicoLLMWord = {
   /** Transcribed word. */
   word: string;
   /** Start of word in seconds. */
@@ -22,21 +22,21 @@ export type LeopardWord = {
   speakerTag: number;
 };
 
-export type LeopardTranscript = {
+export type PicoLLMTranscript = {
   /** Inferred transcription. */
   transcript: string;
   /** Transcribed words and their associated metadata. */
-  words: LeopardWord[];
+  words: PicoLLMWord[];
 };
 
-export type LeopardInitOptions = {
+export type PicoLLMInitOptions = {
   enableAutomaticPunctuation?: boolean;
   enableDiarization?: boolean;
 };
 
-export type LeopardInputOptions = {
+export type PicoLLMInputOptions = {
   modelPath?: string;
   libraryPath?: string;
 };
 
-export type LeopardOptions = LeopardInitOptions & LeopardInputOptions;
+export type PicoLLMOptions = PicoLLMInitOptions & PicoLLMInputOptions;

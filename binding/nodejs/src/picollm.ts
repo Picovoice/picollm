@@ -14,16 +14,16 @@ import * as path from 'path';
 
 import PvStatus from './pv_status_t';
 import {
-  LeopardInvalidArgumentError,
-  LeopardInvalidStateError,
+  PicoLLMInvalidArgumentError,
+  PicoLLMInvalidStateError,
   pvStatusToException,
 } from './errors';
 
-import { LeopardWord, LeopardTranscript, LeopardOptions } from './types';
+import { PicoLLMWord, PicoLLMTranscript, PicoLLMOptions } from './types';
 
 import { getSystemLibraryPath } from './platforms';
 
-const DEFAULT_MODEL_PATH = '../lib/common/leopard_params.pv';
+const DEFAULT_MODEL_PATH = '../lib/common/picollm_params.pv';
 
 const VALID_AUDIO_EXTENSIONS = [
   '.flac',
@@ -38,21 +38,21 @@ const VALID_AUDIO_EXTENSIONS = [
   '.3gp',
 ];
 
-type LeopardHandleAndStatus = { handle: any; status: PvStatus };
-type LeopardResult = {
+type PicoLLMHandleAndStatus = { handle: any; status: PvStatus };
+type PicoLLMResult = {
   transcript: string;
-  words: LeopardWord[];
+  words: PicoLLMWord[];
   status: PvStatus;
 };
 
 /**
- * Node.js binding for Leopard speech-to-text engine.
+ * Node.js binding for PicoLLM speech-to-text engine.
  *
- * Performs the calls to the Leopard node library. Does some basic parameter validation to prevent
+ * Performs the calls to the PicoLLM node library. Does some basic parameter validation to prevent
  * errors occurring in the library layer. Provides clearer error messages in native JavaScript.
  */
-export class Leopard {
-  private _pvLeopard: any;
+export class PicoLLM {
+  private _pvPicoLLM: any;
 
   private _handle: any;
 
@@ -60,23 +60,23 @@ export class Leopard {
   private readonly _sampleRate: number;
 
   /**
-   * Creates an instance of Leopard.
+   * Creates an instance of PicoLLM.
    * @param {string} accessKey AccessKey obtained from Picovoice Console (https://console.picovoice.ai/).
-   * @param {LeopardOptions} options Optional configuration arguments.
+   * @param {PicoLLMOptions} options Optional configuration arguments.
    * @param {string} options.modelPath The path to save and use the model from (.pv extension)
-   * @param {string} options.libraryPath the path to the Leopard dynamic library (.node extension)
+   * @param {string} options.libraryPath the path to the PicoLLM dynamic library (.node extension)
    * @param {boolean} options.enableAutomaticPunctuation Flag to enable automatic punctuation insertion.
-   * @param {boolean} options.enableDiarization Flag to enable speaker diarization, which allows Leopard to
+   * @param {boolean} options.enableDiarization Flag to enable speaker diarization, which allows PicoLLM to
    * differentiate speakers as part of the transcription process. Word metadata will include a `speakerTag`
    * to identify unique speakers.
    */
-  constructor(accessKey: string, options: LeopardOptions = {}) {
+  constructor(accessKey: string, options: PicoLLMOptions = {}) {
     if (
       accessKey === null ||
       accessKey === undefined ||
       accessKey.length === 0
     ) {
-      throw new LeopardInvalidArgumentError(`No AccessKey provided to Leopard`);
+      throw new PicoLLMInvalidArgumentError(`No AccessKey provided to PicoLLM`);
     }
 
     const {
@@ -87,25 +87,25 @@ export class Leopard {
     } = options;
 
     if (!fs.existsSync(libraryPath)) {
-      throw new LeopardInvalidArgumentError(
+      throw new PicoLLMInvalidArgumentError(
         `File not found at 'libraryPath': ${libraryPath}`
       );
     }
 
     if (!fs.existsSync(modelPath)) {
-      throw new LeopardInvalidArgumentError(
+      throw new PicoLLMInvalidArgumentError(
         `File not found at 'modelPath': ${modelPath}`
       );
     }
 
-    const pvLeopard = require(libraryPath); // eslint-disable-line
-    this._pvLeopard = pvLeopard;
+    const pvPicoLLM = require(libraryPath); // eslint-disable-line
+    this._pvPicoLLM = pvPicoLLM;
 
-    let leopardHandleAndStatus: LeopardHandleAndStatus | null = null;
+    let picollmHandleAndStatus: PicoLLMHandleAndStatus | null = null;
     try {
-      pvLeopard.set_sdk('nodejs');
+      pvPicoLLM.set_sdk('nodejs');
 
-      leopardHandleAndStatus = pvLeopard.init(
+      picollmHandleAndStatus = pvPicoLLM.init(
         accessKey,
         modelPath,
         enableAutomaticPunctuation,
@@ -115,14 +115,14 @@ export class Leopard {
       pvStatusToException(<PvStatus>err.code, err);
     }
 
-    const status = leopardHandleAndStatus!.status;
+    const status = picollmHandleAndStatus!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'Leopard failed to initialize');
+      this.handlePvStatus(status, 'PicoLLM failed to initialize');
     }
 
-    this._handle = leopardHandleAndStatus!.handle;
-    this._sampleRate = pvLeopard.sample_rate();
-    this._version = pvLeopard.version();
+    this._handle = picollmHandleAndStatus!.handle;
+    this._sampleRate = pvPicoLLM.sample_rate();
+    this._version = pvPicoLLM.version();
   }
 
   /**
@@ -134,7 +134,7 @@ export class Leopard {
   }
 
   /**
-   * @returns the version of the Leopard engine
+   * @returns the version of the PicoLLM engine
    */
   get version(): string {
     return this._version;
@@ -143,45 +143,45 @@ export class Leopard {
   /**
    * Processes a given audio data and returns its transcription.
    *
-   * @param {Int16Array} pcm Audio data. The audio needs to have a sample rate equal to `Leopard.sampleRate` and be 16-bit linearly-encoded.
+   * @param {Int16Array} pcm Audio data. The audio needs to have a sample rate equal to `PicoLLM.sampleRate` and be 16-bit linearly-encoded.
    * This function operates on single-channel audio. If you wish to process data in a different
-   * sample rate or format consider using `Leopard.processFile()`.
-   * @returns {LeopardTranscript} LeopardTranscript object which contains the transcription results of the engine.
+   * sample rate or format consider using `PicoLLM.processFile()`.
+   * @returns {PicoLLMTranscript} PicoLLMTranscript object which contains the transcription results of the engine.
    */
-  process(pcm: Int16Array): LeopardTranscript {
+  process(pcm: Int16Array): PicoLLMTranscript {
     if (
       this._handle === 0 ||
       this._handle === null ||
       this._handle === undefined
     ) {
-      throw new LeopardInvalidStateError('Leopard is not initialized');
+      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
     }
 
     if (pcm === undefined || pcm === null) {
-      throw new LeopardInvalidArgumentError(
-        `PCM array provided to 'Leopard.process()' is undefined or null`
+      throw new PicoLLMInvalidArgumentError(
+        `PCM array provided to 'PicoLLM.process()' is undefined or null`
       );
     } else if (pcm.length === 0) {
-      throw new LeopardInvalidArgumentError(
-        `PCM array provided to 'Leopard.process()' is empty`
+      throw new PicoLLMInvalidArgumentError(
+        `PCM array provided to 'PicoLLM.process()' is empty`
       );
     }
 
-    let leopardResult: LeopardResult | null = null;
+    let picollmResult: PicoLLMResult | null = null;
     try {
-      leopardResult = this._pvLeopard.process(this._handle, pcm, pcm.length);
+      picollmResult = this._pvPicoLLM.process(this._handle, pcm, pcm.length);
     } catch (err: any) {
       pvStatusToException(<PvStatus>err.code, err);
     }
 
-    const status = leopardResult!.status;
+    const status = picollmResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'Leopard failed to process the audio data');
+      this.handlePvStatus(status, 'PicoLLM failed to process the audio data');
     }
 
     return {
-      transcript: leopardResult!.transcript,
-      words: leopardResult!.words,
+      transcript: picollmResult!.transcript,
+      words: picollmResult!.words,
     };
   }
 
@@ -191,31 +191,31 @@ export class Leopard {
    * @param {string} audioPath Absolute path to the audio file.
    * The file needs to have a sample rate equal to or greater than `.sampleRate`.
    * The supported formats are: `FLAC`, `MP3`, `Ogg`, `WAV`, `WebM`, `MP4/m4a (AAC)`, and `3gp (AMR)`
-   * @returns {LeopardTranscript} object which contains the transcription results of the engine.
+   * @returns {PicoLLMTranscript} object which contains the transcription results of the engine.
    */
-  processFile(audioPath: string): LeopardTranscript {
+  processFile(audioPath: string): PicoLLMTranscript {
     if (
       this._handle === 0 ||
       this._handle === null ||
       this._handle === undefined
     ) {
-      throw new LeopardInvalidStateError('Leopard is not initialized');
+      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
     }
 
     if (!fs.existsSync(audioPath)) {
-      throw new LeopardInvalidArgumentError(
+      throw new PicoLLMInvalidArgumentError(
         `Could not find the audio file at '${audioPath}'`
       );
     }
 
-    let leopardResult: LeopardResult | null = null;
+    let picollmResult: PicoLLMResult | null = null;
     try {
-      leopardResult = this._pvLeopard.process_file(this._handle, audioPath);
+      picollmResult = this._pvPicoLLM.process_file(this._handle, audioPath);
     } catch (err: any) {
       pvStatusToException(<PvStatus>err.code, err);
     }
 
-    const status = leopardResult!.status;
+    const status = picollmResult!.status;
     if (status !== PvStatus.SUCCESS) {
       if (
         status === PvStatus.INVALID_ARGUMENT &&
@@ -228,16 +228,16 @@ export class Leopard {
           )}' is not supported`
         );
       }
-      this.handlePvStatus(status, 'Leopard failed to process the audio file');
+      this.handlePvStatus(status, 'PicoLLM failed to process the audio file');
     }
     return {
-      transcript: leopardResult!.transcript,
-      words: leopardResult!.words,
+      transcript: picollmResult!.transcript,
+      words: picollmResult!.words,
     };
   }
 
   /**
-   * Releases the resources acquired by Leopard.
+   * Releases the resources acquired by PicoLLM.
    *
    * Be sure to call this when finished with the instance
    * to reclaim the memory that was allocated by the C library.
@@ -245,23 +245,23 @@ export class Leopard {
   release(): void {
     if (this._handle !== 0) {
       try {
-        this._pvLeopard.delete(this._handle);
+        this._pvPicoLLM.delete(this._handle);
       } catch (err: any) {
         pvStatusToException(<PvStatus>err.code, err);
       }
       this._handle = 0;
     } else {
       // eslint-disable-next-line no-console
-      console.warn('Leopard is not initialized');
+      console.warn('PicoLLM is not initialized');
     }
   }
 
   private handlePvStatus(status: PvStatus, message: string): void {
-    const errorObject = this._pvLeopard.get_error_stack();
+    const errorObject = this._pvPicoLLM.get_error_stack();
     if (errorObject.status === PvStatus.SUCCESS) {
       pvStatusToException(status, message, errorObject.message_stack);
     } else {
-      pvStatusToException(status, 'Unable to get Leopard error state');
+      pvStatusToException(status, 'Unable to get PicoLLM error state');
     }
   }
 }

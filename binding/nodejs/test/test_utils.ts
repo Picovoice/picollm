@@ -9,7 +9,7 @@
 // specific language governing permissions and limitations under the License.
 //
 import * as path from 'path';
-import { LeopardWord } from '../src';
+import { PicoLLMWord } from '../src';
 
 const ROOT_DIR = path.join(__dirname, '../../..');
 const TEST_DATA_JSON = require(path.join(
@@ -27,7 +27,7 @@ function appendLanguage(s: string, language: string): string {
 export function getModelPathByLanguage(language: string): string {
   return path.join(
     ROOT_DIR,
-    `${appendLanguage('lib/common/leopard_params', language)}.pv`
+    `${appendLanguage('lib/common/picollm_params', language)}.pv`
   );
 }
 
@@ -41,7 +41,7 @@ export function getLanguageTestParameters(): [
   string,
   number,
   string,
-  LeopardWord[]
+  PicoLLMWord[]
 ][] {
   let parametersJson = TEST_DATA_JSON.tests.language_tests;
   return parametersJson.map((x: any) => [
@@ -63,7 +63,7 @@ export function getLanguageTestParameters(): [
 export function getDiarizationTestParameters(): [
   string,
   string,
-  LeopardWord[]
+  PicoLLMWord[]
 ][] {
   let parametersJson = TEST_DATA_JSON.tests.diarization_tests;
   return parametersJson.map((x: any) => [

@@ -14,7 +14,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { LeopardRuntimeError } from './errors';
+import { PicoLLMRuntimeError } from './errors';
 
 const SYSTEM_LINUX = 'linux';
 const SYSTEM_MAC = 'darwin';
@@ -46,47 +46,47 @@ const LIBRARY_PATH_PREFIX = '../lib/';
 const SYSTEM_TO_LIBRARY_PATH = new Map();
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_MAC}/${X86_64}`,
-  `${PLATFORM_MAC}/x86_64/pv_leopard.node`
+  `${PLATFORM_MAC}/x86_64/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_MAC}/${ARM_64}`,
-  `${PLATFORM_MAC}/arm64/pv_leopard.node`
+  `${PLATFORM_MAC}/arm64/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${X86_64}`,
-  `${PLATFORM_LINUX}/x86_64/pv_leopard.node`
+  `${PLATFORM_LINUX}/x86_64/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A53}`,
-  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A53}/pv_leopard.node`
+  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A53}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A53}${ARM_CPU_64}`,
-  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A53}${ARM_CPU_64}/pv_leopard.node`
+  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A53}${ARM_CPU_64}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A72}`,
-  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A72}/pv_leopard.node`
+  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A72}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A72}${ARM_CPU_64}`,
-  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A72}${ARM_CPU_64}/pv_leopard.node`
+  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A72}${ARM_CPU_64}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A76}`,
-  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A76}/pv_leopard.node`
+  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A76}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A76}${ARM_CPU_64}`,
-  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A76}${ARM_CPU_64}/pv_leopard.node`
+  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A76}${ARM_CPU_64}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A57}${ARM_CPU_64}`,
-  `${PLATFORM_JETSON}/${ARM_CPU_CORTEX_A57}${ARM_CPU_64}/pv_leopard.node`
+  `${PLATFORM_JETSON}/${ARM_CPU_CORTEX_A57}${ARM_CPU_64}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_WINDOWS}/${X86_64}`,
-  `${PLATFORM_WINDOWS}/amd64/pv_leopard.node`
+  `${PLATFORM_WINDOWS}/amd64/pv_picollm.node`
 );
 
 function absoluteLibraryPath(libraryPath: string): string {
@@ -101,7 +101,7 @@ function getCpuPart(): string {
       return infoLineSplit[infoLineSplit.length - 1].toLowerCase();
     }
   }
-  throw new LeopardRuntimeError(`Unsupported CPU.`);
+  throw new PicoLLMRuntimeError(`Unsupported CPU.`);
 }
 
 function getLinuxPlatform(): string {
@@ -114,7 +114,7 @@ function getLinuxPlatform(): string {
     case '0xd07':
       return PLATFORM_JETSON;
     default:
-      throw new LeopardRuntimeError(`Unsupported CPU: '${cpuPart}'`);
+      throw new PicoLLMRuntimeError(`Unsupported CPU: '${cpuPart}'`);
   }
 }
 
@@ -135,7 +135,7 @@ function getLinuxMachine(arch: string): string {
     case '0xd0b':
       return ARM_CPU_CORTEX_A76 + archInfo;
     default:
-      throw new LeopardRuntimeError(`Unsupported CPU: '${cpuPart}'`);
+      throw new PicoLLMRuntimeError(`Unsupported CPU: '${cpuPart}'`);
   }
 }
 
@@ -191,7 +191,7 @@ export function getSystemLibraryPath(): string {
               SYSTEM_TO_LIBRARY_PATH.get(`${SYSTEM_LINUX}/${linuxMachine}`)
             );
           }
-          throw new LeopardRuntimeError(
+          throw new PicoLLMRuntimeError(
             `System ${system}/${arch} is not supported by this library for this CPU.`
           );
         }
@@ -206,14 +206,14 @@ export function getSystemLibraryPath(): string {
         break;
       }
       default: {
-        throw new LeopardRuntimeError(
+        throw new PicoLLMRuntimeError(
           `System ${system}/${arch} is not supported by this library.`
         );
       }
     }
   }
 
-  throw new LeopardRuntimeError(
+  throw new PicoLLMRuntimeError(
     `System ${system}/${arch} is not supported by this library.`
   );
 }

@@ -12,12 +12,12 @@
 
 import PvStatus from './pv_status_t';
 
-export class LeopardError extends Error {
+export class PicoLLMError extends Error {
   private readonly _message: string;
   private readonly _messageStack: string[];
 
   constructor(message: string, messageStack: string[] = []) {
-    super(LeopardError.errorToString(message, messageStack));
+    super(PicoLLMError.errorToString(message, messageStack));
     this._message = message;
     this._messageStack = messageStack;
   }
@@ -47,17 +47,17 @@ export class LeopardError extends Error {
   }
 }
 
-export class LeopardOutOfMemoryError extends LeopardError {}
-export class LeopardIOError extends LeopardError {}
-export class LeopardInvalidArgumentError extends LeopardError {}
-export class LeopardStopIterationError extends LeopardError {}
-export class LeopardKeyError extends LeopardError {}
-export class LeopardInvalidStateError extends LeopardError {}
-export class LeopardRuntimeError extends LeopardError {}
-export class LeopardActivationError extends LeopardError {}
-export class LeopardActivationLimitReachedError extends LeopardError {}
-export class LeopardActivationThrottledError extends LeopardError {}
-export class LeopardActivationRefusedError extends LeopardError {}
+export class PicoLLMOutOfMemoryError extends PicoLLMError {}
+export class PicoLLMIOError extends PicoLLMError {}
+export class PicoLLMInvalidArgumentError extends PicoLLMError {}
+export class PicoLLMStopIterationError extends PicoLLMError {}
+export class PicoLLMKeyError extends PicoLLMError {}
+export class PicoLLMInvalidStateError extends PicoLLMError {}
+export class PicoLLMRuntimeError extends PicoLLMError {}
+export class PicoLLMActivationError extends PicoLLMError {}
+export class PicoLLMActivationLimitReachedError extends PicoLLMError {}
+export class PicoLLMActivationThrottledError extends PicoLLMError {}
+export class PicoLLMActivationRefusedError extends PicoLLMError {}
 
 export function pvStatusToException(
   pvStatus: PvStatus,
@@ -66,30 +66,30 @@ export function pvStatusToException(
 ): void {
   switch (pvStatus) {
     case PvStatus.OUT_OF_MEMORY:
-      throw new LeopardOutOfMemoryError(errorMessage, messageStack);
+      throw new PicoLLMOutOfMemoryError(errorMessage, messageStack);
     case PvStatus.IO_ERROR:
-      throw new LeopardIOError(errorMessage, messageStack);
+      throw new PicoLLMIOError(errorMessage, messageStack);
     case PvStatus.INVALID_ARGUMENT:
-      throw new LeopardInvalidArgumentError(errorMessage, messageStack);
+      throw new PicoLLMInvalidArgumentError(errorMessage, messageStack);
     case PvStatus.STOP_ITERATION:
-      throw new LeopardStopIterationError(errorMessage, messageStack);
+      throw new PicoLLMStopIterationError(errorMessage, messageStack);
     case PvStatus.KEY_ERROR:
-      throw new LeopardKeyError(errorMessage, messageStack);
+      throw new PicoLLMKeyError(errorMessage, messageStack);
     case PvStatus.INVALID_STATE:
-      throw new LeopardInvalidStateError(errorMessage, messageStack);
+      throw new PicoLLMInvalidStateError(errorMessage, messageStack);
     case PvStatus.RUNTIME_ERROR:
-      throw new LeopardRuntimeError(errorMessage, messageStack);
+      throw new PicoLLMRuntimeError(errorMessage, messageStack);
     case PvStatus.ACTIVATION_ERROR:
-      throw new LeopardActivationError(errorMessage, messageStack);
+      throw new PicoLLMActivationError(errorMessage, messageStack);
     case PvStatus.ACTIVATION_LIMIT_REACHED:
-      throw new LeopardActivationLimitReachedError(errorMessage, messageStack);
+      throw new PicoLLMActivationLimitReachedError(errorMessage, messageStack);
     case PvStatus.ACTIVATION_THROTTLED:
-      throw new LeopardActivationThrottledError(errorMessage, messageStack);
+      throw new PicoLLMActivationThrottledError(errorMessage, messageStack);
     case PvStatus.ACTIVATION_REFUSED:
-      throw new LeopardActivationRefusedError(errorMessage, messageStack);
+      throw new PicoLLMActivationRefusedError(errorMessage, messageStack);
     default:
       // eslint-disable-next-line no-console
       console.warn(`Unmapped error code: ${pvStatus}`);
-      throw new LeopardError(errorMessage);
+      throw new PicoLLMError(errorMessage);
   }
 }

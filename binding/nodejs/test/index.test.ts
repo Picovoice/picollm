@@ -10,7 +10,7 @@
 //
 'use strict';
 
-import { Leopard, LeopardWord, LeopardInvalidArgumentError } from '../src';
+import { PicoLLM, PicoLLMWord, PicoLLMInvalidArgumentError } from '../src';
 
 import * as fs from 'fs';
 import { WaveFile } from 'wavefile';
@@ -67,8 +67,8 @@ const characterErrorRate = (
 };
 
 const validateMetadata = (
-  words: LeopardWord[],
-  referenceWords: LeopardWord[],
+  words: PicoLLMWord[],
+  referenceWords: PicoLLMWord[],
   enableDiarization: boolean
 ) => {
   expect(words.length).toEqual(referenceWords.length);
@@ -93,60 +93,60 @@ const loadPcm = (audioFile: string): any => {
   return waveAudioFile.getSamples(false, Int16Array);
 };
 
-const testLeopardProcess = (
+const testPicoLLMProcess = (
   language: string,
   transcript: string,
   enableAutomaticPunctuation: boolean,
   enableDiarization: boolean,
   errorRate: number,
   audioFile: string,
-  words: LeopardWord[]
+  words: PicoLLMWord[]
 ) => {
   const modelPath = getModelPathByLanguage(language);
   const pcm = loadPcm(audioFile);
 
-  let leopardEngine = new Leopard(ACCESS_KEY, {
+  let picollmEngine = new PicoLLM(ACCESS_KEY, {
     modelPath,
     enableAutomaticPunctuation,
     enableDiarization,
   });
 
-  let res = leopardEngine.process(pcm);
+  let res = picollmEngine.process(pcm);
 
   expect(
     characterErrorRate(res.transcript, transcript) < errorRate
   ).toBeTruthy();
   validateMetadata(res.words, words, enableDiarization);
 
-  leopardEngine.release();
+  picollmEngine.release();
 };
 
-const testLeopardProcessFile = (
+const testPicoLLMProcessFile = (
   language: string,
   transcript: string,
   enableAutomaticPunctuation: boolean,
   enableDiarization: boolean,
   errorRate: number,
   audioFile: string,
-  words: LeopardWord[]
+  words: PicoLLMWord[]
 ) => {
   const modelPath = getModelPathByLanguage(language);
 
-  let leopardEngine = new Leopard(ACCESS_KEY, {
+  let picollmEngine = new PicoLLM(ACCESS_KEY, {
     modelPath,
     enableAutomaticPunctuation,
     enableDiarization,
   });
 
   const waveFilePath = getAudioFile(audioFile);
-  let res = leopardEngine.processFile(waveFilePath);
+  let res = picollmEngine.processFile(waveFilePath);
 
   expect(
     characterErrorRate(res.transcript, transcript) < errorRate
   ).toBeTruthy();
   validateMetadata(res.words, words, enableDiarization);
 
-  leopardEngine.release();
+  picollmEngine.release();
 };
 
 describe('successful processes', () => {
@@ -158,9 +158,9 @@ describe('successful processes', () => {
       _: string,
       errorRate: number,
       audioFile: string,
-      words: LeopardWord[]
+      words: PicoLLMWord[]
     ) => {
-      testLeopardProcess(
+      testPicoLLMProcess(
         language,
         transcript,
         false,
@@ -180,9 +180,9 @@ describe('successful processes', () => {
       _: string,
       errorRate: number,
       audioFile: string,
-      words: LeopardWord[]
+      words: PicoLLMWord[]
     ) => {
-      testLeopardProcessFile(
+      testPicoLLMProcessFile(
         language,
         transcript,
         false,
@@ -202,9 +202,9 @@ describe('successful processes', () => {
       transcript: string,
       errorRate: number,
       audioFile: string,
-      words: LeopardWord[]
+      words: PicoLLMWord[]
     ) => {
-      testLeopardProcessFile(
+      testPicoLLMProcessFile(
         language,
         transcript,
         true,
@@ -223,9 +223,9 @@ describe('successful processes', () => {
       _: string,
       errorRate: number,
       audioFile: string,
-      words: LeopardWord[]
+      words: PicoLLMWord[]
     ) => {
-      testLeopardProcessFile(
+      testPicoLLMProcessFile(
         language,
         transcript,
         false,
@@ -241,16 +241,16 @@ describe('successful processes', () => {
 describe('successful diarization', () => {
   it.each(DIARIZATION_TEST_PARAMETERS)(
     'testing diarization `%p`',
-    (language: string, audioFile: string, referenceWords: LeopardWord[]) => {
+    (language: string, audioFile: string, referenceWords: PicoLLMWord[]) => {
       const modelPath = getModelPathByLanguage(language);
 
-      let leopardEngine = new Leopard(ACCESS_KEY, {
+      let picollmEngine = new PicoLLM(ACCESS_KEY, {
         modelPath,
         enableDiarization: true,
       });
 
       const waveFilePath = getAudioFile(audioFile);
-      let words = leopardEngine.processFile(waveFilePath).words;
+      let words = picollmEngine.processFile(waveFilePath).words;
 
       expect(words.length).toEqual(referenceWords.length);
       for (let i = 0; i < words.length; i += 1) {
@@ -258,7 +258,7 @@ describe('successful diarization', () => {
         expect(words[i].speakerTag).toEqual(referenceWords[i].speakerTag);
       }
 
-      leopardEngine.release();
+      picollmEngine.release();
     }
   );
 });
@@ -266,8 +266,8 @@ describe('successful diarization', () => {
 describe('Defaults', () => {
   test('Empty AccessKey', () => {
     expect(() => {
-      new Leopard('');
-    }).toThrow(LeopardInvalidArgumentError);
+      new PicoLLM('');
+    }).toThrow(PicoLLMInvalidArgumentError);
   });
 });
 
@@ -275,17 +275,17 @@ describe('manual paths', () => {
   test('manual library path', () => {
     const libraryPath = getSystemLibraryPath();
 
-    let leopardEngine = new Leopard(ACCESS_KEY, {
+    let picollmEngine = new PicoLLM(ACCESS_KEY, {
       libraryPath: libraryPath,
       enableAutomaticPunctuation: false,
     });
 
     const waveFilePath = getAudioFile('test.wav');
-    let res = leopardEngine.processFile(waveFilePath);
+    let res = picollmEngine.processFile(waveFilePath);
 
     expect(res.transcript.length).toBeGreaterThan(0);
 
-    leopardEngine.release();
+    picollmEngine.release();
   });
 });
 
@@ -293,7 +293,7 @@ describe('error message stack', () => {
   test('message stack cleared after read', () => {
     let error: string[] = [];
     try {
-      new Leopard('invalid');
+      new PicoLLM('invalid');
     } catch (e: any) {
       error = e.messageStack;
     }
@@ -302,7 +302,7 @@ describe('error message stack', () => {
     expect(error.length).toBeLessThanOrEqual(8);
 
     try {
-      new Leopard('invalid');
+      new PicoLLM('invalid');
     } catch (e: any) {
       for (let i = 0; i < error.length; i++) {
         expect(error[i]).toEqual(e.messageStack[i]);

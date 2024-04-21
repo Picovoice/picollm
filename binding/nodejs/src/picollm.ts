@@ -164,6 +164,7 @@ export class PicoLLM {
       streamCallback = null,
     } = options;
 
+    const numStopPhrases = (stopPhrases !== null) ? stopPhrases.length : 0;
 
     if (prompt === undefined || prompt === null) {
       throw new PicoLLMInvalidArgumentError(
@@ -178,6 +179,7 @@ export class PicoLLM {
         prompt,
         completionTokenLimit,
         stopPhrases,
+        numStopPhrases,
         seed,
         presencePenalty,
         frequencyPenalty,

@@ -25,28 +25,37 @@ describe('successful processes', () => {
       "phi2-290.bin"
     );
 
+    let result = picollmEngine.generate(
+      "Hello my name is",
+      {
+        completionTokenLimit: 10
+      });
+
+    expect(result).toBeTruthy();
+    expect(result.completion).toEqual(" John and I am a student at XYZ school");
+
     picollmEngine.release();
   });
 });
 
-// describe('error message stack', () => {
-//   test('message stack cleared after read', () => {
-//     let error: string[] = [];
-//     try {
-//       new PicoLLM('invalid');
-//     } catch (e: any) {
-//       error = e.messageStack;
-//     }
+describe('error message stack', () => {
+  test('message stack cleared after read', () => {
+    let error: string[] = [];
+    try {
+      new PicoLLM('invalid', "phi2-290.bin");
+    } catch (e: any) {
+      error = e.messageStack;
+    }
 
-//     expect(error.length).toBeGreaterThan(0);
-//     expect(error.length).toBeLessThanOrEqual(8);
+    expect(error.length).toBeGreaterThan(0);
+    expect(error.length).toBeLessThanOrEqual(8);
 
-//     try {
-//       new PicoLLM('invalid');
-//     } catch (e: any) {
-//       for (let i = 0; i < error.length; i++) {
-//         expect(error[i]).toEqual(e.messageStack[i]);
-//       }
-//     }
-//   });
-// });
+    try {
+      new PicoLLM('invalid', "phi2-290.bin");
+    } catch (e: any) {
+      for (let i = 0; i < error.length; i++) {
+        expect(error[i]).toEqual(e.messageStack[i]);
+      }
+    }
+  });
+});

@@ -16,7 +16,7 @@ export enum PicoLLMEndpoint {
   EndOfSentence = 0,
   CompletionTokenLimitReached = 1,
   StopPhraseEncountered = 2,
-};
+}
 
 export type PicoLLMToken = {
   token: string;

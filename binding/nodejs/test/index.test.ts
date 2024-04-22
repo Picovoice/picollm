@@ -10,7 +10,7 @@
 //
 'use strict';
 
-import { PicoLLM, PicoLLMCompletion  } from '../src';
+import { PicoLLM, PicoLLMCompletion } from '../src';
 
 import * as fs from 'fs';
 

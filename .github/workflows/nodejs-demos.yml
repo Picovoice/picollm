@@ -1,0 +1,52 @@
+name: Node.js Demos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'demo/nodejs/**'
+      - 'demo/expressjs/**'
+      - '!demo/nodejs/README.md'
+      - '!demo/expressjs/README.md'
+      - 'lib/node/**'
+      - '.github/workflows/nodejs-demos.yml'
+
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - 'demo/nodejs/**'
+      - 'demo/expressjs/**'
+      - '!demo/nodejs/README.md'
+      - '!demo/expressjs/README.md'
+      - 'lib/node/**'
+      - '.github/workflows/nodejs-demos.yml'
+
+defaults:
+  run:
+    working-directory: demo/nodejs
+
+jobs:
+  build-self-hosted:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        machine: [rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install and build Node Binding
+      run: yarn && yarn build
+      working-directory: binding/nodejs
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Download resource files
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.bin/latest/phi2-290.bin -o phi2-290.bin
+
+    - name: Test
+      run: yarn generate --access_key ${{secrets.PV_VALID_ACCESS_KEY}} --model_file_path phi2-290.bin --completion_token_limit 10 --generate "Hello my name is"

@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const chunkSize = 1024 * 1024 * 256; // 256MB
+const chunkSize = 1024 * 1024 * 128; // 128MB
 
 const url = process.argv[2];
 const fileName = process.argv[3];

@@ -1,9 +1,7 @@
 import { defineConfig } from 'cypress';
 
 export default defineConfig({
-  env: {
-    // TODO: add test vars
-  },
+  env: {},
   e2e: {
     defaultCommandTimeout: 1000000,
     supportFile: 'cypress/support/index.ts',

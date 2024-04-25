@@ -56,11 +56,11 @@ export class PicoLLMStreamCallback {
     this._wasmMemory = memory;
   }
 
-  public release() {
+  public release(): void {
     this._wasmMemory = undefined;
   }
 
-  public setUserCallback(userCallback?: (token: string) => void) {
+  public setUserCallback(userCallback?: (token: string) => void): void {
     this._userCallback = userCallback;
   }
 
@@ -69,9 +69,12 @@ export class PicoLLMStreamCallback {
       return;
     }
 
-    tokenAddress = unsignedAddress(tokenAddress);
+    const tokenAddressUnsigned = unsignedAddress(tokenAddress);
     const memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
-    const token = arrayBufferToStringAtIndex(memoryBufferUint8, tokenAddress);
+    const token = arrayBufferToStringAtIndex(
+      memoryBufferUint8,
+      tokenAddressUnsigned
+    );
     if (this._userCallback) {
       this._userCallback(token);
     }
@@ -405,9 +408,9 @@ export class PicoLLM {
             stopPhrases.length === 0
               ? 0
               : await this._aligned_alloc(
-                  Int32Array.BYTES_PER_ELEMENT,
-                  stopPhrases.length * Int32Array.BYTES_PER_ELEMENT
-                );
+                Int32Array.BYTES_PER_ELEMENT,
+                stopPhrases.length * Int32Array.BYTES_PER_ELEMENT
+              );
 
           const stopPhrasesAddressList: number[] = [];
           for (const stopPhrase of stopPhrases) {
@@ -428,7 +431,7 @@ export class PicoLLM {
             stopPhrasesAddressList.push(stopPhraseAddress);
           }
 
-          let memoryBufferInt32 = new Int32Array(this._wasmMemory.buffer);
+          const memoryBufferInt32 = new Int32Array(this._wasmMemory.buffer);
           if (stopPhrasesAddressAddress > 0) {
             memoryBufferInt32.set(
               new Int32Array(stopPhrasesAddressList),
@@ -576,18 +579,18 @@ export class PicoLLM {
               logProb: completionLogProb,
             };
 
-            const numTopChoices = memoryBufferView.getInt32(
+            const numTopChoicesReturn = memoryBufferView.getInt32(
               completionTokensPtr,
               true
             );
             completionTokensPtr += Int32Array.BYTES_PER_ELEMENT;
 
-            let topChoices: PicoLLMToken[] = [];
+            const topChoices: PicoLLMToken[] = [];
             let topChoicesPtr = unsignedAddress(
               memoryBufferView.getInt32(completionTokensPtr, true)
             );
-            for (let j = 0; j < numTopChoices; j++) {
-              let topChoiceTokenAddress = unsignedAddress(
+            for (let j = 0; j < numTopChoicesReturn; j++) {
+              const topChoiceTokenAddress = unsignedAddress(
                 memoryBufferView.getInt32(topChoicesPtr, true)
               );
               const topChoiceToken = arrayBufferToStringAtIndex(
@@ -727,7 +730,7 @@ export class PicoLLM {
           const numTokens = memoryBufferView.getInt32(numTokensAddress, true);
           await this._pvFree(numTokensAddress);
 
-          let tokens: number[] = [];
+          const tokens: number[] = [];
           const tokensAddress = unsignedAddress(
             memoryBufferView.getInt32(tokensAddressAddress, true)
           );
@@ -810,7 +813,7 @@ export class PicoLLM {
           const numLogits = memoryBufferView.getInt32(numLogitsAddress, true);
           await this._pvFree(numLogitsAddress);
 
-          let logits: number[] = [];
+          const logits: number[] = [];
           const logitsAddress = unsignedAddress(
             memoryBufferView.getInt32(logitsAddressAddress, true)
           );
@@ -903,9 +906,11 @@ export class PicoLLM {
 
           const pvError = new PvError();
 
+          const streamCallback = new PicoLLMStreamCallback(memory);
+
           const exports = await buildWasm(memory, picoLLMWasmBuffer, pvError, {
             ...xpuWebWorkerImports,
-            stream_callback_wasm: (_: number) => void {},
+            stream_callback_wasm: streamCallback.streamCallbackWasm,
           });
           xpuWebWorkerImports.aligned_alloc = exports.aligned_alloc;
 
@@ -940,7 +945,7 @@ export class PicoLLM {
             );
           }
 
-          let status: PvStatus = await pv_picollm_list_hardware_devices(
+          const status: PvStatus = await pv_picollm_list_hardware_devices(
             hardwareDevicesAddressAddress,
             numHardwareDevicesAddress
           );

@@ -29,7 +29,7 @@
     "format": "prettier --write \"**/*.{js,ts,json}\"",
     "copywasm": "node scripts/copy_wasm.js",
     "setup-test": "node scripts/setup_test.js",
-    "test": "cypress run --spec test/picollm.test.ts --browser chrome"
+    "test": "cypress run --spec test/picollm.test.ts --browser chrome --headed"
   },
   "dependencies": {
     "@picovoice/web-utils": "~1.4.0"

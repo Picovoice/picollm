@@ -1,0 +1,7 @@
+node_modules
+dist
+lib/*
+!lib/.gitkeep
+test/*.bin
+.idea/
+test_data.jsons

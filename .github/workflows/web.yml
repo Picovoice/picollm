@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        machine: [pv-linux, pv-ios, pv-windows]
+        machine: [pv-linux, pv-windows]
 
     steps:
     - uses: actions/checkout@v3

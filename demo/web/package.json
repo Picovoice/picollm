@@ -1,0 +1,25 @@
+{
+  "name": "picollm-web-demo",
+  "version": "0.1.0",
+  "description": "A basic demo to show how to use picoLLM for web browsers, using the IIFE version of the library",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "setup-demo": "node scripts/setup_demo.js",
+    "start": "yarn run http-server -a localhost -p 5000"
+  },
+  "keywords": [
+    "Picovoice",
+    "browser",
+    "generative ai",
+    "llm"
+  ],
+  "author": "Picovoice Inc",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@picovoice/picollm-web": "../../binding/web"
+  },
+  "devDependencies": {
+    "http-server": "^14.0.0"
+  }
+}

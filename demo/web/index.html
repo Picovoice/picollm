@@ -8,11 +8,15 @@
     let modelFile = null;
     let modelUrl = null;
     let picoLLM = null;
+    let prompt = "";
+
+    let llmResponse = "";
 
     window.onload = () => {
       const accessKeyInput = document.getElementById("accessKey")
       const uploadFileInput = document.getElementById("uploadFile");
       const fetchUrlInput = document.getElementById("fetchUrl");
+      const promptInput = document.getElementById("prompt");
 
       accessKeyInput.addEventListener("input", (event) => {
         accessKey = event.target.value.trim();
@@ -25,6 +29,10 @@
       fetchUrlInput.addEventListener("input", (event) => {
         modelUrl = event.target.value.trim();
       });
+
+      promptInput.addEventListener("input", (event) => {
+        prompt = event.target.value.trim();
+      });
     };
 
     function writeMessage(message) {
@@ -36,25 +44,30 @@
       writeMessage("picoLLM is loading. Please wait...");
       try {
         let model = {
-          modelFile: modelFile
+          modelFile: modelFile ? modelFile : modelUrl,
+          cacheFileOverwrite: true
         }
 
         picoLLM = await PicollmWeb.PicoLLM.create(accessKey, model);
         writeMessage("picoLLM ready!");
-
-        const streamCallback = (token) => {
-          writeMessage(token)
-        }
-
-        const result = await picoLLM.generate("what is your name?", {
-          completionTokenLimit: 5,
-          numTopChoices: 2,
-          streamCallback
-        });
-        writeMessage(result.completion);
       } catch (err) {
         writeMessage(err);
       }
+    }
+
+    async function generate() {
+
+      llmResponse = "";
+      const streamCallback = (token) => {
+        llmResponse += token;
+        writeMessage(llmResponse)
+      }
+
+      const result = await picoLLM.generate(prompt, {
+        completionTokenLimit: 30,
+        streamCallback
+      });
+      writeMessage(result.completion);
     }
   </script>
 </head>
@@ -76,7 +89,11 @@
 <input type="button" value="Init picoLLM" onclick="startPicoLLM()"/>
 <hr/>
 <br>
+<label for="prompt">Prompt: </label>
+<textarea id="prompt" name="prompt"></textarea>
+<input type="button" value="Generate" onclick="generate()"/>
 <br>
+<hr/>
 <div id="status" style="white-space: pre;"></div>
 <br>
 <div id="result"></div>

@@ -51,6 +51,7 @@ export type PicoLLMGenerateOptions = {
   temperature?: number;
   topP?: number;
   numTopChoices?: number;
+  streamCallback?: (token: string) => void;
 };
 
 export type PicoLLMUsage = {

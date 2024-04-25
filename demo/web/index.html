@@ -42,11 +42,16 @@
         picoLLM = await PicollmWeb.PicoLLM.create(accessKey, model);
         writeMessage("picoLLM ready!");
 
-        const completion = await picoLLM.generate("what is your name?", {
+        const streamCallback = (token) => {
+          writeMessage(token)
+        }
+
+        const result = await picoLLM.generate("what is your name?", {
           completionTokenLimit: 5,
-          numTopChoices: 2
+          numTopChoices: 2,
+          streamCallback
         });
-        writeMessage(completion);
+        writeMessage(result.completion);
       } catch (err) {
         writeMessage(err);
       }

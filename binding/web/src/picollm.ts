@@ -47,6 +47,37 @@ import picoLLMWebWorkerHelper from '../lib/pv_picollm_web_worker_helper.wasm';
 import picoLLMWebWorkerHelperSimd from '../lib/pv_picollm_web_worker_helper_simd.wasm';
 import { loadModel } from './utils';
 
+export class PicoLLMStreamCallback {
+  private _wasmMemory: WebAssembly.Memory | undefined;
+
+  private _userCallback?: (token: string) => void;
+
+  public constructor(memory: WebAssembly.Memory) {
+    this._wasmMemory = memory;
+  }
+
+  public release() {
+    this._wasmMemory = undefined;
+  }
+
+  public setUserCallback(userCallback?: (token: string) => void) {
+    this._userCallback = userCallback;
+  }
+
+  public streamCallbackWasm = (tokenAddress: number): void => {
+    if (this._wasmMemory === undefined) {
+      return;
+    }
+
+    tokenAddress = unsignedAddress(tokenAddress);
+    const memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
+    const token = arrayBufferToStringAtIndex(memoryBufferUint8, tokenAddress);
+    if (this._userCallback) {
+      this._userCallback(token);
+    }
+  };
+}
+
 /**
  * WebAssembly function types
  */
@@ -128,16 +159,17 @@ type PicoLLMWasmOutput = {
   aligned_alloc: aligned_alloc_type;
   memory: WebAssembly.Memory;
   pvFree: pv_free_type;
+
   contextLength: number;
   maxTopChoices: number;
   model: string;
   version: string;
+  streamCallback: PicoLLMStreamCallback;
 
   objectAddress: number;
   messageStackAddressAddressAddress: number;
   messageStackDepthAddress: number;
 
-  pvPicoLLMInit: pv_picollm_init_type;
   pvPicoLLMDelete: pv_picollm_delete_type;
   pvPicoLLMGenerate: pv_picollm_generate_type;
   pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens_type;
@@ -147,8 +179,6 @@ type PicoLLMWasmOutput = {
   pvPicoLLMForward: pv_picollm_forward_type;
   pvPicoLLMDeleteLogits: pv_picollm_delete_logits_type;
   pvPicoLLMReset: pv_picollm_reset_type;
-  pvPicoLLMListHardwareDevices: pv_picollm_list_hardware_devices_type;
-  pvPicoLLMFreeHardwareDevices: pv_picollm_free_hardware_devices_type;
   pvGetErrorStack: pv_get_error_stack_type;
   pvFreeErrorStack: pv_free_error_stack_type;
 };
@@ -156,7 +186,6 @@ type PicoLLMWasmOutput = {
 const DEFAULT_DEVICE = 'cpu:1';
 
 export class PicoLLM {
-  private readonly _pvPicoLLMInit: pv_picollm_init_type;
   private readonly _pvPicoLLMDelete: pv_picollm_delete_type;
   private readonly _pvPicoLLMGenerate: pv_picollm_generate_type;
   private readonly _pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens_type;
@@ -166,8 +195,6 @@ export class PicoLLM {
   private readonly _pvPicoLLMForward: pv_picollm_forward_type;
   private readonly _pvPicoLLMDeleteLogits: pv_picollm_delete_logits_type;
   private readonly _pvPicoLLMReset: pv_picollm_reset_type;
-  private readonly _pvPicoLLMListHardwareDevices: pv_picollm_list_hardware_devices_type;
-  private readonly _pvPicoLLMFreeHardwareDevices: pv_picollm_free_hardware_devices_type;
   private readonly _pvGetErrorStack: pv_get_error_stack_type;
   private readonly _pvFreeErrorStack: pv_free_error_stack_type;
 
@@ -180,10 +207,12 @@ export class PicoLLM {
   private readonly _messageStackAddressAddressAddress: number;
   private readonly _messageStackDepthAddress: number;
 
-  private static _contextLength: number;
-  private static _maxTopChoices: number;
-  private static _model: string;
-  private static _version: string;
+  private readonly _contextLength: number;
+  private readonly _maxTopChoices: number;
+  private readonly _model: string;
+  private readonly _version: string;
+  private readonly _streamCallback: PicoLLMStreamCallback;
+
   private static _wasm: string;
   private static _wasmSimd: string;
   private static _sdk: string = 'web';
@@ -191,12 +220,12 @@ export class PicoLLM {
   private static _picoLLMMutex = new Mutex();
 
   private constructor(handleWasm: PicoLLMWasmOutput) {
-    PicoLLM._contextLength = handleWasm.contextLength;
-    PicoLLM._maxTopChoices = handleWasm.maxTopChoices;
-    PicoLLM._model = handleWasm.model;
-    PicoLLM._version = handleWasm.version;
+    this._contextLength = handleWasm.contextLength;
+    this._maxTopChoices = handleWasm.maxTopChoices;
+    this._model = handleWasm.model;
+    this._version = handleWasm.version;
+    this._streamCallback = handleWasm.streamCallback;
 
-    this._pvPicoLLMInit = handleWasm.pvPicoLLMInit;
     this._pvPicoLLMDelete = handleWasm.pvPicoLLMDelete;
     this._pvPicoLLMGenerate = handleWasm.pvPicoLLMGenerate;
     this._pvPicoLLMDeleteCompletionTokens =
@@ -207,10 +236,7 @@ export class PicoLLM {
     this._pvPicoLLMForward = handleWasm.pvPicoLLMForward;
     this._pvPicoLLMDeleteLogits = handleWasm.pvPicoLLMDeleteLogits;
     this._pvPicoLLMReset = handleWasm.pvPicoLLMReset;
-    this._pvPicoLLMListHardwareDevices =
-      handleWasm.pvPicoLLMListHardwareDevices;
-    this._pvPicoLLMFreeHardwareDevices =
-      handleWasm.pvPicoLLMFreeHardwareDevices;
+
     this._pvGetErrorStack = handleWasm.pvGetErrorStack;
     this._pvFreeErrorStack = handleWasm.pvFreeErrorStack;
 
@@ -230,28 +256,28 @@ export class PicoLLM {
    * Get model's context length.
    */
   get contextLength(): number {
-    return PicoLLM._contextLength;
+    return this._contextLength;
   }
 
   /**
    * Get maximum number of top choices for generate.
    */
   get maxTopChoices(): number {
-    return PicoLLM._maxTopChoices;
+    return this._maxTopChoices;
   }
 
   /**
    * Get the model's name.
    */
   get model(): string {
-    return PicoLLM._model;
+    return this._model;
   }
 
   /**
    * Get PicoLLM version.
    */
   get version(): string {
-    return PicoLLM._version;
+    return this._version;
   }
 
   public static setSdk(sdk: string): void {
@@ -345,7 +371,10 @@ export class PicoLLM {
       temperature = 0,
       topP = 1,
       numTopChoices = 0,
+      streamCallback,
     } = options;
+
+    this._streamCallback.setUserCallback(streamCallback);
 
     return new Promise<PicoLLMCompletion>((resolve, reject) => {
       this._functionMutex
@@ -524,9 +553,9 @@ export class PicoLLM {
           );
 
           let completionTokensPtr = completionTokensAddress;
-          let completionTokens: PicoLLMCompletionToken[] = [];
+          const completionTokens: PicoLLMCompletionToken[] = [];
           for (let i = 0; i < numCompletionTokens; i++) {
-            let tokenAddress = memoryBufferView.getInt32(
+            const tokenAddress = memoryBufferView.getInt32(
               completionTokensPtr,
               true
             );
@@ -850,8 +879,151 @@ export class PicoLLM {
     await this._pvPicoLLMDelete(this._objectAddress);
     await this._pvFree(this._messageStackAddressAddressAddress);
     await this._pvFree(this._messageStackDepthAddress);
+    this._streamCallback.release();
+
     delete this._wasmMemory;
     this._wasmMemory = undefined;
+  }
+
+  public static async listHardwareDevices(): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      PicoLLM._picoLLMMutex
+        .runExclusive(async () => {
+          const memory: WebAssembly.Memory = new WebAssembly.Memory({
+            initial: 4096,
+          });
+
+          const isSimd = await simd();
+          const picoLLMWorkerWasmBuffer = isSimd
+            ? base64ToUint8Array(picoLLMWebWorkerHelperSimd)
+            : base64ToUint8Array(picoLLMWebWorkerHelper);
+          const picoLLMWasmBuffer = isSimd ? this._wasmSimd : this._wasm;
+
+          const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
+
+          const pvError = new PvError();
+
+          const exports = await buildWasm(memory, picoLLMWasmBuffer, pvError, {
+            ...xpuWebWorkerImports,
+            stream_callback_wasm: (_: number) => void {},
+          });
+          xpuWebWorkerImports.aligned_alloc = exports.aligned_alloc;
+
+          const aligned_alloc = exports.aligned_alloc as aligned_alloc_type;
+          const pv_free = exports.pv_free as pv_free_type;
+          const pv_picollm_list_hardware_devices =
+            exports.pv_picollm_list_hardware_devices as pv_picollm_list_hardware_devices_type;
+          const pv_picollm_free_hardware_devices =
+            exports.pv_picollm_free_hardware_devices as pv_picollm_free_hardware_devices_type;
+          const pv_get_error_stack =
+            exports.pv_get_error_stack as pv_get_error_stack_type;
+          const pv_free_error_stack =
+            exports.pv_free_error_stack as pv_free_error_stack_type;
+
+          const hardwareDevicesAddressAddress = await aligned_alloc(
+            Int32Array.BYTES_PER_ELEMENT,
+            Int32Array.BYTES_PER_ELEMENT
+          );
+          if (hardwareDevicesAddressAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for hardwareDevices'
+            );
+          }
+
+          const numHardwareDevicesAddress = await aligned_alloc(
+            Int32Array.BYTES_PER_ELEMENT,
+            Int32Array.BYTES_PER_ELEMENT
+          );
+          if (numHardwareDevicesAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for numHardwareDevices'
+            );
+          }
+
+          let status: PvStatus = await pv_picollm_list_hardware_devices(
+            hardwareDevicesAddressAddress,
+            numHardwareDevicesAddress
+          );
+
+          const messageStackDepthAddress = await aligned_alloc(
+            Int32Array.BYTES_PER_ELEMENT,
+            Int32Array.BYTES_PER_ELEMENT
+          );
+          if (!messageStackDepthAddress) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for messageStackDepth'
+            );
+          }
+
+          const messageStackAddressAddressAddress = await aligned_alloc(
+            Int32Array.BYTES_PER_ELEMENT,
+            Int32Array.BYTES_PER_ELEMENT
+          );
+          if (!messageStackAddressAddressAddress) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory messageStack'
+            );
+          }
+
+          const memoryBufferView = new DataView(memory.buffer);
+          const memoryBufferUint8 = new Uint8Array(memory.buffer);
+          if (status !== PvStatus.SUCCESS) {
+            const messageStack = await PicoLLM.getMessageStack(
+              pv_get_error_stack,
+              pv_free_error_stack,
+              messageStackAddressAddressAddress,
+              messageStackDepthAddress,
+              memoryBufferView,
+              memoryBufferUint8
+            );
+            await pv_free(messageStackAddressAddressAddress);
+            await pv_free(messageStackDepthAddress);
+
+            throw pvStatusToException(
+              status,
+              'Get context length failed',
+              messageStack,
+              pvError
+            );
+          }
+          await pv_free(messageStackAddressAddressAddress);
+          await pv_free(messageStackDepthAddress);
+
+          const numHardwareDevices: number = memoryBufferView.getInt32(
+            numHardwareDevicesAddress,
+            true
+          );
+          await pv_free(numHardwareDevicesAddress);
+
+          const hardwareDevicesAddress = unsignedAddress(
+            memoryBufferView.getInt32(hardwareDevicesAddressAddress, true)
+          );
+
+          const hardwareDevices: string[] = [];
+          for (let i = 0; i < numHardwareDevices; i++) {
+            const deviceAddress = memoryBufferView.getInt32(
+              hardwareDevicesAddress + i * Int32Array.BYTES_PER_ELEMENT,
+              true
+            );
+            hardwareDevices.push(
+              arrayBufferToStringAtIndex(memoryBufferUint8, deviceAddress)
+            );
+          }
+          await pv_picollm_free_hardware_devices(
+            hardwareDevicesAddress,
+            numHardwareDevices
+          );
+          await pv_free(hardwareDevicesAddressAddress);
+
+          return hardwareDevices;
+        })
+        .then((result: string[]) => {
+          resolve(result);
+        })
+        .catch((error: any) => {
+          reject(error);
+        });
+    });
   }
 
   private static async initWasm(
@@ -873,16 +1045,11 @@ export class PicoLLM {
 
     const pvError = new PvError();
 
-    const streamCallback = (tokenAddress: number) => {
-      tokenAddress = unsignedAddress(tokenAddress);
-      const memoryBufferUint8 = new Uint8Array(memory.buffer);
-      const token = arrayBufferToStringAtIndex(memoryBufferUint8, tokenAddress);
-      console.log(token);
-    };
+    const streamCallback = new PicoLLMStreamCallback(memory);
 
     const exports = await buildWasm(memory, wasmBase64, pvError, {
       ...xpuWebWorkerImports,
-      stream_callback_wasm: streamCallback,
+      stream_callback_wasm: streamCallback.streamCallbackWasm,
     });
     xpuWebWorkerImports.aligned_alloc = exports.aligned_alloc;
 
@@ -907,10 +1074,7 @@ export class PicoLLM {
     const pv_picollm_delete_logits =
       exports.pv_picollm_delete_logits as pv_picollm_delete_logits_type;
     const pv_picollm_reset = exports.pv_picollm_reset as pv_picollm_reset_type;
-    const pv_picollm_list_hardware_devices =
-      exports.pv_picollm_list_hardware_devices as pv_picollm_list_hardware_devices_type;
-    const pv_picollm_free_hardware_devices =
-      exports.pv_picollm_free_hardware_devices as pv_picollm_free_hardware_devices_type;
+
     const pv_picollm_model = exports.pv_picollm_model as pv_picollm_model_type;
     const pv_picollm_context_length =
       exports.pv_picollm_context_length as pv_picollm_context_length_type;
@@ -924,7 +1088,6 @@ export class PicoLLM {
     const pv_free_error_stack =
       exports.pv_free_error_stack as pv_free_error_stack_type;
 
-    // acquire and init memory for c_object
     const objectAddressAddress = await aligned_alloc(
       Int32Array.BYTES_PER_ELEMENT,
       Int32Array.BYTES_PER_ELEMENT
@@ -1128,6 +1291,7 @@ export class PicoLLM {
       memory: memory,
       pvFree: pv_free,
 
+      streamCallback: streamCallback,
       contextLength: contextLength,
       maxTopChoices: maxTopChoices,
       model: model,
@@ -1137,7 +1301,6 @@ export class PicoLLM {
       messageStackAddressAddressAddress: messageStackAddressAddressAddress,
       messageStackDepthAddress: messageStackDepthAddress,
 
-      pvPicoLLMInit: pv_picollm_init,
       pvPicoLLMDelete: pv_picollm_delete,
       pvPicoLLMGenerate: pv_picollm_generate,
       pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens,
@@ -1147,8 +1310,6 @@ export class PicoLLM {
       pvPicoLLMForward: pv_picollm_forward,
       pvPicoLLMDeleteLogits: pv_picollm_delete_logits,
       pvPicoLLMReset: pv_picollm_reset,
-      pvPicoLLMListHardwareDevices: pv_picollm_list_hardware_devices,
-      pvPicoLLMFreeHardwareDevices: pv_picollm_free_hardware_devices,
 
       pvGetErrorStack: pv_get_error_stack,
       pvFreeErrorStack: pv_free_error_stack,

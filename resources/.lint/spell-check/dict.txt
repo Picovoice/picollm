@@ -1,0 +1,4 @@
+Picovoice
+picoLLM
+logit
+logits

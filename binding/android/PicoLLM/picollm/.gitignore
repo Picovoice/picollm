@@ -1,3 +1,0 @@
-/build
-src/main/jniLibs/**/*.so
-src/main/res/**/*.pv

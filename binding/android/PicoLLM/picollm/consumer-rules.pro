@@ -1,1 +1,0 @@
--keep class ai.picovoice.mvm.*Exception { <init>(...); }

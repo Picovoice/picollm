@@ -1,7 +1,0 @@
-node_modules
-.rts2_cache/
-.idea/
-dist/
-*.log
-.DS_Store
-scripts/*.bin

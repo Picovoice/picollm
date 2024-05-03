@@ -1,2 +1,0 @@
-rootProject.name = "PicoLLMTestApp"
-include ':picollm-test-app'

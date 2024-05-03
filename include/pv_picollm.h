@@ -15,7 +15,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "core/picovoice.h"
+#include "picovoice.h"
 
 #ifdef __cplusplus
 
@@ -43,7 +43,7 @@ typedef struct pv_picollm pv_picollm_t;
  * `PV_STATUS_RUNTIME_ERROR`, `PV_STATUS_ACTIVATION_ERROR`, `PV_STATUS_ACTIVATION_LIMIT_REACHED`,
  * `PV_STATUS_ACTIVATION_THROTTLED`, or `PV_STATUS_ACTIVATION_REFUSED` on failure.
  */
-PV_API pv_status_t PV_MOCKABLE(pv_picollm_init)(
+PV_API pv_status_t pv_picollm_init(
         const char *access_key,
         const char *model_path,
         const char *device,
@@ -54,7 +54,7 @@ PV_API pv_status_t PV_MOCKABLE(pv_picollm_init)(
  *
  * @param object picoLLM object.
  */
-PV_API void PV_MOCKABLE(pv_picollm_delete)(pv_picollm_t *object);
+PV_API void pv_picollm_delete(pv_picollm_t *object);
 
 /**
  * Usage information.
@@ -98,6 +98,11 @@ typedef struct {
 } pv_picollm_completion_token_t;
 
 /**
+ * Stream callback function type used in `pv_picollm_generate()`.
+ */
+typedef void (*pv_picollm_stream_callback_t)(const char *, void *);
+
+/**
  * Given a text prompt and a set of generation parameters, creates a completion text and relevant metadata. The caller
  * is responsible for freeing completion and metadata objects using `pv_picollm_delete_completion()` and
  * `pv_picollm_delete_completion_tokens()`.
@@ -129,6 +134,7 @@ typedef struct {
  * `pv_picollm_max_top_choices()`.
  * @param stream_callback If not set to `NULL`, picoLLM executes this callback every time a new piece of completion
  * string becomes available.
+ * @param stream_callback_context Pointer containing user-defined data that is passed to `stream_callback` on every invocation.
  * @param[out] usage Number of tokens in the prompt and completion.
  * @param[out] endpoint Indicates the reason for termination of generation process.
  * @param[out] completion_tokens Token-level information about the generated completion.
@@ -138,7 +144,7 @@ typedef struct {
  * `PV_STATUS_RUNTIME_ERROR`, `PV_STATUS_ACTIVATION_ERROR`, `PV_STATUS_ACTIVATION_LIMIT_REACHED`,
  * `PV_STATUS_ACTIVATION_THROTTLED`, or `PV_STATUS_ACTIVATION_REFUSED` on failure.
  */
-PV_API pv_status_t PV_MOCKABLE(pv_picollm_generate)(
+PV_API pv_status_t pv_picollm_generate(
         pv_picollm_t *object,
         const char *prompt,
         int32_t completion_token_limit,
@@ -150,7 +156,8 @@ PV_API pv_status_t PV_MOCKABLE(pv_picollm_generate)(
         float temperature,
         float top_p,
         int32_t num_top_choices,
-        void (*stream_callback)(const char *),
+        pv_picollm_stream_callback_t stream_callback,
+        void *stream_callback_context,
         pv_picollm_usage_t *usage,
         pv_picollm_endpoint_t *endpoint,
         pv_picollm_completion_token_t **completion_tokens,
@@ -163,7 +170,7 @@ PV_API pv_status_t PV_MOCKABLE(pv_picollm_generate)(
  * @param completion_tokens Completion tokens.
  * @param num_completion_tokens Number of completion tokens.
  */
-PV_API void PV_MOCKABLE(pv_picollm_delete_completion_tokens)(
+PV_API void pv_picollm_delete_completion_tokens(
         pv_picollm_completion_token_t *completion_tokens,
         int32_t num_completion_tokens);
 
@@ -172,7 +179,7 @@ PV_API void PV_MOCKABLE(pv_picollm_delete_completion_tokens)(
  *
  * @param completion Completion.
  */
-PV_API void PV_MOCKABLE(pv_picollm_delete_completion)(char *completion);
+PV_API void pv_picollm_delete_completion(char *completion);
 
 /**
  * Tokenizes a given text using the model's tokenizer. The caller is responsible for freeing the returned tokens buffer
@@ -187,7 +194,7 @@ PV_API void PV_MOCKABLE(pv_picollm_delete_completion)(char *completion);
  * @param[out] tokens Tokens representing the input text.
  * @return Status code. Returns `PV_STATUS_OUT_OF_MEMORY` or `PV_STATUS_INVALID_ARGUMENT` on failure.
  */
-PV_API pv_status_t PV_MOCKABLE(pv_picollm_tokenize)(
+PV_API pv_status_t pv_picollm_tokenize(
         const pv_picollm_t *object,
         const char *text,
         bool bos,
@@ -200,7 +207,7 @@ PV_API pv_status_t PV_MOCKABLE(pv_picollm_tokenize)(
  *
  * @param tokens Tokens.
  */
-PV_API void PV_MOCKABLE(pv_picollm_delete_tokens)(int32_t *tokens);
+PV_API void pv_picollm_delete_tokens(int32_t *tokens);
 
 /**
  * Performs a single forward pass given a token and returns the logits. The caller is responsible for freeing the logits
@@ -215,7 +222,7 @@ PV_API void PV_MOCKABLE(pv_picollm_delete_tokens)(int32_t *tokens);
  * `PV_STATUS_RUNTIME_ERROR`, `PV_STATUS_ACTIVATION_ERROR`, `PV_STATUS_ACTIVATION_LIMIT_REACHED`,
  * `PV_STATUS_ACTIVATION_THROTTLED`, or `PV_STATUS_ACTIVATION_REFUSED` on failure.
  */
-PV_API pv_status_t PV_MOCKABLE(pv_picollm_forward)(
+PV_API pv_status_t pv_picollm_forward(
         pv_picollm_t *object,
         int32_t token,
         int32_t *num_logits,
@@ -226,7 +233,7 @@ PV_API pv_status_t PV_MOCKABLE(pv_picollm_forward)(
  *
  * @param logits Logits.
  */
-PV_API void PV_MOCKABLE(pv_picollm_delete_logits)(float *logits);
+PV_API void pv_picollm_delete_logits(float *logits);
 
 /**
  * Resets the internal state of LLM. It should be called in conjunction with `pv_picollm_forward()` when processing a
@@ -236,7 +243,7 @@ PV_API void PV_MOCKABLE(pv_picollm_delete_logits)(float *logits);
  * @param object picoLLM object.
  * @return Status code. Returns `PV_STATUS_INVALID_ARGUMENT` on failure.
  */
-PV_API pv_status_t PV_MOCKABLE(pv_picollm_reset)(pv_picollm_t *object);
+PV_API pv_status_t pv_picollm_reset(pv_picollm_t *object);
 
 /**
  * Getter for model's name.
@@ -245,7 +252,7 @@ PV_API pv_status_t PV_MOCKABLE(pv_picollm_reset)(pv_picollm_t *object);
  * @param[out] model Model's name.
  * @return Status code. Returns `PV_STATUS_INVALID_ARGUMENT` on failure.
  */
-PV_API pv_status_t PV_MOCKABLE(pv_picollm_model)(const pv_picollm_t *object, const char **model);
+PV_API pv_status_t pv_picollm_model(const pv_picollm_t *object, const char **model);
 
 /**
  * Getter for model's context length.
@@ -254,21 +261,21 @@ PV_API pv_status_t PV_MOCKABLE(pv_picollm_model)(const pv_picollm_t *object, con
  * @param[out] context_length Model's context length.
  * @return Status code. Returns `PV_STATUS_INVALID_ARGUMENT` on failure.
  */
-PV_API pv_status_t PV_MOCKABLE(pv_picollm_context_length)(const pv_picollm_t *object, int32_t *context_length);
+PV_API pv_status_t pv_picollm_context_length(const pv_picollm_t *object, int32_t *context_length);
 
 /**
  * Getter for version.
  *
  * @return Version.
  */
-PV_API const char *PV_MOCKABLE(pv_picollm_version)(void);
+PV_API const char *pv_picollm_version(void);
 
 /**
  * Getter for maximum number of top choices for `pv_picollm_generate()`.
  *
  * @return Maximum number of top choices.
  */
-PV_API int32_t PV_MOCKABLE(pv_picollm_max_top_choices)(void);
+PV_API int32_t pv_picollm_max_top_choices(void);
 
 /**
  * Gets a list of hardware devices that can be specified when calling `pv_picollm_init`
@@ -280,7 +287,7 @@ PV_API int32_t PV_MOCKABLE(pv_picollm_max_top_choices)(void);
  * `PV_STATUS_RUNTIME_ERROR`, `PV_STATUS_ACTIVATION_ERROR`, `PV_STATUS_ACTIVATION_LIMIT_REACHED`,
  * `PV_STATUS_ACTIVATION_THROTTLED`, or `PV_STATUS_ACTIVATION_REFUSED` on failure.
  */
-PV_API pv_status_t PV_MOCKABLE(pv_picollm_list_hardware_devices)(
+PV_API pv_status_t pv_picollm_list_hardware_devices(
         char ***hardware_devices,
         int32_t *num_hardware_devices);
 
@@ -290,7 +297,7 @@ PV_API pv_status_t PV_MOCKABLE(pv_picollm_list_hardware_devices)(
  * @param[out] hardware_devices Array of available hardware devices allocated by `pv_picollm_list_hardware_devices`.
  * @param[out] num_hardware_devices The number of devices in the `hardware_devices` array.
  */
-PV_API void PV_MOCKABLE(pv_picollm_free_hardware_devices)(
+PV_API void pv_picollm_free_hardware_devices(
         char **hardware_devices,
         int32_t num_hardware_devices);
 

@@ -98,6 +98,11 @@ typedef struct {
 } pv_picollm_completion_token_t;
 
 /**
+ * Stream callback function type used in `pv_picollm_generate()`.
+ */
+typedef void (*pv_picollm_stream_callback_t)(const char *, void *);
+
+/**
  * Given a text prompt and a set of generation parameters, creates a completion text and relevant metadata. The caller
  * is responsible for freeing completion and metadata objects using `pv_picollm_delete_completion()` and
  * `pv_picollm_delete_completion_tokens()`.
@@ -129,6 +134,7 @@ typedef struct {
  * `pv_picollm_max_top_choices()`.
  * @param stream_callback If not set to `NULL`, picoLLM executes this callback every time a new piece of completion
  * string becomes available.
+ * @param stream_callback_context Pointer containing user-defined data that is passed to `stream_callback` on every invocation.
  * @param[out] usage Number of tokens in the prompt and completion.
  * @param[out] endpoint Indicates the reason for termination of generation process.
  * @param[out] completion_tokens Token-level information about the generated completion.
@@ -150,7 +156,8 @@ PV_API pv_status_t pv_picollm_generate(
         float temperature,
         float top_p,
         int32_t num_top_choices,
-        void (*stream_callback)(const char *),
+        pv_picollm_stream_callback_t stream_callback,
+        void *stream_callback_context,
         pv_picollm_usage_t *usage,
         pv_picollm_endpoint_t *endpoint,
         pv_picollm_completion_token_t **completion_tokens,

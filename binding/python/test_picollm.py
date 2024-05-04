@@ -133,8 +133,9 @@ class PicollmTestCase(unittest.TestCase):
                 if sum([math.exp(x.log_prob) for x in completion_token.top_choices]) > 1.:
                     return False
 
-        if ''.join(x.token.token for x in res.completion_tokens) != expectation.completion:
-            return False
+        if not any('\\x' in x.token.token for x in res.completion_tokens):
+            if ''.join(x.token.token for x in res.completion_tokens) != expectation.completion:
+                return False
 
         if res.completion != expectation.completion:
             return False

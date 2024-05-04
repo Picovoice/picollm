@@ -3,7 +3,8 @@ name: Check Markdown links
 on:
   workflow_dispatch:
   push:
-    branches: [ main, python-housekeeping ]
+    # [AK]
+    branches: [ main, python ]
   pull_request:
     branches: [ main, 'v[0-9]+.[0-9]+' ]
 

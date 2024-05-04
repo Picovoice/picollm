@@ -26,6 +26,7 @@ body:
         - C
         - iOS
         - Python
+        - Rust
         - Web
     validations:
       required: true
@@ -40,7 +41,7 @@ body:
     id: framework
     attributes:
       label: "Framework version"
-      placeholder: "Python 3.7, etc."
+      placeholder: "Python 3.7, .NET Core 3.1, etc."
     validations:
       required: true
   - type: dropdown
@@ -55,6 +56,8 @@ body:
         - macOS (x86_64, arm64)
         - Windows (x86_64)
         - Raspberry Pi
+        - NVIDIA Jetson
+        - BeagleBone
     validations:
       required: true
   - type: input

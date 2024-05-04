@@ -3,17 +3,18 @@ name: Python Codestyle
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    # [AK]
+    branches: [ main, python ]
     paths:
+      - '.github/workflows/python-codestyle.yml'
       - 'binding/python/*.py'
       - 'demo/python/*.py'
-      - '.github/workflows/python-codestyle.yml'
   pull_request:
     branches: [ main, 'v[0-9]+.[0-9]+' ]
     paths:
+      - '.github/workflows/python-codestyle.yml'
       - 'binding/python/*.py'
       - 'demo/python/*.py'
-      - '.github/workflows/python-codestyle.yml'
 
 jobs:
   check-python-codestyle:

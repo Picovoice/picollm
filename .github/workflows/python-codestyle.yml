@@ -3,8 +3,7 @@ name: Python Codestyle
 on:
   workflow_dispatch:
   push:
-    # [AK]
-    branches: [ main, python ]
+    branches: [ main ]
     paths:
       - '.github/workflows/python-codestyle.yml'
       - 'binding/python/*.py'

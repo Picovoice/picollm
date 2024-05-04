@@ -3,8 +3,7 @@ name: Python Demos
 on:
   workflow_dispatch:
   push:
-    # [AK]
-    branches: [ main, python ]
+    branches: [ main ]
     paths:
       - '.github/workflows/python-demos.yml'
       - 'demo/python/**'

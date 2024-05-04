@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     # [AK]
-    branches: [ main, python-housekeeping ]
+    branches: [ main, python ]
     paths:
       - '.github/workflows/python.yml'
       - 'binding/python/**'

@@ -60,7 +60,7 @@ class Dialog(object):
         self._human = list()
         self._llm = list()
 
-    def human(self, content: str) -> None:
+    def add_human_request(self, content: str) -> None:
         """
         Adds human's request to the dialog.
 
@@ -72,7 +72,7 @@ class Dialog(object):
 
         self._human.append(content)
 
-    def llm(self, content: str) -> None:
+    def add_llm_response(self, content: str) -> None:
         """
         Adds LLM's response to the dialog.
 
@@ -208,6 +208,7 @@ class Phi2Dialog(Dialog):
     """
     Dialog helper for `phi-2`. This is a base class, use one of the mode-specific subclasses.
     """
+
     def __init__(
             self,
             human_tag: str,
@@ -495,7 +496,7 @@ class PicoLLM(object):
         target GPU. If set to `cpu`, the engine will run on the CPU with the default number of threads. To specify the
         number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of
         threads.
-        :param library_path: Absolute path to Leopard's dynamic library.
+        :param library_path: Absolute path to picoLLM's dynamic library.
         """
 
         library = CDLL(library_path, winmode=RTLD_LOCAL)

@@ -51,6 +51,6 @@ setuptools.setup(
             'picollm_demo_completion=picollmdemo.picollm_demo_completion:main',
         ],
     ),
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     keywords="Large Language Model, LLM, Generative AI, GenAI, Llama, Mistral, Mixtral, Gemma, Phi",
 )

@@ -85,7 +85,6 @@ class PicollmTestCase(unittest.TestCase):
                 device=self._device,
                 library_path=pv_library_path('../..'))
 
-    @unittest.skip("wait for zoo-dev fix")
     def test_init_with_invalid_device(self) -> None:
         with self.assertRaises(PicoLLMInvalidArgumentError):
             PicoLLM(
@@ -644,9 +643,9 @@ Output:""",
         for dialog_class, prompt in expectations.items():
             o = dialog_class(**kwargs)
             for human, llm in self.CONVERSATION[:-1]:
-                o.human(human)
-                o.llm(llm)
-            o.human(self.CONVERSATION[-1][0])
+                o.add_human_request(human)
+                o.add_llm_response(llm)
+            o.add_human_request(self.CONVERSATION[-1][0])
             self.assertEqual(o.prompt(), prompt)
 
     def test_prompt(self) -> None:

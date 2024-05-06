@@ -27,7 +27,7 @@ pip3 install picollmdemo
 ## Models
 
 picoLLM Inference Engine supports the following open-weight models. The models are on
-[Picovoice Console](https://console.picovoice.ai/). 
+[Picovoice Console](https://console.picovoice.ai/).
 
 - Gemma
     - `gemma-2b`
@@ -54,6 +54,7 @@ picoLLM Inference Engine supports the following open-weight models. The models a
     - `mixtral-8x7b-v0.1`
     - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
+  - `phi2`
 
 ## AccessKey
 
@@ -67,7 +68,7 @@ offline and completely free for open-weight models. Everyone who signs up for
 
 There are two demos available: completion and chat. The completion demo accepts a prompt and a set of optional
 parameters and generates a single completion. It can run all models, whether instruction-tuned or not. The chat demo can
-run instruction-tuned (chat) models such as `Llama-3-8b-instruct`, `Phi-2`, etc. The chat demo enables a back-and-forth
+run instruction-tuned (chat) models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth
 conversation with the LLM, similar to ChatGPT.
 
 ### Completion Demo
@@ -75,12 +76,11 @@ conversation with the LLM, similar to ChatGPT.
 Run the demo by entering the following in the terminal:
 
 ```console
-picollm_demo_completion --access-key ${ACCESS_KEY} --model-path ${MODEL_PATH} --prompt ${PROMPT}
+picollm_demo_completion --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
-downloaded from Picovoice Console, and `${PROMPT}` with a prompt string. This will run the LLM on the best available
-device.
+downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 
 To get information about all the available options in the demo, run the following:
 
@@ -93,10 +93,10 @@ picollm_demo_completion --help
 To run an instruction-tuned model for chat, run the following in the terminal:
 
 ```console
-picollm_demo_chat --access-key ${ACCESS_KEY} --model-path ${MODEL_PATH}
+picollm_demo_chat --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH}
 ```
 
-Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console and ${MODEL_PATH} with the path to a model file
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console and `${MODEL_PATH}` with the path to a model file
 downloaded from Picovoice Console. 
 
 To get information about all the available options in the demo, run the following:

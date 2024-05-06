@@ -37,13 +37,14 @@ models. picoLLM Inference Engine is:
         - [Android](#android-sdk)
         - [iOS](#ios-sdk)
         - [Web](#web-sdk)
+        - [C](#c-sdk)
     - [Releases](#releases)
     - [FAQ](#faq)
 
 ## Models
 
-picoLLM Inference Engine supports the following open-weight models. You can download them from
-[Picovoice Console](https://console.picovoice.ai/). 
+picoLLM Inference Engine supports the following open-weight models. The models are on
+[Picovoice Console](https://console.picovoice.ai/).
 
 - Gemma
     - `gemma-2b`
@@ -70,6 +71,7 @@ picoLLM Inference Engine supports the following open-weight models. You can down
     - `mixtral-8x7b-v0.1`
     - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
+  - `phi2`
 
 ## AccessKey
 
@@ -92,7 +94,7 @@ pip3 install picollmdemo
 Run the following in the terminal:
 
 ```console
-picollm_demo_completion --access-key ${ACCESS_KEY} --model-path ${MODEL_PATH} --prompt ${PROMPT}
+picollm_demo_completion --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
@@ -125,7 +127,9 @@ Create an instance of the engine and generate a prompt completion:
 ```python
 import picollm
 
-pllm = picollm.create(access_key='${ACCESS_KEY}', model_path='${MODEL_PATH}')
+pllm = picollm.create(
+    access_key='${ACCESS_KEY}',
+    model_path='${MODEL_PATH}')
 
 res = pllm.generate('${PROMPT}')
 print(res.completion)
@@ -142,6 +146,54 @@ the resources using `pllm.release()`.
 ### iOS SDK
 
 ### Web SDK
+
+### C SDK
+
+Create an instance of the engine and generate a prompt completion:
+
+```c
+pv_picollm_t *pllm = NULL;
+pv_picollm_init(
+    '${ACCESS_KEY}',
+    '${MODEL_PATH}',
+    'best',
+    &pllm);
+
+pv_picollm_usage_t usage;
+pv_picollm_endpoint_t endpoint;
+int32_t num_completion_tokens;
+pv_picollm_completion_token_t *completion_tokens;
+char *output;
+pv_picollm_generate(
+    pllm,
+    '${PROMPT}',
+    -1,  // completion_token_limit
+    NULL,  // stop_phrases
+    0,  // num_stop_phrases
+    -1,  // seed
+    0.f,  // presence_penalty
+    0.f,  // frequency_penalty
+    0.f,  // temperature
+    1.f,  // top_p
+    0,  // num_top_choices
+    NULL,  // stream_callback
+    NULL,  // stream_callback_context
+    &usage,
+    &endpoint,
+    &completion_tokens,
+    &num_completion_tokens,
+    &output);
+printf("%s\n", output);
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` to the path to a model file
+downloaded from Picovoice Console, and `${PROMPT}` to a prompt string. 
+
+Finally, when done, be sure to release the resources explicitly:
+
+```c
+pv_picollm_delete(pllm);
+```
 
 ## Releases
 

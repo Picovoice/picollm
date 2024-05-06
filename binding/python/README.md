@@ -27,7 +27,7 @@ pip3 install picollm
 ## Models
 
 picoLLM Inference Engine supports the following open-weight models. The models are on
-[Picovoice Console](https://console.picovoice.ai/). 
+[Picovoice Console](https://console.picovoice.ai/).
 
 - Gemma
     - `gemma-2b`
@@ -54,6 +54,7 @@ picoLLM Inference Engine supports the following open-weight models. The models a
     - `mixtral-8x7b-v0.1`
     - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
+  - `phi2`
 
 ## AccessKey
 
@@ -81,15 +82,15 @@ print(res.completion)
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
 downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 
-Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, `gemma-2b-it`, ...) have a specific chat
-template. You can either directly format the prompt or use a `Dialog` helper:
+Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, and `gemma-2b-it`) have a specific chat
+template. You can either directly format the prompt or use a dialog helper:
 
 ```python
 dialog = pllm.get_dialog()
-dialog.human(prompt)
+dialog.add_human_request(prompt)
 
 res = pllm.generate(prompt=dialog.prompt())
-dialog.llm(res.completion)
+dialog.add_llm_response(res.completion)
 print(res.completion)
 ```
 

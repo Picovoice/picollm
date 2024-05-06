@@ -17,10 +17,10 @@ import picollm
 def main() -> None:
     parser = ArgumentParser()
     parser.add_argument(
-        '--access-key',
+        '--access_key',
         help='`AccessKey` obtained from `Picovoice Console` (https://console.picovoice.ai/).')
     parser.add_argument(
-        '--model-path',
+        '--model_path',
         help='Absolute path to the file containing LLM parameters.')
     parser.add_argument(
         '--device',
@@ -31,12 +31,12 @@ def main() -> None:
              "To specify the number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is "
              "the desired number of threads.")
     parser.add_argument(
-        '--completion-token-limit',
+        '--completion_token_limit',
         type=int,
         default=128,
         help="Maximum number of tokens in the completion. Set to `None` to impose no limit.")
     parser.add_argument(
-        '--stop-phrases',
+        '--stop_phrases',
         nargs='+',
         help="The generation process stops when it encounters any of these phrases in the completion. The already "
              "generated completion, including the encountered stop phrase, will be returned.")
@@ -46,13 +46,13 @@ def main() -> None:
         help="The internal random number generator uses it as its seed if set to a positive integer value. Seeding "
              "enforces deterministic outputs. Set to `None` for randomized responses.")
     parser.add_argument(
-        '--presence-penalty',
+        '--presence_penalty',
         type=float,
         default=0.,
         help="It penalizes logits already appearing in the partial completion if set to a positive value. If set to "
              "`0.0`, it has no effect.")
     parser.add_argument(
-        '--frequency-penalty',
+        '--frequency_penalty',
         type=float,
         default=0.,
         help="If set to a positive floating-point value, it penalizes logits proportional to the frequency of their "
@@ -66,7 +66,7 @@ def main() -> None:
              "contrast, a lower temperature creates a narrower distribution and reduces variability. Setting it to "
              "`0` selects the maximum logit during sampling.")
     parser.add_argument(
-        '--top-p',
+        '--top_p',
         type=float,
         default=1.,
         help="A positive floating-point number within (0, 1]. It restricts the sampler's choices to high-probability "
@@ -74,12 +74,12 @@ def main() -> None:
              "unlikely logits. A value of `1.` enables the sampler to pick any token with non-zero probability, "
              "turning off the feature.")
     parser.add_argument(
-        '--dialog-mode',
-        help="Some instruction-tuned models provide multiple instruction modes. For example, Phi-2 has `qa` and `chat` "
-             "modes.")
+        '--dialog_mode',
+        help="Some instruction-tuned models provide multiple instruction modes. For example, `phi2` has `qa` and "
+             "`chat` modes.")
     parser.add_argument(
-        '--system-instruction',
-        help="Some instruction-tuned models, such as `Llama-2-7b-chat` accept a system-level instruction that can "
+        '--system_instruction',
+        help="Some instruction-tuned models, such as `llama-2-70b-chat` accept a system-level instruction that can "
              "change the model's behavior or tone throughout the entire dialog.")
     parser.add_argument(
         '--history',
@@ -90,11 +90,11 @@ def main() -> None:
              "parameter controls how many of the latest back-and-forths should be serialized in each prompt. Set to "
              "`None` to impose no limit.")
     parser.add_argument(
-        '--show-available-devices',
+        '--show_available_devices',
         action='store_true',
         help="Show the list of available devices for LLM inference.")
     parser.add_argument(
-        '--library-path',
+        '--library_path',
         help="Absolute path to picoLLM's dynamic library.")
 
     args = parser.parse_args()
@@ -119,10 +119,10 @@ def main() -> None:
         exit(0)
     else:
         if access_key is None:
-            print("`--access-key` is a required argument")
+            print("`--access_key` is a required argument")
             exit(1)
         if model_path is None:
-            print("`--model-path` is a required argument")
+            print("`--model_path` is a required argument")
             exit(1)
 
     o = picollm.create(
@@ -138,7 +138,7 @@ def main() -> None:
     try:
         while True:
             prompt = input(">>> ")
-            dialog.human(prompt)
+            dialog.add_human_request(prompt)
             res = o.generate(
                 prompt=dialog.prompt(),
                 completion_token_limit=completion_token_limit,
@@ -150,7 +150,7 @@ def main() -> None:
                 top_p=top_p,
                 stream_callback=lambda x: print(x, flush=True, end=''))
             print()
-            dialog.llm(res.completion)
+            dialog.add_llm_response(res.completion)
     except KeyboardInterrupt:
         pass
     finally:

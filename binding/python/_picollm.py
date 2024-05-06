@@ -895,6 +895,24 @@ class PicoLLM(object):
 
         return message_stack
 
+    _DIALOGS: Dict[str, Union[Type[Dialog], Dict[str, Type[Dialog]]]] = {
+        'gemma-2b-it': GemmaChatDialog,
+        'gemma-7b-it': GemmaChatDialog,
+        'llama-2-7b-chat': Llama2ChatDialog,
+        'llama-2-13b-chat': Llama2ChatDialog,
+        'llama-2-70b-chat': Llama2ChatDialog,
+        'llama-3-8b-instruct': Llama3ChatDialog,
+        'llama-3-70b-instruct': Llama3ChatDialog,
+        'mistral-7b-instruct-v0.1': MistralChatDialog,
+        'mistral-7b-instruct-v0.2': MistralChatDialog,
+        'mixtral-8x7b-instruct-v0.1': MixtralChatDialog,
+        'phi2': {
+            'default': Phi2QADialog,
+            'qa': Phi2QADialog,
+            'chat': Phi2ChatDialog,
+        },
+    }
+
     def get_dialog(
             self,
             mode: Optional[str] = None,
@@ -913,46 +931,28 @@ class PicoLLM(object):
         :return: Constructed dialog object.
         """
 
-        dialogs: Dict[str, Union[Type[Dialog], Dict[str, Type[Dialog]]]] = {
-            'gemma-2b-it': GemmaChatDialog,
-            'gemma-7b-it': GemmaChatDialog,
-            'llama-2-7b-chat': Llama2ChatDialog,
-            'llama-2-13b-chat': Llama2ChatDialog,
-            'llama-2-70b-chat': Llama2ChatDialog,
-            'llama-3-8b-instruct': Llama3ChatDialog,
-            'llama-3-70b-instruct': Llama3ChatDialog,
-            'mistral-7b-instruct-v0.1': MistralChatDialog,
-            'mistral-7b-instruct-v0.2': MistralChatDialog,
-            'mixtral-8x7b-instruct-v0.1': MixtralChatDialog,
-            'phi2': {
-                'default': Phi2QADialog,
-                'qa': Phi2QADialog,
-                'chat': Phi2ChatDialog,
-            },
-        }
-
         model = self.model.split()[0].lower()
-        if model not in dialogs:
+        if model not in self._DIALOGS:
             raise NotImplementedError(
                 f" `{self._model}` does not have a corresponding dialog implementation or is not instruction-tuned")
 
-        if isinstance(dialogs[model], dict):
+        if isinstance(self._DIALOGS[model], dict):
             if mode is None:
-                if 'default' not in dialogs[model]:
+                if 'default' not in self._DIALOGS[model]:
                     raise ValueError(
                         f"`{self._model}` does require a `mode`. Available modes are: "
-                        f"`{', '.join(sorted(dialogs[model].keys()))}`")
-                return dialogs[model]['default'](history=history, system=system)
+                        f"`{', '.join(sorted(self._DIALOGS[model].keys()))}`")
+                return self._DIALOGS[model]['default'](history=history, system=system)
             else:
-                if mode not in dialogs[model]:
+                if mode not in self._DIALOGS[model]:
                     raise ValueError(
                         f"`{self._model}` doesn't have a `{mode}` model. Available modes are: "
-                        f"`{', '.join(sorted(dialogs[model].keys()))}`")
-                return dialogs[model][mode](history=history, system=system)
+                        f"`{', '.join(sorted(self._DIALOGS[model].keys()))}`")
+                return self._DIALOGS[model][mode](history=history, system=system)
         else:
             if mode is not None:
                 raise ValueError(f"`{self._model}` doesn't accept a `mode` parameter, set it to `None`.")
-            return dialogs[model](history=history, system=system)
+            return self._DIALOGS[model](history=history, system=system)
 
 
 __all__ = [

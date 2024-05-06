@@ -1,9 +1,6 @@
-# picoLLM Inference Engine Demos
+# picoLLM Inference Engine Python Demos
 
 Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
-
-This package contains demos and commandline utilities for local LLM inference (chat and completion) using picoLLM
-inference engine.
 
 ## picoLLM Inference Engine
 
@@ -13,15 +10,13 @@ models. picoLLM Inference Engine is:
 - Accurate; picoLLM Compression improves GPTQ by up to 98%.
 - Private; LLM inference runs 100% locally.
 - Cross-Platform
-  - Linux (x86_64), macOS (x86_64, arm64), Windows (x86_64)
-  - Raspberry Pi (3, 4, 5)
 - Runs on CPU and GPU
 - Free for open-weight models
 
 ## Compatibility
 
 - Python 3.8+
-- Runs on Linux (x86_64), macOS (x86_64 and arm64), Windows (x86_64), and Raspberry Pi (3, 4, and 5).
+- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64), and Raspberry Pi (5, 4, and 3).
 
 ## Installation
 
@@ -31,7 +26,7 @@ pip3 install picollmdemo
 
 ## Models
 
-picoLLM Inference Engine supports the following open-weight models. You can download them from
+picoLLM Inference Engine supports the following open-weight models. The models are on
 [Picovoice Console](https://console.picovoice.ai/). 
 
 - Gemma

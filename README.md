@@ -1,13 +1,4 @@
-# picoLLM
-
-[//]: # ([AK])
-
-<!-- markdown-link-check-disable -->
-
-[![GitHub release](https://img.shields.io/github/release/Picovoice/picollm.svg)](https://github.com/Picovoice/picollm/releases)
-[![GitHub](https://img.shields.io/github/license/Picovoice/picollm)](https://github.com/Picovoice/picollm/blob/main/LICENSE)
-
-<!-- markdown-link-check-enable -->
+# picoLLM Inference Engine
 
 Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
 
@@ -20,16 +11,16 @@ models. picoLLM Inference Engine is:
 - Accurate; picoLLM Compression improves GPTQ by up to 98%.
 - Private; LLM inference runs 100% locally.
 - Cross-Platform
-    - Linux (x86_64), macOS (x86_64, arm64), Windows (x86_64)
-    - Raspberry Pi (3, 4, 5)
+    - Linux (x86_64), macOS (arm64, x86_64), and Windows (x86_64)
+    - Raspberry Pi (5, 4, and 3)
     - Android and iOS
-    - Chrome, Safari, Firefox, and Edge
+    - Chrome, Safari, Edge, and Firefox 
 - Runs on CPU and GPU
 - Free for open-weight models
 
 ## Table of Contents
 
-- [picoLLM](#picollm)
+- [picoLLM](#picollm-inference-engine)
     - [Table of Contents](#table-of-contents)
     - [Models](#models)
     - [AccessKey](#accesskey)

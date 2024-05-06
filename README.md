@@ -167,15 +167,15 @@ char *output;
 pv_picollm_generate(
     pllm,
     '${PROMPT}',
-    -1,  // completion_token_limit
+    -1,    // completion_token_limit
     NULL,  // stop_phrases
-    0,  // num_stop_phrases
-    -1,  // seed
-    0.f,  // presence_penalty
-    0.f,  // frequency_penalty
-    0.f,  // temperature
-    1.f,  // top_p
-    0,  // num_top_choices
+    0,     // num_stop_phrases
+    -1,    // seed
+    0.f,   // presence_penalty
+    0.f,   // frequency_penalty
+    0.f,   // temperature
+    1.f,   // top_p
+    0,     // num_top_choices
     NULL,  // stream_callback
     NULL,  // stream_callback_context
     &usage,

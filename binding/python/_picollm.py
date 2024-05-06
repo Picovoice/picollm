@@ -800,7 +800,10 @@ class PicoLLM(object):
             byref(c_num_tokens),
             byref(c_tokens))
         if status is not self.PicovoiceStatuses.SUCCESS:
-            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status]()
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message="`pv_picollm_tokenize` failed.",
+                message_stack=self.get_error_stack()
+            )
 
         tokens = [c_tokens[i] for i in range(c_num_tokens.value)]
         self._delete_tokens_func(c_tokens)
@@ -824,7 +827,10 @@ class PicoLLM(object):
             byref(c_num_logits),
             byref(c_logits))
         if status is not self.PicovoiceStatuses.SUCCESS:
-            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status]()
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message="`pv_picollm_forward` failed.",
+                message_stack=self.get_error_stack()
+            )
 
         logits = [c_logits[i] for i in range(c_num_logits.value)]
         self._delete_logits(c_logits)
@@ -840,7 +846,10 @@ class PicoLLM(object):
 
         status = self._reset_func(self._handle)
         if status is not self.PicovoiceStatuses.SUCCESS:
-            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status]()
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message="`pv_picollm_reset` failed.",
+                message_stack=self.get_error_stack()
+            )
 
     def release(self) -> None:
         """Releases resources acquired by picoLLM."""

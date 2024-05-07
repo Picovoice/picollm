@@ -61,7 +61,8 @@ class PicollmTestCase(unittest.TestCase):
         cls._model_path = sys.argv[2]
         cls._device = sys.argv[3]
 
-        with open(os.path.join(os.path.dirname(__file__), '../../resources/.test/test_data.json')) as f:
+        path = os.path.join(os.path.dirname(__file__), '../../resources/.test/test_data.json')
+        with open(path, encoding='utf-8') as f:
             cls.data = json.load(f)["picollm"]
 
     def setUp(self):
@@ -452,7 +453,8 @@ class DialogTestCase(unittest.TestCase):
             "phi2-qa-dialog": Phi2QADialog,
         }
 
-        with open(os.path.join(os.path.dirname(__file__), '../../resources/.test/test_data.json')) as f:
+        path = os.path.join(os.path.dirname(__file__), '../../resources/.test/test_data.json')
+        with open(path, encoding='utf-8') as f:
             data = json.load(f)['dialog']
             cls.system: str = data['system']
             cls.conversation: Sequence[Tuple[str, str]] = [(x[0], x[1]) for x in data['conversation']]

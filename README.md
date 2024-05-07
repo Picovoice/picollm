@@ -154,9 +154,9 @@ Create an instance of the engine and generate a prompt completion:
 ```c
 pv_picollm_t *pllm = NULL;
 pv_picollm_init(
-    '${ACCESS_KEY}',
-    '${MODEL_PATH}',
-    'best',
+    "${ACCESS_KEY}",
+    "${MODEL_PATH}",
+    "best",
     &pllm);
 
 pv_picollm_usage_t usage;
@@ -166,7 +166,7 @@ pv_picollm_completion_token_t *completion_tokens;
 char *output;
 pv_picollm_generate(
     pllm,
-    '${PROMPT}',
+    "${PROMPT}",
     -1,    // completion_token_limit
     NULL,  // stop_phrases
     0,     // num_stop_phrases

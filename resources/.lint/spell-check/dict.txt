@@ -43,3 +43,9 @@ tock
 uddin
 winmode
 xcframework
+LPWSTR
+wargv
+Makefiles
+libpv
+Pico
+LLMC

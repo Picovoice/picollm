@@ -14,7 +14,7 @@ models. picoLLM Inference Engine is:
     - Linux (x86_64), macOS (arm64, x86_64), and Windows (x86_64)
     - Raspberry Pi (5, 4, and 3)
     - Android and iOS
-    - Chrome, Safari, Edge, and Firefox 
+    - Chrome, Safari, Edge, and Firefox
 - Runs on CPU and GPU
 - Free for open-weight models
 
@@ -25,12 +25,12 @@ models. picoLLM Inference Engine is:
     - [Models](#models)
     - [AccessKey](#accesskey)
     - [Demos](#demos)
-      - [Python](#python-demos)
-      - [Node.js](#nodejs-demos)
-      - [Android](#android-demos)
-      - [iOS](#ios-demos)
-      - [Web](#web-demos)
-      - [C](#c-demos)
+        - [Python](#python-demos)
+        - [Node.js](#nodejs-demos)
+        - [Android](#android-demos)
+        - [iOS](#ios-demos)
+        - [Web](#web-demos)
+        - [C](#c-demos)
     - [SDKs](#sdks)
         - [Python](#python-sdk)
         - [Node.js](#nodejs-sdk)
@@ -71,7 +71,7 @@ picoLLM Inference Engine supports the following open-weight models. The models a
     - `mixtral-8x7b-v0.1`
     - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
-  - `phi2`
+    - `phi2`
 
 ## AccessKey
 
@@ -111,6 +111,25 @@ For more information about Python demos go to [demo/python](demo/python/README.m
 ### Web Demos
 
 ### C Demos
+
+Build the demo:
+
+```console
+cmake -S demo/c/ -B demo/c/build && cmake --build demo/c/build
+```
+
+Run the demo:
+
+```console
+./demo/c/build/picollm_demo_completion -a ${ACCESS_KEY} -l ${LIBRARY_PATH} -m ${MODEL_FILE_PATH} -p ${PROMPT}
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${LIBRARY_PATH}` with the path to the shared
+library
+file located in the [lib](lib) directory, `${MODEL_FILE_PATH}` with the path to a model file downloaded from Picovoice
+Console, and `${PROMPT}` with a prompt string.
+
+For more information about C demos go to [demo/c](demo/c/README.md).
 
 ## SDKs
 
@@ -187,7 +206,7 @@ printf("%s\n", output);
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` to the path to a model file
-downloaded from Picovoice Console, and `${PROMPT}` to a prompt string. 
+downloaded from Picovoice Console, and `${PROMPT}` to a prompt string.
 
 Finally, when done, be sure to release the resources explicitly:
 

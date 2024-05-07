@@ -1,16 +1,5 @@
 # picoLLM Inference Engine C Demo
 
-## picoLLM Inference Engine
-
-picoLLM Inference Engine is a highly accurate and cross-platform SDK optimized for running compressed large language
-models. picoLLM Inference Engine is:
-
-- Accurate; picoLLM Compression improves GPTQ by up to 98%.
-- Private; LLM inference runs 100% locally.
-- Cross-Platform
-- Runs on CPU and GPU
-- Free for open-weight models
-
 ## Compatibility
 
 - C99-compatible compiler
@@ -28,6 +17,38 @@ using Picovoice needs to have a valid AccessKey. You must keep your AccessKey se
 connectivity to validate your AccessKey with Picovoice license servers even though the LLM inference is running 100%
 offline and completely free for open-weight models. Everyone who signs up for
 [Picovoice Console](https://console.picovoice.ai/) receives a unique AccessKey.
+
+## Models
+
+picoLLM Inference Engine supports the following open-weight models. The models are on
+[Picovoice Console](https://console.picovoice.ai/).
+
+- Gemma
+    - `gemma-2b`
+    - `gemma-2b-it`
+    - `gemma-7b`
+    - `gemma-7b-it`
+- Llama-2
+    - `llama-2-7b`
+    - `llama-2-7b-chat`
+    - `llama-2-13b`
+    - `llama-2-13b-chat`
+    - `llama-2-70b`
+    - `llama-2-70b-chat`
+- Llama-3
+    - `llama-3-8b`
+    - `llama-3-8b-instruct`
+    - `llama-3-70b`
+    - `llama-3-70b-instruct`
+- Mistral
+    - `mistral-7b-v0.1`
+    - `mistral-7b-instruct-v0.1`
+    - `mistral-7b-instruct-v0.2`
+- Mixtral
+    - `mixtral-8x7b-v0.1`
+    - `mixtral-8x7b-instruct-v0.1`
+- Phi-2
+    - `phi2`
 
 ## Usage
 
@@ -56,45 +77,45 @@ cmake --build demo/c/build
 Running the demo without arguments prints the usage:
 
 ```console
+Usage: ./demo/c/build/picollm_demo_completion -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH 
+[-d DEVICE] [-c COMPLETION_TOKEN_LIMIT] [-s STOP_PHRASES] [-e SEED] [-r PRESENCE_PENALTY] 
+[-f FREQUENCY_PENALTY] [-o TOP_P] [-t TEMPERATURE] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES] 
+[-v] [-h] -p PROMPT
+-v: enable verbose output
+-h: show available devices
 ```
 
 Run the command corresponding to your platform from the root of the repository. Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
-downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
-
-To get information about all the available options in the demo, run the following:
-
-```console
-picollm_demo_completion --help
-```
+downloaded from Picovoice Console, and `${PROMPT}` with a prompt string. `-v` enables verbose output, and `-h` shows available devices. For more information on the optional parameters, see the [picollm header file](../../include/pv_picollm.h).
 
 #### Linux (x86_64)
 
 ```console
-./demo/c/build/leopard_demo \
+./demo/c/build/picollm_demo_completion \
 -a ${ACCESS_KEY} \
--m lib/common/leopard_params.pv \
--l lib/linux/x86_64/libpv_leopard.so \
-${AUDIO_PATH}
+-m ${MODEL_PATH} \
+-l lib/linux/x86_64/libpv_picollm.so \
+-p ${PROMPT}
 ```
 
 #### macOS (x86_64)
 
 ```console
-./demo/c/build/leopard_demo \
+./demo/c/build/picollm_demo_completion \
 -a ${ACCESS_KEY} \
--m lib/common/leopard_params.pv \
--l lib/mac/x86_64/libpv_leopard.dylib \
-${AUDIO_PATH}
+-m ${MODEL_PATH} \
+-l lib/mac/x86_64/libpv_picollm.dylib \
+-p ${PROMPT}
 ```
 
 #### macOS (arm64)
 
 ```console
-./demo/c/build/leopard_demo \
+./demo/c/build/picollm_demo_completion \
 -a ${ACCESS_KEY} \
--m lib/common/leopard_params.pv \
--l lib/mac/arm64/libpv_leopard.dylib \
-${AUDIO_PATH}
+-m ${MODEL_PATH} \
+-l lib/mac/arm64/libpv_picollm.dylib \
+-p ${PROMPT}
 ```
 
 #### Windows
@@ -102,49 +123,49 @@ ${AUDIO_PATH}
 Run using `Command Prompt`.
 
 ```console
-demo\\c\\build\\leopard_demo.exe ^
+demo\c\build\picollm_demo_completion.exe ^
 -a ${ACCESS_KEY} ^
--m lib\\common\\leopard_params.pv ^
--l lib\\windows\\amd64\\libpv_leopard.dll ^
-${AUDIO_PATH}
+-m ${MODEL_PATH} ^
+-l lib\windows\amd64\libpv_picollm.dll ^
+-p ${PROMPT}
 ```
 
 #### Raspberry Pi 4
 
 ```console
-./demo/c/build/leopard_demo \
+./demo/c/build/picollm_demo_completion \
 -a ${ACCESS_KEY} \
--m lib/common/leopard_params.pv \
--l lib/raspberry-pi/cortex-a72/libpv_leopard.so \
-${AUDIO_PATH}
+-m ${MODEL_PATH} \
+-l lib/raspberry-pi/cortex-a72/libpv_picollm.so \
+-p ${PROMPT}
 ```
 
 #### Raspberry Pi 4 (64-bit)
 
 ```console
-./demo/c/build/leopard_demo \
+./demo/c/build/picollm_demo_completion \
 -a ${ACCESS_KEY} \
--m lib/common/leopard_params.pv \
--l lib/raspberry-pi/cortex-a72-aarch64/libpv_leopard.so \
-${AUDIO_PATH}
+-m ${MODEL_PATH} \
+-l lib/raspberry-pi/cortex-a72-aarch64/libpv_picollm.so \
+-p ${PROMPT}
 ```
 
 #### Raspberry Pi 3
 
 ```console
-./demo/c/build/leopard_demo \
+./demo/c/build/picollm_demo_completion \
 -a ${ACCESS_KEY} \
--m lib/common/leopard_params.pv \
--l lib/raspberry-pi/cortex-a53/libpv_leopard.so \
-${AUDIO_PATH}
+-m ${MODEL_PATH} \
+-l lib/raspberry-pi/cortex-a53/libpv_picollm.so \
+-p ${PROMPT}
 ```
 
 #### Raspberry Pi 3 (64-bit)
 
 ```console
-./demo/c/build/leopard_demo \
+./demo/c/build/picollm_demo_completion \
 -a ${ACCESS_KEY} \
--m lib/common/leopard_params.pv \
--l lib/raspberry-pi/cortex-a53-aarch64/libpv_leopard.so \
-${AUDIO_PATH}
+-m ${MODEL_PATH} \
+-l lib/raspberry-pi/cortex-a53-aarch64/libpv_picollm.so \
+-p ${PROMPT}
 ```

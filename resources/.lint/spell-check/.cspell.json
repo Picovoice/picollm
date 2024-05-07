@@ -11,33 +11,26 @@
     }
   ],
   "ignorePaths": [
-    // binaries
+    // Binaries
     "**/*.a",
     "**/*.dll",
     "**/*.dylib",
     "**/*.jar",
-    "**/*.mp3",
     "**/*.node",
-    "**/*.ppn",
-    "**/*.pv",
     "**/*.so",
     "**/*.wasm",
     "**/dist/**",
-    "../../../lib/ios/**/*",
+    "**/lib/ios/**/*",
 
-    // ios
-    "**/*.xcconfig",
-    "**/*.podspec",
-    "**/Podfile",
-    "**/*.plist",
-    "**/contents.xcworkspacedata",
-    "**/*.storyboard",
+    // iOS
     "**/*.pbxproj",
+    "**/*.plist",
+    "**/*.storyboard",
+    "**/*.xcconfig",
     "**/*.xcscheme",
-    "**/*.m",
-    "../../../lib/ios/**/*",
+    "**/contents.xcworkspacedata",
 
-    // java
+    // Java
     "**/build.gradle",
     "**/gradle-wrapper.properties",
     "**/gradle.properties",
@@ -45,9 +38,7 @@
     "**/gradlew.bat",
     "**/proguard-rules.pro",
 
-    // android
-    "**/AndroidManifest.xml",
-    "**/activity_main.xml",
-    "**/koala_activity_demo.xml"
+    // Python
+    "**/__pycache__/**"
   ]
 }

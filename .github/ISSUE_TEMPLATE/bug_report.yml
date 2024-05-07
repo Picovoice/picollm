@@ -25,6 +25,7 @@ body:
         - Android
         - C
         - iOS
+        - Node.js
         - Python
         - Web
     validations:
@@ -40,7 +41,7 @@ body:
     id: framework
     attributes:
       label: "Framework version"
-      placeholder: "Python 3.7, etc."
+      placeholder: "Python 3.8, etc."
     validations:
       required: true
   - type: dropdown
@@ -50,11 +51,11 @@ body:
       options:
         - Android
         - iOS
-        - Web (WASM)
         - Linux (x86_64)
-        - macOS (x86_64, arm64)
-        - Windows (x86_64)
+        - macOS (arm64, x86_64)
         - Raspberry Pi
+        - Web (WASM)
+        - Windows (x86_64)
     validations:
       required: true
   - type: input

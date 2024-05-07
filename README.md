@@ -114,6 +114,20 @@ For more information about Android demos go to [demo/android](demo/android/READM
 
 ### iOS Demos
 
+To run the completion demo, go to [demo/ios/PicoLLMCompletionDemo](demo/ios/PicoLLMCompletionDemo) and run:
+
+```console
+pod install
+```
+
+Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](demo/ios/PicoLLMCompletionDemo/PicoLLMCompletionDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
+
+Then, using [Xcode](https://developer.apple.com/xcode/), open the generated `PicoLLMCompletionDemo.xcworkspace` and run the application.
+
+To learn about how to use picoLLM in a chat application, try out the [Chat demo](demo/ios/PicoLLMChatDemo).
+
+For more information about iOS demos go to [demo/python](demo/ios/README.md).
+
 ### Web Demos
 
 From [demo/web](demo/web) run the following in the terminal:
@@ -204,6 +218,22 @@ downloaded from Picovoice Console, and `${PROMPT}` to a prompt string. Finally, 
 the resources using `picollm.delete()`.
 
 ### iOS SDK
+
+Create an instance of the engine and generate a prompt completion:
+
+```c
+import PicoLLM
+
+let pllm = try PicoLLM(
+    accessKey: "${ACCESS_KEY}",
+    modelPath: "${MODEL_PATH}")
+
+let res = pllm.generate(prompt: "${PROMPT}")
+print(res.completion)
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` to the path to a model file
+downloaded from Picovoice Console, and `${PROMPT}` to a prompt string.
 
 ### Web SDK
 

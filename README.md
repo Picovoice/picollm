@@ -125,9 +125,8 @@ Run the demo:
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${LIBRARY_PATH}` with the path to the shared
-library
-file located in the [lib](lib) directory, `${MODEL_FILE_PATH}` with the path to a model file downloaded from Picovoice
-Console, and `${PROMPT}` with a prompt string.
+library file located in the [lib](lib) directory, `${MODEL_FILE_PATH}` with the path to a model file downloaded from
+Picovoice Console, and `${PROMPT}` with a prompt string.
 
 For more information about C demos go to [demo/c](demo/c/README.md).
 

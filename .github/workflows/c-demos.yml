@@ -9,8 +9,6 @@ on:
       - '.github/workflows/c-demos.yml'
       - 'demo/c/**'
       - 'include/**'
-      - 'lib/common/**'
-      - 'lib/jetson/**'
       - 'lib/linux/**'
       - 'lib/mac/**'
       - 'lib/raspberry-pi/**'
@@ -23,8 +21,6 @@ on:
       - '.github/workflows/c-demos.yml'
       - 'demo/c/**'
       - 'include/**'
-      - 'lib/common/**'
-      - 'lib/jetson/**'
       - 'lib/linux/**'
       - 'lib/mac/**'
       - 'lib/raspberry-pi/**'
@@ -44,7 +40,7 @@ jobs:
       matrix:
         xpu: [ cpu ]
         make_file: [ "Unix Makefiles" ]
-        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios ]
+        machine: [ rpi3-32, rpi3-64, rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios ]
         include:
           - xpu: gpu
             machine: pv-linux

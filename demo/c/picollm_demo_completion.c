@@ -1,5 +1,5 @@
 /*
-    Copyright 2023-2024 Picovoice Inc.
+    Copyright 2024 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
     file accompanying this source.
@@ -302,56 +302,57 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_delete_completion_tokens_func)(pv_picollm_completion_token_t *, int32_t) =
-    load_symbol(dl_handle, "pv_picollm_delete_completion_tokens");
+    pv_status_t (*pv_picollm_delete_completion_tokens_func)(pv_picollm_completion_token_t *, int32_t) = 
+        load_symbol(dl_handle, "pv_picollm_delete_completion_tokens");
     if (!pv_picollm_delete_completion_tokens_func) {
         print_dl_error("failed to load `pv_picollm_delete_completion_tokens`");
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_delete_completion_func)(char *) =
-    load_symbol(dl_handle, "pv_picollm_delete_completion");
+    pv_status_t (*pv_picollm_delete_completion_func)(char *) = 
+        load_symbol(dl_handle, "pv_picollm_delete_completion");
     if (!pv_picollm_delete_completion_func) {
         print_dl_error("failed to load `pv_picollm_delete_completion`");
         exit(EXIT_FAILURE);
     }
 
-    const char *(*pv_picollm_version_func)(void) = load_symbol(dl_handle, "pv_picollm_version");
+    const char *(*pv_picollm_version_func)(void) = 
+        load_symbol(dl_handle, "pv_picollm_version");
     if (!pv_picollm_version_func) {
         print_dl_error("failed to load `pv_picollm_version`");
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_model_func)(pv_picollm_t *, char **) = load_symbol(dl_handle, "pv_picollm_model");
+    pv_status_t (*pv_picollm_model_func)(pv_picollm_t *, char **) = 
+        load_symbol(dl_handle, "pv_picollm_model");
     if (!pv_picollm_model_func) {
         print_dl_error("failed to load `pv_picollm_model`");
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_list_hardware_devices_func)(char ***, int32_t *) = load_symbol(dl_handle,
-                                                                                            "pv_picollm_list_hardware_devices");
+    pv_status_t (*pv_picollm_list_hardware_devices_func)(char ***, int32_t *) = 
+        load_symbol(dl_handle, "pv_picollm_list_hardware_devices");
     if (!pv_picollm_list_hardware_devices_func) {
         print_dl_error("failed to load `pv_picollm_list_hardware_devices`");
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_free_hardware_devices_func)(char **, int32_t) = load_symbol(dl_handle,
-                                                                                         "pv_picollm_free_hardware_devices");
+    pv_status_t (*pv_picollm_free_hardware_devices_func)(char **, int32_t) = 
+        load_symbol(dl_handle, "pv_picollm_free_hardware_devices");
     if (!pv_picollm_free_hardware_devices_func) {
         print_dl_error("failed to load `pv_picollm_free_hardware_devices`");
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_get_error_stack_func)(
-            char ***,
-            int32_t *) = load_symbol(dl_handle, "pv_get_error_stack");
+    pv_status_t (*pv_get_error_stack_func)(char ***, int32_t *) = 
+        load_symbol(dl_handle, "pv_get_error_stack");
     if (!pv_get_error_stack_func) {
         print_dl_error("failed to load 'pv_get_error_stack_func'");
         exit(EXIT_FAILURE);
     }
 
     void (*pv_free_error_stack_func)(char **) =
-    load_symbol(dl_handle, "pv_free_error_stack");
+        load_symbol(dl_handle, "pv_free_error_stack");
     if (!pv_free_error_stack_func) {
         print_dl_error("failed to load 'pv_free_error_stack_func'");
         exit(EXIT_FAILURE);

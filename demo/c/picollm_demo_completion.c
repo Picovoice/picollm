@@ -82,10 +82,32 @@ static void print_dl_error(const char *message) {
 #endif
 }
 
-void print_error_message(char **message_stack, int32_t message_stack_depth) {
-    for (int32_t i = 0; i < message_stack_depth; i++) {
-        fprintf(stderr, "  [%d] %s\n", i, message_stack[i]);
+void print_error_message(
+    char **message_stack, 
+    int32_t message_stack_depth,
+    pv_status_t (*pv_get_error_stack_func)(char ***, int32_t *),
+    void (*pv_free_error_stack_func)(char **),
+    const char *(*pv_status_to_string_func)(pv_status_t)) {
+    pv_status_t error_status = pv_get_error_stack_func(&message_stack, &message_stack_depth);
+    if (error_status != PV_STATUS_SUCCESS) {
+        fprintf(
+                stderr,
+                "Unable to get Picovoice error state with '%s'.\n",
+                pv_status_to_string_func(error_status));
+        exit(EXIT_FAILURE);
     }
+
+    if (message_stack_depth > 0) {
+        fprintf(stderr, ":\n");
+        for (int32_t i = 0; i < message_stack_depth; i++) {
+            fprintf(stderr, "  [%d] %s\n", i, message_stack[i]);
+        }
+    } else {
+        fprintf(stderr, ".\n");
+    }
+
+    pv_free_error_stack_func(message_stack);
+    exit(EXIT_FAILURE);
 }
 
 static void usage(const char *program) {
@@ -354,11 +376,11 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    fprintf(stdout, "picoLLM: `%s`\n", pv_picollm_version_func());
+
     char **message_stack = NULL;
     int32_t message_stack_depth = 0;
     pv_status_t error_status = PV_STATUS_RUNTIME_ERROR;
-
-    fprintf(stdout, "picoLLM: `%s`\n", pv_picollm_version_func());
 
     if (show_devices) {
         char **hardware_devices = NULL;
@@ -369,24 +391,13 @@ int picovoice_main(int argc, char **argv) {
                     stderr,
                     "Failed to list hardware devices with `%s`.\n",
                     pv_status_to_string_func(status));
-            error_status = pv_get_error_stack_func(&message_stack, &message_stack_depth);
-            if (error_status != PV_STATUS_SUCCESS) {
-                fprintf(
-                        stderr,
-                        ".\nUnable to get Picovoice error state with '%s'.\n",
-                        pv_status_to_string_func(error_status));
-                exit(EXIT_FAILURE);
-            }
-
-            if (message_stack_depth > 0) {
-                fprintf(stderr, ":\n");
-                print_error_message(message_stack, message_stack_depth);
-            } else {
-                fprintf(stderr, ".\n");
-            }
-
-            pv_free_error_stack_func(message_stack);
-            exit(EXIT_FAILURE);
+            print_error_message(
+                message_stack, 
+                message_stack_depth,
+                pv_get_error_stack_func,
+                pv_free_error_stack_func,
+                pv_status_to_string_func
+            );
         }
 
         for (int32_t i = 0; i < num_hardware_devices; i++) {
@@ -413,24 +424,13 @@ int picovoice_main(int argc, char **argv) {
                 stderr,
                 "failed to init with `%s`",
                 pv_status_to_string_func(status));
-        error_status = pv_get_error_stack_func(&message_stack, &message_stack_depth);
-        if (error_status != PV_STATUS_SUCCESS) {
-            fprintf(
-                    stderr,
-                    ".\nUnable to get Picovoice error state with '%s'.\n",
-                    pv_status_to_string_func(error_status));
-            exit(EXIT_FAILURE);
-        }
-
-        if (message_stack_depth > 0) {
-            fprintf(stderr, ":\n");
-            print_error_message(message_stack, message_stack_depth);
-        } else {
-            fprintf(stderr, ".\n");
-        }
-
-        pv_free_error_stack_func(message_stack);
-        exit(EXIT_FAILURE);
+        print_error_message(
+            message_stack, 
+            message_stack_depth,
+            pv_get_error_stack_func,
+            pv_free_error_stack_func,
+            pv_status_to_string_func
+        );
     }
 
     char *model = NULL;
@@ -440,24 +440,13 @@ int picovoice_main(int argc, char **argv) {
                 stderr,
                 "Failed to get model with `%s`.\n",
                 pv_status_to_string_func(status));
-        error_status = pv_get_error_stack_func(&message_stack, &message_stack_depth);
-        if (error_status != PV_STATUS_SUCCESS) {
-            fprintf(
-                    stderr,
-                    ".\nUnable to get Picovoice error state with '%s'.\n",
-                    pv_status_to_string_func(error_status));
-            exit(EXIT_FAILURE);
-        }
-
-        if (message_stack_depth > 0) {
-            fprintf(stderr, ":\n");
-            print_error_message(message_stack, message_stack_depth);
-        } else {
-            fprintf(stderr, ".\n");
-        }
-
-        pv_free_error_stack_func(message_stack);
-        exit(EXIT_FAILURE);
+        print_error_message(
+            message_stack, 
+            message_stack_depth,
+            pv_get_error_stack_func,
+            pv_free_error_stack_func,
+            pv_status_to_string_func
+        );
     }
 
     fprintf(stdout, "Loaded model: `%s`\n", model);
@@ -493,24 +482,13 @@ int picovoice_main(int argc, char **argv) {
                 stderr,
                 "Failed to generate with `%s`.\n",
                 pv_status_to_string_func(status));
-        error_status = pv_get_error_stack_func(&message_stack, &message_stack_depth);
-        if (error_status != PV_STATUS_SUCCESS) {
-            fprintf(
-                    stderr,
-                    ".\nUnable to get Picovoice error state with '%s'.\n",
-                    pv_status_to_string_func(error_status));
-            exit(EXIT_FAILURE);
-        }
-
-        if (message_stack_depth > 0) {
-            fprintf(stderr, ":\n");
-            print_error_message(message_stack, message_stack_depth);
-        } else {
-            fprintf(stderr, ".\n");
-        }
-
-        pv_free_error_stack_func(message_stack);
-        exit(EXIT_FAILURE);
+        print_error_message(
+            message_stack, 
+            message_stack_depth,
+            pv_get_error_stack_func,
+            pv_free_error_stack_func,
+            pv_status_to_string_func
+        );
     }
     fprintf(stdout, "\n");
 

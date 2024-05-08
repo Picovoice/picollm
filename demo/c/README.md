@@ -3,7 +3,7 @@
 ## Compatibility
 
 - C99-compatible compiler
-- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64), and Raspberry Pi (5, 4, and 3).
+- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64), and Raspberry Pi (5 and 4).
 
 ## Requirements
 
@@ -108,8 +108,6 @@ where `${LIBRARY_PATH}` is the path to the Picovoice library file corresponding 
 | Raspberry Pi 5 (64-bit) | lib/raspberry-pi/cortex-a76-aarch64/libpv_picollm.so |
 | Raspberry Pi 4          | lib/raspberry-pi/cortex-a76/libpv_picollm.so         |
 | Raspberry Pi 4 (64-bit) | lib/raspberry-pi/cortex-a76-aarch64/libpv_picollm.so |
-| Raspberry Pi 3          | lib/raspberry-pi/cortex-a53/libpv_picollm.so         |
-| Raspberry Pi 3 (64-bit) | lib/raspberry-pi/cortex-a53-aarch64/libpv_picollm.so |
 
 #### Windows
 

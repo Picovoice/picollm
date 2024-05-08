@@ -12,7 +12,7 @@ models. picoLLM Inference Engine is:
 - Private; LLM inference runs 100% locally.
 - Cross-Platform
     - Linux (x86_64), macOS (arm64, x86_64), and Windows (x86_64)
-    - Raspberry Pi (5, 4, and 3)
+    - Raspberry Pi (5 and 4)
     - Android and iOS
     - Chrome, Safari, Edge, and Firefox
 - Runs on CPU and GPU

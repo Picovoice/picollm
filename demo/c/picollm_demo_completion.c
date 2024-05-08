@@ -255,18 +255,14 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    const char *(*pv_status_to_string_func)(pv_status_t) =
-    load_symbol(dl_handle, "pv_status_to_string");
+    const char *(*pv_status_to_string_func)(pv_status_t) = load_symbol(dl_handle, "pv_status_to_string");
     if (!pv_status_to_string_func) {
         print_dl_error("failed to load `pv_status_to_string`");
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_init_func)(
-            const char *,
-            const char *,
-            const char *,
-            pv_picollm_t **) = load_symbol(dl_handle, "pv_picollm_init");
+    pv_status_t (*pv_picollm_init_func)(const char *, const char *, const char *, pv_picollm_t **) = 
+        load_symbol(dl_handle, "pv_picollm_init");
     if (!pv_picollm_init_func) {
         print_dl_error("failed to load `pv_picollm_init`");
         exit(EXIT_FAILURE);

@@ -36,9 +36,7 @@ def _pv_linux_machine() -> str:
     except Exception as e:
         raise RuntimeError("Failed to identify the CPU with `%s`\nCPU info: `%s`" % (e, cpu_info))
 
-    if '0xd03' == cpu_part:
-        return 'cortex-a53' + arch_info
-    elif '0xd08' == cpu_part:
+    if '0xd08' == cpu_part:
         return 'cortex-a72' + arch_info
     elif "0xd0b" == cpu_part:
         return "cortex-a76" + arch_info
@@ -62,10 +60,8 @@ def _pv_platform() -> Tuple[str, str]:
 _PV_SYSTEM, _PV_MACHINE = _pv_platform()
 
 _RASPBERRY_PI_MACHINES = {
-    "cortex-a53",
     "cortex-a72",
     "cortex-a76",
-    "cortex-a53-aarch64",
     "cortex-a72-aarch64",
     "cortex-a76-aarch64"
 }

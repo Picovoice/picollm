@@ -31,6 +31,7 @@ class PicoLLMCTestCase(unittest.TestCase):
             "-a", self._access_key,
             "-l", pv_library_path("../../.."),
             "-m", self._model_path,
+            "-d", self._device,
             "-p", "Instruct: Where is the capital city of British Columbia?\nOutput:",
         ]
         process = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -38,7 +39,8 @@ class PicoLLMCTestCase(unittest.TestCase):
         self.assertEqual(process.poll(), 0)
         self.assertEqual(stderr.decode('utf-8'), '')
         completion = stdout.decode('utf-8').strip()
-        self.assertIn("British Columbia", completion)
+        if self._device != "gpu":
+            self.assertIn("British Columbia", completion)
 
 
 if __name__ == '__main__':

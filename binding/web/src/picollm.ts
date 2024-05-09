@@ -393,19 +393,19 @@ export class PicoLLM {
 
           let memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
 
+          const encoded = new TextEncoder().encode(prompt);
+
           const promptAddress = await this._aligned_alloc(
             Uint8Array.BYTES_PER_ELEMENT,
-            (prompt.length + 1) * Uint8Array.BYTES_PER_ELEMENT
+            (encoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT
           );
           if (promptAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for prompt'
             );
           }
-          for (let i = 0; i < prompt.length; i++) {
-            memoryBufferUint8[promptAddress + i] = prompt.charCodeAt(i);
-          }
-          memoryBufferUint8[promptAddress + prompt.length] = 0;
+          memoryBufferUint8.set(encoded, promptAddress);
+          memoryBufferUint8[promptAddress + encoded.length] = 0;
 
           const stopPhrasesAddressAddress =
             stopPhrases.length === 0
@@ -671,19 +671,19 @@ export class PicoLLM {
 
           let memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
 
+          const encoded = new TextEncoder().encode(text);
+
           const textAddress = await this._aligned_alloc(
             Uint8Array.BYTES_PER_ELEMENT,
-            (text.length + 1) * Uint8Array.BYTES_PER_ELEMENT
+            (encoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT
           );
           if (textAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for text'
             );
           }
-          for (let i = 0; i < text.length; i++) {
-            memoryBufferUint8[textAddress + i] = text.charCodeAt(i);
-          }
-          memoryBufferUint8[textAddress + text.length] = 0;
+          memoryBufferUint8.set(encoded, textAddress);
+          memoryBufferUint8[textAddress + encoded.length] = 0;
 
           const numTokensAddress = await this._aligned_alloc(
             Int32Array.BYTES_PER_ELEMENT,

@@ -120,7 +120,7 @@ export class Phi2Dialog extends Dialog {
     for (let i = 0; i < llm.length; i++) {
       res.push(`${ht}: ${human[i]}\n${lt}: ${llm[i]}\n`);
     }
-    res.push(`${ht}: ${human.at(-1)}\n${lt}`);
+    res.push(`${ht}: ${human.at(-1)}\n${lt}:`);
 
     return res.join('');
   }

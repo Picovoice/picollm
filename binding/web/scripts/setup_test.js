@@ -7,7 +7,21 @@ const chunkSize = 1024 * 1024 * 128; // 128MB
 const url = process.argv[2];
 const fileName = process.argv[3];
 const splitFile = path.parse(fileName);
-const outputFile = path.join(__dirname, '..', 'test', splitFile.name);
+const outputFile = path.join(__dirname, '..', 'cypress', 'fixtures', splitFile.name);
+
+const testDirectory = path.join(__dirname, '..', 'test');
+
+const testDataSource = path.join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'resources',
+  '.test',
+  'test_data.json'
+);
+
+fs.copyFileSync(testDataSource, path.join(testDirectory, 'test_data.json'));
 
 console.log(`Downloading file...`);
 
@@ -44,7 +58,7 @@ http.get(url, res => {
     console.log('Download Complete!');
 
     const jsonTestData = JSON.stringify(testData);
-    const jsonTestFile = path.join(__dirname, '..', 'test', 'model_data.json');
+    const jsonTestFile = path.join(__dirname, '..', 'cypress', 'fixtures', 'model_data.json');
     fs.writeFile(jsonTestFile, jsonTestData, err => {
       if (err) {
         console.error('Error writing test JSON file:', err);

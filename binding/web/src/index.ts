@@ -10,6 +10,11 @@ import {
 } from './dialog';
 
 import {
+  PicoLLMCompletion,
+  PicoLLMCompletionToken,
+  PicoLLMEndpoint,
+  PicoLLMToken,
+  PicoLLMUsage,
   PicoLLMInitOptions,
   PicoLLMGenerateOptions,
   PicoLLMModel,
@@ -47,6 +52,11 @@ export {
   Phi2QADialog,
   Phi2ChatDialog,
   PicoLLM,
+  PicoLLMCompletion,
+  PicoLLMCompletionToken,
+  PicoLLMEndpoint,
+  PicoLLMToken,
+  PicoLLMUsage,
   PicoLLMGenerateOptions,
   PicoLLMInitOptions,
   PicoLLMModel,

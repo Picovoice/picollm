@@ -104,6 +104,7 @@ export class PicoLLMWorker {
             break;
           case 'failed':
           case 'error':
+            worker.terminate();
             const error = pvStatusToException(event.data.status, event.data.shortMessage, event.data.messageStack);
             reject(error);
             break;
@@ -305,6 +306,7 @@ export class PicoLLMWorker {
       this._worker.onmessage = (event: MessageEvent<PicoLLMWorkerReleaseResponse>): void => {
         switch (event.data.command) {
           case 'ok':
+            this._worker.terminate();
             resolve();
             break;
           case 'failed':
@@ -324,12 +326,5 @@ export class PicoLLMWorker {
     });
 
     return returnPromise;
-  }
-
-  /**
-   * Terminates the active worker. Stops all requests being handled by worker.
-   */
-  public terminate(): void {
-    this._worker.terminate();
   }
 }

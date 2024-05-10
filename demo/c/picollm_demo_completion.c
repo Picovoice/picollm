@@ -114,9 +114,9 @@ static void usage(const char *program) {
     (void) fprintf(
             stderr,
             "Usage: %s -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH "
-            "[-d DEVICE] [-c COMPLETION_TOKEN_LIMIT] [-s STOP_PHRASES] "
-            "[-e SEED] [-r PRESENCE_PENALTY] [-f FREQUENCY_PENALTY] "
-            "[-o TOP_P] [-t TEMPERATURE] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES] [-v] [-h] -p PROMPT\n"
+            "[-d DEVICE] [-s STOP_PHRASES] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES] "
+            "[-r PRESENCE_PENALTY] [-f FREQUENCY_PENALTY] "
+            "[-o TOP_P] [-t TEMPERATURE] [-e SEED] [-v] [-h] -p PROMPT\n"
             "-v: enable verbose output\n"
             "-h: show available devices\n",
             program);
@@ -256,11 +256,11 @@ int picovoice_main(int argc, char **argv) {
             case '?':
                 (void) fprintf(stderr, "Unknown option `%c`\n", optopt);
                 usage(argv[0]);
-                break;
+                exit(EXIT_FAILURE);
             case ':':
                 (void) fprintf(stderr, "Missing arg for `%c`\n", optopt);
                 usage(argv[0]);
-                break;
+                exit(EXIT_FAILURE);
             default:
                 break;
         }
@@ -334,6 +334,13 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    pv_status_t (*pv_picollm_context_length_func)(const pv_picollm_t *, int32_t *) = 
+        load_symbol(dl_handle, "pv_picollm_context_length");
+    if (!pv_picollm_context_length_func) {
+        print_dl_error("failed to load `pv_picollm_context_length`");
+        exit(EXIT_FAILURE);
+    }
+
     const char *(*pv_picollm_version_func)(void) = 
         load_symbol(dl_handle, "pv_picollm_version");
     if (!pv_picollm_version_func) {
@@ -345,6 +352,13 @@ int picovoice_main(int argc, char **argv) {
         load_symbol(dl_handle, "pv_picollm_model");
     if (!pv_picollm_model_func) {
         print_dl_error("failed to load `pv_picollm_model`");
+        exit(EXIT_FAILURE);
+    }
+
+    int32_t (*pv_picollm_max_top_choices_func)(void) = 
+        load_symbol(dl_handle, "pv_picollm_max_top_choices");
+    if (!pv_picollm_max_top_choices_func) {
+        print_dl_error("failed to load `pv_picollm_max_top_choices`");
         exit(EXIT_FAILURE);
     }
 
@@ -413,6 +427,15 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    const int32_t max_top_choices = pv_picollm_max_top_choices_func();
+    if (num_top_choices > max_top_choices) {
+        fprintf(
+                stderr,
+                "Number of top choices must be less than or equal to %d.\n",
+                max_top_choices);
+        exit(EXIT_FAILURE);
+    }
+
     pv_picollm_t *picollm = NULL;
     pv_status_t status = pv_picollm_init_func(
             access_key,
@@ -431,6 +454,30 @@ int picovoice_main(int argc, char **argv) {
             pv_free_error_stack_func,
             pv_status_to_string_func
         );
+    }
+
+    int32_t context_length = 0;
+    status = pv_picollm_context_length_func(picollm, &context_length);
+    if (status != PV_STATUS_SUCCESS) {
+        fprintf(
+                stderr,
+                "Failed to get context length with `%s`.\n",
+                pv_status_to_string_func(status));
+        print_error_message(
+            message_stack, 
+            message_stack_depth,
+            pv_get_error_stack_func,
+            pv_free_error_stack_func,
+            pv_status_to_string_func
+        );
+    }
+
+    if (max_output_tokens > context_length) {
+        fprintf(
+                stderr,
+                "Max output tokens must be less than or equal to %d.\n",
+                context_length);
+        exit(EXIT_FAILURE);
     }
 
     char *model = NULL;

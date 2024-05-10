@@ -389,7 +389,23 @@ public class PicoLLM {
             }
 
             if (device == null || device.equals("")) {
-                device = "best";
+                device = "cpu:2";
+            } else {
+                String[] deviceSplit = device.split(":");
+                if (deviceSplit.length >= 1) {
+                    if (deviceSplit[0].equals("cpu") || deviceSplit[0].equals("best")) {
+                        if (deviceSplit.length == 1) {
+                            device = deviceSplit[0] + ":2";
+                        }
+                    } else {
+                        throw new PicoLLMInvalidArgumentException(
+                                String.format(
+                                        "`%s` is not a valid device string. Only `cpu` and " +
+                                                "`best` are currently available for Android.",
+                                        deviceSplit[0]
+                                ));
+                    }
+                }
             }
 
             return new PicoLLM(accessKey, modelPath, device);

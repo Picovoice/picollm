@@ -50,7 +50,6 @@ public class MistralChatDialog extends PicoLLMDialog {
      * @return A formatted prompt string.
      * @throws PicoLLMException If there's an issue generating the prompt.
      */
-    @Overr
     @Override
     public String getPrompt() throws PicoLLMException {
         if (this.humanRequests.size() == this.llmResponses.size()) {

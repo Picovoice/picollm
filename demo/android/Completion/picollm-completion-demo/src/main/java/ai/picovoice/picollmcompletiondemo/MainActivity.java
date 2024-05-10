@@ -563,12 +563,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         SeekBar numTopChoicesSlider = findViewById(R.id.numTopChoicesSlider);
-        try {
-            numTopChoicesSlider.setMax(PicoLLM.getMaxTopChoices());
-        } catch (PicoLLMException e) {
-            Log.e("PICOVOICE", "Unable to get max top choices:\n" + e);
-            numTopChoicesSlider.setMax(0);
-        }
+        numTopChoicesSlider.setMax(PicoLLM.getMaxTopChoices());
 
         final TextView numTopChoicesText = findViewById(R.id.numTopChoicesText);
 

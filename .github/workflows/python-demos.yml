@@ -61,7 +61,7 @@ jobs:
       run: python3 -m pip install -r requirements.txt
 
     - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.bin/latest/phi2-290.bin -o phi2-290.bin
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm
 
     - name: Test
-      run: python3 picollm_demo_completion.py --access_key ${{secrets.PV_VALID_ACCESS_KEY}} --model_path phi2-290.bin --completion_token_limit 10 --prompt "Hello my name is" --device ${{matrix.xpu}}
+      run: python3 picollm_demo_completion.py --access_key ${{secrets.PV_VALID_ACCESS_KEY}} --model_path phi2-290.pllm --completion_token_limit 10 --prompt "Hello my name is" --device ${{matrix.xpu}}

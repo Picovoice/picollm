@@ -70,7 +70,7 @@ jobs:
           echo PATH=$PATH >> $GITHUB_ENV
 
       - name: Download resource files
-        run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.bin/latest/phi2-290.bin -o phi2-290.bin
+        run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.llm/latest/phi2-290.llm -o phi2-290.llm
 
       - name: Create build directory
         run: cmake -G "${{ matrix.make_file }}" -B ./build
@@ -82,4 +82,4 @@ jobs:
         run: python3 -m pip install -r test/requirements.txt
 
       - name: Test
-        run: python test/test_picollm_c.py ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.bin ${{matrix.xpu}}
+        run: python test/test_picollm_c.py ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.llm ${{matrix.xpu}}

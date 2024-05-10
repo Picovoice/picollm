@@ -1,0 +1,2 @@
+rootProject.name = "PicoLLMCompletionDemo"
+include ':picollm-completion-demo'

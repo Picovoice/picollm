@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">picoLLM Completion Demo</string>
+    <string name="settings_open">Open</string>
+    <string name="settings_close">Close</string>
+    <string name="settings_title"><b>Completion Settings</b></string>
+    <string name="intro_text">
+        Load a `.pllm` file from your device to begin.\n\n
+        If you do not have a `.pllm` on device, you can either download one from the Picovoice Console or push one to the device with adb.
+    </string>
+</resources>

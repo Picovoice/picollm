@@ -16,20 +16,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * `PicoLLMDialog` subclass for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2` models.
+ * Represents a dialog helper specific for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2` models.
  */
 public class MistralChatDialog extends PicoLLMDialog {
 
+    /**
+     * Builder class for constructing MistralChatDialog instances.
+     */
     public static class Builder extends PicoLLMDialog.Builder {
+        /**
+         * Builds a new instance of MistralChatDialog based on the configured settings.
+         *
+         * @return A new instance of MistralChatDialog.
+         */
         public MistralChatDialog build() {
             return new MistralChatDialog(this.history, this.system);
         }
     }
 
+    /**
+     * Constructs a MistralChatDialog instance with the specified history and system settings.
+     *
+     * @param history The history length for the dialog.
+     * @param system  The system instruction for configuring the model's responses.
+     */
     MistralChatDialog(Integer history, String system) {
         super(history, system);
     }
 
+    /**
+     * Generates a formatted prompt string based on the dialog's content and configured settings.
+     *
+     * @return A formatted prompt string.
+     * @throws PicoLLMException If there's an issue generating the prompt.
+     */
+    @Overr
     @Override
     public String getPrompt() throws PicoLLMException {
         if (this.humanRequests.size() == this.llmResponses.size()) {

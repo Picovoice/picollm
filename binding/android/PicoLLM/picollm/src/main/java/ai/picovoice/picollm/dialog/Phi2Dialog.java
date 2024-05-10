@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * `PicoLLMDialog` subclass for `phi-2` models.
- * This is a base class, use one of the mode-specific subclasses.
+ * Represents a dialog helper for the 'phi-2' model within PicoLLM.
+ * This is a base class that provides functionalities common to both 'chat' and 'qa' modes
  */
 public class Phi2Dialog extends PicoLLMDialog {
 
@@ -25,19 +25,43 @@ public class Phi2Dialog extends PicoLLMDialog {
 
     private final String llmTag;
 
+    /**
+     * Builder class for constructing Phi2Dialog instances.
+     */
     protected static class Builder extends PicoLLMDialog.Builder {
 
+        /**
+         * Builds a new instance of Phi2Dialog based on the configured settings.
+         *
+         * @param humanTag The tag representing human input.
+         * @param llmTag   The tag representing LLM output.
+         * @return A new instance of Phi2Dialog.
+         */
         protected Phi2Dialog build(String humanTag, String llmTag) {
             return new Phi2Dialog(humanTag, llmTag, this.history, this.system);
         }
     }
 
+    /**
+     * Constructs a Phi2Dialog instance with the specified history, system, human tag, and LLM tag.
+     *
+     * @param humanTag The tag representing human input.
+     * @param llmTag   The tag representing LLM output.
+     * @param history  The history length for the dialog.
+     * @param system   The system instruction for configuring the model's responses.
+     */
     protected Phi2Dialog(String humanTag, String llmTag, Integer history, String system) {
         super(history, system);
         this.humanTag = humanTag;
         this.llmTag = llmTag;
     }
 
+    /**
+     * Generates a prompt string based on the human requests and LLM responses.
+     *
+     * @return The formatted prompt string.
+     * @throws PicoLLMException If there is an issue generating the prompt.
+     */
     @Override
     public String getPrompt() throws PicoLLMException {
         if (this.humanRequests.size() == this.llmResponses.size()) {

@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
 
-    private int completionTokenLimit = 32;
+    private int completionTokenLimit = 64;
     private String[] stopPhrases = null;
     private float presencePenalty = 0;
     private float frequencyPenalty = 0;

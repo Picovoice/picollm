@@ -13,17 +13,31 @@
 package ai.picovoice.picollm;
 
 /**
- * `PicoLLMDialog` subclass for `phi-2` models in `chat` mode.
+ * Represents a dialog helper specific for `phi-2` models in `chat` mode.
  */
 public class Phi2ChatDialog extends Phi2Dialog {
 
+    /**
+     * Builder class for constructing Phi2ChatDialog instances.
+     */
     public static class Builder extends Phi2Dialog.Builder {
 
+        /**
+         * Builds a new instance of Phi2ChatDialog based on the configured settings.
+         *
+         * @return A new instance of Phi2ChatDialog.
+         */
         public Phi2ChatDialog build() {
             return new Phi2ChatDialog(this.history, this.system);
         }
     }
 
+    /**
+     * Constructs a Phi2ChatDialog instance with the specified history and system settings.
+     *
+     * @param history The history length for the dialog.
+     * @param system  The system instruction for configuring the model's responses.
+     */
     Phi2ChatDialog(Integer history, String system) {
         super("Human", "AI", history, system);
     }

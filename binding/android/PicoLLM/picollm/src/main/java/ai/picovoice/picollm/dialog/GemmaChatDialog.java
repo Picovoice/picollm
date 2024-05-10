@@ -16,20 +16,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * `PicoLLMDialog` subclass for `gemma-2b-it` and `gemma-7b-it` models.
+ * Represents a dialog helper specific for `gemma-2b-it` and `gemma-7b-it` models.
  */
 public class GemmaChatDialog extends PicoLLMDialog {
 
+    /**
+     * Builder class for constructing GemmaChatDialog instances.
+     */
     public static class Builder extends PicoLLMDialog.Builder {
+
+        /**
+         * Builds a new instance of GemmaChatDialog based on the configured settings.
+         *
+         * @return A new instance of GemmaChatDialog.
+         */
         public GemmaChatDialog build() {
             return new GemmaChatDialog(this.history, this.system);
         }
     }
 
+    /**
+     * Constructs a GemmaChatDialog instance with the specified history and system settings.
+     *
+     * @param history The history length for the dialog.
+     * @param system  The system instruction for configuring the model's responses.
+     */
     GemmaChatDialog(Integer history, String system) {
         super(history, system);
     }
 
+    /**
+     * Generates a formatted prompt string based on the dialog's content and configured settings.
+     *
+     * @return A formatted prompt string.
+     * @throws PicoLLMException If there's an issue generating the prompt.
+     */
     @Override
     public String getPrompt() throws PicoLLMException {
         if (this.humanRequests.size() == this.llmResponses.size()) {

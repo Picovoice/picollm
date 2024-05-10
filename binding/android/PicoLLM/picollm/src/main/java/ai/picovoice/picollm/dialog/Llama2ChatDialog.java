@@ -17,20 +17,41 @@ import java.util.List;
 
 
 /**
- * `PicoLLMDialog` subclass for `llama-2-7b-chat`, `llama-2-13b-chat`, and `llama-2-70b-chat` models.
+ * Represents a dialog helper specific for `llama-2-7b-chat`, `llama-2-13b-chat`, and `llama-2-70b-chat` models.
  */
 public class Llama2ChatDialog extends PicoLLMDialog {
 
+    /**
+     * Builder class for constructing Llama2ChatDialog instances.
+     */
     public static class Builder extends PicoLLMDialog.Builder {
+
+        /**
+         * Builds a new instance of Llama2ChatDialog based on the configured settings.
+         *
+         * @return A new instance of Llama2ChatDialog.
+         */
         public Llama2ChatDialog build() {
             return new Llama2ChatDialog(this.history, this.system);
         }
     }
 
+    /**
+     * Constructs a Llama2ChatDialog instance with the specified history and system settings.
+     *
+     * @param history The history length for the dialog.
+     * @param system  The system instruction for configuring the model's responses.
+     */
     Llama2ChatDialog(Integer history, String system) {
         super(history, system);
     }
 
+    /**
+     * Generates a formatted prompt string based on the dialog's content and configured settings.
+     *
+     * @return A formatted prompt string.
+     * @throws PicoLLMException If there's an issue generating the prompt.
+     */
     @Override
     public String getPrompt() throws PicoLLMException {
         if (this.humanRequests.size() == this.llmResponses.size()) {

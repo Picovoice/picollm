@@ -63,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}";
 
+    private static final int COMPLETION_TOKEN_LIMIT = 256;
+
     private PicoLLM picollm;
 
     private PicoLLMDialog dialog;
@@ -270,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
                                         chatTextScrollView.fullScroll(ScrollView.FOCUS_DOWN);
                                     });
                                 })
+                                .setCompletionTokenLimit(COMPLETION_TOKEN_LIMIT)
                                 .build());
                 dialog.addLLMResponse(finalCompletion.getCompletion());
                 updateUIState(UIState.PROMPT);

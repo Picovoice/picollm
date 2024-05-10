@@ -240,7 +240,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="32"
+                android:text="64"
                 android:textAlignment="textEnd"
                 android:gravity="end"
                 android:paddingHorizontal="5dp"
@@ -252,7 +252,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
             android:max="1024"
-            android:progress="32"/>
+            android:progress="64"/>
 
         <TextView
             android:layout_width="wrap_content"

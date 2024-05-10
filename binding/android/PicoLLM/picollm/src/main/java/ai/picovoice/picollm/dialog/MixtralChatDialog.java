@@ -13,16 +13,30 @@
 package ai.picovoice.picollm;
 
 /**
- * `PicoLLMDialog` subclass for the `mixtral-8x7b-instruct-v0.1` model.
+ * Represents a dialog helper specific for the `mixtral-8x7b-instruct-v0.1` model.
  */
 public class MixtralChatDialog extends MistralChatDialog {
 
+    /**
+     * Builder class for constructing MixtralChatDialog instances.
+     */
     public static class Builder extends MistralChatDialog.Builder {
+        /**
+         * Builds a new instance of MixtralChatDialog based on the configured settings.
+         *
+         * @return A new instance of MixtralChatDialog.
+         */
         public MixtralChatDialog build() {
             return new MixtralChatDialog(this.history, this.system);
         }
     }
 
+    /**
+     * Constructs a MixtralChatDialog instance with the specified history and system settings.
+     *
+     * @param history The history length for the dialog.
+     * @param system  The system instruction for configuring the model's responses.
+     */
     MixtralChatDialog(Integer history, String system) {
         super(history, system);
     }

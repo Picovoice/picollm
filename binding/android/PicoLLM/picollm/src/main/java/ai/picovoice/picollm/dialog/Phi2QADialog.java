@@ -13,16 +13,31 @@
 package ai.picovoice.picollm;
 
 /**
- * `PicoLLMDialog` subclass for `phi-2` models in `qa` mode.
+ * Represents a dialog helper specific for `phi-2` models in `qa` mode.
  */
 public class Phi2QADialog extends Phi2Dialog {
 
+    /**
+     * Builder class for constructing Phi2QADialog instances.
+     */
     public static class Builder extends Phi2Dialog.Builder {
+
+        /**
+         * Builds a new instance of Phi2QADialog based on the configured settings.
+         *
+         * @return A new instance of Phi2QADialog.
+         */
         public Phi2QADialog build() {
             return new Phi2QADialog(this.history, this.system);
         }
     }
 
+    /**
+     * Constructs a Phi2QADialog instance with the specified history, system, human tag, and LLM tag.
+     *
+     * @param history The history length for the dialog.
+     * @param system  The system instruction for configuring the model's responses.
+     */
     Phi2QADialog(Integer history, String system) {
         super("Instruct", "Output", history, system);
     }

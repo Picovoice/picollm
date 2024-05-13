@@ -1,10 +1,10 @@
 import { PvXpuType } from "../types";
 export declare enum PvPicollmWeightAction {
     WEIGHT_BLOCK_MIXED_16X8_PREPROCESS_BLOCKS = 100,
-    WEIGHT_BLOCK_MIXED_16X8_FORWARD_SINGLE = 101,
-    WEIGHT_BLOCK_MIXED_16X8_FORWARD_MULTIPLE = 102,
-    WEIGHT_BLOCK_MIXED_16X8_ADD_BIAS = 103,
-    WEIGHT_FLOAT_FORWARD = 104
+    WEIGHT_BLOCK_MIXED_16X8_PREPROCESS_METAS = 101,
+    WEIGHT_BLOCK_MIXED_16X8_PREPROCESS_BIAS = 102,
+    WEIGHT_BLOCK_MIXED_16X8_FORWARD_SINGLE = 103,
+    WEIGHT_BLOCK_MIXED_16X8_FORWARD_MULTIPLE = 104
 }
 export type WeightBlockMixed16x8PreprocessBlocksType = {
     shape: Int32Array;
@@ -12,9 +12,18 @@ export type WeightBlockMixed16x8PreprocessBlocksType = {
     bitDepthStarts: Int32Array;
     numBlockBytes: number;
     blocksAddress: number;
+    block: Uint8Array;
 } & PvXpuType<{
     pv_picollm_weight_block_mixed_16x8_preprocess_blocks: (shapeAddress: number, numBitDepths: number, bitDepthsAddress: number, bitDepthStartsAddress: number, blocksAddress: number) => void;
 }>;
+export type WeightBlockMixed16x8PreprocessMetasType = {
+    memAddress: number;
+    metas: Uint16Array;
+} & PvXpuType<object>;
+export type WeightBlockMixed16x8PreprocessBiasType = {
+    memAddress: number;
+    bias: Float32Array;
+} & PvXpuType<object>;
 export type WeightBlockMixed16x8ForwardSingleType = {
     shape: Int32Array;
     indicesAddress: number;
@@ -27,8 +36,11 @@ export type WeightBlockMixed16x8ForwardSingleType = {
     xOffset: number;
     xAddress: number;
     yAddress: number;
+    xBuffer: Float32Array;
+    biasAddress: number;
 } & PvXpuType<{
     pv_picollm_weight_block_mixed_16x8_forward_single: (shapeAddress: number, indicesAddress: number, numBitDepths: number, bitDepthsAddress: number, bitDepthStartsAddress: number, metasAddress: number, blocksAddress: number, xAddress: number, yAddress: number) => void;
+    pv_picollm_weight_block_mixed_16x8_add_bias: (n: number, dimension: number, yAddress: number, biasAddress: number) => void;
 }>;
 export type WeightBlockMixed16x8ForwardMultipleType = {
     shape: Int32Array;
@@ -43,26 +55,10 @@ export type WeightBlockMixed16x8ForwardMultipleType = {
     xOffset: number;
     xAddress: number;
     yAddress: number;
-} & PvXpuType<{
-    pv_picollm_weight_block_mixed_16x8_forward_multiple: (shapeAddress: number, indicesAddress: number, numBitDepths: number, bitDepthsAddress: number, bitDepthStartsAddress: number, metasAddress: number, blocksAddress: number, n: number, xAddress: number, yAddress: number) => void;
-}>;
-export type WeightBlockMixed16x8AddBiasType = {
-    n: number;
-    dimension: number;
-    yAddress: number;
+    xBuffer: Float32Array;
     biasAddress: number;
 } & PvXpuType<{
+    pv_picollm_weight_block_mixed_16x8_forward_multiple: (shapeAddress: number, indicesAddress: number, numBitDepths: number, bitDepthsAddress: number, bitDepthStartsAddress: number, metasAddress: number, blocksAddress: number, n: number, xAddress: number, yAddress: number) => void;
     pv_picollm_weight_block_mixed_16x8_add_bias: (n: number, dimension: number, yAddress: number, biasAddress: number) => void;
-}>;
-export type WeightFloatForwardType = {
-    n: number;
-    nc: number;
-    nr: number;
-    wAddress: number;
-    xOffset: number;
-    xAddress: number;
-    yAddress: number;
-} & PvXpuType<{
-    pv_picollm_weight_float_forward: (n: number, nc: number, nr: number, wAddress: number, xAddress: number, yAddress: number) => void;
 }>;
 //# sourceMappingURL=pv_picollm_weight_types.d.ts.map

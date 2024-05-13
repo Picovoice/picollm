@@ -1,22 +1,31 @@
 import {
+  Dialog,
+  GemmaChatDialog,
+  Llama2ChatDialog,
+  Llama3ChatDialog,
+  MistralChatDialog,
+  Phi2ChatDialog,
+  Phi2QADialog,
   PicoLLM,
   PicoLLMWorker,
   PicoLLMModel,
   PicoLLMGenerateOptions,
   PicoLLMCompletion,
-  PicoLLMEndpoint, GemmaChatDialog, Phi2ChatDialog, Phi2QADialog, Dialog,
+  PicoLLMEndpoint,
 } from '../';
 
 // @ts-ignore
 import { modelName } from '../cypress/fixtures/model_data.json';
 // @ts-ignore
 import testData from './test_data.json';
-import { log } from 'node:util';
 
 const ACCESS_KEY = Cypress.env('ACCESS_KEY');
 
 const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   'gemma-chat-dialog': GemmaChatDialog,
+  "llama-2-chat-dialog": Llama2ChatDialog,
+  "llama-3-chat-dialog": Llama3ChatDialog,
+  "mistral-chat-dialog": MistralChatDialog,
   'phi2-chat-dialog': Phi2ChatDialog,
   'phi2-qa-dialog': Phi2QADialog,
 };
@@ -31,6 +40,9 @@ type CompletionExpectation = {
 
 type DialogExpectations = {
   'gemma-chat-dialog': string,
+  "llama-2-chat-dialog": string,
+  "llama-3-chat-dialog": string,
+  "mistral-chat-dialog": string,
   'phi2-chat-dialog': string,
   'phi2-qa-dialog': string,
 }
@@ -156,10 +168,6 @@ const runDialogTest = async (
   const { history, system } = params;
 
   for (const [k, v] of Object.entries(expectations)) {
-    if (!DIALOG_CLASSES[k]) {
-      continue;
-    }
-
     const o = new DIALOG_CLASSES[k](history, system);
     for (let i = 0; i < conversations.length - 1; i++) {
       const [human, llm] = conversations[i];
@@ -241,6 +249,16 @@ describe('PicoLLM basic tests', function () {
 });
 
 const generateTests = () => {
+  it(`should be able to reset`, () => {
+    cy.loadPicoLLM().then(async picoLLM => {
+      const logits = await picoLLM.forward(79);
+      await picoLLM.reset();
+
+      const newLogits = await picoLLM.forward(79);
+      expect(logits).to.deep.eq(newLogits);
+    });
+  });
+
   it(`should be able to generate default`, () => {
     cy.loadPicoLLM().then(async picoLLM => {
       const data = testData.picollm.default;
@@ -457,22 +475,6 @@ const generateTests = () => {
       expect(Math.abs(1 - (sum / logits.reduce((acc, x) => acc + Math.exp(x), 0)))).to.be.lt(0.0001);
     });
   });
-
-  it(`should be able to reset`, () => {
-    cy.loadPicoLLM().then(async picoLLM => {
-      const logits = await picoLLM.forward(79);
-      await picoLLM.reset();
-
-      const newLogits = await picoLLM.forward(79);
-
-      const delta = 0.1;
-      for (let i = 0; i < newLogits.length; i++) {
-        if (Math.abs(logits[i] - newLogits[i]) > delta) {
-          expect(logits[i]).to.be.closeTo(newLogits[i], delta);
-        }
-      }
-    });
-  });
 };
 
 describe('PicoLLM generate tests (main)', () => {
@@ -512,7 +514,7 @@ describe('PicoLLM Dialog tests', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const system = data.system;
-    const prompts = data.prompts;
+    const prompts = data['prompts-with-system'];
 
     await runDialogTest(prompts, conversation, {
       system: system
@@ -522,7 +524,7 @@ describe('PicoLLM Dialog tests', () => {
   it('should be able to get prompt with history', async () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
-    const prompts = data.prompts;
+    const prompts = data['prompts-with-history'];
 
     await runDialogTest(prompts, conversation, {
       history: 0
@@ -533,7 +535,7 @@ describe('PicoLLM Dialog tests', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const system = data.system;
-    const prompts = data.prompts;
+    const prompts = data['prompts-with-system-and-history'];
 
     await runDialogTest(prompts, conversation, {
       system: system,

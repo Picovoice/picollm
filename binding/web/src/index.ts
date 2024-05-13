@@ -4,6 +4,10 @@ import { PicoLLMWorker } from './picollm_worker';
 import {
   Dialog,
   GemmaChatDialog,
+  Llama2ChatDialog,
+  Llama3ChatDialog,
+  MistralChatDialog,
+  MixtralChatDialog,
   Phi2Dialog,
   Phi2QADialog,
   Phi2ChatDialog,
@@ -35,19 +39,20 @@ import {
   PicoLLMWorkerResponse,
 } from './types';
 
-import picoLLMWasm from '../lib/pv_picollm.wasm';
 import picoLLMWasmSimd from '../lib/pv_picollm_simd.wasm';
 
 import * as PicoLLMErrors from './picollm_errors';
 
-PicoLLM.setWasm(picoLLMWasm);
 PicoLLM.setWasmSimd(picoLLMWasmSimd);
-PicoLLMWorker.setWasm(picoLLMWasm);
 PicoLLMWorker.setWasmSimd(picoLLMWasmSimd);
 
 export {
   Dialog,
   GemmaChatDialog,
+  Llama2ChatDialog,
+  Llama3ChatDialog,
+  MistralChatDialog,
+  MixtralChatDialog,
   Phi2Dialog,
   Phi2QADialog,
   Phi2ChatDialog,

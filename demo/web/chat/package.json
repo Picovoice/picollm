@@ -1,11 +1,11 @@
 {
-  "name": "picollm-web-completion-demo",
+  "name": "picollm-web-chat-demo",
   "version": "0.1.0",
   "description": "A basic demo to show how to use picoLLM for web browsers, using the IIFE version of the library",
   "main": "index.js",
   "private": true,
   "scripts": {
-    "start": "yarn run http-server -a localhost -p 5000"
+    "start": "yarn run http-server -a 0.0.0.0 -p 5000"
   },
   "keywords": [
     "Picovoice",

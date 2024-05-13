@@ -78,8 +78,8 @@ export class GemmaChatDialog extends Dialog {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
     }
 
-    const human = (this._history) ? this._human.slice(-(this._history + 1)) : this._human;
-    const llm = (this._history) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
 
     const res: string[] = [];
     for (let i = 0; i < llm.length; i++) {
@@ -90,6 +90,91 @@ export class GemmaChatDialog extends Dialog {
 
     return res.join('');
   }
+}
+
+/**
+ * Dialog helper for `llama-2-7b-chat`, `llama-2-13b-chat`, and `llama-2-70b-chat`.
+ */
+export class Llama2ChatDialog extends Dialog {
+  public prompt(): string {
+    if (this._human.length === this._llm.length) {
+      throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
+    }
+
+    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+
+    const res: string[] = [];
+    for (let i = 0; i < human.length - 1; i++) {
+      let instruction = human[i].trim();
+      if (this._system !== undefined && i === 0) {
+        instruction = `<<SYS>>\n${this._system.trim()}\n<</SYS>>\n\n${instruction}`;
+      }
+
+      res.push(`<s>[INST] ${instruction} [/INST] ${llm[i].trim()} </s>`);
+    }
+
+    let instruction = human.at(-1)!.trim();
+    if (this._system !== undefined && human.length === 1) {
+      instruction = `<<SYS>>\n${this._system.trim()}\n<</SYS>>\n\n${instruction}`;
+    }
+    res.push(`<s>[INST] ${instruction} [/INST]`);
+
+    return res.join('');
+  }
+}
+
+/**
+ * Dialog helper for `llama-3-8b-instruct` and `llama-3-70b-instruct`.
+ */
+export class Llama3ChatDialog extends Dialog {
+  public prompt(): string {
+    if (this._human.length === this._llm.length) {
+      throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
+    }
+
+    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+
+    const res: string[] = [];
+    res.push(`<|begin_of_text|>`);
+    for (let i = 0; i < llm.length; i++) {
+      res.push(`<|start_header_id|>user<|end_header_id|>\n\n${human[i].trim()}<|eot_id|>`);
+      res.push(`<|start_header_id|>assistant<|end_header_id|>\n\n${llm[i].trim()}<|eot_id|>`);
+    }
+    res.push(`<|start_header_id|>user<|end_header_id|>\n\n${human.at(-1)!.trim()}<|eot_id|>`);
+    res.push(`<|start_header_id|>assistant<|end_header_id|>\n\n`);
+
+    return res.join('');
+  }
+}
+
+/**
+ * Dialog helper for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2`.
+ */
+export class MistralChatDialog extends Dialog {
+  public prompt(): string {
+    if (this._human.length === this._llm.length) {
+      throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
+    }
+
+    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+
+    const res: string[] = [];
+    for (let i = 0; i < llm.length; i++) {
+      res.push(`[INST] ${human[i]} [/INST] ${llm[i]}</s>`);
+    }
+    res.push(`[INST] ${human.at(-1)} [/INST]`);
+
+    return res.join('');
+  }
+}
+
+/**
+ * Dialog helper for `mixtral-8x7b-instruct-v0.1`.
+ */
+export class MixtralChatDialog extends MistralChatDialog {
 }
 
 /**
@@ -111,8 +196,8 @@ export class Phi2Dialog extends Dialog {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
     }
 
-    const human = (this._history) ? this._human.slice(-(this._history + 1)) : this._human;
-    const llm = (this._history) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
     const ht = this._humanTag;
     const lt = this._llmTag;
 
@@ -146,9 +231,18 @@ export class Phi2ChatDialog extends Phi2Dialog {
 
 export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof Dialog } } = {
   "gemma-2b-it": GemmaChatDialog,
+  "gemma-7b-it": GemmaChatDialog,
+  'llama-2-7b-chat': Llama2ChatDialog,
+  'llama-2-13b-chat': Llama2ChatDialog,
+  'llama-2-70b-chat': Llama2ChatDialog,
+  'llama-3-8b-instruct': Llama3ChatDialog,
+  'llama-3-70b-instruct': Llama3ChatDialog,
+  'mistral-7b-instruct-v0.1': MistralChatDialog,
+  'mistral-7b-instruct-v0.2': MistralChatDialog,
+  'mixtral-8x7b-instruct-v0.1': MixtralChatDialog,
   "phi2": {
     "default": Phi2QADialog,
     "qa": Phi2QADialog,
-    "chatt": Phi2ChatDialog
+    "chat": Phi2ChatDialog
   }
 };

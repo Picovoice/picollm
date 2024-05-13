@@ -1,6 +1,17 @@
 window.onload = () => {
   let picoLLM;
 
+  let dotIdx = 0;
+  let dotInterval;
+
+  let numTokens = -1;
+  let timeFirstToken = 0;
+  let isText = true;
+
+  const status = document.getElementById("status");
+  const error = document.getElementById("error");
+  const dotdotdot = document.getElementById("dotdotdot");
+
   const initBlock = document.getElementById("initBlock");
   const completionBlock = document.getElementById("completionBlock");
 
@@ -10,9 +21,13 @@ window.onload = () => {
 
   const accessKey = document.getElementById("accessKey");
   const modelFile = document.getElementById("uploadFile");
+
   const prompt = document.getElementById("prompt");
   const original = document.getElementById("original");
-  const result = document.getElementById("result");
+  const resultText = document.getElementById("resultText");
+  const resultTokens = document.getElementById("resultTokens");
+  const codeIcon = document.getElementById("code-icon");
+  const tokensPerSec = document.getElementById("tokensPerSec");
 
   const temperature = document.getElementById("temperature");
   const temperatureText = document.getElementById("temperatureText");
@@ -70,19 +85,60 @@ window.onload = () => {
     numTopChoicesText.innerText = numTopChoices.value;
   });
 
+  const writeError = (message) => {
+    error.style.display = 'block';
+    error.innerText = `Error: ${message}`;
+    status.innerText = 'Error.';
+  };
+
+  const startDot = () => {
+    if (dotInterval) {
+      clearInterval(dotInterval);
+    }
+    dotInterval = setInterval(() => {
+      dotIdx = (dotIdx + 1) % 4;
+      let dotText = '';
+      for (let i = 0; i < dotIdx; i++) {
+        dotText += '.';
+      }
+      dotdotdot.innerText = dotText;
+    }, 500);
+  }
+
+  const stopDot = () => {
+    if (dotInterval) {
+      clearInterval(dotInterval);
+    }
+    dotIdx = 0;
+    dotdotdot.innerText = '';
+  }
+
   initButton.onclick = async () => {
     if (picoLLM) {
       return;
     }
 
     initButton.disabled = true;
+    status.innerText = "Loading model"
+    startDot();
 
-    picoLLM = await PicollmWeb.PicoLLMWorker.create(accessKey.value, {
-      modelFile: modelFile.files[0]
-    });
+    try {
+      picoLLM = await PicollmWeb.PicoLLMWorker.create(accessKey.value, {
+        modelFile: modelFile.files[0],
+        cacheFilePath: modelFile.files[0].name,
+      });
 
-    initBlock.style.display = 'none';
-    completionBlock.style.display = 'flex';
+      completionTokenLimit.max = picoLLM.contextLength;
+      numTopChoices.max = picoLLM.maxTopChoices;
+
+      initBlock.style.display = 'none';
+      completionBlock.style.display = 'flex';
+      status.innerText = "Loading complete."
+    } catch (e) {
+      writeError(e.message);
+    } finally {
+      stopDot();
+    }
   };
 
   prompt.onkeyup = (ev) => {
@@ -96,28 +152,75 @@ window.onload = () => {
       return;
     }
 
+    status.innerText = "Generating text"
+    startDot();
+
+    numTokens = -1;
+
     prompt.disabled = true;
     generateButton.disabled = true;
+    isText = true;
+    tokensPerSec.innerText = '-';
 
     original.innerText = prompt.value;
-    result.innerHTML = original.outerHTML;
-    await picoLLM.generate(
-      prompt.value,
-      {
-        completionTokenLimit: Number(completionTokenLimit.value),
-        stopPhrases: (stopPhrases.value) ? stopPhrases.value.split(',').map(x => x.trim()) : [],
-        topP: Number(topP.value),
-        presencePenalty: Number(presencePenalty.value),
-        frequencyPenalty: Number(frequencyPenalty.value),
-        numTopChoices: Number(numTopChoices),
-        streamCallback: (token) => {
-          result.innerHTML += token;
-        }
-      }
-    )
+    resultText.innerHTML = original.outerHTML;
 
-    prompt.disabled = false;
-    generateButton.disabled = false;
+    resultText.style.display = 'block';
+    resultTokens.style.display = 'none';
+    codeIcon.style.display = 'none';
+    codeIcon.src = 'assets/code-no-slash.svg';
+
+    try {
+      const { completionTokens } = await picoLLM.generate(
+        prompt.value,
+        {
+          completionTokenLimit: Number(completionTokenLimit.value),
+          stopPhrases: (stopPhrases.value) ? stopPhrases.value.split(',').map(x => x.trim()).filter(x => x.length > 0) : [],
+          topP: Number(topP.value),
+          presencePenalty: Number(presencePenalty.value),
+          frequencyPenalty: Number(frequencyPenalty.value),
+          numTopChoices: Number(numTopChoices),
+          streamCallback: (token) => {
+            if (numTokens === -1) {
+              timeFirstToken = performance.now();
+            }
+            numTokens += 1;
+
+            resultText.innerHTML += token;
+            resultText.scrollTop = resultText.scrollHeight;
+          }
+        }
+      )
+
+      const tock = performance.now();
+      const elapsedSec = (tock - timeFirstToken) / 1000;
+
+      tokensPerSec.innerText = `${Math.round((completionTokens.length / elapsedSec) * 100) / 100}`;
+
+      prompt.disabled = false;
+      generateButton.disabled = false;
+      resultTokens.innerText = JSON.stringify(completionTokens, null, 2);
+      codeIcon.style.display = 'inline-block';
+
+      status.innerText = "Generating complete."
+    } catch (e) {
+      writeError(e.message);
+    } finally {
+      stopDot();
+    }
+  };
+
+  codeIcon.onclick = () => {
+    if (isText) {
+      resultText.style.display = 'none';
+      resultTokens.style.display = 'block';
+      codeIcon.src = 'assets/code.svg';
+    } else {
+      resultText.style.display = 'block';
+      resultTokens.style.display = 'none';
+      codeIcon.src = 'assets/code-no-slash.svg';
+    }
+    isText = !isText;
   };
 
   changeModelButton.onclick = async () => {
@@ -139,7 +242,15 @@ window.onload = () => {
     prompt.value = '';
     prompt.disabled = false;
 
+    tokensPerSec.innerText = '-';
     original.innerText = '';
-    result.innerHTML = original.outerHTML;
+    resultText.innerHTML = original.outerHTML;
+
+    resultText.style.display = 'block';
+    resultTokens.style.display = 'none';
+    codeIcon.src = 'assets/code-no-slash.svg';
+    codeIcon.style.display = 'none';
+
+    status.innerText = "Not loaded."
   }
 };

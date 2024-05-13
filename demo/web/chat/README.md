@@ -1,4 +1,4 @@
-# picoLLM Completion Web Demo
+# picoLLM Chat Web Demo
 
 This is a basic demo to show how to use picoLLM on web browsers, using the IIFE version of the library (i.e. an HTML
 script tag). It instantiates a PicoLLM worker engine to generate text.
@@ -53,4 +53,4 @@ Hit CTRL-C to stop the server
 ```
 
 4. Enter your [access key](#accesskey), select a [model file](#models) and press `Init picoLLM`. Wait until
-loading completes and enter any text to test the demo.
+   loading completes and start chatting with `picoLLM`.

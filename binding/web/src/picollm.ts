@@ -43,7 +43,6 @@ import {
 import * as PicoLLMErrors from './picollm_errors';
 import { pvStatusToException } from './picollm_errors';
 
-import picoLLMWebWorkerHelper from '../lib/pv_picollm_web_worker_helper.wasm';
 import picoLLMWebWorkerHelperSimd from '../lib/pv_picollm_web_worker_helper_simd.wasm';
 import { loadModel } from './utils';
 
@@ -219,7 +218,6 @@ export class PicoLLM {
   private readonly _version: string;
   private readonly _streamCallback: PicoLLMStreamCallback;
 
-  private static _wasm: string;
   private static _wasmSimd: string;
   private static _sdk: string = 'web';
 
@@ -291,11 +289,22 @@ export class PicoLLM {
   }
 
   /**
-   * Creates an instance of PicoLLM.
+   * Creates an instance of picoLLM.
    *
-   * @param accessKey
-   * @param model
+   * @param accessKey AccessKey obtained from Picovoice Console (https://console.picovoice.ai/)
+   * @param model PicoLLM model representation, see PicoLLMModel for details.
+   * @param model.modelFile The model file can be one or chunks (in order) of:
+   *  - URL string of the model file.
+   *  - File object containing the contents of the model file.
+   *  - Blob object containing the bytes of the model file.
+   * @param model.cacheFilePath Custom path to save the model in storage. Set to a different name to use multiple
+   * models across `picoLLM` instances.
+   * @param model.cacheFileVersion PicoLLM model version. Set to a higher number to update the model file.
+   * @param model.cacheFileOverwrite Flag to force overwrite the model in storage even if it exists.
+   * @param model.numFetchRetries Number of retries to try and fetch the model file.
    * @param options Optional init configuration arguments, see PicoLLMInitOptions for details.
+   * @param options.device String representation of the device to use for inference. If set to `best`,
+   * picoLLM picks the most suitable device.
    *
    * @returns An instance of the PicoLLM.
    */
@@ -307,16 +316,6 @@ export class PicoLLM {
     const modelPath = await loadModel(model);
 
     return this._init(accessKey, modelPath, options);
-  }
-
-  /**
-   * Set base64 wasm file.
-   * @param wasm Base64'd wasm file to use to initialize wasm.
-   */
-  public static setWasm(wasm: string): void {
-    if (this._wasm === undefined) {
-      this._wasm = wasm;
-    }
   }
 
   /**
@@ -344,8 +343,12 @@ export class PicoLLM {
       PicoLLM._picoLLMMutex
         .runExclusive(async () => {
           const isSimd = await simd();
+          if (!isSimd) {
+            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
+          }
+
           const wasmOutput = await PicoLLM.initWasm(
-            isSimd ? this._wasmSimd : this._wasm,
+            this._wasmSimd,
             accessKey,
             modelPath,
             device
@@ -362,7 +365,35 @@ export class PicoLLM {
   }
 
   /**
+   * Given a text prompt and a set of generation parameters, creates a completion text and relevant metadata.
    *
+   * @param prompt Prompt.
+   * @param options Optional generate configuration arguments, see PicoLLMGenerateOptions for details.
+   * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
+   * to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be
+   * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
+   * @param options.stopPhrases The generation process stops when it encounters any of these phrases in the completion. The
+   * already generated completion, including the encountered stop phrase, will be returned. The `endpoint` parameter
+   * in `PicoLLMCompletion` output will be `PicoLLMEndpoint.STOP_PHRASE_ENCOUNTERED`. Set to `undefined` to turn off this
+   * feature.
+   * @param options.seed The internal random number generator uses it as its seed if set to a positive integer value.
+   * Seeding enforces deterministic outputs.  Set to `undefined` for randomized outputs for a given prompt.
+   * @param options.presensePenalty It penalizes logits already appearing in the partial completion if set to a positive
+   * value. If set to `0` or `undefined`, it has no effect.
+   * @param options.frequencyPenalty If set to a positive floating-point value, it penalizes logits proportional to the
+   * frequency of their appearance in the partial completion. If set to `0` or `undefined`, it has no effect.
+   * @param options.temperature Sampling temperature. Temperature is a non-negative floating-point value that controls the
+   * randomness of the sampler. A higher temperature smoothens the samplers' output, increasing the randomness. In
+   * contrast, a lower temperature creates a narrower distribution and reduces variability. Setting it to `0` or
+   * `undefined` selects the maximum logit during sampling.
+   * @param options.topP A positive floating-point number within 0, and 1. It restricts the sampler's choices to
+   * high-probability logits that form the `topP` portion of the probability mass. Hence, it avoids randomly
+   * selecting unlikely logits. A value of `1` or `undefined` enables the sampler to pick any token with non-zero
+   * probability turning off the feature.
+   * @param options.numTopChoices If set to a positive value, picoLLM returns the list of the highest probability tokens
+   * for any generated token. Set to `0` to turn off the feature. The maximum number of top choices is `.maxTopChoices`.
+   * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
+   * completion string becomes available.
    */
   public async generate(
     prompt: string,
@@ -655,6 +686,15 @@ export class PicoLLM {
     });
   }
 
+  /**
+   * Tokenizes a given text using the model's tokenizer. This is a low-level function meant for benchmarking and
+   * advanced usage. `.generate()` should be used when possible.
+   *
+   * @param text Text.
+   * @param bos If set to `True`, the tokenizer prepends the beginning of the sentence token to the result.
+   * @param eos If set to `True`, the tokenizer appends the end of the sentence token to the result.
+   * @returns Tokens representing the input text.
+   */
   public async tokenize(
     text: string,
     bos: boolean,
@@ -761,6 +801,13 @@ export class PicoLLM {
     });
   }
 
+  /**
+   * Performs a single forward pass given a token and returns the logits. This is a low-level function for
+   * benchmarking and advanced usage. `.generate()` should be used when possible.
+   *
+   * @param token Input token.
+   * @returns Logits.
+   */
   public async forward(token: number): Promise<number[]> {
     return new Promise<number[]>((resolve, reject) => {
       this._functionMutex
@@ -844,6 +891,11 @@ export class PicoLLM {
     });
   }
 
+  /**
+   * Resets the internal state of LLM. It should be called in conjunction with `.forward()` when processing a new
+   * sequence of tokens. This is a low-level function for benchmarking and advanced usage. `.generate()` should be
+   * used when possible.
+   */
   public async reset(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this._functionMutex
@@ -892,7 +944,7 @@ export class PicoLLM {
    */
   public getDialog(mode?: string, history: number = 0, system?: string): Dialog {
     const model = this._model.split(' ')[0].toLowerCase();
-    if (!model && DIALOGS[model] === undefined) {
+    if (model && DIALOGS[model] === undefined) {
       throw new PicoLLMErrors.PicoLLMRuntimeError(
         `'${this._model}' does not have a corresponding dialog implementation or is not instruction-tuned`
       );
@@ -941,7 +993,13 @@ export class PicoLLM {
     this._wasmMemory = undefined;
   }
 
-  public static async listHardwareDevices(): Promise<string[]> {
+  /**
+   * Lists all available devices that picoLLM can use for inference. Each entry in the list can be the `device` argument
+   * of `.create` method.
+   *
+   * @returns List of all available devices that picoLLM can use for inference.
+   */
+  public static async listAvailableDevices(): Promise<string[]> {
     return new Promise<string[]>((resolve, reject) => {
       PicoLLM._picoLLMMutex
         .runExclusive(async () => {
@@ -950,18 +1008,18 @@ export class PicoLLM {
           });
 
           const isSimd = await simd();
-          const picoLLMWorkerWasmBuffer = isSimd
-            ? base64ToUint8Array(picoLLMWebWorkerHelperSimd)
-            : base64ToUint8Array(picoLLMWebWorkerHelper);
-          const picoLLMWasmBuffer = isSimd ? this._wasmSimd : this._wasm;
+          if (!isSimd) {
+            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
+          }
 
+          const picoLLMWorkerWasmBuffer = base64ToUint8Array(picoLLMWebWorkerHelperSimd);
           const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
 
           const pvError = new PvError();
 
           const streamCallback = new PicoLLMStreamCallback(memory);
 
-          const exports = await buildWasm(memory, picoLLMWasmBuffer, pvError, {
+          const exports = await buildWasm(memory, this._wasmSimd, pvError, {
             ...xpuWebWorkerImports,
             stream_callback_wasm: streamCallback.streamCallbackWasm,
           });
@@ -1094,11 +1152,7 @@ export class PicoLLM {
 
     let memoryBufferUint8 = new Uint8Array(memory.buffer);
 
-    const isSimd = await simd();
-    const picoLLMWorkerWasmBuffer = isSimd
-      ? base64ToUint8Array(picoLLMWebWorkerHelperSimd)
-      : base64ToUint8Array(picoLLMWebWorkerHelper);
-
+    const picoLLMWorkerWasmBuffer = base64ToUint8Array(picoLLMWebWorkerHelperSimd);
     const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
 
     const pvError = new PvError();

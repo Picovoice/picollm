@@ -12,7 +12,7 @@ Signup or Login to [Picovoice Console](https://console.picovoice.ai/) to get you
 
 ## Models
 
-picoLLM Inference Web Engine supports the following open-weight models. The models are on
+picoLLM Inference Engine on Web supports the following open-weight models. The models are on
 [Picovoice Console](https://console.picovoice.ai/).
 
 - Gemma
@@ -21,11 +21,17 @@ picoLLM Inference Web Engine supports the following open-weight models. The mode
 - Llama-2
   - `llama-2-7b`
   - `llama-2-7b-chat`
+  - `llama-3-8b`
+  - `llama-3-8b-instruct`
 - Mistral
   - `mistral-7b-v0.1`
   - `mistral-7b-instruct-v0.1`
+  - `mistral-7b-instruct-v0.2`
 - Phi-2
   - `phi2`
+
+**NOTE**: Gemma and Phi-2 models have been tested throughout multiple platforms. The rest of the models
+depend on the user's system in order properly.
 
 ## Install & run
 

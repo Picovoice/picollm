@@ -1,0 +1,55 @@
+name: Web Demos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'demo/web/**'
+      - '!demo/web/README.md'
+      - '.github/workflows/web-demos.yml'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - 'demo/web/**'
+      - '!demo/web/README.md'
+      - '.github/workflows/web-demos.yml'
+
+defaults:
+  run:
+    working-directory: demo/web
+
+jobs:
+  build-completion-demo:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      matrix:
+        machine: [pv-linux, pv-ios, pv-windows]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install and build Web Binding
+      run: yarn && yarn copywasm && yarn build
+      working-directory: binding/web
+
+    - name: Install dependencies
+      run: yarn install
+
+  build-chat-demo:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      matrix:
+        machine: [pv-linux, pv-ios, pv-windows]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install and build Web Binding
+      run: yarn && yarn copywasm && yarn build
+      working-directory: binding/web
+
+    - name: Install dependencies
+      run: yarn install

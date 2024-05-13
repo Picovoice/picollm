@@ -1,8 +1,10 @@
-export declare const getPicollmWeightWasmFunctions: (memory: WebAssembly.Memory) => {
-    pv_picollm_weight_block_mixed_16x8_preprocess_blocks_web_worker_wasm: (objAddress: number, shapeAddress: number, numBitDepths: number, bitDepthsAddress: number, bitDepthsStartAddress: number, numBlockBytes: number, blocksAddress: number, statusAddress: number) => Promise<void>;
-    pv_picollm_weight_block_mixed_16x8_forward_single_web_worker_wasm: (objAddress: number, shapeAddress: number, indicesAddress: number, numBitDepths: number, bitDepthsStartAddress: number, bitDepthsAddress: number, numMetas: number, metasAddress: number, numBlockBytes: number, blocksAddress: number, xOffset: number, xAddress: number, yAddress: number, statusAddress: number) => Promise<void>;
-    pv_picollm_weight_block_mixed_16x8_forward_multiple_web_worker_wasm: (objAddress: number, shapeAddress: number, indicesAddress: number, numBitDepths: number, bitDepthsStartAddress: number, bitDepthsAddress: number, numMetas: number, metasAddress: number, numBlockBytes: number, blocksAddress: number, n: number, xOffset: number, xAddress: number, yAddress: number, statusAddress: number) => Promise<void>;
-    pv_picollm_weight_block_mixed_16x8_add_bias_web_worker_wasm: (objAddress: number, n: number, dimension: number, yAddress: number, biasAddress: number, statusAddress: number) => Promise<void>;
-    pv_picollm_weight_float_forward_web_worker_wasm: (objAddress: number, n: number, nc: number, nr: number, wAddress: number, xOffset: number, xAddress: number, yAddress: number, statusAddress: number) => Promise<void>;
+import { PvGraph } from "../pv_graph";
+export declare const getPicollmWeightWasmFunctions: (memory: WebAssembly.Memory, graph: PvGraph, imports?: any) => {
+    pv_picollm_weight_block_mixed_16x8_preprocess_blocks_web_worker_wasm: (objAddress: number, nameAddress: number, shapeAddress: number, numBitDepths: number, bitDepthsAddress: number, bitDepthsStartAddress: number, batchSize: number, numBlockBytes: number, blocksAddress: number, blocksXpuAddress: number, statusAddress: number) => Promise<void>;
+    pv_picollm_weight_block_mixed_16x8_preprocess_metas_web_worker_wasm: (objAddress: number, shapeAddress: number, numBitDepths: number, bitDepthsStartAddress: number, blocksXpuAddress: number, batchSize: number, numMetas: number, metasAddress: number, metasXpuAddress: number, statusAddress: number) => Promise<void>;
+    pv_picollm_weight_block_mixed_16x8_preprocess_bias_web_worker_wasm: (objAddress: number, shapeAddress: number, blocksXpuAddress: number, batchSize: number, biasAddress: number, biasXpuAddress: number, statusAddress: number) => Promise<void>;
+    pv_picollm_weight_block_mixed_16x8_forward_single_web_worker_wasm: (...args: any[]) => Promise<void>;
+    pv_picollm_weight_block_mixed_16x8_forward_multiple_web_worker_wasm: (...args: any[]) => Promise<void>;
+    pv_picollm_weight_float_forward_web_worker_wasm: (...args: any[]) => Promise<void>;
 };
 //# sourceMappingURL=pv_picollm_weight.d.ts.map

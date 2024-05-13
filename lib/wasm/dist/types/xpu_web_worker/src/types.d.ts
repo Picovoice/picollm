@@ -1,3 +1,5 @@
+import { PvWorker } from "./pv_worker";
+import { PvGraph } from "./pv_graph";
 export declare enum PvXpuAction {
     INIT = 0,
     ALLOC = 1,
@@ -13,16 +15,20 @@ export declare enum PvXpuAction {
 export type XpuType = {
     deviceMem: Set<number>;
     numWorkers: number;
-    workers: Worker[];
+    workers: PvWorker[];
+    graph: PvGraph;
 };
 export type MemType = {
     objAddress: number;
-    isShared: boolean;
+    memFlag: number;
     allocSize: number;
     chunkSize: number;
+    numWorkers?: number;
+    workerSet?: number[];
 };
 export type ExportType = {
     aligned_alloc: (alignment: number, size: number) => number;
+    calloc: (num: number, size: number) => number;
     free: (ptr: number) => void;
 };
 export type MemAllocType = Map<number, {

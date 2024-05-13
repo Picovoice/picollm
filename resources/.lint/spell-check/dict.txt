@@ -49,3 +49,10 @@ Makefiles
 libpv
 Pico
 LLMC
+Gson
+picollmchatdemo
+Spannable
+Colour
+picollmcompletiondemo
+sdcard
+drawerlayout

@@ -64,10 +64,10 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build app
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --info
 
     - name: Build androidTest
-      run: ./gradlew assembleDebugAndroidTest
+      run: ./gradlew assembleDebugAndroidTest --info
 
     - name: Run tests
       run: ./gradlew connectedAndroidTest --info -Pandroid.testInstrumentationRunnerArguments.class=ai.picovoice.picollm.testapp.PicoLLMTest
@@ -114,10 +114,10 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build app
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease --info
 
     - name: Build androidTest
-      run: ./gradlew assembleReleaseAndroidTest
+      run: ./gradlew assembleReleaseAndroidTest --info
 
     - name: Run tests
       run: ./gradlew connectedAndroidTest --info -Pandroid.testInstrumentationRunnerArguments.class=ai.picovoice.picollm.testapp.IntegrationTest

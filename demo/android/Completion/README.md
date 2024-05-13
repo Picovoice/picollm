@@ -1,1 +1,0 @@
-# PicoLLM Completion Demo

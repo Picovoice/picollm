@@ -210,11 +210,12 @@ public class MainActivity extends AppCompatActivity {
         chatTextBuilder = new SpannableStringBuilder();
         updateUIState(UIState.PROMPT);
     }
+
     private File extractModelFile(Uri uri) {
         File modelFile = new File(getApplicationContext().getFilesDir(), "model.pllm");
 
         try (InputStream is = getContentResolver().openInputStream(uri);
-             OutputStream os = new FileOutputStream(modelFile)) {
+                OutputStream os = new FileOutputStream(modelFile)) {
             byte[] buffer = new byte[8192];
             int numBytesRead;
             while ((numBytesRead = is.read(buffer)) != -1) {
@@ -298,7 +299,11 @@ public class MainActivity extends AppCompatActivity {
                     loadModelLayout.setVisibility(View.VISIBLE);
                     chatLayout.setVisibility(View.INVISIBLE);
                     loadModelButton.setEnabled(true);
-                    loadModelButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.button_background, null));
+                    loadModelButton.setBackground(
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
+                                    R.drawable.button_background,
+                                    null));
                     loadModelProgress.setVisibility(View.INVISIBLE);
                     loadModelText.setText(getResources().getString(R.string.intro_text));
                     break;
@@ -306,20 +311,33 @@ public class MainActivity extends AppCompatActivity {
                     loadModelLayout.setVisibility(View.VISIBLE);
                     chatLayout.setVisibility(View.INVISIBLE);
                     loadModelButton.setEnabled(false);
-                    loadModelButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.button_disabled, null));
+                    loadModelButton.setBackground(
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
+                                    R.drawable.button_disabled,
+                                    null));
                     loadModelProgress.setVisibility(View.VISIBLE);
                     loadModelText.setText("Loading model...");
                     break;
                 case PROMPT:
                     loadModelLayout.setVisibility(View.INVISIBLE);
                     chatLayout.setVisibility(View.VISIBLE);
-                    promptEditText.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.prompt_text_enabled, null));
+                    promptEditText.setBackground(
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
+                                    R.drawable.prompt_text_enabled,
+                                    null));
                     promptEditText.setEnabled(true);
                     promptEditText.setText("");
-                    promptButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.prompt_button_enabled, null));
+                    promptButton.setBackground(
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
+                                    R.drawable.prompt_button_enabled,
+                                    null));
                     promptButton.setEnabled(true);
                     loadNewModelButton.setImageDrawable(
-                            ResourcesCompat.getDrawable(getResources(),
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
                                     R.drawable.arrow_back_button,
                                     null));
                     loadNewModelButton.setEnabled(true);
@@ -328,19 +346,29 @@ public class MainActivity extends AppCompatActivity {
                     chatStatusText.setText("");
                     clearTextButton.setEnabled(false);
                     clearTextButton.setImageDrawable(
-                            ResourcesCompat.getDrawable(getResources(),
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
                                     R.drawable.clear_button_disabled,
                                     null));
                     break;
                 case GENERATING_COMPLETION:
                     loadModelLayout.setVisibility(View.INVISIBLE);
                     chatLayout.setVisibility(View.VISIBLE);
-                    promptEditText.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.prompt_text_disabled, null));
+                    promptEditText.setBackground(
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
+                                    R.drawable.prompt_text_disabled,
+                                    null));
                     promptEditText.setEnabled(false);
-                    promptButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.prompt_button_disabled, null));
+                    promptButton.setBackground(
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
+                                    R.drawable.prompt_button_disabled,
+                                    null));
                     promptButton.setEnabled(false);
                     loadNewModelButton.setImageDrawable(
-                            ResourcesCompat.getDrawable(getResources(),
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
                                     R.drawable.arrow_back_button_disabled,
                                     null));
                     loadNewModelButton.setEnabled(false);
@@ -350,9 +378,12 @@ public class MainActivity extends AppCompatActivity {
                     chatStatusText.setText("Generating...");
                     clearTextButton.setEnabled(false);
                     clearTextButton.setImageDrawable(
-                            ResourcesCompat.getDrawable(getResources(),
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
                                     R.drawable.clear_button_disabled,
                                     null));
+                    break;
+                default:
                     break;
             }
         });

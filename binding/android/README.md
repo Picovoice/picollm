@@ -63,7 +63,7 @@ picoLLM Inference Engine supports the following open-weight models. The models a
 
 ### Model File Deployment
 
-Android APKs have a size limit which does not allow for the direct inclusion of a `picoLLM` model file as a resouce. To deploy a model file as part of an Android app, there are a few alternative options:
+Android APKs have a size limit which does not allow for the direct inclusion of a `picoLLM` model file as a resource. To deploy a model file as part of an Android app, there are a few alternative options:
 
 1. **Include in App Bundle:**
    - Utilize Google Play's [Dynamic Delivery](https://developer.android.com/guide/playcore/dynamic-delivery) feature to include the model file in your app bundle.

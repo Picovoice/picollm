@@ -136,7 +136,7 @@ public class BaseTest {
         AssetManager assetManager = testContext.getAssets();
 
         try (InputStream is = assetManager.open("test_resources/test_data.json");
-             InputStreamReader reader = new InputStreamReader(is)) {
+                InputStreamReader reader = new InputStreamReader(is)) {
             return new JsonParser().parse(reader).getAsJsonObject();
         }
     }
@@ -164,9 +164,9 @@ public class BaseTest {
 
     private static void extractFile(String filepath) throws IOException {
         try (InputStream is = assetManager.open(filepath);
-             OutputStream os = new BufferedOutputStream(
-                     Files.newOutputStream(new File(externalFilesDir, filepath).toPath()),
-                     256)) {
+                OutputStream os = new BufferedOutputStream(
+                        Files.newOutputStream(new File(externalFilesDir, filepath).toPath()),
+                        256)) {
             byte[] buffer = new byte[256];
             int bytesRead;
             while ((bytesRead = is.read(buffer)) != -1) {

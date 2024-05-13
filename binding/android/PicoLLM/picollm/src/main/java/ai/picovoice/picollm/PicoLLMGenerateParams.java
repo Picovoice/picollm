@@ -12,6 +12,9 @@
 
 package ai.picovoice.picollm;
 
+/**
+ * Class for configuring generation parameters when calling `PicoLLM.generate()`.
+ */
 public class PicoLLMGenerateParams {
 
     private int completionTokenLimit;
@@ -25,38 +28,45 @@ public class PicoLLMGenerateParams {
     private PicoLLMStreamCallback streamCallback;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param completionTokenLimit The maximum number of tokens allowed in the completion.
      *                             If the generation process stops due to reaching this limit,
-     *                             the endpoint output argument will indicate a completion token limit reached condition.
-     *                             Set to `-1` to impose no limit.
+     *                             the endpoint output argument will indicate a completion token
+     *                             limit reached condition. Set to `-1` to impose no limit.
      * @param stopPhrases          Phrases that trigger early completion termination.
-     *                             The generation process stops when it encounters any of these phrases in the completion.
-     *                             The already generated completion, including the encountered stop phrase, will be returned.
-     *                             Set to `null` to turn off this feature.
+     *                             The generation process stops when it encounters any of
+     *                             these phrases in the completion. The already generated
+     *                             completion, including the encountered stop phrase, will be
+     *                             returned. Set to `null` to turn off this feature.
      * @param seed                 The seed value for the internal random number generator.
      *                             Seeding enforces deterministic outputs.
      *                             Set to -1 for randomized outputs for a given prompt.
      * @param presencePenalty      Penalty for presence of tokens in the generated completion.
-     *                             It penalizes logits already appearing in the partial completion if set to a positive value.
-     *                             If set to `0.0`, it has no effect.
+     *                             It penalizes logits already appearing in the partial completion
+     *                             if set to a positive value. If set to `0.0`, it has no effect.
      * @param frequencyPenalty     Penalty for the frequency of tokens in the generated completion.
-     *                             If set to a positive floating-point value, it penalizes logits proportional to the frequency
-     *                             of their appearance in the partial completion. If set to `0.0`, it has no effect.
+     *                             If set to a positive floating-point value, it penalizes logits
+     *                             proportional to the frequency of their appearance in the partial
+     *                             completion. If set to `0.0`, it has no effect.
      * @param temperature          Sampling temperature.
-     *                             A higher temperature smoothens the sampler's output, increasing the randomness.
-     *                             In contrast, a lower temperature creates a narrower distribution and reduces variability.
-     *                             Setting it to `0` selects the maximum logit during sampling.
+     *                             A higher temperature smoothens the sampler's output, increasing
+     *                             the randomness. In contrast, a lower temperature creates a
+     *                             narrower distribution and reduces variability. Setting it to
+     *                             `0` selects the maximum logit during sampling.
      * @param topP                 A positive floating-point number within (0, 1].
-     *                             It restricts the sampler's choices to high-probability logits that form the `topP` portion
-     *                             of the probability mass. Hence, it avoids randomly selecting unlikely logits.
-     *                             A value of `1.0` enables the sampler to pick any token with non-zero probability, turning off the feature.
-     * @param numTopChoices        If set to a positive value, picoLLM returns the list of the highest probability tokens for any
-     *                             generated token. Set to `0` to turn off the feature.
-     *                             The maximum number of top choices is determined by `PicoLLM.getMaxTopChoices()`.
-     * @param streamCallback       If not set to `null`, picoLLM executes this callback every time a new piece of completion
-     *                             string becomes available.
+     *                             It restricts the sampler's choices to high-probability logits
+     *                             that form the `topP` portion of the probability mass. Hence, it
+     *                             avoids randomly selecting unlikely logits. A value of `1.0`
+     *                             enables the sampler to pick any token with non-zero probability,
+     *                             turning off the feature.
+     * @param numTopChoices        If set to a positive value, picoLLM returns the list of the
+     *                             highest probability tokens for any generated token.
+     *                             Set to `0` to turn off the feature.
+     *                             The maximum number of top choices is determined by
+     *                             `PicoLLM.getMaxTopChoices()`.
+     * @param streamCallback       If not set to `null`, picoLLM executes this callback every time
+     *                             a new piece of completion string becomes available.
      */
     public PicoLLMGenerateParams(
             int completionTokenLimit,
@@ -93,8 +103,8 @@ public class PicoLLMGenerateParams {
      *
      * @param completionTokenLimit The completion token limit to set.
      *                             If the generation process stops due to reaching this limit,
-     *                             the endpoint output argument will indicate a completion token limit reached condition.
-     *                             Set to `null` to impose no limit.
+     *                             the endpoint output argument will indicate a completion token
+     *                             limit reached condition. Set to `null` to impose no limit.
      */
     public void setCompletionTokenLimit(Integer completionTokenLimit) {
         this.completionTokenLimit = completionTokenLimit;
@@ -113,9 +123,10 @@ public class PicoLLMGenerateParams {
      * Sets the phrases that trigger early completion termination.
      *
      * @param stopPhrases Phrases that trigger early completion termination.
-     *                    The generation process stops when it encounters any of these phrases in the completion.
-     *                    The already generated completion, including the encountered stop phrase, will be returned.
-     *                    Set to `null` to turn off this feature.
+     *                    The generation process stops when it encounters any of these phrases
+     *                    in the completion. The already generated completion, including the
+     *                    encountered stop phrase, will be returned. Set to `null` to turn off
+     *                    this feature.
      */
     public void setStopPhrases(String[] stopPhrases) {
         this.stopPhrases = stopPhrases;
@@ -125,8 +136,8 @@ public class PicoLLMGenerateParams {
      * Gets the seed value for the internal random number generator.
      *
      * @return The seed value for the internal random number generator.
-     * Seeding enforces deterministic outputs.
-     * Set to `null` for randomized outputs for a given prompt.
+     *     Seeding enforces deterministic outputs.
+     *     Set to `null` for randomized outputs for a given prompt.
      */
     public Integer getSeed() {
         return seed;
@@ -147,8 +158,8 @@ public class PicoLLMGenerateParams {
      * Gets the presence penalty.
      *
      * @return The presence penalty.
-     * It penalizes logits already appearing in the partial completion if set to a positive value.
-     * If set to `0.0`, it has no effect.
+     *     It penalizes logits already appearing in the partial completion if set to a positive value.
+     *     If set to `0.0`, it has no effect.
      */
     public float getPresencePenalty() {
         return presencePenalty;
@@ -158,8 +169,8 @@ public class PicoLLMGenerateParams {
      * Sets the presence penalty.
      *
      * @param presencePenalty The presence penalty.
-     *                        It penalizes logits already appearing in the partial completion if set to a positive value.
-     *                        If set to `0.0`, it has no effect.
+     *                        It penalizes logits already appearing in the partial completion if
+     *                        set to a positive value. If set to `0.0`, it has no effect.
      */
     public void setPresencePenalty(float presencePenalty) {
         this.presencePenalty = presencePenalty;
@@ -169,8 +180,9 @@ public class PicoLLMGenerateParams {
      * Gets the frequency penalty.
      *
      * @return The frequency penalty.
-     * If set to a positive floating-point value, it penalizes logits proportional to the frequency
-     * of their appearance in the partial completion. If set to `0.0`, it has no effect.
+     *     If set to a positive floating-point value, it penalizes logits proportional to the
+     *     frequency of their appearance in the partial completion. If set to `0.0`, it has no
+     *     effect.
      */
     public float getFrequencyPenalty() {
         return frequencyPenalty;
@@ -180,8 +192,9 @@ public class PicoLLMGenerateParams {
      * Sets the frequency penalty.
      *
      * @param frequencyPenalty The frequency penalty.
-     *                         If set to a positive floating-point value, it penalizes logits proportional to the frequency
-     *                         of their appearance in the partial completion. If set to `0.0`, it has no effect.
+     *                         If set to a positive floating-point value, it penalizes logits
+     *                         proportional to the frequency of their appearance in the partial
+     *                         completion. If set to `0.0`, it has no effect.
      */
     public void setFrequencyPenalty(float frequencyPenalty) {
         this.frequencyPenalty = frequencyPenalty;
@@ -191,9 +204,9 @@ public class PicoLLMGenerateParams {
      * Gets the temperature parameter.
      *
      * @return The temperature parameter.
-     * A higher temperature smoothens the sampler's output, increasing the randomness.
-     * In contrast, a lower temperature creates a narrower distribution and reduces variability.
-     * Setting it to `0` selects the maximum logit during sampling.
+     *     A higher temperature smoothens the sampler's output, increasing the randomness.
+     *     In contrast, a lower temperature creates a narrower distribution and reduces variability.
+     *     Setting it to `0` selects the maximum logit during sampling.
      */
     public float getTemperature() {
         return temperature;
@@ -203,9 +216,10 @@ public class PicoLLMGenerateParams {
      * Sets the temperature parameter.
      *
      * @param temperature The temperature parameter.
-     *                    A higher temperature smoothens the sampler's output, increasing the randomness.
-     *                    In contrast, a lower temperature creates a narrower distribution and reduces variability.
-     *                    Setting it to `0` selects the maximum logit during sampling.
+     *                    A higher temperature smoothens the sampler's output, increasing the
+     *                    randomness. In contrast, a lower temperature creates a narrower
+     *                    distribution and reduces variability. Setting it to `0` selects the
+     *                    maximum logit during sampling.
      */
     public void setTemperature(float temperature) {
         this.temperature = temperature;
@@ -215,10 +229,11 @@ public class PicoLLMGenerateParams {
      * Gets the top-p parameter.
      *
      * @return The top-p parameter.
-     * A positive floating-point number within (0, 1].
-     * It restricts the sampler's choices to high-probability logits that form the top_p portion
-     * of the probability mass. Hence, it avoids randomly selecting unlikely logits.
-     * A value of 1.0 enables the sampler to pick any token with non-zero probability, turning off the feature.
+     *     A positive floating-point number within (0, 1].
+     *     It restricts the sampler's choices to high-probability logits that form the top_p portion
+     *     of the probability mass. Hence, it avoids randomly selecting unlikely logits.
+     *     A value of 1.0 enables the sampler to pick any token with non-zero probability, turning
+     *     off the feature.
      */
     public float getTopP() {
         return topP;
@@ -229,9 +244,10 @@ public class PicoLLMGenerateParams {
      *
      * @param topP The top-p parameter.
      *             A positive floating-point number within (0, 1].
-     *             It restricts the sampler's choices to high-probability logits that form the top_p portion
-     *             of the probability mass. Hence, it avoids randomly selecting unlikely logits.
-     *             A value of `1.0` enables the sampler to pick any token with non-zero probability, turning off the feature.
+     *             It restricts the sampler's choices to high-probability logits that form the top_p
+     *             portion of the probability mass. Hence, it avoids randomly selecting unlikely
+     *             logits. A value of `1.0` enables the sampler to pick any token with non-zero
+     *             probability, turning off the feature.
      */
     public void setTopP(float topP) {
         this.topP = topP;
@@ -241,9 +257,9 @@ public class PicoLLMGenerateParams {
      * Gets the number of top choices.
      *
      * @return The number of top choices.
-     * If set to a positive value, picoLLM returns the list of the highest probability tokens for any
-     * generated token. Set to `0` to turn off the feature.
-     * The maximum number of top choices is determined by `PicoLLM.getMaxTopChoices()`.
+     *     If set to a positive value, picoLLM returns the list of the highest probability tokens
+     *     for any generated token. Set to `0` to turn off the feature.
+     *     The maximum number of top choices is determined by `PicoLLM.getMaxTopChoices()`.
      */
     public int getNumTopChoices() {
         return numTopChoices;
@@ -253,9 +269,10 @@ public class PicoLLMGenerateParams {
      * Sets the number of top choices.
      *
      * @param numTopChoices The number of top choices.
-     *                      If set to a positive value, picoLLM returns the list of the highest probability tokens for any
-     *                      generated token. Set to 0 to turn off the feature.
-     *                      The maximum number of top choices is determined by `PicoLLM.getMaxTopChoices()`.
+     *                      If set to a positive value, picoLLM returns the list of the highest
+     *                      probability tokens for any generated token. Set to 0 to turn off the
+     *                      feature. The maximum number of top choices is determined by
+     *                      `PicoLLM.getMaxTopChoices()`.
      */
     public void setNumTopChoices(int numTopChoices) {
         this.numTopChoices = numTopChoices;
@@ -265,8 +282,8 @@ public class PicoLLMGenerateParams {
      * Gets the completion stream callback.
      *
      * @return The stream callback.
-     * If not set to null, picoLLM executes this callback every time a new piece of completion
-     * string becomes available.
+     *     If not set to null, picoLLM executes this callback every time a new piece of completion
+     *     string becomes available.
      */
     public PicoLLMStreamCallback getStreamCallback() {
         return streamCallback;
@@ -276,13 +293,16 @@ public class PicoLLMGenerateParams {
      * Sets the completion stream callback.
      *
      * @param streamCallback The stream callback.
-     *                       If not set to null, picoLLM executes this callback every time a new piece of completion
-     *                       string becomes available.
+     *                       If not set to null, picoLLM executes this callback every time a new
+     *                       piece of completion string becomes available.
      */
     public void setStreamCallback(PicoLLMStreamCallback streamCallback) {
         this.streamCallback = streamCallback;
     }
 
+    /**
+     * Builder class for creating a `PicoLLMGenerateParams` instance.
+     */
     public static class Builder {
         private Integer completionTokenLimit = null;
         private String[] stopPhrases = null;
@@ -299,8 +319,9 @@ public class PicoLLMGenerateParams {
          *
          * @param completionTokenLimit The maximum number of tokens allowed in the completion.
          *                             If the generation process stops due to reaching this limit,
-         *                             the endpoint output argument will indicate a completion token limit reached condition.
-         *                             If not set, there will be no limit imposed.
+         *                             the endpoint output argument will indicate a completion token
+         *                             limit reached condition.If not set, there will be no limit
+         *                             imposed.
          * @return {@code Builder} instance.
          */
         public Builder setCompletionTokenLimit(Integer completionTokenLimit) {
@@ -312,9 +333,9 @@ public class PicoLLMGenerateParams {
          * Sets the phrases that trigger early completion termination.
          *
          * @param stopPhrases Phrases that trigger early completion termination.
-         *                    The generation process stops when it encounters any of these phrases in the completion.
-         *                    The already generated completion, including the encountered stop phrase, will be returned.
-         *                    Set to {@code null} to turn off this feature.
+         *                    The generation process stops when it encounters any of these phrases
+         *                    in the completion. The already generated completion, including the
+         *                    encountered stop phrase, will be returned. Set to {@code null} to turn off this feature.
          * @return {@code Builder} instance.
          */
         public Builder setStopPhrases(String[] stopPhrases) {
@@ -339,8 +360,8 @@ public class PicoLLMGenerateParams {
          * Sets the presence penalty.
          *
          * @param presencePenalty The presence penalty.
-         *                        It penalizes logits already appearing in the partial completion if set to a positive value.
-         *                        If set to 0.0, it has no effect.
+         *                        It penalizes logits already appearing in the partial completion if
+         *                        set to a positive value. If set to 0.0, it has no effect.
          * @return {@code Builder} instance.
          */
         public Builder setPresencePenalty(float presencePenalty) {
@@ -352,8 +373,9 @@ public class PicoLLMGenerateParams {
          * Sets the frequency penalty.
          *
          * @param frequencyPenalty The frequency penalty.
-         *                         If set to a positive floating-point value, it penalizes logits proportional to the frequency
-         *                         of their appearance in the partial completion. If set to 0.0, it has no effect.
+         *                         If set to a positive floating-point value, it penalizes logits
+         *                         proportional to the frequency of their appearance in the partial
+         *                         completion. If set to 0.0, it has no effect.
          * @return {@code Builder} instance.
          */
         public Builder setFrequencyPenalty(float frequencyPenalty) {
@@ -365,9 +387,10 @@ public class PicoLLMGenerateParams {
          * Sets the temperature parameter.
          *
          * @param temperature The temperature parameter.
-         *                    A higher temperature smoothens the sampler's output, increasing the randomness.
-         *                    In contrast, a lower temperature creates a narrower distribution and reduces variability.
-         *                    Setting it to 0 selects the maximum logit during sampling.
+         *                    A higher temperature smoothens the sampler's output, increasing the
+         *                    randomness. In contrast, a lower temperature creates a narrower
+         *                    distribution and reduces variability. Setting it to 0 selects the
+         *                    maximum logit during sampling.
          * @return {@code Builder} instance.
          */
         public Builder setTemperature(float temperature) {
@@ -380,9 +403,10 @@ public class PicoLLMGenerateParams {
          *
          * @param topP The top-p parameter.
          *             A positive floating-point number within (0, 1].
-         *             It restricts the sampler's choices to high-probability logits that form the top_p portion
-         *             of the probability mass. Hence, it avoids randomly selecting unlikely logits.
-         *             A value of 1.0 enables the sampler to pick any token with non-zero probability, turning off the feature.
+         *             It restricts the sampler's choices to high-probability logits that form the
+         *             top_p portion of the probability mass. Hence, it avoids randomly selecting
+         *             unlikely logits. A value of 1.0 enables the sampler to pick any token with
+         *             non-zero probability, turning off the feature.
          * @return {@code Builder} instance.
          */
         public Builder setTopP(float topP) {
@@ -394,9 +418,10 @@ public class PicoLLMGenerateParams {
          * Sets the number of top choices.
          *
          * @param numTopChoices The number of top choices.
-         *                      If set to a positive value, picoLLM returns the list of the highest probability tokens for any
-         *                      generated token. Set to 0 to turn off the feature.
-         *                      The maximum number of top choices is determined by pv_picollm_max_top_choices().
+         *                      If set to a positive value, picoLLM returns the list of the highest
+         *                      probability tokens for any generated token.
+         *                      Set to 0 to turn off the feature. The maximum number of top choices
+         *                      is determined by pv_picollm_max_top_choices().
          * @return {@code Builder} instance.
          */
         public Builder setNumTopChoices(int numTopChoices) {
@@ -408,8 +433,8 @@ public class PicoLLMGenerateParams {
          * Sets the completion stream callback.
          *
          * @param streamCallback The stream callback.
-         *                       If not set to null, picoLLM executes this callback every time a new piece of completion
-         *                       string becomes available.
+         *                       If not set to null, picoLLM executes this callback every time a new
+         *                       piece of completion string becomes available.
          * @return {@code Builder} instance.
          */
         public Builder setStreamCallback(PicoLLMStreamCallback streamCallback) {

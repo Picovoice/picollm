@@ -85,11 +85,11 @@ public class PicoLLM {
      * @param accessKey AccessKey obtained from <a href="https://console.picovoice.ai/">Picovoice Console</a>
      * @param modelPath Absolute path to the file containing LLM parameters.
      * @param device    String representation of the device (e.g., CPU or GPU) to use for inference. If set to `best`,
-     *                  picoLLM picks the most suitable device. If set to `gpu`, the engine uses the first available GPU device. To
-     *                  select a specific GPU device, set this argument to `gpu:${GPU_INDEX}`, where `${GPU_INDEX}` is the index of the
-     *                  target GPU. If set to `cpu`, the engine will run on the CPU with the default number of threads. To specify the
-     *                  number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of
-     *                  threads.
+     *                  picoLLM picks the most suitable device. If set to `gpu`, the engine uses the first available
+     *                  GPU device. To select a specific GPU device, set this argument to `gpu:${GPU_INDEX}`, where
+     *                  `${GPU_INDEX}` is the index of the target GPU. If set to `cpu`, the engine will run on the
+     *                  CPU with the default number of threads. To specify the number of threads, set this argument
+     *                  to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of threads.
      * @throws PicoLLMException if initialization fails.
      */
     private PicoLLM(
@@ -215,7 +215,7 @@ public class PicoLLM {
     }
 
     /**
-     * Helper class for constructing `PicoLLMDialog` instances with customizable settings.
+     * Builder class for creating a `PicoLLMDialog` instance.
      */
     public class DialogBuilder {
 
@@ -291,7 +291,8 @@ public class PicoLLM {
 
             Object dialog = DIALOGS.get(modelKey);
             if (dialog instanceof Map) {
-                Map<String, Class<? extends PicoLLMDialog>> dialogModeMap = (Map<String, Class<? extends PicoLLMDialog>>) dialog;
+                Map<String, Class<? extends PicoLLMDialog>> dialogModeMap =
+                        (Map<String, Class<? extends PicoLLMDialog>>) dialog;
                 if (mode == null) {
                     if (!dialogModeMap.containsKey("default")) {
                         throw new PicoLLMInvalidArgumentException(

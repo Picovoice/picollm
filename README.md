@@ -186,7 +186,6 @@ try {
 Replace `${ACCESS_KEY}` with your `AccessKey` from Picovoice Console, `${MODEL_PATH}` to the path to a model file
 downloaded from Picovoice Console, and `${PROMPT}` to a prompt string. Finally, when done be sure to explicitly release
 the resources using `picollm.delete()`.
-```
 
 ### iOS SDK
 

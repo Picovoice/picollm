@@ -167,7 +167,7 @@ export class PicoLLMWorker {
    * feature.
    * @param options.seed The internal random number generator uses it as its seed if set to a positive integer value.
    * Seeding enforces deterministic outputs.  Set to `undefined` for randomized outputs for a given prompt.
-   * @param options.presensePenalty It penalizes logits already appearing in the partial completion if set to a positive
+   * @param options.presencePenalty It penalizes logits already appearing in the partial completion if set to a positive
    * value. If set to `0` or `undefined`, it has no effect.
    * @param options.frequencyPenalty If set to a positive floating-point value, it penalizes logits proportional to the
    * frequency of their appearance in the partial completion. If set to `0` or `undefined`, it has no effect.

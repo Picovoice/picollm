@@ -110,7 +110,7 @@ Using Android Studio, open the [Completion demo](demo/android/Completion/) as an
 
 To learn about how to use picoLLM in a chat application, try out the [Chat demo](demo/android/Chat/).
 
-For more information about Android demos go to [demo/python](demo/android/README.md).
+For more information about Android demos go to [demo/android](demo/android/README.md).
 
 ### iOS Demos
 

@@ -33,9 +33,11 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
+    # ********* remove after release *************
     - name: Build binding
       run: ./gradlew assembleRelease
       working-directory: binding/android/PicoLLM
+    # ********* remove after release *************
 
     - name: Build
       run: ./gradlew assembleDebug
@@ -55,9 +57,11 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
+    # ********* remove after release *************
     - name: Build binding
       run: ./gradlew assembleRelease
       working-directory: binding/android/PicoLLM
+    # ********* remove after release *************
 
     - name: Build
       run: ./gradlew assembleDebug

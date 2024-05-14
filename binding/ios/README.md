@@ -16,7 +16,7 @@ models. picoLLM Inference Engine is:
 ## Compatibility
 
 - Swift 5
-- iOS 13.0+
+- iOS 16.0+
 
 ## Installation
 <!-- markdown-link-check-disable -->

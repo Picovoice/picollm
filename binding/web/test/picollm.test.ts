@@ -181,7 +181,7 @@ const runDialogTest = async (
 
 describe('PicoLLM basic tests', function () {
   it('List hardware devices', async () => {
-    const hardwareDevices: string[] = await PicoLLM.listHardwareDevices();
+    const hardwareDevices: string[] = await PicoLLM.listAvailableDevices();
     expect(Array.isArray(hardwareDevices)).to.be.true;
     expect(hardwareDevices).length.to.be.greaterThan(0);
   });

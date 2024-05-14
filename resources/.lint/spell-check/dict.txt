@@ -37,6 +37,7 @@ pluginutils
 readables
 rtld
 salut
+SIMD
 signup
 strdup
 testapp

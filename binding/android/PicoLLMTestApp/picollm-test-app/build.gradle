@@ -55,7 +55,8 @@ android {
 
     buildTypes {
         debug {
-             signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
+            testBuildType "debug"
         }
         release {
             minifyEnabled false

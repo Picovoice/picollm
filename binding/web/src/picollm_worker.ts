@@ -88,7 +88,9 @@ export class PicoLLMWorker {
    * @param model.numFetchRetries Number of retries to try and fetch the model file.
    * @param options Optional init configuration arguments, see PicoLLMInitOptions for details.
    * @param options.device String representation of the device to use for inference. If set to `best`,
-   * picoLLM picks the most suitable device.
+   * picoLLM picks the most suitable device. If set to `cpu`, the engine will run on the CPU with the default number of
+   * threads. To specify the number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}`
+   * is the desired number of threads. The number of threads is capped at the max available cores determined by the browser.
    *
    * @returns An instance of the PicoLLMWorker.
    */

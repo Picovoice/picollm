@@ -130,7 +130,7 @@ You can download directly to your device or airdrop from a Mac.
         statsText = ""
         numTokens = 0
 
-        let stopPhrases = stopPhrasesText
+        let stopPhrases = stopPhrasesText.isEmpty ? nil : stopPhrasesText
             .split(separator: ",")
             .map({(phrase) in phrase.trimmingCharacters(in: .whitespacesAndNewlines)})
 

@@ -9,12 +9,12 @@
   specific language governing permissions and limitations under the License.
 */
 
+import * as PicoLLMErrors from './picollm_errors';
+
 /*
  * Dialog is a helper class that stores a chat dialog and formats it according to an instruction-tuned LLM's chat
  * template. Dialog is the base class. Each supported instruction-tuned LLM has an accompanying concrete subclass.
  */
-import * as PicoLLMErrors from './picollm_errors';
-
 export class Dialog {
   protected _history?: number;
   protected _system?: string;

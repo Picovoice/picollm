@@ -211,7 +211,7 @@ const res = await picoLLM.generate(`${PROMPT}`);
 console.log(res.completion);
 ```
 
-Replace `${ACCESS_KEY}` with yours obtained from [Picovoice Console](https://console.picovoice.ai/), `${MODEL_FILE}` with the contents of the model file as `File`, `Blob` or `URL (path to model file)` formats and `${PROMPT}` to a prompt string. Finally, when done release the resources using `picoLLM.release()`.
+Replace `${ACCESS_KEY}` with yours obtained from [Picovoice Console](https://console.picovoice.ai/), `${MODEL_FILE}` with the contents of the model file as `File`, `Blob` or `URL (path to model file)` format and `${PROMPT}` with a prompt string. Finally, when done release the resources using `picoLLM.release()`.
 
 ### C SDK
 

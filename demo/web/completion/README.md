@@ -1,18 +1,18 @@
 # picoLLM Completion Web Demo
 
 This is a basic demo to show how to use picoLLM on web browsers, using the IIFE version of the library (i.e. an HTML
-script tag). It instantiates a PicoLLM worker engine to generate text.
+script tag). It instantiates a picoLLM worker engine to generate text.
 
 ## AccessKey
 
-PIcoLLM requires a valid Picovoice `AccessKey` at initialization. `AccessKey` acts as your credentials when using
+PicoLLM requires a valid Picovoice `AccessKey` at initialization. `AccessKey` acts as your credentials when using
 Picovoice SDKs.
 You can get your `AccessKey` for free. Make sure to keep your `AccessKey` secret.
 Signup or Login to [Picovoice Console](https://console.picovoice.ai/) to get your `AccessKey`.
 
 ## Models
 
-picoLLM Inference Engine on Web supports the following open-weight models. The models are on
+picoLLM Inference Web Engine supports the following open-weight models. The models are on
 [Picovoice Console](https://console.picovoice.ai/).
 
 - Gemma

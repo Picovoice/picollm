@@ -418,7 +418,7 @@ public class PicoLLM {
         return String(cString: cModel!)
     }
 
-    /// Getter for model's context length name.
+    /// Getter for model's context length.
     ///
     /// - Throws: PicoLLMError
     /// - Returns: Context length.

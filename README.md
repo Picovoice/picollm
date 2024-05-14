@@ -221,7 +221,7 @@ the resources using `picollm.delete()`.
 
 Create an instance of the engine and generate a prompt completion:
 
-```c
+```swift
 import PicoLLM
 
 let pllm = try PicoLLM(

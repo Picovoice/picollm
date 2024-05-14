@@ -73,7 +73,7 @@ jobs:
       run: ./gradlew assembleDebug --info
 
     - name: Build androidTest
-      run: ./gradlew assembleDebugAndroidTest --info
+      run: ./gradlew assembleAndroidTest --info
 
     - name: Run tests
       run: ./gradlew connectedAndroidTest --info -Pandroid.testInstrumentationRunnerArguments.class=ai.picovoice.picollm.testapp.PicoLLMTest

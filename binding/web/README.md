@@ -18,7 +18,7 @@ models. picoLLM Inference Engine is:
 - Chrome / Edge
 - Firefox
 - Safari
-- 
+
 ### Restrictions
 
 IndexedDB and SIMD are required to use `picoLLM`.

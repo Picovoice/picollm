@@ -1,5 +1,5 @@
 ext {
-    defaultTargetSdkVersion = 33
+    defaultTargetSdkVersion = 31
 }
 
 buildscript {
@@ -13,6 +13,11 @@ buildscript {
 }
 
 allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:deprecation"
+        }
+    }
     repositories {
         google()
         mavenCentral()

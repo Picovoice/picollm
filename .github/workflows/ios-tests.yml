@@ -52,4 +52,4 @@ jobs:
         run: xcrun xcodebuild test
           -workspace PicoLLMAppTest.xcworkspace
           -scheme PicoLLMAppTest
-          -destination 'platform=iOS Simulator,name=iPhone 13'
+          -destination 'platform=iOS Simulator,name=iPhone 13,os=16.4'

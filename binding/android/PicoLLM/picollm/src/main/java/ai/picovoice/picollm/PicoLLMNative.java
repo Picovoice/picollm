@@ -14,13 +14,13 @@ package ai.picovoice.picollm;
 
 class PicoLLMNative {
 
-    static native String getVersion();
+    static native String getVersion() throws PicoLLMException;
 
     static native int getMaxTopChoices();
 
-    static native String[] listHardwareDevices();
+    static native String[] listHardwareDevices() throws PicoLLMException;
 
-    static native void setSdk(String sdk);
+    static native void setSdk(String sdk) throws PicoLLMException;
 
     static native long init(
             String accessKey,

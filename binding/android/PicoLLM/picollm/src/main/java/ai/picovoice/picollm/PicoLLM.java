@@ -26,6 +26,8 @@ public class PicoLLM {
 
     private static final Map<String, Object> DIALOGS = new HashMap<>();
 
+    private static String _sdk = "android";
+
     static {
         DIALOGS.put("gemma-2b-it", GemmaChatDialog.class);
         DIALOGS.put("gemma-7b-it", GemmaChatDialog.class);
@@ -45,6 +47,10 @@ public class PicoLLM {
         DIALOGS.put("phi2", phi2Map);
     }
 
+    public static void setSdk(String sdk) {
+        PicoLLM._sdk = sdk;
+    }
+
     private long handle;
 
     private final String model;
@@ -55,8 +61,9 @@ public class PicoLLM {
      * Retrieves the version of the picoLLM library.
      *
      * @return Version of the picoLLM library.
+     * @throws PicoLLMException if getting the version fails.
      */
-    public static String getVersion() {
+    public static String getVersion() throws PicoLLMException {
         return PicoLLMNative.getVersion();
     }
 
@@ -74,8 +81,9 @@ public class PicoLLM {
      * Each entry in the list can be the `device` when initializing picoLLM.
      *
      * @return Array of all available devices that picoLLM can be used for inference.
+     * @throws PicoLLMException if getting available devices fails.
      */
-    public static String[] getAvailableDevices() {
+    public static String[] getAvailableDevices() throws PicoLLMException {
         return PicoLLMNative.listHardwareDevices();
     }
 
@@ -96,6 +104,7 @@ public class PicoLLM {
             String accessKey,
             String modelPath,
             String device) throws PicoLLMException {
+        PicoLLMNative.setSdk(PicoLLM._sdk);
         handle = PicoLLMNative.init(
                 accessKey,
                 modelPath,
@@ -188,9 +197,8 @@ public class PicoLLM {
      * Getter for model's name.
      *
      * @return Model's name.
-     * @throws PicoLLMException if getting the model fails.
      */
-    public String getModel() throws PicoLLMException {
+    public String getModel() {
         return this.model;
     }
 
@@ -198,9 +206,8 @@ public class PicoLLM {
      * Getter for model's context length.
      *
      * @return Model's context length.
-     * @throws PicoLLMException if getting the context length fails.
      */
-    public int getContextLength() throws PicoLLMException {
+    public int getContextLength() {
         return this.contextLength;
     }
 

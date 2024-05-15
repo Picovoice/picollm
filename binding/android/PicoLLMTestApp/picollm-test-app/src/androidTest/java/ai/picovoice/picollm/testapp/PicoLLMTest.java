@@ -19,8 +19,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -744,7 +742,7 @@ public class PicoLLMTest {
         }
 
         @Test
-        public void testGetAvailableDevices() {
+        public void testGetAvailableDevices() throws PicoLLMException {
             String[] availableDevices = PicoLLM.getAvailableDevices();
             assertTrue(availableDevices.length > 0);
             for (String d : availableDevices) {

@@ -20,7 +20,6 @@ import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -150,9 +149,9 @@ public class MainActivity extends AppCompatActivity {
         loadModelProgress = findViewById(R.id.loadModelProgress);
         loadModelButton = findViewById(R.id.loadModelButton);
 
-        loadModelButton.setOnClickListener(view -> {
-            modelSelection.launch(new String[]{"application/octet-stream"});
-        });
+        loadModelButton.setOnClickListener(view ->
+                modelSelection.launch(new String[]{"application/octet-stream"})
+        );
 
         updateUIState(UIState.INIT);
 
@@ -249,15 +248,10 @@ public class MainActivity extends AppCompatActivity {
                         updateUIState(UIState.PROMPT);
                         mainHandler.post(() -> {
                             SeekBar completionTokenSlider = findViewById(R.id.completionTokenLimitSlider);
-                            try {
-                                completionTokenSlider.setMax(picollm.getContextLength());
-                                completionTokenLimit = Math.min(
-                                        picollm.getContextLength(),
-                                        completionTokenLimit);
-                            } catch (PicoLLMException e) {
-                                Log.e("PICOVOICE", "Unable to get context length:\n" + e);
-                                completionTokenSlider.setMax(0);
-                            }
+                            completionTokenSlider.setMax(picollm.getContextLength());
+                            completionTokenLimit = Math.min(
+                                    picollm.getContextLength(),
+                                    completionTokenLimit);
                         });
                     });
                 }
@@ -267,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
         File modelFile = new File(getApplicationContext().getFilesDir(), "model.pllm");
 
         try (InputStream is = getContentResolver().openInputStream(uri);
-                OutputStream os = new FileOutputStream(modelFile)) {
+             OutputStream os = new FileOutputStream(modelFile)) {
             byte[] buffer = new byte[8192];
             int numBytesRead;
             while ((numBytesRead = is.read(buffer)) != -1) {

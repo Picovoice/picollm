@@ -501,6 +501,12 @@ class PicoLLM(object):
 
         library = CDLL(library_path, winmode=RTLD_LOCAL)
 
+        set_sdk_func = library.pv_set_sdk
+        set_sdk_func.argtypes = [c_char_p]
+        set_sdk_func.restype = None
+
+        set_sdk_func('python'.encode())
+
         self._get_error_stack_func = library.pv_get_error_stack
         self._get_error_stack_func.argtypes = [POINTER(POINTER(c_char_p)), POINTER(c_int32)]
         self._get_error_stack_func.restype = self.PicovoiceStatuses

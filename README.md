@@ -126,7 +126,7 @@ Then, using [Xcode](https://developer.apple.com/xcode/), open the generated `Pic
 
 To learn about how to use picoLLM in a chat application, try out the [Chat demo](demo/ios/PicoLLMChatDemo).
 
-For more information about iOS demos go to [demo/python](demo/ios/README.md).
+For more information about iOS demos go to [demo/ios](demo/ios/README.md).
 
 ### Web Demos
 

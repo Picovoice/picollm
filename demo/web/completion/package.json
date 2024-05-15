@@ -1,7 +1,7 @@
 {
   "name": "picollm-web-completion-demo",
   "version": "1.0.0",
-  "description": "A basic demo to show how to use picoLLM for web browsers, using the IIFE version of the library",
+  "description": "A demo to show how to create a picoLLM inference engine on a web worker that accepts a prompt along with a set of optional parameters and generates a single completion.",
   "main": "index.js",
   "private": true,
   "scripts": {

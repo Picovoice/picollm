@@ -1,7 +1,8 @@
 # picoLLM Completion Web Demo
 
 This is a basic demo to show how to use picoLLM on web browsers, using the IIFE version of the library (i.e. an HTML
-script tag). It instantiates a picoLLM worker engine to generate text.
+script tag). It instantiates a picoLLM inference engine on a web worker that accepts a prompt along with a set of 
+optional parameters and generates a single completion.
 
 ## AccessKey
 

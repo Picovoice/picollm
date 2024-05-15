@@ -102,7 +102,7 @@ func cStreamCallback (completion: UnsafePointer<CChar>?, context: UnsafeMutableR
     }
 }
 
-/// Low-level iOS binding for picoLLM inference engine. Provides a Swift interface to the picoLLM library.
+/// iOS binding for picoLLM Inference Engine. Provides a Swift interface to the picoLLM library.
 public class PicoLLM {
 
     static let resourceBundle: Bundle = {
@@ -134,7 +134,7 @@ public class PicoLLM {
     ///
     /// - Parameters:
     ///   - accessKey: The AccessKey obtained from Picovoice Console (https://console.picovoice.ai).
-    ///   - modelPath: Absolute path to the file containing LLM parameters.
+    ///   - modelPath: Absolute path to the file containing LLM parameters (`.pllm`).
     ///   - device: String representation of the device (e.g., CPU or GPU) to use for inference. If set to `best`,
     ///         picoLLM picks the most suitable device. If set to `gpu`, the engine uses the first available GPU device.
     ///         To select a specific GPU device, set this argument to `gpu:${GPU_INDEX}`, where `${GPU_INDEX}` is the
@@ -221,7 +221,7 @@ public class PicoLLM {
         streamCallback: ((String) -> Void)? = nil
     ) throws -> PicoLLMCompletion {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before generating")
         }
 
         let stopPhrasesArg = (stopPhrases != nil) ? stopPhrases!.map { UnsafePointer(strdup($0)) } : nil
@@ -312,7 +312,7 @@ public class PicoLLM {
         eos: Bool
     ) throws -> [Int32] {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling tokenize")
         }
 
         var numTokens: Int32 = 0
@@ -327,7 +327,7 @@ public class PicoLLM {
             &cTokens)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try PicoLLM.getMessageStack()
-            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM tokenize failed", messageStack)
         }
 
         var tokens = [Int32]()

@@ -174,7 +174,7 @@ You can download directly to your device or airdrop from a Mac.
         let secondsElapsed: Double = (timerTock - timerTick)
         let tokensPerSecond: Double = Double(numTokens) / secondsElapsed
 
-        tpsText = String(format: "%0.2f Tokens Per Second", tokensPerSecond)
+        tpsText = String(format: "%0.2f tokens per second", tokensPerSecond)
 
         do {
             let jsonEncoder = JSONEncoder()

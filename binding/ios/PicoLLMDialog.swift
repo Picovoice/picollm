@@ -63,7 +63,7 @@ public class BasePicoLLMDialog: PicoLLMDialog {
         self.human.append(content)
     }
 
-    /// Adds LLM's request to the dialog.
+    /// Adds LLM's response to the dialog.
     ///
     /// - Parameters:
     ///   - content: LLM's response.

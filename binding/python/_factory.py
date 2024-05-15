@@ -9,8 +9,10 @@
 # specific language governing permissions and limitations under the License.
 #
 
+import os
+
 from ctypes import (
-    CDLL,
+    cdll,
     POINTER,
     RTLD_LOCAL,
     byref,
@@ -73,7 +75,14 @@ def available_devices(library_path: Optional[str] = None) -> Sequence[str]:
     if library_path is None:
         library_path = pv_library_path('')
 
-    library = CDLL(library_path, winmode=RTLD_LOCAL)
+    dll_dir_obj = None
+    if hasattr(os, "add_dll_directory"):
+        dll_dir_obj = os.add_dll_directory(os.path.dirname(library_path))
+
+    library = cdll.LoadLibrary(library_path)
+
+    if dll_dir_obj is not None:
+        dll_dir_obj.close()
 
     list_hardware_devices_func = library.pv_picollm_list_hardware_devices
     list_hardware_devices_func.argtypes = [POINTER(POINTER(c_char_p)), POINTER(c_int32)]

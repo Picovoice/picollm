@@ -19,9 +19,7 @@ models. picoLLM Inference Engine is:
 - Firefox
 - Safari
 
-### Restrictions
-
-IndexedDB and SIMD are required to use `picoLLM`.
+**NOTE**: IndexedDB and SIMD are required to use `picoLLM`.
 
 ## Installation
 
@@ -70,11 +68,11 @@ offline and completely free for open-weight models. Everyone who signs up for
 
 ## Usage
 
-### PicoLLM Model File Types
+### picoLLM Model File Types
 
 `picoLLM` accepts model files in three different types:
 
-- File URL(s):
+#### File URL(s):
 
 ```typescript
 const modelFile = `${SERVER_URL}/${PATH_TO_MODEL_FILE}`;
@@ -90,7 +88,7 @@ const modelFile = [
 ];
 ```
 
-- File Object(s):
+#### File Object(s):
 
 ```typescript
 const modelFile = new File([/* file contents */]);
@@ -116,7 +114,7 @@ File objects are usually used with HTML's input tag:
 </script>
 ```
 
-- Blob Object(s):
+#### Blob Object(s):
 
 ```typescript
 const modelFile = new Blob([new Uint8Array(/* model bytes */)]);
@@ -132,7 +130,7 @@ const modelFile = [
 ];
 ```
 
-### PicoLLM Model
+#### picoLLM Model
 
 `picoLLM` saves and caches your parameter model file (`.pllm`) in IndexedDB to be
 used by Web Assembly. Use a different `cacheFilePath` variable to hold and cache 
@@ -143,7 +141,7 @@ change the number of fetch retry attempts for the model file.
 
 ```typescript
 const picoLLMModel = {
-  modelFile: modelFile, // Based on the section before,
+  modelFile: modelFile, // Based on the sections before,
   
   // Optional
   cacheFilePath: 'custom_model',
@@ -155,16 +153,7 @@ const picoLLMModel = {
 
 ### Initialize picoLLM
 
-Initialize an instance of `picoLLM` in the main thread:
-
-```typescript
-const picoLLM = await PicoLLM.create(
-  ${ACCESS_KEY},
-  picoLLMModel,
-);
-```
-
-or initialize an instance of `picoLLM` in a worker thread:
+Initialize an instance of `picoLLM` in a worker thread:
 
 ```typescript
 const picoLLM = await PicoLLMWorker.create(
@@ -175,14 +164,14 @@ const picoLLM = await PicoLLMWorker.create(
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console.
 
-### Generate Prompt
+### Generate Completion
 
 ```typescript
 const res = await picoLLM.generate(`${PROMPT}`);
 console.log(res.completion);
 ```
 
-Replace ${PROMPT}` with a prompt string.
+Replace `${PROMPT}` with a prompt string.
 
 ### Instruction-tuned models
 
@@ -193,14 +182,14 @@ template. You can either directly format the prompt or use a dialog helper:
 const dialog = picoLLM.getDialog()
 dialog.addHumanRequest(prompt)
 
-const res = await picoLLM.generate(prompt=dialog.prompt())
+const res = await picoLLM.generate(dialog.prompt())
 dialog.addLLMResponse(res.completion)
 print(res.completion)
 ```
 
 ### Clean Up
 
-Clean up used resources by `PicoLLM` or `PicoLLMWorker`:
+Clean up used resources by `picoLLM` or `picoLLMWorker`:
 
 ```typescript
 await picoLLM.release()

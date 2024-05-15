@@ -15,6 +15,7 @@ window.onload = () => {
   const initButton = document.getElementById("init");
   const sendButton = document.getElementById("send");
   const changeModelButton = document.getElementById("changeModel");
+  const resetDialogButton = document.getElementById("resetDialog");
 
   const accessKey = document.getElementById("accessKey");
   const modelFile = document.getElementById("uploadFile");
@@ -72,6 +73,14 @@ window.onload = () => {
     return textElem;
   }
 
+  accessKey.onchange = () => {
+    if (accessKey.value.length > 0 && modelFile.files.length > 0) {
+      initButton.disabled = false;
+    }
+  }
+
+  modelFile.onchange = accessKey.onchange;
+
   const addLLMMessage = (elem, messageString) => {
     elem.innerHTML += messageString;
     result.scrollTop = result.scrollHeight;
@@ -104,8 +113,15 @@ window.onload = () => {
     }
   };
 
+  message.onkeydown = (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+    }
+  }
+
   message.onkeyup = (ev) => {
     if (ev.key === "Enter") {
+      ev.preventDefault();
       sendButton.click();
     }
   };
@@ -152,6 +168,10 @@ window.onload = () => {
     }
   };
 
+  resetDialogButton.onclick = () => {
+    result.innerHTML = '';
+  }
+
   changeModelButton.onclick = async () => {
     if (!picoLLM) {
       return;
@@ -165,7 +185,7 @@ window.onload = () => {
 
     modelFile.value = '';
 
-    initButton.disabled = false;
+    initButton.disabled = true;
     sendButton.disabled = false;
 
     message.value = '';

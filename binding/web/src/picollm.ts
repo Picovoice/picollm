@@ -264,7 +264,7 @@ export class PicoLLM {
   }
 
   /**
-   * Get maximum number of top choices for generate.
+   * Get maximum number of top choices for `.generate()`.
    */
   get maxTopChoices(): number {
     return this._maxTopChoices;

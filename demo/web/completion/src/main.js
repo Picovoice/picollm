@@ -113,6 +113,14 @@ window.onload = () => {
     dotdotdot.innerText = '';
   }
 
+  accessKey.onchange = () => {
+    if (accessKey.value.length > 0 && modelFile.files.length > 0) {
+      initButton.disabled = false;
+    }
+  }
+
+  modelFile.onchange = accessKey.onchange;
+
   initButton.onclick = async () => {
     if (picoLLM) {
       return;
@@ -141,8 +149,15 @@ window.onload = () => {
     }
   };
 
+  prompt.onkeydown = (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+    }
+  }
+
   prompt.onkeyup = (ev) => {
     if (ev.key === "Enter") {
+      ev.preventDefault();
       generateButton.click();
     }
   };
@@ -236,7 +251,7 @@ window.onload = () => {
 
     modelFile.value = '';
 
-    initButton.disabled = false;
+    initButton.disabled = true;
     generateButton.disabled = false;
 
     prompt.value = '';

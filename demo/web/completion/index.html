@@ -55,7 +55,7 @@
       font-size: 14px;
       white-space: pre-wrap;
       word-wrap: break-word;
-      height: calc(100% - 35px);
+      height: calc(100% - 45px);
       margin: 0;
       padding: 5px;
       overflow-y: auto;
@@ -66,8 +66,17 @@
       height: 90%;
     }
 
+    #changeModel {
+      font-size: 30px;
+      cursor: pointer;
+
+      &:hover {
+        color: #377dff;
+      }
+    }
+
     #code-icon {
-      width: 25px;
+      width: 35px;
       float: right;
       cursor: pointer;
       display: none;
@@ -90,7 +99,7 @@
     <label for="uploadFile">Upload model file: </label>
     <input id="uploadFile" name="uploadFile" type="file">
     <br/>
-    <input type="button" id="init" value="Init picoLLM"/>
+    <button id="init" disabled>Init picoLLM</button>
   </div>
 
   <div class="container">
@@ -103,23 +112,23 @@
         </div>
         <div style="display: flex; justify-content: space-between; margin-top: 5px;">
           <span>Tokens per second: <span id="tokensPerSec">-</span></span>
-          <button id="changeModel">Load New Model</button>
         </div>
         <hr />
         <div class="result-container">
           <pre id="resultText" class="result"><span id="original" style="background-color: lightblue"></span></pre>
           <pre id="resultTokens" class="result" style="display: none;"></pre>
+          <span id="changeModel">&larr;</span>
           <img id="code-icon" src="assets/code-no-slash.svg"/>
         </div>
       </div>
       <div style="width: 20%; padding: 5px">
         <div class="control-label">
           <label for="temperature">Temperature <span id="temperatureText"></span></label>
-          <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.9" />
+          <input type="range" id="temperature" min="0" max="1" step="0.01" value="0" />
         </div>
         <div class="control-label">
           <label for="completionTokenLimit">Completion Token Limit <span id="completionTokenLimitText"></span></label>
-          <input type="range" id="completionTokenLimit" min="0" max="2048" step="1" value="256" />
+          <input type="range" id="completionTokenLimit" min="0" max="2048" step="1" value="64" />
         </div>
         <div class="control-label">
           <label for="stopPhrases">Stop Phrases</label>
@@ -127,7 +136,7 @@
         </div>
         <div class="control-label">
           <label for="topP">Top P <span id="topPText"></span></label>
-          <input type="range" id="topP" min="0" max="1" step="0.01" value="0.9" />
+          <input type="range" id="topP" min="0" max="1" step="0.01" value="1" />
         </div>
         <div class="control-label">
           <label for="presencePenalty">Presence Penalty <span id="presencePenaltyText"></span></label>
@@ -139,7 +148,7 @@
         </div>
         <div class="control-label">
           <label for="numTopChoices"># Top Choices <span id="numTopChoicesText"></span></label>
-          <input type="range" id="numTopChoices" min="0" max="100" step="1" value="5" />
+          <input type="range" id="numTopChoices" min="0" max="100" step="1" value="0" />
         </div>
       </div>
     </div>

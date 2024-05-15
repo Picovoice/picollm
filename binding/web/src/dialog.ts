@@ -42,7 +42,7 @@ export class Dialog {
    */
   public addHumanRequest(content: string): void {
     if (this._human.length > this._llm.length) {
-      throw new PicoLLMErrors.PicoLLMRuntimeError("Entering a human request without entering the last LLM response is invalid.");
+      throw new PicoLLMErrors.PicoLLMInvalidStateError("Entering a human request without entering the last LLM response is invalid.");
     }
 
     this._human.push(content);
@@ -54,7 +54,7 @@ export class Dialog {
    */
   public addLLMResponse(content: string): void {
     if (this._human.length === this._llm.length) {
-      throw new PicoLLMErrors.PicoLLMRuntimeError("Entering an LLM response without entering the human request is invalid.");
+      throw new PicoLLMErrors.PicoLLMInvalidStateError("Entering an LLM response without entering the human request is invalid.");
     }
 
     this._llm.push(content);

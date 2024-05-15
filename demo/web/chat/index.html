@@ -29,17 +29,17 @@
       flex: 0 0 auto;
       height: 95%;
       width: 60%;
-      max-width: 800px;
+      max-width: 500px;
     }
 
     .messageArea {
       flex: 0 0 auto;
       width: 60%;
       display: flex;
-      max-width: 800px;
+      max-width: 500px;
 
       & > button {
-        width: 10%;
+        width: 15%;
       }
     }
 
@@ -47,14 +47,13 @@
       margin: 0;
       white-space: pre-wrap;
       word-wrap: break-word;
-      border: 1px solid rgb(118, 118, 118);
-      height: calc(100% - 10px);
+      height: calc(100% - 45px);
       overflow-y: auto;
       padding: 5px;
     }
 
     #message {
-      width: 90%;
+      width: 85%;
       resize: none;
       height: 40px
     }
@@ -70,9 +69,9 @@
 
     .human-border {
       border-radius: 20px;
-      background-color: black;
+      background-color: #377dff;
       color: white;
-      padding: 3px;
+      padding: 5px;
       margin-bottom: 2px;
       margin-top: 0;
     }
@@ -87,7 +86,7 @@
       border-radius: 20px;
       background-color: darkgrey;
       color: white;
-      padding: 3px;
+      padding: 5px;
       margin-bottom: 2px;
     }
 
@@ -95,6 +94,30 @@
       border-radius: 5px;
       background-color: lightgrey;
       padding: 6px;
+    }
+
+    .result-container {
+      height: 100%;
+      border: 1px solid rgb(118, 118, 118);
+    }
+
+    #changeModel {
+      font-size: 30px;
+      cursor: pointer;
+
+      &:hover {
+        color: #377dff;
+      }
+    }
+
+    #resetDialog {
+      font-size: 30px;
+      cursor: pointer;
+      float: right;
+
+      &:hover {
+        color: #377dff;
+      }
     }
   </style>
 </head>
@@ -114,19 +137,20 @@
     <label for="uploadFile">Upload model file: </label>
     <input id="uploadFile" name="uploadFile" type="file" accept=".pllm">
     <br/>
-    <input type="button" id="init" value="Init picoLLM"/>
+    <button id="init" disabled>Init picoLLM</button>
   </div>
 
   <div id="chatBlock">
     <div class="dialogArea">
-      <pre id="result"></pre>
+      <div class="result-container">
+        <pre id="result"></pre>
+        <span id="changeModel">&larr;</span>
+        <span id="resetDialog">&#x21bb;</span>
+      </div>
     </div>
     <div class="messageArea">
-      <textarea id="message"></textarea>
+      <textarea id="message" placeholder="Message picoLLM"></textarea>
       <button id="send">Send</button>
-    </div>
-    <div style="width: 60%; max-width: 800px">
-      <button id="changeModel" style="float: right; margin-top: 5px;">Load New Model</button>
     </div>
   </div>
 </body>

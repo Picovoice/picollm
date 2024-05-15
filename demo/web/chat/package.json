@@ -1,7 +1,7 @@
 {
   "name": "picollm-web-chat-demo",
   "version": "1.0.0",
-  "description": "A basic demo to show how to use picoLLM for web browsers, using the IIFE version of the library",
+  "description": "A demo to show how to create a picoLLM inference engine on a web worker and have a back-and-forth conversation with the LLM, similar to ChatGPT.",
   "main": "index.js",
   "private": true,
   "scripts": {

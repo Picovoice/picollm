@@ -73,7 +73,7 @@ export class PicoLLMWorker {
   }
 
   /**
-   * Creates an instance of picoLLMWorker.
+   * Creates an instance of picoLLM on a web worker.
    *
    * @param accessKey AccessKey obtained from Picovoice Console (https://console.picovoice.ai/)
    * @param model PicoLLM model representation, see PicoLLMModel for details.

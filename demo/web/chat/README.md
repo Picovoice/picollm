@@ -1,7 +1,7 @@
 # picoLLM Chat Web Demo
 
 This is a basic demo to show how to use picoLLM on web browsers, using the IIFE version of the library (i.e. an HTML
-script tag). It instantiates a picoLLM worker engine to generate text.
+script tag). It instantiates a picoLLM inference engine on a web worker and enables a back-and-forth conversation with the LLM, similar to ChatGPT.
 
 ## AccessKey
 

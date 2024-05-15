@@ -36,7 +36,7 @@ struct ChatView: View {
                 .padding(.horizontal, 24)
 
                 ZStack {
-                    TextField("Message", text: $viewModel.promptText)
+                    TextField("Message picoLLM", text: $viewModel.promptText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .submitLabel(.go)
                         .onSubmit {

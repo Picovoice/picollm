@@ -116,6 +116,22 @@ For more information about Android demos go to [demo/android](demo/android/READM
 
 ### Web Demos
 
+From [demo/web](demo/web) run the following in the terminal:
+
+```console
+yarn
+yarn start
+```
+
+(or)
+
+```console
+npm install
+npm run start
+```
+
+Open `http://localhost:5000` in your browser to try the demo.
+
 ### C Demos
 
 Build the demo:
@@ -190,6 +206,38 @@ the resources using `picollm.delete()`.
 ### iOS SDK
 
 ### Web SDK
+
+Install the web SDK using yarn:
+
+```console
+yarn add @picovoice/picollm-web
+```
+
+or using npm:
+
+```console
+npm install --save @picovoice/picollm-web
+```
+
+Create an instance of the engine using `PicoLLMWorker` and transcribe an audio file:
+
+```typescript
+import { PicoLLMWorker } from "@picovoice/picollm-web";
+
+const picoLLMModel = {
+  modelFile: '${MODEL_FILE}'
+}
+
+const picoLLM = await PicoLLMWorker.create(
+  "${ACCESS_KEY}",
+  picoLLMModel
+);
+
+const res = await picoLLM.generate(`${PROMPT}`);
+console.log(res.completion);
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from [Picovoice Console](https://console.picovoice.ai/), `${MODEL_FILE}` with the contents of the model file as `File`, `Blob` or `URL (path to model file)` format and `${PROMPT}` with a prompt string. Finally, when done release the resources using `picoLLM.release()`.
 
 ### C SDK
 

@@ -1,0 +1,24 @@
+{
+  "name": "picollm-web-completion-demo",
+  "version": "1.0.0",
+  "description": "A demo to show how to create a picoLLM inference engine on a web worker that accepts a prompt along with a set of optional parameters and generates a single completion.",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "yarn run http-server -a localhost -p 5000"
+  },
+  "keywords": [
+    "Picovoice",
+    "browser",
+    "generative ai",
+    "llm"
+  ],
+  "author": "Picovoice Inc",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@picovoice/picollm-web": "../../../binding/web"
+  },
+  "devDependencies": {
+    "http-server": "^14.0.0"
+  }
+}

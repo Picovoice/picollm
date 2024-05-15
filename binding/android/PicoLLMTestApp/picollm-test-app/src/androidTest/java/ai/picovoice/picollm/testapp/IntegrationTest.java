@@ -97,7 +97,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void testPorcupine() {
+    public void testPicoLLM() {
         onView(withId(R.id.testButton)).perform(click());
         onView(withId(R.id.testResult)).perform(waitForText("Passed", 60000));
     }

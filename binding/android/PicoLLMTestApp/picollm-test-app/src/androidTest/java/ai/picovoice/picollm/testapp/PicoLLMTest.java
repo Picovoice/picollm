@@ -19,6 +19,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -439,7 +441,8 @@ public class PicoLLMTest {
                             .setTemperature(temperature)
                             .setTopP(topP)
                             .build());
-
+            Log.i("PICOVOICE", res.getCompletion());
+            System.out.println(res.getCompletion());
             List<String> completionStrings = new Gson().fromJson(
                     currentTestData.get("expectations"),
                     new TypeToken<List<String>>() {
@@ -557,35 +560,6 @@ public class PicoLLMTest {
             assertNotNull(dialog);
             PicoLLMDialog dialog2 = picollm.getDialogBuilder().setMode("chat").build();
             assertNotNull(dialog2);
-        }
-
-        @Test
-        public void testErrorStack() {
-            String[] error = {};
-            try {
-                new PicoLLM.Builder()
-                        .setAccessKey("invalid")
-                        .setModelPath(modelPath)
-                        .setDevice(device)
-                        .build();
-            } catch (PicoLLMException e) {
-                error = e.getMessageStack();
-            }
-
-            assertTrue(0 < error.length);
-            assertTrue(error.length <= 8);
-
-            try {
-                new PicoLLM.Builder()
-                        .setAccessKey("invalid")
-                        .setModelPath(modelPath)
-                        .setDevice(device)
-                        .build();
-            } catch (PicoLLMException e) {
-                for (int i = 0; i < error.length; i++) {
-                    assertEquals(e.getMessageStack()[i], error[i]);
-                }
-            }
         }
     }
 
@@ -740,9 +714,39 @@ public class PicoLLMTest {
         }
     }
 
-    public static class AvailableDevicesTests extends BaseTest {
+    public static class NonInstanceTests extends BaseTest {
+
         @Test
-        public void testGetAvailableDevices() throws PicoLLMException {
+        public void testErrorStack() {
+            String[] error = {};
+            try {
+                new PicoLLM.Builder()
+                        .setAccessKey("invalid")
+                        .setModelPath(modelPath)
+                        .setDevice(device)
+                        .build();
+            } catch (PicoLLMException e) {
+                error = e.getMessageStack();
+            }
+
+            assertTrue(0 < error.length);
+            assertTrue(error.length <= 8);
+
+            try {
+                new PicoLLM.Builder()
+                        .setAccessKey("invalid")
+                        .setModelPath(modelPath)
+                        .setDevice(device)
+                        .build();
+            } catch (PicoLLMException e) {
+                for (int i = 0; i < error.length; i++) {
+                    assertEquals(e.getMessageStack()[i], error[i]);
+                }
+            }
+        }
+
+        @Test
+        public void testGetAvailableDevices() {
             String[] availableDevices = PicoLLM.getAvailableDevices();
             assertTrue(availableDevices.length > 0);
             for (String d : availableDevices) {

@@ -83,7 +83,6 @@ def pv_library_path(relative: str) -> str:
                 'lib/raspberry-pi/%s/libpv_picollm.so' % _PV_MACHINE)
     elif _PV_SYSTEM == 'Windows':
         library_file = os.path.join(os.path.dirname(__file__), relative, 'lib/windows/amd64/libpv_picollm.dll')
-        os.environ["PATH"] += os.pathsep + os.path.join(os.path.dirname(library_file))
         return library_file
 
     raise NotImplementedError('Unsupported platform.')

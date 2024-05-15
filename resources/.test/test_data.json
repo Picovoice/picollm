@@ -79,6 +79,13 @@
           "endpoint": "END_OF_SENTENCE",
           "num-top-choices": 0,
           "completion": " Cheese. Cheese. Cheese. Cheese. Cheese. Cheese!\n<|endoftext|>"
+        },
+        {
+          "num-prompt-tokens": 10,
+          "num-completion-tokens": 4,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 0,
+          "completion": " Cheese.\n<|endoftext|>"
         }
       ]
     },
@@ -123,7 +130,8 @@
         "uddin'\n\n\nThe song is about a man who has to go to work",
         " Asset, and I am going to sing it,\n\n\n\nI like to",
         "!\n\n\n##Your task: **Rewrite** the above paragraph into a",
-        "!\n\n\nWhat is banana?\n- A fruit that grows on trees\n"
+        "!\n\n\nWhat is banana?\n- A fruit that grows on trees\n",
+        "uddin'\n\n\nThe song is one of the most popular songs in the modern"
       ]
     },
     "with-top-choices": {

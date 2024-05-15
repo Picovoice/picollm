@@ -178,7 +178,7 @@ try {
         .setModelPath("${MODEL_PATH}")
         .build();
     PicoLLMCompletion res = picollm.generate(
-        prompt,
+        "${PROMPT}",
         new PicoLLMGenerateParams.Builder().build());
 } catch (PicoLLMException e) { }
 ```

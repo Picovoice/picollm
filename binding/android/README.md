@@ -109,7 +109,7 @@ Generate a prompt completion:
 ```java
 try {
     PicoLLMCompletion res = picollm.generate(
-        prompt,
+        "${PROMPT}",
         new PicoLLMGenerateParams.Builder().build());
 } catch (PicoLLMException e) { }
 ```
@@ -127,7 +127,7 @@ try {
     dialog.addHumanRequest(prompt);
 
     PicoLLMCompletion res = picollm.generate(
-        prompt,
+        dialog.getPrompt(),
         new PicoLLMGenerateParams.Builder().build());
     dialog.addLLMResponse(res.getCompletion());
 } catch (PicoLLMException e) { }

@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
         File modelFile = new File(getApplicationContext().getFilesDir(), "model.pllm");
 
         try (InputStream is = getContentResolver().openInputStream(uri);
-             OutputStream os = new FileOutputStream(modelFile)) {
+                OutputStream os = new FileOutputStream(modelFile)) {
             byte[] buffer = new byte[8192];
             int numBytesRead;
             while ((numBytesRead = is.read(buffer)) != -1) {

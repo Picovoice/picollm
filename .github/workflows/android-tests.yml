@@ -56,6 +56,9 @@ jobs:
     - name: Inject model name
       run: echo pvTestingModelName="phi2-290.pllm" >> local.properties
 
+    - name: Inject device string
+      run: echo pvTestingDevice="cpu" >> local.properties
+
     - name: Inject Android keystore variables
       run: |
         echo storePassword="${{secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD}}" >> local.properties
@@ -111,6 +114,9 @@ jobs:
 
     - name: Inject model name
       run: echo pvTestingModelName="phi2-290.pllm" >> local.properties
+
+    - name: Inject device string
+      run: echo pvTestingDevice="cpu" >> local.properties
 
     - name: Inject Android keystore variables
       run: |

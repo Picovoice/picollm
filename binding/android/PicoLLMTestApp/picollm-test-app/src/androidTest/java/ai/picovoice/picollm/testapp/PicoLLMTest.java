@@ -441,8 +441,6 @@ public class PicoLLMTest {
                             .setTemperature(temperature)
                             .setTopP(topP)
                             .build());
-            Log.i("PICOVOICE", res.getCompletion());
-            System.out.println(res.getCompletion());
             List<String> completionStrings = new Gson().fromJson(
                     currentTestData.get("expectations"),
                     new TypeToken<List<String>>() {

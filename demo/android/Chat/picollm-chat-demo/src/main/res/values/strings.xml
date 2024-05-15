@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">picoLLM Chat Demo</string>
+    <string name="intro_text">
+        Load a `.pllm` file from your device to begin.\n\n
+        If you do not have a `.pllm` on device, you can either download one from the Picovoice Console or push one to the device with adb.
+    </string>
+</resources>

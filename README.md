@@ -106,6 +106,12 @@ For more information about Python demos go to [demo/python](demo/python/README.m
 
 ### Android Demos
 
+Using Android Studio, open the [Completion demo](demo/android/Completion/) as an Android project, copy your AccessKey into MainActivity.java, and run the application.
+
+To learn about how to use picoLLM in a chat application, try out the [Chat demo](demo/android/Chat/).
+
+For more information about Android demos go to [demo/android](demo/android/README.md).
+
 ### iOS Demos
 
 ### Web Demos
@@ -176,6 +182,26 @@ the resources using `pllm.release()`.
 ### Node.js SDK
 
 ### Android SDK
+
+Create an instance of the inference engine and generate a prompt completion:
+
+```java
+import ai.picovoice.picollm.*;
+
+try {
+    PicoLLM picollm = new PicoLLM.Builder()
+        .setAccessKey("${ACCESS_KEY}")
+        .setModelPath("${MODEL_PATH}")
+        .build();
+    PicoLLMCompletion res = picollm.generate(
+        "${PROMPT}",
+        new PicoLLMGenerateParams.Builder().build());
+} catch (PicoLLMException e) { }
+```
+
+Replace `${ACCESS_KEY}` with your `AccessKey` from Picovoice Console, `${MODEL_PATH}` to the path to a model file
+downloaded from Picovoice Console, and `${PROMPT}` to a prompt string. Finally, when done be sure to explicitly release
+the resources using `picollm.delete()`.
 
 ### iOS SDK
 

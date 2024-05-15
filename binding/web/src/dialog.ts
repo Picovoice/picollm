@@ -19,8 +19,8 @@ export class Dialog {
   protected _history?: number;
   protected _system?: string;
 
-  protected _human: string[];
-  protected _llm: string[];
+  protected _humanRequests: string[];
+  protected _llmResponses: string[];
 
   /**
    * Constructor.
@@ -32,8 +32,8 @@ export class Dialog {
     this._history = history;
     this._system = system;
 
-    this._human = [];
-    this._llm = [];
+    this._humanRequests = [];
+    this._llmResponses = [];
   }
 
   /**
@@ -41,11 +41,11 @@ export class Dialog {
    * @param content Human's request.
    */
   public addHumanRequest(content: string): void {
-    if (this._human.length > this._llm.length) {
+    if (this._humanRequests.length > this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMInvalidStateError("Entering a human request without entering the last LLM response is invalid.");
     }
 
-    this._human.push(content);
+    this._humanRequests.push(content);
   }
 
   /**
@@ -53,11 +53,11 @@ export class Dialog {
    * @param content LLM's response.
    */
   public addLLMResponse(content: string): void {
-    if (this._human.length === this._llm.length) {
+    if (this._humanRequests.length === this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMInvalidStateError("Entering an LLM response without entering the human request is invalid.");
     }
 
-    this._llm.push(content);
+    this._llmResponses.push(content);
   }
 
   /**
@@ -74,12 +74,12 @@ export class Dialog {
  */
 export class GemmaChatDialog extends Dialog {
   public prompt(): string {
-    if (this._human.length === this._llm.length) {
+    if (this._humanRequests.length === this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
     }
 
-    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
-    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+    const human = (this._history !== undefined) ? this._humanRequests.slice(-(this._history + 1)) : this._humanRequests;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llmResponses.slice(-this._history)) : this._llmResponses;
 
     const res: string[] = [];
     for (let i = 0; i < llm.length; i++) {
@@ -97,12 +97,12 @@ export class GemmaChatDialog extends Dialog {
  */
 export class Llama2ChatDialog extends Dialog {
   public prompt(): string {
-    if (this._human.length === this._llm.length) {
+    if (this._humanRequests.length === this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
     }
 
-    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
-    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+    const human = (this._history !== undefined) ? this._humanRequests.slice(-(this._history + 1)) : this._humanRequests;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llmResponses.slice(-this._history)) : this._llmResponses;
 
     const res: string[] = [];
     for (let i = 0; i < human.length - 1; i++) {
@@ -129,12 +129,12 @@ export class Llama2ChatDialog extends Dialog {
  */
 export class Llama3ChatDialog extends Dialog {
   public prompt(): string {
-    if (this._human.length === this._llm.length) {
+    if (this._humanRequests.length === this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
     }
 
-    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
-    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+    const human = (this._history !== undefined) ? this._humanRequests.slice(-(this._history + 1)) : this._humanRequests;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llmResponses.slice(-this._history)) : this._llmResponses;
 
     const res: string[] = [];
     res.push(`<|begin_of_text|>`);
@@ -154,12 +154,12 @@ export class Llama3ChatDialog extends Dialog {
  */
 export class MistralChatDialog extends Dialog {
   public prompt(): string {
-    if (this._human.length === this._llm.length) {
+    if (this._humanRequests.length === this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
     }
 
-    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
-    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+    const human = (this._history !== undefined) ? this._humanRequests.slice(-(this._history + 1)) : this._humanRequests;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llmResponses.slice(-this._history)) : this._llmResponses;
 
     const res: string[] = [];
     for (let i = 0; i < llm.length; i++) {
@@ -192,12 +192,12 @@ export class Phi2Dialog extends Dialog {
   }
 
   public prompt(): string {
-    if (this._human.length === this._llm.length) {
+    if (this._humanRequests.length === this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
     }
 
-    const human = (this._history !== undefined) ? this._human.slice(-(this._history + 1)) : this._human;
-    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llm.slice(-this._history)) : this._llm;
+    const human = (this._history !== undefined) ? this._humanRequests.slice(-(this._history + 1)) : this._humanRequests;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llmResponses.slice(-this._history)) : this._llmResponses;
     const ht = this._humanTag;
     const lt = this._llmTag;
 

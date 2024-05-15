@@ -1,0 +1,48 @@
+name: Web
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'binding/web/**'
+      - '!binding/web/README.md'
+      - 'lib/wasm/**'
+      - '.github/workflows/web.yml'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - 'binding/web/**'
+      - '!binding/web/README.md'
+      - 'lib/wasm/**'
+      - '.github/workflows/web.yml'
+
+defaults:
+  run:
+    working-directory: binding/web
+
+jobs:
+  build:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      matrix:
+        machine: [pv-linux, pv-ios, pv-windows]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Copy libs
+      run: yarn copywasm
+
+    - name: Build
+      run: yarn build
+
+    - name: Prepare Test
+      run: yarn setup-test http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm phi2-290.pllm
+
+    - name: Test Web Worker
+      run: yarn test --env ACCESS_KEY=${{secrets.PV_VALID_ACCESS_KEY}}

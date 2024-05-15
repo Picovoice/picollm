@@ -8,6 +8,7 @@ cleartext
 constraintlayout
 copywasm
 cuda
+dotdotdot
 dylib
 endoftext
 gptq
@@ -36,6 +37,7 @@ pluginutils
 readables
 rtld
 salut
+SIMD
 signup
 strdup
 testapp
@@ -43,6 +45,7 @@ tock
 uddin
 winmode
 xcframework
+xlink
 LPWSTR
 wargv
 Makefiles

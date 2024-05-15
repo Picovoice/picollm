@@ -105,24 +105,13 @@ func cStreamCallback (completion: UnsafePointer<CChar>?, context: UnsafeMutableR
 /// iOS binding for picoLLM Inference Engine. Provides a Swift interface to the picoLLM library.
 public class PicoLLM {
 
-    static let resourceBundle: Bundle = {
-        let myBundle = Bundle(for: PicoLLM.self)
-
-        guard let resourceBundleURL = myBundle.url(
-             forResource: "PicoLLMResources", withExtension: "bundle")
-        else { fatalError("PicoLLMResources.bundle not found") }
-
-        guard let resourceBundle = Bundle(url: resourceBundleURL)
-            else { fatalError("Could not open PicoLLMResources.bundle") }
-
-        return resourceBundle
-    }()
-
     private var handle: OpaquePointer?
     public var streamCallback: ((String) -> Void)?
 
     public static let maxTopChoices = Int32(pv_picollm_max_top_choices())
     public static let version = String(cString: pv_picollm_version())
+    public let model: String
+    public let contextLength: Int32
 
     private static var sdk = "ios"
 
@@ -148,7 +137,15 @@ public class PicoLLM {
         device: String = "best:0"
     ) throws {
 
-        if device.count == 0 {
+        if device.isEmpty {
+            throw PicoLLMInvalidArgumentError("accessKey is required for PicoLLM initialization")
+        }
+
+        if device.isEmpty {
+            throw PicoLLMInvalidArgumentError("modelPath is required for PicoLLM initialization")
+        }
+
+        if device.isEmpty {
             throw PicoLLMInvalidArgumentError("device is required for PicoLLM initialization")
         }
 
@@ -164,6 +161,26 @@ public class PicoLLM {
             let messageStack = try PicoLLM.getMessageStack()
             throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM init failed", messageStack)
         }
+
+        var cModel: UnsafePointer<Int8>?
+        let status = pv_picollm_model(
+            self.handle,
+            &cModel)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM init failed", messageStack)
+        }
+        self.model = String(cString: cModel!)
+
+        var contextLength: Int32 = 0
+        let status = pv_picollm_context_length(
+            self.handle,
+            &contextLength)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM init failed", messageStack)
+        }
+        self.contextLength = contextLength
     }
 
     deinit {
@@ -184,12 +201,12 @@ public class PicoLLM {
     ///   - prompt: Prompt.
     ///   - completionTokenLimit: Maximum number of tokens in the completion. If the generation process stops due to
     ///         reaching this limit, the `endpoint` output argument will be
-    ///         `PicoLLMEndpoint.completionTokenLimitReached`. Set to `-1` to impose no limit.
+    ///         `PicoLLMEndpoint.completionTokenLimitReached`. Set to `nil` to impose no limit.
     ///   - stopPhrase: The generation process stops when it encounters any of these phrases in the completion. The
     ///         already generated completion, including the encountered stop phrase, will be returned. The `endpoint`
     ///         output argument will be `PicoLLMEndpoint.stopPhraseEncountered`. Set to `nil` to turn off this feature.
     ///   - seed: The internal random number generator uses it as its seed if set to a positive integer value. Seeding
-    ///         enforces deterministic outputs. Set to `-1` for randomized outputs for a given prompt.
+    ///         enforces deterministic outputs. Set to `nil` for randomized outputs for a given prompt.
     ///   - presencePenalty: It penalizes logits already appearing in the partial completion if set to a positive value.
     ///         If set to `0.0`, it has no effect.
     ///   - frequencyPenalty: If set to a positive floating-point value, it penalizes logits proportional to the
@@ -210,9 +227,9 @@ public class PicoLLM {
     /// - Returns: PicoLLMCompletion containing stats and generated tokens.
     public func generate(
         prompt: String,
-        completionTokenLimit: Int32 = -1,
+        completionTokenLimit: Int32? = nil,
         stopPhrases: [String]? = nil,
-        seed: Int32 = -1,
+        seed: Int32? = nil,
         presencePenalty: Float = 0.0,
         frequencyPenalty: Float = 0.0,
         temperature: Float = 0.0,
@@ -238,10 +255,10 @@ public class PicoLLM {
         let status = pv_picollm_generate(
             self.handle,
             prompt,
-            completionTokenLimit,
+            (completionTokenLimit != nil) ? completionTokenLimit! : -1,
             stopPhrasesArg,
             numStopPhrasesArg,
-            seed,
+            (seed != nil) ? seed! : -1,
             presencePenalty,
             frequencyPenalty,
             temperature,
@@ -396,50 +413,6 @@ public class PicoLLM {
         }
     }
 
-    /// Getter for model's name.
-    ///
-    /// - Throws: PicoLLMError
-    /// - Returns: Model name.
-    public func model() throws -> String {
-        if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-        }
-
-        var cModel: UnsafePointer<Int8>?
-
-        let status = pv_picollm_model(
-            self.handle,
-            &cModel)
-        if status != PV_STATUS_SUCCESS {
-            let messageStack = try PicoLLM.getMessageStack()
-            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
-        }
-
-        return String(cString: cModel!)
-    }
-
-    /// Getter for model's context length.
-    ///
-    /// - Throws: PicoLLMError
-    /// - Returns: Context length.
-    public func contextLength() throws -> Int32 {
-        if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
-        }
-
-        var contextLength: Int32 = 0
-
-        let status = pv_picollm_context_length(
-            self.handle,
-            &contextLength)
-        if status != PV_STATUS_SUCCESS {
-            let messageStack = try PicoLLM.getMessageStack()
-            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
-        }
-
-        return contextLength
-    }
-
     /// Gets a list of hardware devices that can be specified when constructing.
     ///
     /// - Throws: PicoLLMError
@@ -555,7 +528,7 @@ public class PicoLLM {
             return try PicoLLM.dialogs[model]!.init(history: history, system: system)
         } else if model == "phi2" {
             if PicoLLM.phi2Dialogs[mode ?? "default"] == nil {
-                throw PicoLLMInvalidArgumentError("`\(model)` does not have a corresponding mode")
+                throw PicoLLMInvalidArgumentError("`\(model)` does not have a corresponding mode `\(mode)`")
             }
 
             return try PicoLLM.phi2Dialogs[mode ?? "default"]!.init(history: history, system: system)

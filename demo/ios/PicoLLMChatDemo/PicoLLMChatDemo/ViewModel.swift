@@ -37,7 +37,6 @@ You can download directly to your device or airdrop from a Mac.
     @Published var enableGenerateButton = true
 
     @Published var chatText: [Message] = []
-    @Published var tpsText = ""
 
     @Published var errorMessage = ""
 
@@ -66,7 +65,6 @@ You can download directly to your device or airdrop from a Mac.
             do {
                 picollm = try PicoLLM(accessKey: ACCESS_KEY, modelPath: selectedModelUrl!.path)
                 dialog = try picollm!.getDialog()
-                print("Loaded baby")
                 DispatchQueue.main.async { [self] in
                     picoLLMLoaded = true
                 }
@@ -133,9 +131,6 @@ You can download directly to your device or airdrop from a Mac.
                     streamCallback: streamCallback)
 
                 try dialog!.addLLMResponse(content: result.completion)
-                DispatchQueue.main.async { [self] in
-                    updateStats(result: result)
-                }
             } catch {
                 DispatchQueue.main.async { [self] in
                     errorMessage = "\(error)"
@@ -147,13 +142,6 @@ You can download directly to your device or airdrop from a Mac.
                 enableGenerateButton = true
             }
         }
-    }
-
-    public func updateStats(result: PicoLLMCompletion) {
-        let secondsElapsed: Double = (timerTock - timerTick)
-        let tokensPerSecond: Double = Double(numTokens) / secondsElapsed
-
-        tpsText = String(format: "%0.2f Tokens Per Second", tokensPerSecond)
     }
 
     public func clearText() {

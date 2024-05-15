@@ -73,7 +73,6 @@ You can download directly to your device or airdrop from a Mac.
         DispatchQueue.global(qos: .userInitiated).async { [self] in
             do {
                 picollm = try PicoLLM(accessKey: ACCESS_KEY, modelPath: selectedModelUrl!.path)
-                print("Loaded baby")
                 DispatchQueue.main.async { [self] in
                     picoLLMLoaded = true
                 }

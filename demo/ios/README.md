@@ -81,7 +81,7 @@ pod install
 
 4. Build and run the project on your device.
 
-5. Press the `Load Model` button and load the model file from your external storage. If you can't see your model file in the file navigator, ensure the `Large files` toggle at the top is enabled.
+5. Press the `Load Model` button and load the model file from your device's storage.
 
 6. Enter a prompt that you want a completion for, e.g. "roses are red".
 
@@ -101,7 +101,7 @@ pod install
 
 4. Build and run the project on your device.
 
-5. Press the `Load Model` button and load the model file from your external storage. If you can't see your model file in the file navigator, ensure the `Large files` toggle at the top is enabled.
+5. Press the `Load Model` button and load the model file from your device's storage.
 
 6. Chat back and forth with the LLM using the text box at the bottom.
 

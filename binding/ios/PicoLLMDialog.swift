@@ -23,8 +23,8 @@ public class BasePicoLLMDialog: PicoLLMDialog {
     internal var history: Int32?
     internal var system: String?
 
-    internal var human: [String]
-    internal var llm: [String]
+    internal var humanRequests: [String]
+    internal var llmResponses: [String]
 
     /// Constructor.
     ///
@@ -45,22 +45,22 @@ public class BasePicoLLMDialog: PicoLLMDialog {
         self.history = history
         self.system = system
 
-        self.human = []
-        self.llm = []
+        self.humanRequests = []
+        self.llmResponses = []
     }
 
-    /// Adds human's request to the dialog.
+    /// Adds humanRequests's request to the dialog.
     ///
     /// - Parameters:
     ///   - content: Human's request.
     /// - Throws: PicoLLMError
     public func addHumanRequest(content: String) throws {
-        if self.human.count > self.llm.count {
+        if self.humanRequests.count > self.llmResponses.count {
             throw PicoLLMInvalidStateError(
                 "Entering a human request without entering the last LLM response is invalid.")
         }
 
-        self.human.append(content)
+        self.humanRequests.append(content)
     }
 
     /// Adds LLM's response to the dialog.
@@ -69,11 +69,11 @@ public class BasePicoLLMDialog: PicoLLMDialog {
     ///   - content: LLM's response.
     /// - Throws: PicoLLMError
     public func addLLMResponse(content: String) throws {
-        if self.human.count == self.llm.count {
+        if self.humanRequests.count == self.llmResponses.count {
             throw PicoLLMInvalidStateError("Entering a llm response without entering the human request is invalid.")
         }
 
-        self.llm.append(content)
+        self.llmResponses.append(content)
     }
 
     /// Creates a prompt string given parameters passed the constructor and dialog's content.
@@ -87,17 +87,17 @@ public class BasePicoLLMDialog: PicoLLMDialog {
 
 /// Dialog helper for `phi-2`. This is a base class, use one of the mode-specific subclasses.
 public class Phi2Dialog: BasePicoLLMDialog {
-    private var humanTag: String
-    private var llmTag: String
+    private var humanRequestsTag: String
+    private var llmResponsesTag: String
 
     public init(
-        humanTag: String,
-        llmTag: String,
+        humanRequestsTag: String,
+        llmResponsesTag: String,
         history: Int32? = nil,
         system: String? = nil
     ) throws {
-        self.humanTag = humanTag
-        self.llmTag = llmTag
+        self.humanRequestsTag = humanRequestsTag
+        self.llmResponsesTag = llmResponsesTag
 
         try super.init(history: history, system: system)
     }
@@ -107,29 +107,33 @@ public class Phi2Dialog: BasePicoLLMDialog {
     }
 
     public override func prompt() throws -> String {
-        if self.human.count == self.llm.count {
+        if self.humanRequests.count == self.llmResponses.count {
             throw PicoLLMInvalidStateError("Only subclasses of PicoLLMDialog can return create prompts.")
         }
 
-        let human = (self.history == nil) ? self.human[...] : self.human[(self.human.count - Int(self.history!) - 1)...]
-        let llm = (self.history == nil) ? self.llm[...] : self.llm[(self.llm.count - Int(self.history!))...]
+        let humanRequests = (self.history == nil) ?
+            self.humanRequests[...] :
+            self.humanRequests[(self.humanRequests.count - Int(self.history!) - 1)...]
+        let llmResponses = (self.history == nil) ?
+            self.llmResponses[...] :
+            self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
 
         var res = ""
-        for i in 0..<llm.count {
+        for i in 0..<llmResponses.count {
             res += String(
               format: "%@: %@\n%@: %@\n",
-              self.humanTag,
-              human[i].trimmingCharacters(in: .whitespacesAndNewlines),
-              self.llmTag,
-              llm[i].trimmingCharacters(in: .whitespacesAndNewlines)
+              self.humanRequestsTag,
+              humanRequests[i].trimmingCharacters(in: .whitespacesAndNewlines),
+              self.llmResponsesTag,
+              llmResponses[i].trimmingCharacters(in: .whitespacesAndNewlines)
             )
         }
 
         res += String(
           format: "%@: %@\n%@:",
-          self.humanTag,
-          human.last!.trimmingCharacters(in: .whitespacesAndNewlines),
-          self.llmTag
+          self.humanRequestsTag,
+          humanRequests.last!.trimmingCharacters(in: .whitespacesAndNewlines),
+          self.llmResponsesTag
         )
 
         return res
@@ -142,7 +146,7 @@ public class Phi2QADialog: Phi2Dialog {
         history: Int32? = nil,
         system: String? = nil
     ) throws {
-        try super.init(humanTag: "Instruct", llmTag: "Output", history: history, system: system)
+        try super.init(humanRequestsTag: "Instruct", llmResponsesTag: "Output", history: history, system: system)
     }
 }
 
@@ -152,32 +156,36 @@ public class Phi2ChatDialog: Phi2Dialog {
         history: Int32? = nil,
         system: String? = nil
     ) throws {
-        try super.init(humanTag: "Human", llmTag: "AI", history: history, system: system)
+        try super.init(humanRequestsTag: "Human", llmResponsesTag: "AI", history: history, system: system)
     }
 }
 
 /// Dialog helper for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2`.
 public class MistralChatDialog: BasePicoLLMDialog {
     public override func prompt() throws -> String {
-        if self.human.count == self.llm.count {
+        if self.humanRequests.count == self.llmResponses.count {
             throw PicoLLMInvalidStateError("Only subclasses of PicoLLMDialog can return create prompts.")
         }
 
-        let human = (self.history == nil) ? self.human[...] : self.human[(self.human.count - Int(self.history!) - 1)...]
-        let llm = (self.history == nil) ? self.llm[...] : self.llm[(self.llm.count - Int(self.history!))...]
+        let humanRequests = (self.history == nil) ?
+            self.humanRequests[...] :
+            self.humanRequests[(self.humanRequests.count - Int(self.history!) - 1)...]
+        let llmResponses = (self.history == nil) ?
+            self.llmResponses[...] :
+            self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
 
         var res = ""
-        for i in 0..<llm.count {
+        for i in 0..<llmResponses.count {
             res += String(
               format: "[INST] %@ [/INST] %@</s>",
-              human[i].trimmingCharacters(in: .whitespacesAndNewlines),
-              llm[i].trimmingCharacters(in: .whitespacesAndNewlines)
+              humanRequests[i].trimmingCharacters(in: .whitespacesAndNewlines),
+              llmResponses[i].trimmingCharacters(in: .whitespacesAndNewlines)
             )
         }
 
         res += String(
           format: "[INST] %@ [/INST]",
-          human.last!.trimmingCharacters(in: .whitespacesAndNewlines)
+          humanRequests.last!.trimmingCharacters(in: .whitespacesAndNewlines)
         )
 
         return res
@@ -192,16 +200,20 @@ public class MixtralChatDialog: MistralChatDialog {
 /// Dialog helper for `llama-2-7b-chat`, `llama-2-13b-chat`, and `llama-2-70b-chat`.
 public class Llama2ChatDialog: BasePicoLLMDialog {
     public override func prompt() throws -> String {
-        if self.human.count == self.llm.count {
+        if self.humanRequests.count == self.llmResponses.count {
             throw PicoLLMInvalidStateError("Only subclasses of PicoLLMDialog can return create prompts.")
         }
 
-        let human = (self.history == nil) ? self.human[...] : self.human[(self.human.count - Int(self.history!) - 1)...]
-        let llm = (self.history == nil) ? self.llm[...] : self.llm[(self.llm.count - Int(self.history!))...]
+        let humanRequests = (self.history == nil) ?
+            self.humanRequests[...] :
+            self.humanRequests[(self.humanRequests.count - Int(self.history!) - 1)...]
+        let llmResponses = (self.history == nil) ?
+            self.llmResponses[...] :
+            self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
 
         var res = ""
-        for i in 0..<llm.count {
-            var instruction = human[i].trimmingCharacters(in: .whitespacesAndNewlines)
+        for i in 0..<llmResponses.count {
+            var instruction = humanRequests[i].trimmingCharacters(in: .whitespacesAndNewlines)
             if system != nil && i == 0 {
                 instruction = String(format: "<<SYS>>\n%@\n<</SYS>>\n\n%@", system!, instruction)
             }
@@ -209,12 +221,12 @@ public class Llama2ChatDialog: BasePicoLLMDialog {
             res += String(
               format: "<s>[INST] %@ [/INST] %@ </s>",
               instruction,
-              llm[i].trimmingCharacters(in: .whitespacesAndNewlines)
+              llmResponses[i].trimmingCharacters(in: .whitespacesAndNewlines)
             )
         }
 
-        var instruction = human.last!.trimmingCharacters(in: .whitespacesAndNewlines)
-        if system != nil && human.count == 1 {
+        var instruction = humanRequests.last!.trimmingCharacters(in: .whitespacesAndNewlines)
+        if system != nil && humanRequests.count == 1 {
             instruction = String(format: "<<SYS>>\n%@\n<</SYS>>\n\n%@", system!, instruction)
         }
 
@@ -230,28 +242,32 @@ public class Llama2ChatDialog: BasePicoLLMDialog {
 /// Dialog helper for `llama-3-8b-instruct` and `llama-3-70b-instruct`.
 public class Llama3ChatDialog: BasePicoLLMDialog {
     public override func prompt() throws -> String {
-        if self.human.count == self.llm.count {
+        if self.humanRequests.count == self.llmResponses.count {
             throw PicoLLMInvalidStateError("Only subclasses of PicoLLMDialog can return create prompts.")
         }
 
-        let human = (self.history == nil) ? self.human[...] : self.human[(self.human.count - Int(self.history!) - 1)...]
-        let llm = (self.history == nil) ? self.llm[...] : self.llm[(self.llm.count - Int(self.history!))...]
+        let humanRequests = (self.history == nil) ?
+            self.humanRequests[...] :
+            self.humanRequests[(self.humanRequests.count - Int(self.history!) - 1)...]
+        let llmResponses = (self.history == nil) ?
+            self.llmResponses[...] :
+            self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
 
         var res = "<|begin_of_text|>"
-        for i in 0..<llm.count {
+        for i in 0..<llmResponses.count {
             res += String(
                 format: "<|start_header_id|>user<|end_header_id|>\n\n%@<|eot_id|>",
-                human[i].trimmingCharacters(in: .whitespacesAndNewlines)
+                humanRequests[i].trimmingCharacters(in: .whitespacesAndNewlines)
             )
             res += String(
                 format: "<|start_header_id|>assistant<|end_header_id|>\n\n%@<|eot_id|>",
-                llm[i].trimmingCharacters(in: .whitespacesAndNewlines)
+                llmResponses[i].trimmingCharacters(in: .whitespacesAndNewlines)
             )
         }
 
         res += String(
             format: "<|start_header_id|>user<|end_header_id|>\n\n%@<|eot_id|>",
-            human.last!.trimmingCharacters(in: .whitespacesAndNewlines)
+            humanRequests.last!.trimmingCharacters(in: .whitespacesAndNewlines)
         )
         res += String(
             format: "<|start_header_id|>assistant<|end_header_id|>\n\n"
@@ -264,28 +280,32 @@ public class Llama3ChatDialog: BasePicoLLMDialog {
 /// Dialog helper for `gemma-2b-it` and `gemma-7b-it`.
 public class GemmaChatDialog: BasePicoLLMDialog {
     public override func prompt() throws -> String {
-        if self.human.count == self.llm.count {
+        if self.humanRequests.count == self.llmResponses.count {
             throw PicoLLMInvalidStateError("Only subclasses of PicoLLMDialog can return create prompts.")
         }
 
-        let human = (self.history == nil) ? self.human[...] : self.human[(self.human.count - Int(self.history!) - 1)...]
-        let llm = (self.history == nil) ? self.llm[...] : self.llm[(self.llm.count - Int(self.history!))...]
+        let humanRequests = (self.history == nil) ?
+            self.humanRequests[...] :
+            self.humanRequests[(self.humanRequests.count - Int(self.history!) - 1)...]
+        let llmResponses = (self.history == nil) ?
+            self.llmResponses[...] :
+            self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
 
         var res = ""
-        for i in 0..<llm.count {
+        for i in 0..<llmResponses.count {
             res += String(
                 format: "<start_of_turn>user\n%@<end_of_turn>\n",
-                human[i].trimmingCharacters(in: .whitespacesAndNewlines)
+                humanRequests[i].trimmingCharacters(in: .whitespacesAndNewlines)
             )
             res += String(
                 format: "<start_of_turn>model\n%@<end_of_turn>\n",
-                llm[i].trimmingCharacters(in: .whitespacesAndNewlines)
+                llmResponses[i].trimmingCharacters(in: .whitespacesAndNewlines)
             )
         }
 
         res += String(
             format: "<start_of_turn>user\n%@<end_of_turn>\n<start_of_turn>model",
-            human.last!.trimmingCharacters(in: .whitespacesAndNewlines)
+            humanRequests.last!.trimmingCharacters(in: .whitespacesAndNewlines)
         )
 
         return res

@@ -31,10 +31,6 @@ struct ChatView: View {
                         Text("Generating...")
                             .padding(.horizontal, 12)
                     }
-                    if !viewModel.tpsText.isEmpty {
-                        Text(viewModel.tpsText)
-                            .padding(.horizontal, 12)
-                    }
                     Spacer()
                 }
                 .padding(.horizontal, 24)

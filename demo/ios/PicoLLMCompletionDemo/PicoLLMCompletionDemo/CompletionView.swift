@@ -30,7 +30,7 @@ struct CompletionView: View {
                     )
                     .disabled(isError || !viewModel.enableGenerateButton)
                     Spacer()
-                    Text("PicoLLM Completion Demo")
+                    Text("picoLLM Completion Demo")
                     Spacer()
                 }
 

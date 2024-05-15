@@ -52,7 +52,7 @@ You can download directly to your device or airdrop from a Mac.
     }
 
     public func loadPicollm() {
-        modelLoadStatusText = "Loading Picollm..."
+        modelLoadStatusText = "Loading picoLLM..."
         enableLoadModelButton = false
 
         let modelAccess = selectedModelUrl!.startAccessingSecurityScopedResource()

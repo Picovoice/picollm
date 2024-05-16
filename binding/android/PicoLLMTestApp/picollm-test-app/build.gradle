@@ -80,8 +80,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.google.code.gson:gson:2.10'
 
-    // implementation 'ai.picovoice:picollm-android:0.0.1'
-    implementation files('../../../../binding/android/PicoLLM/picollm/build/outputs/aar/picollm-release.aar')
+    implementation 'ai.picovoice:picollm-android:1.0.0'
 
     // Espresso UI Testing
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

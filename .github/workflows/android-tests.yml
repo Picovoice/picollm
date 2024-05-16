@@ -29,12 +29,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # ********* remove after release *************
-    - name: Build binding
-      run: ./gradlew assembleRelease
-      working-directory: binding/android/PicoLLM
-    # ********* remove after release *************
-
     - name: Uninstall previous app
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp || true
 
@@ -87,12 +81,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    # ********* remove after release *************
-    - name: Build binding
-      run: ./gradlew assembleRelease
-      working-directory: binding/android/PicoLLM
-    # ********* remove after release *************
 
     - name: Uninstall previous app
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp || true

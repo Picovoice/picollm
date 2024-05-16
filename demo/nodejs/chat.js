@@ -12,84 +12,196 @@
 "use strict";
 
 const { program } = require("commander");
-const fs = require("fs");
-
-const { PicoLLM, PicoLLMActivationLimitReached } = require("@picovoice/picollm-node");
-
+const { PicoLLM } = require("@picovoice/picollm-node");
+const readline = require("node:readline");
 
 program
-  .requiredOption(
-    "-a, --access_key <string>",
-    "AccessKey obtain from the Picovoice Console (https://console.picovoice.ai/)"
-  )
-  .requiredOption(
-    "-i, --input_audio_file_path <string>",
-    "input audio file"
-  )
-  .option(
-    "-l, --library_file_path <string>",
-    "absolute path to picollm dynamic library"
-  )
-  .option("-m, --model_file_path <string>", "absolute path to picollm model")
-  .option("-p, --disable_automatic_punctuation", "disable automatic punctuation")
-  .option("-d, --disable_speaker_diarization", "disable speaker diarization")
-  .option("-v, --verbose", "verbose mode, prints metadata");
+    .option(
+        "--access_key <string>",
+        "AccessKey obtain from the Picovoice Console (https://console.picovoice.ai/)."
+    )
+    .option(
+        "--library_path <string>",
+        "Absolute path to picollm dynamic library."
+    )
+    .option("--model_path <string>", "Absolute path to picollm model")
+    .option("--prompt <string>", "Prompt string.")
+    .option(
+        "--device <string>",
+        "String representation of the device (e.g., CPU or GPU) to use for inference. If set to `best`, picoLLM " +
+        "picks the most suitable device. If set to `gpu`, the engine uses the first available GPU device. To " +
+        "select a specific GPU device, set this argument to `gpu:${GPU_INDEX}`, where `${GPU_INDEX}` is the index " +
+        "of the target GPU. If set to `cpu`, the engine will run on the CPU with the default number of threads. " +
+        "To specify the number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is " +
+        "the desired number of threads.")
+    .option(
+        "--completion_token_limit <number>",
+        "Maximum number of tokens in the completion. Set to `undefined` to impose no limit.",
+        Number,
+        128)
+    .option(
+        "--stop_phrases <string>",
+        "The generation process stops when it encounters any of these phrases in the completion. The already " +
+        "generated completion, including the encountered stop phrase, will be returned.")
+    .option(
+        "--seed <number>",
+        "The internal random number generator uses it as its seed if set to a positive integer value. Seeding " +
+        "enforces deterministic outputs. Set to `None` for randomized responses.",
+        Number)
+    .option(
+        "--presence_penalty <number>",
+        "It penalizes logits already appearing in the partial completion if set to a positive value. If set to " +
+        "`0.0`, it has no effect.",
+        Number,
+        0)
+    .option(
+        "--frequency_penalty <number>",
+        "If set to a positive floating-point value, it penalizes logits proportional to the frequency of their " +
+        "appearance in the partial completion. If set to `0.0`, it has no effect.",
+        Number,
+        0)
+    .option(
+        "--temperature <number>",
+        "Sampling temperature. Temperature is a non-negative floating-point value that controls the randomness of " +
+        "the sampler. A higher temperature smoothens the samplers' output, increasing the randomness. In " +
+        "contrast, a lower temperature creates a narrower distribution and reduces variability. Setting it to " +
+        "`0` selects the maximum logit during sampling.",
+        Number,
+        0)
+    .option(
+        "--top_p <number>",
+        "A positive floating-point number within (0, 1]. It restricts the sampler's choices to high-probability " +
+        "logits that form the `top_p` portion of the probability mass. Hence, it avoids randomly selecting " +
+        "unlikely logits. A value of `1.` enables the sampler to pick any token with non-zero probability, " +
+        "turning off the feature.",
+        Number,
+        1)
+    .option(
+        "--num_top_choices <number>",
+        "If set to a positive value, picoLLM returns the list of the highest probability tokens for any generated " +
+        "token. Set to `0` to turn off the feature.",
+        Number,
+        0)
+    .option(
+        "--dialog_mode <string>",
+        "Some instruction-tuned models provide multiple instruction modes. For example, `phi2` has `qa` and " +
+        "`chat` modes.")
+    .option(
+        "--system_instruction <string>",
+        "Some instruction-tuned models, such as `llama-2-70b-chat` accept a system-level instruction that can " +
+        "change the model's behavior or tone throughout the entire dialog.")
+    .option(
+        "--history <number>",
+        "All models have limited context. Hence, when going back and forth for a long time, we need to limit the " +
+        "scope of previous conversations we pass to the model as a prompt to generate a response. The History " +
+        "parameter controls how many of the latest back-and-forths should be serialized in each prompt. Set to " +
+        "`None` to impose no limit.",
+        Number,
+        0)
+    .option(
+        "--show_available_devices",
+        "Show the list of available devices for LLM inference.",
+        false);
 
-
-if (process.argv.length < 2) {
+if (process.argv.length < 1) {
   program.help();
 }
 program.parse(process.argv);
 
-function fileDemo() {
-  let audioPath = program["input_audio_file_path"];
-  let accessKey = program["access_key"]
-  let libraryFilePath = program["library_file_path"];
-  let modelFilePath = program["model_file_path"];
-  let disableAutomaticPunctuation = program["disable_automatic_punctuation"];
-  let disableSpeakerDiarization = program["disable_speaker_diarization"];
-  let verbose = program["verbose"];
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
-  let engineInstance = new PicoLLM(
+const getPrompt = () => {
+  return new Promise(resolve => {
+      rl.question(">>> ", input => {
+        resolve(input);
+      });
+  });
+}
+
+async function completionDemo() {
+  const accessKey = program["access_key"];
+  const libraryPath = program["library_path"];
+  const modelPath = program["model_path"];
+  const prompt = program["prompt"];
+  const device = program["device"];
+  const completionTokenLimit = program["completion_token_limit"];
+  const stopPhrases = program["stop_phrases"];
+  const seed = program["seed"];
+  const presencePenalty = program["presence_penalty"];
+  const frequencyPenalty = program["frequency_penalty"];
+  const temperature = program["temperature"];
+  const topP = program["top_p"];
+  const numTopChoices = program["num_top_choices"];
+  const dialogMode = program["dialog_mode"];
+  const systemInstruction = program["system_instruction"];
+  const history = program["history"];
+  const showAvailableDevices = program["show_available_devices"];
+
+  if (showAvailableDevices) {
+    console.log(PicoLLM.listAvailableDevices().join('\n'));
+    process.exit();
+  }
+
+  if (accessKey === undefined) {
+    console.error("No AccessKey provided");
+    process.exit();
+  }
+
+  const picoLLM = new PicoLLM(
       accessKey,
+      modelPath,
       {
-        'modelPath': modelFilePath,
-        'libraryPath': libraryFilePath,
-        'enableAutomaticPunctuation': !disableAutomaticPunctuation,
-        'enableDiarization': !disableSpeakerDiarization
+        libraryPath: libraryPath,
+        device: device
       }
   );
 
-  if (!fs.existsSync(audioPath)) {
-    console.error(`--input_audio_file_path file not found: ${audioPath}`);
-    return;
-  }
+  console.log(`picoLLM '${picoLLM.version}'`);
+  console.log(`Loaded '${picoLLM.model}'`);
+
+  const dialog = picoLLM.getDialog(dialogMode, history, systemInstruction);
+
+  const streamCallback = (token) => {
+    process.stdout.write(token);
+  };
+
+  process.on('SIGINT', function() {
+    picoLLM.release();
+    rl.close();
+    process.exit();
+  });
 
   try {
-    const res = engineInstance.processFile(audioPath);
-    console.log(res.transcript);
-    if (verbose) {
-      console.table(
-        res.words.map(word => {
-          return {
-            "Word": word.word,
-            "Start time (s)": word.startSec.toFixed(2),
-            "End time (s)": word.endSec.toFixed(2),
-            "Confidence": word.confidence.toFixed(2),
-            "Speaker Tag": word.speakerTag
-          };
-        })
+    while (true) {
+      const prompt = await getPrompt();
+      dialog.addHumanRequest(prompt);
+      const res = await picoLLM.generate(
+        dialog.prompt(),
+        {
+          completionTokenLimit,
+          stopPhrases,
+          seed,
+          presencePenalty,
+          frequencyPenalty,
+          temperature,
+          topP,
+          numTopChoices,
+          streamCallback,
+        }
       );
+      console.log();
+      dialog.addLLMResponse(res.completion);
     }
-  } catch (err) {
-    if (err instanceof PicoLLMActivationLimitReached) {
-      console.error(`AccessKey '${accessKey}' has reached it's processing limit.`);
-    } else {
-      console.error(err);
-    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    picoLLM.release();
+    rl.close();
   }
 
-  engineInstance.release();
 }
 
-fileDemo();
+completionDemo();

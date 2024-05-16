@@ -69,7 +69,7 @@ conversation with the LLM, similar to ChatGPT.
 
 ### Completion Demo
 
-1. Go to [PicoLLMCompletionDemo](PicoLLMCompletionDemo) directory. Then run:
+1. Go to the [Completion](Completion) directory. Then run:
 
 ```console
 pod install
@@ -77,7 +77,7 @@ pod install
 
 2. Open the `PicoLLMCompletionDemo.xcworkspace` in XCode
 
-3. Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](./PicoLLMCompletionDemo/PicoLLMCompletionDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
+3. Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](./Completion/PicoLLMCompletionDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
 
 4. Build and run the project on your device.
 
@@ -89,7 +89,7 @@ pod install
 
 ### Chat Demo
 
-1. Go to [PicoLLMChatDemo](PicoLLMChatDemo) directory. Then run:
+1. Go to the [Chat](Chat) directory. Then run:
 
 ```console
 pod install
@@ -97,7 +97,7 @@ pod install
 
 2. Open the `PicoLLMChatDemo.xcworkspace` in XCode
 
-3. Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](./PicoLLMChatDemo/PicoLLMChatDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
+3. Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](./Chat/PicoLLMChatDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
 
 4. Build and run the project on your device.
 

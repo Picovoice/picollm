@@ -134,11 +134,9 @@ You can download directly to your device or airdrop from a Mac.
             errorMessage = "Empty or all whitespace stop phrases is invalid"
             return
         }
-        for phrase in stopPhrases ?? [] {
-            if phrase.isEmpty {
-                errorMessage = "Empty or all whitespace stop phrase is invalid"
-                return
-            }
+        for phrase in stopPhrases ?? [] where phrase.isEmpty {
+            errorMessage = "Empty or all whitespace stop phrase is invalid"
+            return
         }
 
         enableGenerateButton = false

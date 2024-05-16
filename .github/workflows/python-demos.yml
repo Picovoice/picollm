@@ -50,13 +50,6 @@ jobs:
         .venv\Scripts\activate
         echo PATH=$PATH >> $GITHUB_ENV
 
-    - name: Build dependencies
-      run: |
-        python3 -m pip install setuptools wheel
-        cd ../../binding/python
-        python3 setup.py sdist bdist_wheel
-        python3 -m pip install --force-reinstall dist/picollm-1.0.0-py3-none-any.whl
-
     - name: Install Python dependencies
       run: python3 -m pip install -r requirements.txt
 

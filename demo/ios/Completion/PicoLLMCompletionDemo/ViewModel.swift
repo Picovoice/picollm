@@ -98,6 +98,7 @@ You can download directly to your device or airdrop from a Mac.
         }
         picollm = nil
 
+        errorMessage = ""
         promptText = ""
         completionPromptText = ""
         completionText = ""
@@ -169,6 +170,7 @@ You can download directly to your device or airdrop from a Mac.
             }
 
             DispatchQueue.main.async { [self] in
+                promptText = ""
                 enableGenerateButton = true
             }
         }

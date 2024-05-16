@@ -90,6 +90,7 @@ You can download directly to your device or airdrop from a Mac.
         }
         picollm = nil
 
+        errorMessage = ""
         promptText = ""
         chatText.removeAll()
         picoLLMLoaded = false

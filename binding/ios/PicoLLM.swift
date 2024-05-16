@@ -137,11 +137,11 @@ public class PicoLLM {
         device: String = "best:0"
     ) throws {
 
-        if device.isEmpty {
+        if accessKey.isEmpty {
             throw PicoLLMInvalidArgumentError("accessKey is required for PicoLLM initialization")
         }
 
-        if device.isEmpty {
+        if modelPath.isEmpty {
             throw PicoLLMInvalidArgumentError("modelPath is required for PicoLLM initialization")
         }
 
@@ -237,7 +237,7 @@ public class PicoLLM {
         streamCallback: ((String) -> Void)? = nil
     ) throws -> PicoLLMCompletion {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before generating")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized calling generate")
         }
 
         let stopPhrasesArg = (stopPhrases != nil) ? stopPhrases!.map { UnsafePointer(strdup($0)) } : nil
@@ -368,7 +368,7 @@ public class PicoLLM {
         token: Int32
     ) throws -> [Float] {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling forward")
         }
 
         var numLogits: Int32 = 0
@@ -381,7 +381,7 @@ public class PicoLLM {
             &cLogits)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try PicoLLM.getMessageStack()
-            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM forward failed", messageStack)
         }
 
         var logits = [Float]()
@@ -402,13 +402,13 @@ public class PicoLLM {
     /// - Throws: PicoLLMError
     public func reset() throws {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized before processing")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling reset")
         }
 
         let status = pv_picollm_reset(self.handle)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try PicoLLM.getMessageStack()
-            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM reset failed", messageStack)
         }
     }
 
@@ -422,7 +422,7 @@ public class PicoLLM {
         let status = pv_picollm_list_hardware_devices(&cHardwareDevices, &numHardwareDevices)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try getMessageStack()
-            throw pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
+            throw pvStatusToPicoLLMError(status, "PicoLLM getAvailableDevices failed", messageStack)
         }
 
         var hardwareDevices: [String] = []

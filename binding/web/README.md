@@ -197,9 +197,5 @@ await picoLLM.release()
 
 ## Demos
 
-<!-- markdown-link-check-disable -->
-
 Refer to our [Web demos](https://github.com/Picovoice/picollm/tree/master/demo/web) for examples using LLM completion
 and chat using `picoLLM`.
-
-<!-- markdown-link-check-enable -->

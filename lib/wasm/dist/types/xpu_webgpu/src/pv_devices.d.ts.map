@@ -1,0 +1,1 @@
+{"version":3,"file":"pv_devices.d.ts","sourceRoot":"","sources":["../../../../src/xpu_webgpu/src/pv_devices.ts"],"names":[],"mappings":";AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,SAAS,CAAC;AAErC,eAAO,MAAM,UAAU,EAAE,GAAG,CAAC,MAAM,EAAE,UAAU,CAQ5C,CAAC;AAEJ,eAAO,MAAM,UAAU;mBAGJ,MAAM;YACb,SAAS;;EAGlB,CAAC"}

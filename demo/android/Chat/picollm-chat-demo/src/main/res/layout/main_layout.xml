@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/loadModelLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/modelGuidelineHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.80" />
+        <TextView
+            android:id="@+id/loadModelText"
+            android:text="@string/intro_text"
+            android:textSize="17sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:paddingHorizontal="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/modelGuidelineHorizontal"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ProgressBar
+            android:id="@+id/loadModelProgress"
+            android:visibility="invisible"
+            android:indeterminateTint="@color/colorPrimary"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loadModelText"
+            android:layout_marginTop="15dp"/>
+        <Button
+            android:id="@+id/loadModelButton"
+            android:background="@drawable/button_background"
+            android:textColor="#FFFFFF"
+            android:text="Load Model"
+            android:padding="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/modelGuidelineHorizontal" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.82" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineVertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.70" />
+
+        <ScrollView
+            android:id="@+id/chatScrollView"
+            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginEnd="24dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="35dp"
+            android:gravity="center"
+            android:background="@drawable/chat_text_background"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/completionStatusText">
+        <TextView
+            android:id="@+id/chatText"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:textSize="18sp"
+            android:padding="10dp"
+            android:text=""
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+        </ScrollView>
+
+        <ImageButton
+            android:background="#EEEEEE"
+            android:id="@+id/loadNewModelButton"
+            android:src="@drawable/arrow_back_button"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="5dp"
+            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:text="Load New Model"
+            app:layout_constraintStart_toStartOf="@id/chatScrollView"
+            app:layout_constraintBottom_toBottomOf="@+id/chatScrollView"/>
+
+        <ImageButton
+            android:background="#EEEEEE"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="5dp"
+            android:id="@+id/clearButton"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:src="@drawable/clear_button"
+            app:layout_constraintEnd_toEndOf="@+id/chatScrollView"
+            app:layout_constraintBottom_toBottomOf="@+id/chatScrollView"/>
+
+        <ProgressBar
+            android:id="@+id/completionStatusProgress"
+            android:indeterminateTint="@color/colorPrimary"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:text=""
+            app:layout_constraintBottom_toTopOf="@+id/guidelineHorizontal"
+            app:layout_constraintStart_toStartOf="@+id/chatScrollView"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"/>
+
+        <TextView
+            android:id="@+id/completionStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Generating..."
+            app:layout_constraintStart_toEndOf="@+id/completionStatusProgress"
+            app:layout_constraintBottom_toTopOf="@+id/guidelineHorizontal"
+            android:layout_marginStart="10dp"
+            android:paddingBottom="6dp"/>
+
+        <RelativeLayout
+            android:id="@+id/promptTextContainer"
+            android:layout_height="55dp"
+            android:layout_width="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            app:layout_constraintTop_toBottomOf="@+id/guidelineHorizontal"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <EditText
+                android:id="@+id/promptEditText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/prompt_text_enabled"
+                android:paddingStart="12dp"
+                android:paddingEnd="48dp"
+                android:hint="Message picoLLM"
+                android:textColorHint="#9E9E9E"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:imeOptions="actionDone"
+                android:maxLines="5"/>
+
+            <ImageButton
+                android:id="@+id/promptButton"
+                android:background="@drawable/prompt_button_enabled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/prompt_button_arrow"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="12dp"/>
+        </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

@@ -1,0 +1,141 @@
+name: Android Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/android-tests.yml'
+      - 'binding/android/PicoLLM/**'
+      - 'binding/android/PicoLLMTestApp/**'
+      - '!binding/android/PicoLLM/README.md'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+']
+    paths:
+      - '.github/workflows/android-tests.yml'
+      - 'binding/android/PicoLLM/**'
+      - 'binding/android/PicoLLMTestApp/**'
+      - '!binding/android/PicoLLM/README.md'
+
+defaults:
+  run:
+    working-directory: binding/android/PicoLLMTestApp
+
+jobs:
+  test:
+    name: Run Android Tests
+    runs-on: pv-android
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # ********* remove after release *************
+    - name: Build binding
+      run: ./gradlew assembleRelease
+      working-directory: binding/android/PicoLLM
+    # ********* remove after release *************
+
+    - name: Uninstall previous app
+      run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp || true
+
+    - name: Uninstall previous tests
+      run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp.test || true
+
+    - name: Download resource files
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm
+
+    - name: Make Android dir
+      run: ~/Android/Sdk/platform-tools/adb shell mkdir -p /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external
+
+    - name: Copy resource files
+      run: ~/Android/Sdk/platform-tools/adb push --sync phi2-290.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/phi2-290.pllm
+
+    - name: Inject AccessKey
+      run: echo pvTestingAccessKey="${{secrets.PV_VALID_ACCESS_KEY}}" >> local.properties
+
+    - name: Inject model name
+      run: echo pvTestingModelName="phi2-290.pllm" >> local.properties
+
+    - name: Inject device string
+      run: echo pvTestingDevice="cpu" >> local.properties
+
+    - name: Inject Android keystore variables
+      run: |
+        echo storePassword="${{secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD}}" >> local.properties
+        echo keyPassword="${{secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD}}" >> local.properties
+        echo keyAlias=picovoice >> local.properties
+        echo storeFile=../picovoice.jks >> local.properties
+
+    - name: Setup Android keystore file
+      run: echo "${{secrets.ANDROID_RELEASE_KEYSTORE_FILE_B64}}" | base64 -d > picovoice.jks
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build app
+      run: ./gradlew assembleDebug --info
+
+    - name: Build androidTest
+      run: ./gradlew assembleAndroidTest --info
+
+    - name: Run tests
+      run: ./gradlew connectedAndroidTest --info -Pandroid.testInstrumentationRunnerArguments.class=ai.picovoice.picollm.testapp.PicoLLMTest
+
+  test-integ:
+    name: Run Android Integ Tests
+    runs-on: pv-android
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # ********* remove after release *************
+    - name: Build binding
+      run: ./gradlew assembleRelease
+      working-directory: binding/android/PicoLLM
+    # ********* remove after release *************
+
+    - name: Uninstall previous app
+      run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp || true
+
+    - name: Uninstall previous tests
+      run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp.test || true
+
+    - name: Download resource files
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm
+
+    - name: Make Android dir
+      run: ~/Android/Sdk/platform-tools/adb shell mkdir -p /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external
+
+    - name: Copy resource files
+      run: ~/Android/Sdk/platform-tools/adb push --sync phi2-290.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/phi2-290.pllm
+
+    - name: Inject AccessKey
+      run: echo pvTestingAccessKey="${{secrets.PV_VALID_ACCESS_KEY}}" >> local.properties
+
+    - name: Inject model name
+      run: echo pvTestingModelName="phi2-290.pllm" >> local.properties
+
+    - name: Inject device string
+      run: echo pvTestingDevice="cpu" >> local.properties
+
+    - name: Inject Android keystore variables
+      run: |
+        echo storePassword="${{secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD}}" >> local.properties
+        echo keyPassword="${{secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD}}" >> local.properties
+        echo keyAlias=picovoice >> local.properties
+        echo storeFile=../picovoice.jks >> local.properties
+
+    - name: Setup Android keystore file
+      run: echo "${{secrets.ANDROID_RELEASE_KEYSTORE_FILE_B64}}" | base64 -d > picovoice.jks
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build app
+      run: ./gradlew assembleRelease --info
+
+    - name: Build androidTest
+      run: ./gradlew assembleReleaseAndroidTest --info
+
+    - name: Run tests
+      run: ./gradlew connectedAndroidTest --info -Pandroid.testInstrumentationRunnerArguments.class=ai.picovoice.picollm.testapp.IntegrationTest

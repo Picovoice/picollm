@@ -1,0 +1,68 @@
+name: Python
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/python.yml'
+      - 'binding/python/**'
+      - '!binding/python/README.md'
+      - 'lib/linux/**'
+      - 'lib/mac/**'
+      - 'lib/raspberry-pi/**'
+      - 'lib/windows/**'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - '.github/workflows/python.yml'
+      - 'binding/python/**'
+      - '!binding/python/README.md'
+      - 'lib/linux/**'
+      - 'lib/mac/**'
+      - 'lib/raspberry-pi/**'
+      - 'lib/windows/**'
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  build-self-hosted:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        xpu: [ cpu ]
+        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows ]
+        include:
+          - xpu: gpu
+            machine: pv-linux
+          - xpu: gpu
+            machine: pv-windows
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Python virtualenv (*nix)
+      if: ${{ matrix.machine != 'pv-windows' }}
+      run: |
+        python3 -m venv binding/python/.venv
+        . binding/python/.venv/bin/activate
+        echo PATH=$PATH >> $GITHUB_ENV
+
+    - name: Setup Python virtualenv (windows)
+      if: ${{ matrix.machine == 'pv-windows' }}
+      run: |
+        python3 -m venv binding\python\.venv
+        binding\python\.venv\Scripts\activate
+        echo PATH=$PATH >> $GITHUB_ENV
+
+    - name: Install Python dependencies
+      run: python3 -m pip install -r binding/python/requirements.txt
+
+    - name: Download resource files
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm
+
+    - name: Test
+      run: python3 -m binding.python.test_picollm ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.pllm ${{matrix.xpu}}

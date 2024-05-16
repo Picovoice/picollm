@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="node_modules/@picovoice/picollm-web/dist/iife/index.js"></script>
+  <script type="application/javascript" src="./src/main.js"></script>
+  <style>
+    html, body {
+      height: 90%;
+    }
+
+    .control-label {
+      margin-bottom: 10px;
+
+      & label {
+        & span {
+          float: right;
+        }
+      }
+
+      & input {
+        width: 100%;
+      }
+    }
+
+    #error {
+      white-space: pre;
+      background: red;
+      color: white;
+      padding: 5px;
+      font-size: 16px;
+    }
+
+    .container {
+      display: flex;
+      flex-flow: column;
+      align-items: center;
+      height: 100%;
+    }
+
+    #completionBlock {
+      width: 80%;
+      min-width: 960px;
+      display: none;
+      height: 100%;
+    }
+
+    #prompt {
+      width: 90%;
+      height: 40px;
+      resize: none;
+      font-size: 14px;
+    }
+
+    .result {
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      height: calc(100% - 45px);
+      margin: 0;
+      padding: 5px;
+      overflow-y: auto;
+    }
+
+    .result-container {
+      background-color: lightgrey;
+      height: 90%;
+    }
+
+    #changeModel {
+      font-size: 30px;
+      cursor: pointer;
+
+      &:hover {
+        color: #377dff;
+      }
+    }
+
+    #code-icon {
+      width: 35px;
+      float: right;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>picoLLM Web Completion Demo</h1>
+  <div><b>Status:</b> <span id="status">Not loaded.</span><span id="dotdotdot"></span></div>
+  <div id="error" style="white-space: pre; display: none;"></div>
+  <hr/>
+
+  <div id="initBlock">
+    <label for="accessKey">
+      AccessKey obtained from
+      <a href="https://console.picovoice.ai/">Picovoice Console</a>:
+    </label>
+    <input type="text" id="accessKey" name="accessKey"/>
+    <br/>
+    <label for="uploadFile">Upload model file: </label>
+    <input id="uploadFile" name="uploadFile" type="file">
+    <br/>
+    <button id="init" disabled>Init picoLLM</button>
+  </div>
+
+  <div class="container">
+    <div id="completionBlock">
+      <div style="width: 80%; padding: 5px">
+        <div style="display: flex">
+          <label for="prompt"></label>
+          <textarea id="prompt"></textarea>
+          <button id="generate" style="width: 10%">Generate</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+          <span>Tokens per second: <span id="tokensPerSec">-</span></span>
+        </div>
+        <hr />
+        <div class="result-container">
+          <pre id="resultText" class="result"><span id="original" style="background-color: lightblue"></span></pre>
+          <pre id="resultTokens" class="result" style="display: none;"></pre>
+          <span id="changeModel">&larr;</span>
+          <img id="code-icon" src="assets/code-no-slash.svg"/>
+        </div>
+      </div>
+      <div style="width: 20%; padding: 5px">
+        <div class="control-label">
+          <label for="temperature">Temperature <span id="temperatureText"></span></label>
+          <input type="range" id="temperature" min="0" max="1" step="0.01" value="0" />
+        </div>
+        <div class="control-label">
+          <label for="completionTokenLimit">Completion Token Limit <span id="completionTokenLimitText"></span></label>
+          <input type="range" id="completionTokenLimit" min="0" max="2048" step="1" value="64" />
+        </div>
+        <div class="control-label">
+          <label for="stopPhrases">Stop Phrases</label>
+          <input id="stopPhrases" min="0" placeholder="phrase 1, phrase 2" />
+        </div>
+        <div class="control-label">
+          <label for="topP">Top P <span id="topPText"></span></label>
+          <input type="range" id="topP" min="0" max="1" step="0.01" value="1" />
+        </div>
+        <div class="control-label">
+          <label for="presencePenalty">Presence Penalty <span id="presencePenaltyText"></span></label>
+          <input type="range" id="presencePenalty" min="0" max="4" step="0.01" value="0" />
+        </div>
+        <div class="control-label">
+          <label for="frequencyPenalty">Frequency Penalty <span id="frequencyPenaltyText"></span></label>
+          <input type="range" id="frequencyPenalty" min="0" max="4" step="0.01" value="0" />
+        </div>
+        <div class="control-label">
+          <label for="numTopChoices"># Top Choices <span id="numTopChoicesText"></span></label>
+          <input type="range" id="numTopChoices" min="0" max="100" step="1" value="0" />
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

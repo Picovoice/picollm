@@ -1,0 +1,217 @@
+{
+  "picollm": {
+    "default": {
+      "prompt": "Instruct: Where is the capital city of British Columbia?\nOutput:",
+      "expectations": [
+        {
+          "num-prompt-tokens": 14,
+          "num-completion-tokens": 11,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 0,
+          "completion": " The capital city of British Columbia is Victoria.\n<|endoftext|>"
+        }
+      ]
+    },
+    "with-completion-token-limit": {
+      "prompt": "Instruct: Where is the capital city of British Columbia?\nOutput:",
+      "parameters": {
+        "completion-token-limit": 10
+      },
+      "expectations": [
+        {
+          "num-prompt-tokens": 14,
+          "num-completion-tokens": 10,
+          "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+          "num-top-choices": 0,
+          "completion": " The capital city of British Columbia is Victoria.\n"
+        }
+      ]
+    },
+    "with-stop-phrases": {
+      "prompt": "Instruct: Where is the capital city of British Columbia?\nOutput:",
+      "parameters": {
+        "stop-phrases": [
+          "Vancouver",
+          "Victoria"
+        ]
+      },
+      "expectations": [
+        {
+          "num-prompt-tokens": 14,
+          "num-completion-tokens": 8,
+          "endpoint": "STOP_PHRASE_ENCOUNTERED",
+          "num-top-choices": 0,
+          "completion": " The capital city of British Columbia is Victoria"
+        }
+      ]
+    },
+    "with-presence-penalty": {
+      "prompt": "Instruct: Say cheese 5 times.\nOutput:",
+      "parameters": {
+        "presence-penalty": 1.5
+      },
+      "expectations": [
+        {
+          "num-prompt-tokens": 10,
+          "num-completion-tokens": 4,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 0,
+          "completion": " Cheese.\n<|endoftext|>"
+        }
+      ]
+    },
+    "with-frequency-penalty": {
+      "prompt": "Instruct: Say cheese 5 times.\nOutput:",
+      "parameters": {
+        "frequency-penalty": 0.6
+      },
+      "expectations": [
+        {
+          "num-prompt-tokens": 10,
+          "num-completion-tokens": 12,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 0,
+          "completion": " Cheese. Cheese. Cheese. Cheese. Cheese.\n<|endoftext|>"
+        },
+        {
+          "num-prompt-tokens": 10,
+          "num-completion-tokens": 14,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 0,
+          "completion": " Cheese. Cheese. Cheese. Cheese. Cheese. Cheese!\n<|endoftext|>"
+        },
+        {
+          "num-prompt-tokens": 10,
+          "num-completion-tokens": 4,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 0,
+          "completion": " Cheese.\n<|endoftext|>"
+        }
+      ]
+    },
+    "with-temperature": {
+      "prompt": "Here is a song about banana",
+      "parameters": {
+        "completion-token-limit": 17,
+        "seeds": [
+          1234,
+          4321
+        ],
+        "temperature": 1.0
+      }
+    },
+    "with-temperature-and-identical-seeds": {
+      "prompt": "Here is a song about banana",
+      "parameters": {
+        "completion-token-limit": 17,
+        "seed": 1234,
+        "temperature": 1.0
+      }
+    },
+    "with-temperature-and-top-p": {
+      "prompt": "Here is a song about banana",
+      "parameters": {
+        "completion-token-limit": 17,
+        "seed": 1234,
+        "temperature": 0.7,
+        "top-p": 0.6
+      },
+      "expectations": [
+        " bread.\n\nThe song is a parody of the song \"The Banana Song\".",
+        "uddin'\n\n\nThe song is from a long time ago, and it's",
+        "!\n\n\nIt's a song about a banana, a fruit that is yellow",
+        " bread.\n\nThe song is called \"Banana Bread Song\" and it was",
+        " bread.\n\n\"Banana bread is the best thing in the world.\"\n",
+        " bread.\n\nBanana bread is a delicious treat,\nThat's perfect for",
+        " bread.\n\nBanana bread is a delicious treat that is made with bananas,",
+        "!\n\n\n...\n\nThe song:\n\n...\n\nThe song",
+        " Asset, and I am going to sing it,\n\n\n\nI would like",
+        " bread.\n\nThe song is called \"Banana Bread Song\" and it's",
+        "uddin'\n\n\nThe song is about a man who has to go to work",
+        " Asset, and I am going to sing it,\n\n\n\nI like to",
+        "!\n\n\n##Your task: **Rewrite** the above paragraph into a",
+        "!\n\n\nWhat is banana?\n- A fruit that grows on trees\n",
+        "uddin'\n\n\nThe song is one of the most popular songs in the modern",
+        " Asset, and I am going to sing it,\n\n\n\nI will sing"
+      ]
+    },
+    "with-top-choices": {
+      "prompt": "Instruct: Where is the capital city of British Columbia?\nOutput:",
+      "parameters": {
+        "num-top-choices": 10
+      },
+      "expectations": [
+        {
+          "num-prompt-tokens": 14,
+          "num-completion-tokens": 11,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 10,
+          "completion": " The capital city of British Columbia is Victoria.\n<|endoftext|>"
+        }
+      ]
+    },
+    "tokenize": {
+      "text": "picoLLM is 🔥!",
+      "tokens": [
+        79,
+        3713,
+        3069,
+        44,
+        318,
+        12520,
+        242,
+        98,
+        0
+      ]
+    }
+  },
+  "dialog": {
+    "system": "respond with ❤️ and 🫡",
+    "conversation": [
+      [
+        "Hi",
+        "Hey"
+      ],
+      [
+        "Hola",
+        "¡Oye!"
+      ],
+      [
+        "Salut",
+        ""
+      ]
+    ],
+    "prompts": {
+      "gemma-chat-dialog": "<start_of_turn>user\nHi<end_of_turn>\n<start_of_turn>model\nHey<end_of_turn>\n<start_of_turn>user\nHola<end_of_turn>\n<start_of_turn>model\n¡Oye!<end_of_turn>\n<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
+      "llama-2-chat-dialog": "<s>[INST] Hi [/INST] Hey </s><s>[INST] Hola [/INST] ¡Oye! </s><s>[INST] Salut [/INST]",
+      "llama-3-chat-dialog": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nHi<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nHey<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHola<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n¡Oye!<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+      "mistral-chat-dialog": "[INST] Hi [/INST] Hey</s>[INST] Hola [/INST] ¡Oye!</s>[INST] Salut [/INST]",
+      "phi2-chat-dialog": "Human: Hi\nAI: Hey\nHuman: Hola\nAI: ¡Oye!\nHuman: Salut\nAI:",
+      "phi2-qa-dialog": "Instruct: Hi\nOutput: Hey\nInstruct: Hola\nOutput: ¡Oye!\nInstruct: Salut\nOutput:"
+    },
+    "prompts-with-system": {
+      "gemma-chat-dialog": "<start_of_turn>user\nHi<end_of_turn>\n<start_of_turn>model\nHey<end_of_turn>\n<start_of_turn>user\nHola<end_of_turn>\n<start_of_turn>model\n¡Oye!<end_of_turn>\n<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
+      "llama-2-chat-dialog": "<s>[INST] <<SYS>>\nrespond with ❤️ and \uD83E\uDEE1\n<</SYS>>\n\nHi [/INST] Hey </s><s>[INST] Hola [/INST] ¡Oye! </s><s>[INST] Salut [/INST]",
+      "llama-3-chat-dialog": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nHi<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nHey<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHola<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n¡Oye!<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+      "mistral-chat-dialog": "[INST] Hi [/INST] Hey</s>[INST] Hola [/INST] ¡Oye!</s>[INST] Salut [/INST]",
+      "phi2-chat-dialog": "Human: Hi\nAI: Hey\nHuman: Hola\nAI: ¡Oye!\nHuman: Salut\nAI:",
+      "phi2-qa-dialog": "Instruct: Hi\nOutput: Hey\nInstruct: Hola\nOutput: ¡Oye!\nInstruct: Salut\nOutput:"
+    },
+    "prompts-with-history": {
+      "gemma-chat-dialog": "<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
+      "llama-2-chat-dialog": "<s>[INST] Salut [/INST]",
+      "llama-3-chat-dialog": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+      "mistral-chat-dialog": "[INST] Salut [/INST]",
+      "phi2-chat-dialog": "Human: Salut\nAI:",
+      "phi2-qa-dialog": "Instruct: Salut\nOutput:"
+    },
+    "prompts-with-system-and-history": {
+      "gemma-chat-dialog": "<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
+      "llama-2-chat-dialog": "<s>[INST] <<SYS>>\nrespond with ❤️ and \uD83E\uDEE1\n<</SYS>>\n\nSalut [/INST]",
+      "llama-3-chat-dialog": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+      "mistral-chat-dialog": "[INST] Salut [/INST]",
+      "phi2-chat-dialog": "Human: Salut\nAI:",
+      "phi2-qa-dialog": "Instruct: Salut\nOutput:"
+    }
+  }
+}

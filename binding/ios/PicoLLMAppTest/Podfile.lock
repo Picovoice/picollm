@@ -1,0 +1,16 @@
+PODS:
+  - picoLLM-iOS (1.0.0)
+
+DEPENDENCIES:
+  - picoLLM-iOS (from `../`)
+
+EXTERNAL SOURCES:
+  picoLLM-iOS:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  picoLLM-iOS: f7645c331f6c2a8b0dbb1a474f1762340746ebcd
+
+PODFILE CHECKSUM: c0c4911847bceea06d48df525489a56c09b4d794
+
+COCOAPODS: 1.12.1

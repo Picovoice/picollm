@@ -1,0 +1,65 @@
+name: iOS Demos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'demo/ios/**'
+      - '.github/workflows/ios-demos.yml'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - 'demo/ios/**'
+      - '.github/workflows/ios-demos.yml'
+
+jobs:
+  build-completion-demo:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: demo/ios/Completion
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Cocoapods
+        run: gem install cocoapods
+
+      - name: Run Cocoapods
+        run: pod install
+
+      - name: Build
+        run: xcrun xcodebuild build
+          -configuration Debug
+          -workspace PicoLLMCompletionDemo.xcworkspace
+          -sdk iphoneos
+          -scheme PicoLLMCompletionDemo
+          -derivedDataPath ddp
+          CODE_SIGNING_ALLOWED=NO
+
+  build-chat-demo:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: demo/ios/Chat
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Cocoapods
+        run: gem install cocoapods
+
+      - name: Run Cocoapods
+        run: pod install
+
+      - name: Build
+        run: xcrun xcodebuild build
+          -configuration Debug
+          -workspace PicoLLMChatDemo.xcworkspace
+          -sdk iphoneos
+          -scheme PicoLLMChatDemo
+          -derivedDataPath ddp
+          CODE_SIGNING_ALLOWED=NO

@@ -1,0 +1,85 @@
+name: C Demos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '!demo/c/README.md'
+      - '.github/workflows/c-demos.yml'
+      - 'demo/c/**'
+      - 'include/**'
+      - 'lib/linux/**'
+      - 'lib/mac/**'
+      - 'lib/raspberry-pi/**'
+      - 'lib/windows/**'
+      - 'resources/.test/**'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - '!demo/c/README.md'
+      - '.github/workflows/c-demos.yml'
+      - 'demo/c/**'
+      - 'include/**'
+      - 'lib/linux/**'
+      - 'lib/mac/**'
+      - 'lib/raspberry-pi/**'
+      - 'lib/windows/**'
+      - 'resources/.test/**'
+
+defaults:
+  run:
+    working-directory: demo/c
+
+jobs:
+  build-self-hosted:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        xpu: [ cpu ]
+        make_file: [ "Unix Makefiles" ]
+        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios ]
+        include:
+          - xpu: gpu
+            machine: pv-linux
+            make_file: "Unix Makefiles"
+          - xpu: gpu
+            machine: pv-windows
+            make_file: "MinGW Makefiles"
+          - xpu: cpu
+            machine: pv-windows
+            make_file: "MinGW Makefiles"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python virtualenv (*nix)
+        if: ${{ matrix.machine != 'pv-windows' }}
+        run: |
+          python3 -m venv binding/python/.venv
+          . binding/python/.venv/bin/activate
+          echo PATH=$PATH >> $GITHUB_ENV
+
+      - name: Setup Python virtualenv (windows)
+        if: ${{ matrix.machine == 'pv-windows' }}
+        run: |
+          python3 -m venv binding\python\.venv
+          binding\python\.venv\Scripts\activate
+          echo PATH=$PATH >> $GITHUB_ENV
+
+      - name: Download resource files
+        run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm
+
+      - name: Create build directory
+        run: cmake -G "${{ matrix.make_file }}" -B ./build
+
+      - name: Build demo
+        run: cmake --build ./build --target picollm_demo_completion
+
+      - name: Install dependencies
+        run: python3 -m pip install -r test/requirements.txt
+
+      - name: Test
+        run: python test/test_picollm_c.py ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.pllm ${{matrix.xpu}}

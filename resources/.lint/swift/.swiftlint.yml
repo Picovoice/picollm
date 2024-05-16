@@ -1,0 +1,11 @@
+disabled_rules:
+  - identifier_name
+  - function_body_length
+  - force_cast
+  - implicit_getter
+  - cyclomatic_complexity
+  - function_parameter_count
+  - file_length
+  - type_body_length
+excluded:
+  - ${PWD}/**/Pods

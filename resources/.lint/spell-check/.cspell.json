@@ -1,0 +1,44 @@
+{
+  "language": "en",
+  "dictionaries": [
+    "dict"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "dict",
+      "path": "./dict.txt",
+      "addWords": true
+    }
+  ],
+  "ignorePaths": [
+    // Binaries
+    "**/*.a",
+    "**/*.dll",
+    "**/*.dylib",
+    "**/*.jar",
+    "**/*.node",
+    "**/*.so",
+    "**/*.wasm",
+    "**/dist/**",
+    "**/lib/ios/**/*",
+
+    // iOS
+    "**/*.pbxproj",
+    "**/*.plist",
+    "**/*.storyboard",
+    "**/*.xcconfig",
+    "**/*.xcscheme",
+    "**/contents.xcworkspacedata",
+
+    // Java
+    "**/build.gradle",
+    "**/gradle-wrapper.properties",
+    "**/gradle.properties",
+    "**/gradlew",
+    "**/gradlew.bat",
+    "**/proguard-rules.pro",
+
+    // Python
+    "**/__pycache__/**"
+  ]
+}

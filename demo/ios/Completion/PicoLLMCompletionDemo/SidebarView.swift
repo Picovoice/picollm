@@ -50,7 +50,8 @@ struct SidebarView: View {
         VStack(alignment: .center) {
             Spacer()
             Text("Completion Settings")
-            Spacer()
+                .bold()
+                .padding(.bottom, 32)
             sliderSetting(
                 name: "Temperature",
                 value: $viewModel.generateTemperature,

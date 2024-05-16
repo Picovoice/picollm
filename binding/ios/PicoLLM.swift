@@ -151,19 +151,18 @@ public class PicoLLM {
 
         pv_set_sdk(PicoLLM.sdk)
 
-        let status = pv_picollm_init(
+        var status = pv_picollm_init(
             accessKey,
             modelPath,
             device,
             &handle)
-
         if status != PV_STATUS_SUCCESS {
             let messageStack = try PicoLLM.getMessageStack()
             throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM init failed", messageStack)
         }
 
         var cModel: UnsafePointer<Int8>?
-        let status = pv_picollm_model(
+        status = pv_picollm_model(
             self.handle,
             &cModel)
         if status != PV_STATUS_SUCCESS {
@@ -173,7 +172,7 @@ public class PicoLLM {
         self.model = String(cString: cModel!)
 
         var contextLength: Int32 = 0
-        let status = pv_picollm_context_length(
+        status = pv_picollm_context_length(
             self.handle,
             &contextLength)
         if status != PV_STATUS_SUCCESS {
@@ -522,13 +521,13 @@ public class PicoLLM {
         history: Int32? = 0,
         system: String? = nil
     ) throws -> PicoLLMDialog {
-        let model = try self.model().split(separator: " ")[0].lowercased()
+        let model = self.model.split(separator: " ")[0].lowercased()
 
         if PicoLLM.dialogs[model] != nil {
             return try PicoLLM.dialogs[model]!.init(history: history, system: system)
         } else if model == "phi2" {
             if PicoLLM.phi2Dialogs[mode ?? "default"] == nil {
-                throw PicoLLMInvalidArgumentError("`\(model)` does not have a corresponding mode `\(mode)`")
+                throw PicoLLMInvalidArgumentError("`\(model)` does not have a corresponding mode `\(mode ?? "")`")
             }
 
             return try PicoLLM.phi2Dialogs[mode ?? "default"]!.init(history: history, system: system)

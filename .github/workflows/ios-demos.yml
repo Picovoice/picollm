@@ -18,7 +18,7 @@ jobs:
     runs-on: macos-latest
     defaults:
       run:
-        working-directory: demo/ios/PicoLLMCompletionDemo
+        working-directory: demo/ios/Completion
 
     steps:
       - name: Checkout
@@ -43,7 +43,7 @@ jobs:
     runs-on: macos-latest
     defaults:
       run:
-        working-directory: demo/ios/PicoLLMChatDemo
+        working-directory: demo/ios/Chat
 
     steps:
       - name: Checkout

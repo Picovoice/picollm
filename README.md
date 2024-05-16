@@ -114,17 +114,17 @@ For more information about Android demos go to [demo/android](demo/android/READM
 
 ### iOS Demos
 
-To run the completion demo, go to [demo/ios/PicoLLMCompletionDemo](demo/ios/PicoLLMCompletionDemo) and run:
+To run the completion demo, go to [demo/ios/Completion](demo/ios/Completion) and run:
 
 ```console
 pod install
 ```
 
-Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](demo/ios/PicoLLMCompletionDemo/PicoLLMCompletionDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
+Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](demo/ios/Completion/PicoLLMCompletionDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
 
 Then, using [Xcode](https://developer.apple.com/xcode/), open the generated `PicoLLMCompletionDemo.xcworkspace` and run the application.
 
-To learn about how to use picoLLM in a chat application, try out the [Chat demo](demo/ios/PicoLLMChatDemo).
+To learn about how to use picoLLM in a chat application, try out the [Chat demo](demo/ios/Chat).
 
 For more information about iOS demos go to [demo/ios](demo/ios/README.md).
 

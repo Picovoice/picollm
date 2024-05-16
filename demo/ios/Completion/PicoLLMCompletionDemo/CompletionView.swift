@@ -28,7 +28,7 @@ struct CompletionView: View {
                                 .padding(.horizontal, 12)
                         }
                     )
-                    .disabled(isError || !viewModel.enableGenerateButton)
+                    .disabled(!viewModel.enableGenerateButton)
                     Spacer()
                     Text("picoLLM Completion Demo")
                     Spacer()
@@ -54,6 +54,17 @@ struct CompletionView: View {
                 }
                 .padding(.horizontal, 24)
 
+                if isError {
+                   Text(viewModel.errorMessage)
+                       .padding()
+                       .foregroundColor(Color.white)
+                       .frame(maxWidth: .infinity)
+                       .background(Constants.dangerRed)
+                       .font(.body)
+                       .opacity(viewModel.errorMessage.isEmpty ? 0 : 1)
+                       .cornerRadius(10)
+               }
+
                 ZStack {
                     TextField("Prompt", text: $viewModel.promptText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -61,24 +72,27 @@ struct CompletionView: View {
                         .onSubmit {
                             viewModel.generate()
                         }
-                        .disabled(isError || !viewModel.enableGenerateButton)
+                        .disabled(!viewModel.enableGenerateButton)
                     HStack(alignment: .center) {
                         Spacer()
                         Button(action: viewModel.generate) {
                             Image(systemName: "arrow.up")
                                 .imageScale(.medium)
-                                .background(Constants.btnColor(viewModel.enableGenerateButton && !isError))
+                                .background(Constants.btnColor(viewModel.enableGenerateButton))
                                 .foregroundColor(.white)
                                 .padding(6)
                         }.background(
-                            Capsule().fill(Constants.btnColor(viewModel.enableGenerateButton && !isError))
+                            Capsule().fill(Constants.btnColor(viewModel.enableGenerateButton))
                         )
                         .padding(.horizontal, 4)
-                        .disabled(isError || !viewModel.enableGenerateButton)
+                        .disabled(!viewModel.enableGenerateButton)
                     }
                 }
-                .padding(12)
-            }.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity).background(Color.white)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 24)
+            }
+            .padding(.bottom, 32)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity).background(Color.white)
 
             SidebarView(viewModel: viewModel, isSidebarVisible: $showSidebar)
         }
@@ -113,7 +127,7 @@ struct CompletionView: View {
                     Image(systemName: "arrow.left")
                         .imageScale(.large)
                 }
-                .padding(24)
+                .padding(.horizontal, 12)
                 .disabled(!viewModel.enableGenerateButton)
                 Spacer()
                 Button(
@@ -130,12 +144,13 @@ struct CompletionView: View {
                             .imageScale(.small)
                     }
                 )
-                .padding(24)
+                .padding(.horizontal, 12)
                 .disabled(
                     viewModel.errorMessage.count > 0 ||
                     !viewModel.enableGenerateButton ||
                     viewModel.completionText.isEmpty)
             }
+            .padding(.bottom, 12)
         }
         .frame(
             maxWidth: .infinity,
@@ -143,8 +158,8 @@ struct CompletionView: View {
             alignment: .topLeading
         )
         .background(Constants.backgroundGrey)
-        .border(/*@START_MENU_TOKEN@*/Color.black/*@END_MENU_TOKEN@*/)
-        .padding(12)
+        .cornerRadius(/*@START_MENU_TOKEN@*/3.0/*@END_MENU_TOKEN@*/)
+        .padding(24)
     }
 }
 

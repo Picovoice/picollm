@@ -60,6 +60,7 @@ You can download directly to your device or airdrop from a Mac.
     }
 
     public func loadPicollm() {
+        errorMessage = ""
         modelLoadStatusText = "Loading picoLLM..."
         enableLoadModelButton = false
 
@@ -78,7 +79,7 @@ You can download directly to your device or airdrop from a Mac.
                 }
             } catch {
                 DispatchQueue.main.async { [self] in
-                    errorMessage = "\(error)"
+                    errorMessage = "\(error.localizedDescription)"
                 }
             }
 
@@ -100,6 +101,7 @@ You can download directly to your device or airdrop from a Mac.
         promptText = ""
         completionPromptText = ""
         completionText = ""
+        tpsText = ""
         statsText = ""
         picoLLMLoaded = false
     }
@@ -122,16 +124,29 @@ You can download directly to your device or airdrop from a Mac.
             return
         }
 
+        errorMessage = ""
+
+        let stopPhrases = stopPhrasesText.isEmpty ? nil : stopPhrasesText
+            .split(separator: ",")
+            .map({(phrase) in phrase.trimmingCharacters(in: .whitespacesAndNewlines)})
+
+        if stopPhrases != nil && stopPhrases!.isEmpty {
+            errorMessage = "Empty or all whitespace stop phrases is invalid"
+            return
+        }
+        for phrase in stopPhrases ?? [] {
+            if phrase.isEmpty {
+                errorMessage = "Empty or all whitespace stop phrase is invalid"
+                return
+            }
+        }
+
         enableGenerateButton = false
         completionPromptText = promptText
         completionText = ""
         tpsText = ""
         statsText = ""
         numTokens = 0
-
-        let stopPhrases = stopPhrasesText.isEmpty ? nil : stopPhrasesText
-            .split(separator: ",")
-            .map({(phrase) in phrase.trimmingCharacters(in: .whitespacesAndNewlines)})
 
         DispatchQueue.global(qos: .userInitiated).async { [self] in
             do {
@@ -150,7 +165,7 @@ You can download directly to your device or airdrop from a Mac.
                 }
             } catch {
                 DispatchQueue.main.async { [self] in
-                    errorMessage = "\(error)"
+                    errorMessage = "\(error.localizedDescription)"
                     enableLoadModelButton = true
                 }
             }
@@ -186,7 +201,7 @@ You can download directly to your device or airdrop from a Mac.
             statsText += String(data: jsonData, encoding: String.Encoding.utf8) ?? ""
         } catch {
             DispatchQueue.main.async { [self] in
-                errorMessage = "\(error)"
+                errorMessage = "\(error.localizedDescription)"
             }
         }
     }

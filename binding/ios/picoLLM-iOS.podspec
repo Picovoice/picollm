@@ -10,10 +10,10 @@ Pod::Spec.new do |s|
   DESC
   s.homepage = 'https://github.com/Picovoice/picollm/tree/master/binding/ios'
   s.author = { 'Picovoice' => 'hello@picovoice.ai' }
-  s.source = { :git => '' }
+  s.source = { :git => "https://github.com/Picovoice/picollm.git", :tag => "picoLLM-iOS-v1.0.0" }
   s.ios.deployment_target = '16.0'
   s.swift_version = '5.0'
   s.vendored_frameworks = 'lib/ios/PvPicoLLM.xcframework'
-  s.source_files = '*.{swift}'
-  s.exclude_files = 'PicoLLMAppTest/**'
+  s.source_files = 'binding/ios/*.{swift}'
+  s.exclude_files = 'binding/ios/PicoLLMAppTest/**'
 end

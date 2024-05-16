@@ -51,6 +51,7 @@ You can download directly to your device or airdrop from a Mac.
     }
 
     public func loadPicollm() {
+        errorMessage = ""
         modelLoadStatusText = "Loading picoLLM..."
         enableLoadModelButton = false
 
@@ -70,7 +71,7 @@ You can download directly to your device or airdrop from a Mac.
                 }
             } catch {
                 DispatchQueue.main.async { [self] in
-                    errorMessage = "\(error)"
+                    errorMessage = "\(error.localizedDescription)"
                 }
             }
 
@@ -112,8 +113,9 @@ You can download directly to your device or airdrop from a Mac.
             return
         }
 
+        errorMessage = ""
+
         enableGenerateButton = false
-        tpsText = ""
         numTokens = 0
 
         DispatchQueue.global(qos: .userInitiated).async { [self] in
@@ -133,18 +135,20 @@ You can download directly to your device or airdrop from a Mac.
                 try dialog!.addLLMResponse(content: result.completion)
             } catch {
                 DispatchQueue.main.async { [self] in
-                    errorMessage = "\(error)"
+                    errorMessage = "\(error.localizedDescription)"
                     enableLoadModelButton = true
                 }
             }
 
             DispatchQueue.main.async { [self] in
+                promptText = ""
                 enableGenerateButton = true
             }
         }
     }
 
     public func clearText() {
+        promptText = ""
         chatText.removeAll()
     }
 }

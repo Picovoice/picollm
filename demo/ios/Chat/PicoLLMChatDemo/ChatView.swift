@@ -35,6 +35,17 @@ struct ChatView: View {
                 }
                 .padding(.horizontal, 24)
 
+                if isError {
+                   Text(viewModel.errorMessage)
+                       .padding()
+                       .foregroundColor(Color.white)
+                       .frame(maxWidth: .infinity)
+                       .background(Constants.dangerRed)
+                       .font(.body)
+                       .opacity(viewModel.errorMessage.isEmpty ? 0 : 1)
+                       .cornerRadius(10)
+                }
+
                 ZStack {
                     TextField("Message picoLLM", text: $viewModel.promptText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -58,8 +69,11 @@ struct ChatView: View {
                         .disabled(isError || !viewModel.enableGenerateButton)
                     }
                 }
-                .padding(12)
-            }.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity).background(Color.white)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 24)
+            }
+            .padding(.bottom, 32)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity).background(Color.white)
         }
     }
 
@@ -72,7 +86,7 @@ struct ChatView: View {
                             let speaker = viewModel.chatText[i].speaker
                             let msg = viewModel.chatText[i].msg
                             return (
-                                Text("\(speaker)\n").foregroundColor(Constants.activeBlue)
+                                Text("\(speaker)\n\n").foregroundColor(Constants.activeBlue)
                                 +
                                 Text("\(msg)\n\n")
                             )
@@ -96,19 +110,20 @@ struct ChatView: View {
                     Image(systemName: "arrow.left")
                         .imageScale(.large)
                 }
-                .padding(24)
+                .padding(.horizontal, 12)
                 .disabled(!viewModel.enableGenerateButton)
                 Spacer()
                 Button(action: viewModel.clearText) {
                     Image(systemName: "arrow.counterclockwise")
                         .imageScale(.large)
                 }
-                .padding(24)
+                .padding(.horizontal, 12)
                 .disabled(
                     viewModel.errorMessage.count > 0 ||
                     !viewModel.enableGenerateButton ||
                     viewModel.chatText.isEmpty)
             }
+            .padding(.bottom, 12)
         }
         .frame(
             maxWidth: .infinity,
@@ -116,8 +131,8 @@ struct ChatView: View {
             alignment: .topLeading
         )
         .background(Constants.backgroundGrey)
-        .border(/*@START_MENU_TOKEN@*/Color.black/*@END_MENU_TOKEN@*/)
-        .padding(12)
+        .cornerRadius(3.0)
+        .padding(24)
     }
 }
 

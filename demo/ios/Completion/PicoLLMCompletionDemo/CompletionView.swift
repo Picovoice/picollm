@@ -63,7 +63,7 @@ struct CompletionView: View {
                        .font(.body)
                        .opacity(viewModel.errorMessage.isEmpty ? 0 : 1)
                        .cornerRadius(10)
-               }
+                }
 
                 ZStack {
                     TextField("Prompt", text: $viewModel.promptText)
@@ -158,7 +158,7 @@ struct CompletionView: View {
             alignment: .topLeading
         )
         .background(Constants.backgroundGrey)
-        .cornerRadius(/*@START_MENU_TOKEN@*/3.0/*@END_MENU_TOKEN@*/)
+        .cornerRadius(3.0)
         .padding(24)
     }
 }

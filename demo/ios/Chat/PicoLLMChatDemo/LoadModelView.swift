@@ -15,37 +15,48 @@ struct LoadModelView: View {
     @State var showSidebar = false
 
     var body: some View {
-        let isError = viewModel.errorMessage.count > 0
+        let isError = !viewModel.errorMessage.isEmpty
 
         VStack(alignment: .center) {
             Spacer()
 
-            Text(viewModel.modelLoadStatusText)
-                .frame(
-                    minWidth: 0,
-                    maxWidth: UIScreen.main.bounds.width - 50,
-                    minHeight: UIScreen.main.bounds.height / 2)
-                .padding(.vertical, 10)
-                .padding(.horizontal, 10)
-                .font(.body)
-                .cornerRadius(.infinity)
-            if !viewModel.enableLoadModelButton {
-                ProgressView(value: 0).progressViewStyle(CircularProgressViewStyle())
+            if !isError {
+                Text(viewModel.modelLoadStatusText)
+                    .frame(
+                        minWidth: 0,
+                        maxWidth: UIScreen.main.bounds.width - 50,
+                        minHeight: UIScreen.main.bounds.height / 2)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 10)
+                    .font(.body)
+                    .cornerRadius(.infinity)
+                if !viewModel.enableLoadModelButton {
+                    ProgressView(value: 0).progressViewStyle(CircularProgressViewStyle())
+                }
+            } else {
+                Text(viewModel.errorMessage)
+                    .padding()
+                    .foregroundColor(Color.white)
+                    .frame(maxWidth: .infinity)
+                    .background(Constants.dangerRed)
+                    .font(.body)
+                    .opacity(viewModel.errorMessage.isEmpty ? 0 : 1)
+                    .cornerRadius(10)
             }
 
             Spacer()
 
             Button(action: viewModel.extractModelFile) {
                 Text("Load Model")
-                    .background(Constants.btnColor(viewModel.enableLoadModelButton && !isError))
+                    .background(Constants.btnColor(viewModel.enableLoadModelButton))
                     .foregroundColor(.white)
                     .padding(.horizontal, 35.0)
                     .padding(.vertical, 20.0)
             }.background(
-                Capsule().fill(Constants.btnColor(viewModel.enableLoadModelButton && !isError))
+                Capsule().fill(Constants.btnColor(viewModel.enableLoadModelButton))
             )
             .padding(12)
-            .disabled(isError || !viewModel.enableLoadModelButton)
+            .disabled(!viewModel.enableLoadModelButton)
 
             .fileImporter(
                 isPresented: $viewModel.showFileImporter,

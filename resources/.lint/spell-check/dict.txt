@@ -59,3 +59,7 @@ Colour
 picollmcompletiondemo
 sdcard
 drawerlayout
+Unmanaged
+Unretained
+Podfile
+xcworkspace

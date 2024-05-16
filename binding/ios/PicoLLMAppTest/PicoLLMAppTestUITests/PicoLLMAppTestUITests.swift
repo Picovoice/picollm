@@ -375,11 +375,11 @@ class PicoLLMAppTestUITests: BaseTest {
     }
 
     func testModel() throws {
-        XCTAssertEqual(try self.handle!.model(), "phi2 [2.90 v1]")
+        XCTAssertEqual(self.handle!.model, "phi2 [2.90 v1]")
     }
 
     func testContextLength() throws {
-        XCTAssertEqual(try self.handle!.contextLength(), 2048)
+        XCTAssertEqual(self.handle!.contextLength, 2048)
     }
 
     func testMaxTopChoices() throws {
@@ -439,6 +439,34 @@ class PicoLLMAppTestUITests: BaseTest {
         let system = self.dialogTestData!["system"] as! String
 
         try verifyDialogPrompt(testName: "prompts-with-system-and-history", history: 0, system: system)
+    }
+
+    func testGetAvailableDevices() throws {
+        let devices = try PicoLLM.getAvailableDevices()
+        XCTAssert(!devices.isEmpty)
+        for device in devices {
+            XCTAssert(!device.isEmpty)
+        }
+    }
+
+    func testMessageStack() throws {
+        tearDownHelper()
+
+        var first_error: String = ""
+        do {
+            let pllm = try PicoLLM.init(accessKey: "invalid", modelPath: modelPath)
+            XCTAssertNil(pllm)
+        } catch {
+            first_error = "\(error.localizedDescription)"
+            XCTAssert(first_error.count < 1024)
+        }
+
+        do {
+            let pllm = try PicoLLM.init(accessKey: "invalid", modelPath: modelPath)
+            XCTAssertNil(pllm)
+        } catch {
+            XCTAssert("\(error.localizedDescription)".count == first_error.count)
+        }
     }
 }
 

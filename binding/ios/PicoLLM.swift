@@ -416,7 +416,7 @@ public class PicoLLM {
     ///
     /// - Throws: PicoLLMError
     /// - Returns: Array of available hardware devices.
-    public static func listHardwareDevices() throws -> [String] {
+    public static func getAvailableDevices() throws -> [String] {
         var cHardwareDevices: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?
         var numHardwareDevices: Int32 = 0
         let status = pv_picollm_list_hardware_devices(&cHardwareDevices, &numHardwareDevices)

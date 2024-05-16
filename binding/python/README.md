@@ -102,11 +102,5 @@ pllm.release()
 
 ## Demos
 
-[//]: # ([AK])
-
-<!-- markdown-link-check-disable -->
-
 [picollmdemo](https://pypi.org/project/picollmdemo/) provides command-line utilities for LLM completion and chat using
 picoLLM.
-
-<!-- markdown-link-check-enable -->

@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 Picovoice Inc.
+// Copyright 2024 Picovoice Inc.
 //
 // You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 // file accompanying this source.
@@ -10,303 +10,517 @@
 //
 'use strict';
 
-import { PicoLLM, PicoLLMWord, PicoLLMInvalidArgumentError } from '../src';
-
-import * as fs from 'fs';
-import { WaveFile } from 'wavefile';
-
-import { getSystemLibraryPath } from '../src/platforms';
+import * as path from 'path';
 
 import {
-  getModelPathByLanguage,
-  getAudioFile,
-  getLanguageTestParameters,
-  getDiarizationTestParameters,
-} from './test_utils';
+  Dialog,
+  GemmaChatDialog,
+  Llama2ChatDialog,
+  Llama3ChatDialog,
+  MistralChatDialog,
+  Phi2ChatDialog,
+  Phi2QADialog,
+  PicoLLM,
+  PicoLLMGenerateOptions,
+  PicoLLMCompletion,
+  PicoLLMEndpoint,
+} from '../src';
 
-const LANGUAGE_TEST_PARAMETERS = getLanguageTestParameters();
-const DIARIZATION_TEST_PARAMETERS = getDiarizationTestParameters();
+import * as testData from '../../../resources/.test/test_data.json';
 
 const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]
   .split('--access_key=')[1];
 
-const levenshteinDistance = (words1: string[], words2: string[]) => {
-  const res = Array.from(
-    Array(words1.length + 1),
-    () => new Array(words2.length + 1)
-  );
-  for (let i = 0; i <= words1.length; i++) {
-    res[i][0] = i;
-  }
-  for (let j = 0; j <= words2.length; j++) {
-    res[0][j] = j;
-  }
-  for (let i = 1; i <= words1.length; i++) {
-    for (let j = 1; j <= words2.length; j++) {
-      res[i][j] = Math.min(
-        res[i - 1][j] + 1,
-        res[i][j - 1] + 1,
-        res[i - 1][j - 1] +
-          (words1[i - 1].toUpperCase() === words2[j - 1].toUpperCase() ? 0 : 1)
-      );
-    }
-  }
-  return res[words1.length][words2.length];
+const MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
+
+const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
+  'gemma-chat-dialog': GemmaChatDialog,
+  "llama-2-chat-dialog": Llama2ChatDialog,
+  "llama-3-chat-dialog": Llama3ChatDialog,
+  "mistral-chat-dialog": MistralChatDialog,
+  'phi2-chat-dialog': Phi2ChatDialog,
+  'phi2-qa-dialog': Phi2QADialog,
 };
 
-const characterErrorRate = (
-  transcript: string,
-  expectedTranscript: string
-): number => {
-  const ed = levenshteinDistance(
-    transcript.split(''),
-    expectedTranscript.split('')
-  );
-  return ed / expectedTranscript.length;
+type CompletionExpectation = {
+  'num-prompt-tokens': number,
+  'num-completion-tokens': number,
+  'endpoint': string,
+  'num-top-choices': number,
+  'completion': string
 };
 
-const validateMetadata = (
-  words: PicoLLMWord[],
-  referenceWords: PicoLLMWord[],
-  enableDiarization: boolean
+type DialogExpectations = {
+  'gemma-chat-dialog': string,
+  "llama-2-chat-dialog": string,
+  "llama-3-chat-dialog": string,
+  "mistral-chat-dialog": string,
+  'phi2-chat-dialog': string,
+  'phi2-qa-dialog': string,
+}
+
+const runInitTest = (
+  params: {
+    accessKey?: string;
+    modelPath?: string;
+    device?: string;
+    libraryPath? : string;
+    expectFailure?: boolean;
+  } = {}
 ) => {
-  expect(words.length).toEqual(referenceWords.length);
-  for (let i = 0; i < words.length; i += 1) {
-    expect(words[i].word).toEqual(referenceWords[i].word);
-    expect(words[i].startSec).toBeCloseTo(referenceWords[i].startSec, 1);
-    expect(words[i].endSec).toBeCloseTo(referenceWords[i].endSec, 1);
-    expect(words[i].confidence).toBeCloseTo(referenceWords[i].confidence, 1);
-    if (enableDiarization) {
-      expect(words[i].speakerTag).toEqual(referenceWords[i].speakerTag);
+  const {
+    accessKey = ACCESS_KEY,
+    modelPath = MODEL_PATH,
+    device = 'best',
+    libraryPath,
+    expectFailure = false,
+  } = params;
+
+  let isFailed = false;
+
+  try {
+    const picoLLM = new PicoLLM(
+      accessKey,
+      modelPath,
+      {
+        libraryPath,
+        device
+      }
+    );
+
+    expect(picoLLM.contextLength).toBeGreaterThan(0);
+    expect(picoLLM.maxTopChoices).toBeGreaterThan(0);
+    expect(typeof picoLLM.version).toEqual('string');
+    expect(picoLLM.version.length).toBeGreaterThan(0);
+    expect(typeof picoLLM.model).toEqual('string');
+    expect(picoLLM.model.length).toBeGreaterThan(0);
+
+    picoLLM.release();
+  } catch (e) {
+    if (expectFailure) {
+      isFailed = true;
     } else {
-      expect(words[i].speakerTag).toEqual(-1);
+      expect(e).toBeUndefined();
     }
+  }
+
+  if (expectFailure) {
+    expect(isFailed).toBeTruthy();
   }
 };
 
-const loadPcm = (audioFile: string): any => {
-  const waveFilePath = getAudioFile(audioFile);
-  const waveBuffer = fs.readFileSync(waveFilePath);
-  const waveAudioFile = new WaveFile(waveBuffer);
+const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpectation[]) => {
+  let error: any;
+  for (const expectation of expectations) {
+    try {
+      expect(res.usage.promptTokens).toEqual(expectation['num-prompt-tokens']);
+      expect(res.usage.completionTokens).toEqual(expectation['num-completion-tokens']);
+      expect(res.endpoint).toEqual(PicoLLMEndpoint[expectation.endpoint as keyof typeof PicoLLMEndpoint]);
 
-  return waveAudioFile.getSamples(false, Int16Array);
-};
+      for (const completionToken of res.completionTokens) {
+        expect(completionToken.token.token.length).toBeGreaterThan(0);
+        expect(completionToken.token.logProb).toBeLessThanOrEqual(0);
+        expect(completionToken.topChoices.length).toEqual(expectation['num-top-choices']);
 
-const testPicoLLMProcess = (
-  language: string,
-  transcript: string,
-  enableAutomaticPunctuation: boolean,
-  enableDiarization: boolean,
-  errorRate: number,
-  audioFile: string,
-  words: PicoLLMWord[]
-) => {
-  const modelPath = getModelPathByLanguage(language);
-  const pcm = loadPcm(audioFile);
+        for (const topChoice of completionToken.topChoices) {
+          expect(topChoice.token.length).toBeGreaterThan(0);
+          expect(topChoice.logProb).toBeLessThanOrEqual(0);
+        }
 
-  let picollmEngine = new PicoLLM(ACCESS_KEY, {
-    modelPath,
-    enableAutomaticPunctuation,
-    enableDiarization,
-  });
+        if (completionToken.topChoices.length > 0) {
+          expect(
+            completionToken.topChoices.reduce((acc, topChoice) => acc + Math.exp(topChoice.logProb), 0)
+          ).toBeLessThanOrEqual(1);
+        }
 
-  let res = picollmEngine.process(pcm);
+        if (!res.completionTokens.every(x => x.token.token.includes('\\x'))) {
+          expect(
+            res.completionTokens.reduce((acc, completionToken) => acc + completionToken.token.token, '')
+          ).toEqual(expectation.completion);
+        }
 
-  expect(
-    characterErrorRate(res.transcript, transcript) < errorRate
-  ).toBeTruthy();
-  validateMetadata(res.words, words, enableDiarization);
-
-  picollmEngine.release();
-};
-
-const testPicoLLMProcessFile = (
-  language: string,
-  transcript: string,
-  enableAutomaticPunctuation: boolean,
-  enableDiarization: boolean,
-  errorRate: number,
-  audioFile: string,
-  words: PicoLLMWord[]
-) => {
-  const modelPath = getModelPathByLanguage(language);
-
-  let picollmEngine = new PicoLLM(ACCESS_KEY, {
-    modelPath,
-    enableAutomaticPunctuation,
-    enableDiarization,
-  });
-
-  const waveFilePath = getAudioFile(audioFile);
-  let res = picollmEngine.processFile(waveFilePath);
-
-  expect(
-    characterErrorRate(res.transcript, transcript) < errorRate
-  ).toBeTruthy();
-  validateMetadata(res.words, words, enableDiarization);
-
-  picollmEngine.release();
-};
-
-describe('successful processes', () => {
-  it.each(LANGUAGE_TEST_PARAMETERS)(
-    'testing process `%p`',
-    (
-      language: string,
-      transcript: string,
-      _: string,
-      errorRate: number,
-      audioFile: string,
-      words: PicoLLMWord[]
-    ) => {
-      testPicoLLMProcess(
-        language,
-        transcript,
-        false,
-        false,
-        errorRate,
-        audioFile,
-        words
-      );
-    }
-  );
-
-  it.each(LANGUAGE_TEST_PARAMETERS)(
-    'testing process file `%p`',
-    (
-      language: string,
-      transcript: string,
-      _: string,
-      errorRate: number,
-      audioFile: string,
-      words: PicoLLMWord[]
-    ) => {
-      testPicoLLMProcessFile(
-        language,
-        transcript,
-        false,
-        false,
-        errorRate,
-        audioFile,
-        words
-      );
-    }
-  );
-
-  it.each(LANGUAGE_TEST_PARAMETERS)(
-    'testing process file `%p` with punctuation',
-    (
-      language: string,
-      _: string,
-      transcript: string,
-      errorRate: number,
-      audioFile: string,
-      words: PicoLLMWord[]
-    ) => {
-      testPicoLLMProcessFile(
-        language,
-        transcript,
-        true,
-        false,
-        errorRate,
-        audioFile,
-        words
-      );
-    }
-  );
-  it.each(LANGUAGE_TEST_PARAMETERS)(
-    'testing process file `%p` with diarization',
-    (
-      language: string,
-      transcript: string,
-      _: string,
-      errorRate: number,
-      audioFile: string,
-      words: PicoLLMWord[]
-    ) => {
-      testPicoLLMProcessFile(
-        language,
-        transcript,
-        false,
-        true,
-        errorRate,
-        audioFile,
-        words
-      );
-    }
-  );
-});
-
-describe('successful diarization', () => {
-  it.each(DIARIZATION_TEST_PARAMETERS)(
-    'testing diarization `%p`',
-    (language: string, audioFile: string, referenceWords: PicoLLMWord[]) => {
-      const modelPath = getModelPathByLanguage(language);
-
-      let picollmEngine = new PicoLLM(ACCESS_KEY, {
-        modelPath,
-        enableDiarization: true,
-      });
-
-      const waveFilePath = getAudioFile(audioFile);
-      let words = picollmEngine.processFile(waveFilePath).words;
-
-      expect(words.length).toEqual(referenceWords.length);
-      for (let i = 0; i < words.length; i += 1) {
-        expect(words[i].word).toEqual(referenceWords[i].word);
-        expect(words[i].speakerTag).toEqual(referenceWords[i].speakerTag);
+        expect(res.completion).toEqual(expectation.completion);
       }
 
-      picollmEngine.release();
+      return;
+    } catch (e) {
+      error = e;
     }
-  );
-});
+  }
 
-describe('Defaults', () => {
-  test('Empty AccessKey', () => {
-    expect(() => {
-      new PicoLLM('');
-    }).toThrow(PicoLLMInvalidArgumentError);
+  if (error) {
+    throw error;
+  }
+};
+
+const runGenerateTest = (
+  prompt: string,
+  expectations: CompletionExpectation[],
+  options?: PicoLLMGenerateOptions,
+) => {
+  const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+
+  try {
+    const res = picoLLM.generate(prompt, options);
+    verifyCompletion(res, expectations);
+  } catch (e) {
+    expect(e).toBeUndefined();
+  } finally {
+    picoLLM.release();
+  }
+};
+
+const runDialogTest = async (
+  expectations: DialogExpectations,
+  conversations: [string, string][],
+  params: {
+    history?: number,
+    system?: string,
+  } = {}
+) => {
+  const { history, system } = params;
+
+  for (const [k, v] of Object.entries(expectations)) {
+    const o = new DIALOG_CLASSES[k](history, system);
+    for (let i = 0; i < conversations.length - 1; i++) {
+      const [human, llm] = conversations[i];
+      o.addHumanRequest(human);
+      o.addLLMResponse(llm);
+    }
+    o.addHumanRequest(conversations.at(-1)![0]);
+    expect(o.prompt()).toEqual(v);
+  }
+};
+
+describe('PicoLLM basic tests', function () {
+  test('List hardware devices', () => {
+    const hardwareDevices: string[] = PicoLLM.listAvailableDevices();
+    expect(Array.isArray(hardwareDevices)).toBeTruthy();
+    expect(hardwareDevices.length).toBeGreaterThan(0);
+  });
+
+  test(`should return correct error message stack`, () => {
+    let messageStack = [];
+    try {
+      const picollm = new PicoLLM(
+        "invalidAccessKey",
+        MODEL_PATH,
+      );
+      expect(picollm).toBeUndefined();
+    } catch (e: any) {
+      messageStack = e.messageStack;
+    }
+
+    expect(messageStack.length).toBeGreaterThan(0);
+    expect(messageStack.length).toBeLessThan(8);
+
+    try {
+      const picollm = new PicoLLM(
+        "invalidAccessKey",
+        MODEL_PATH,
+      );
+      expect(picollm).toBeUndefined();
+    } catch (e: any) {
+      expect(messageStack.length).toEqual(e.messageStack.length);
+    }
+  });
+
+  test(`should be able to handle invalid access key`, () => {
+    runInitTest({
+      accessKey: 'invalid',
+      expectFailure: true,
+    });
+  });
+
+  test(`should be able to handle invalid model path`, () => {
+    runInitTest({
+      expectFailure: true,
+      modelPath: 'invalid'
+    });
+  });
+
+  test(`should be able to handle invalid library path`, () => {
+    runInitTest({
+      expectFailure: true,
+      libraryPath: 'invalid'
+    });
+  });
+
+  test(`should be able to handle invalid device string`, () => {
+    runInitTest({
+      device: "nan",
+      expectFailure: true,
+    });
   });
 });
 
-describe('manual paths', () => {
-  test('manual library path', () => {
-    const libraryPath = getSystemLibraryPath();
+describe('PicoLLM generate tests', () => {
+  test(`should be able to generate default`, () => {
+    const data = testData.picollm.default;
+    const prompt = data.prompt;
 
-    let picollmEngine = new PicoLLM(ACCESS_KEY, {
-      libraryPath: libraryPath,
-      enableAutomaticPunctuation: false,
+    runGenerateTest(prompt, data.expectations);
+  });
+
+  test(`should be able to generate with completion token limit`, () => {
+    const data = testData.picollm['with-completion-token-limit'];
+    const prompt = data.prompt;
+    const completionTokenLimit = data.parameters['completion-token-limit'];
+
+    runGenerateTest(prompt, data.expectations, {
+      completionTokenLimit: completionTokenLimit
+    });
+  });
+
+  test(`should be able to generate with stop phrases`, () => {
+    const data = testData.picollm['with-stop-phrases'];
+    const prompt = data.prompt;
+    const stopPhrases = data.parameters['stop-phrases'];
+
+    runGenerateTest(prompt, data.expectations, {
+      stopPhrases: stopPhrases
+    });
+  });
+
+  test(`should be able to generate with presence penalty`, () => {
+    const data = testData.picollm['with-presence-penalty'];
+    const prompt = data.prompt;
+    const presencePenalty = data.parameters['presence-penalty'];
+
+    runGenerateTest(prompt, data.expectations, {
+      presencePenalty: presencePenalty
+    });
+  });
+
+  test(`should be able to generate with frequency penalty`, () => {
+    const data = testData.picollm['with-frequency-penalty'];
+    const prompt = data.prompt;
+    const frequencyPenalty = data.parameters['frequency-penalty'];
+
+    runGenerateTest(prompt, data.expectations, {
+      frequencyPenalty: frequencyPenalty
+    });
+  });
+
+  test(`should be able to generate with temperature`, () => {
+    const data = testData.picollm['with-temperature'];
+    const prompt = data.prompt;
+    const completionTokenLimit = data.parameters['completion-token-limit'];
+    const seeds = data.parameters.seeds;
+    const temperature = data.parameters.temperature;
+
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+
+    const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+
+    const res = picoLLM.generate(prompt, {
+      completionTokenLimit: completionTokenLimit,
+      seed: seeds[0],
+      temperature: temperature
     });
 
-    const waveFilePath = getAudioFile('test.wav');
-    let res = picollmEngine.processFile(waveFilePath);
+    const res2 = picoLLM.generate(prompt, {
+      completionTokenLimit: completionTokenLimit,
+      seed: seeds[1],
+      temperature: temperature
+    });
 
-    expect(res.transcript.length).toBeGreaterThan(0);
+    verifyCompletion(res, [{
+      'num-prompt-tokens': numPromptTokens,
+      'num-completion-tokens': res.usage.completionTokens,
+      'endpoint': PicoLLMEndpoint[res.endpoint],
+      'num-top-choices': 0,
+      'completion': res.completion
+    }]);
 
-    picollmEngine.release();
+    verifyCompletion(res2, [{
+      'num-prompt-tokens': numPromptTokens,
+      'num-completion-tokens': res2.usage.completionTokens,
+      'endpoint': PicoLLMEndpoint[res2.endpoint],
+      'num-top-choices': 0,
+      'completion': res2.completion
+    }]);
+
+    expect(res.completion).not.toEqual(res2.completion);
+
+    picoLLM.release();
+  });
+
+  test(`should be able to generate with temperature and identical seeds`, () => {
+    const data = testData.picollm['with-temperature-and-identical-seeds'];
+    const prompt = data.prompt;
+    const completionTokenLimit = data.parameters['completion-token-limit'];
+    const seed = data.parameters.seed;
+    const temperature = data.parameters.temperature;
+
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+
+    const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+
+    const res = picoLLM.generate(prompt, {
+      completionTokenLimit: completionTokenLimit,
+      seed: seed,
+      temperature: temperature
+    });
+
+    const res2 = picoLLM.generate(prompt, {
+      completionTokenLimit: completionTokenLimit,
+      seed: seed,
+      temperature: temperature
+    });
+
+    verifyCompletion(res, [{
+      'num-prompt-tokens': numPromptTokens,
+      'num-completion-tokens': res.usage.completionTokens,
+      'endpoint': PicoLLMEndpoint[res.endpoint],
+      'num-top-choices': 0,
+      'completion': res.completion
+    }]);
+
+    verifyCompletion(res2, [{
+      'num-prompt-tokens': numPromptTokens,
+      'num-completion-tokens': res2.usage.completionTokens,
+      'endpoint': PicoLLMEndpoint[res2.endpoint],
+      'num-top-choices': 0,
+      'completion': res2.completion
+    }]);
+
+    expect(res.completion).toEqual(res2.completion);
+
+    picoLLM.release();
+  });
+
+  test(`should be able to generate with temperature and top_p`, () => {
+    const data = testData.picollm['with-temperature-and-top-p'];
+    const prompt = data.prompt;
+    const completionTokenLimit = data.parameters['completion-token-limit'];
+    const seed = data.parameters.seed;
+    const temperature = data.parameters.temperature;
+    const topP = data.parameters['top-p'];
+    const expectations = data.expectations;
+
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+
+    const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+
+    const res = picoLLM.generate(prompt, {
+      completionTokenLimit: completionTokenLimit,
+      seed: seed,
+      temperature: temperature,
+      topP: topP,
+    });
+
+    verifyCompletion(res, expectations.map(x => ({
+      'num-prompt-tokens': numPromptTokens,
+      'num-completion-tokens': res.usage.completionTokens,
+      'endpoint': PicoLLMEndpoint[res.endpoint],
+      'num-top-choices': 0,
+      'completion': x
+    })));
+
+    picoLLM.release();
+  });
+
+  test(`should be able to generate with top choices`, () => {
+    const data = testData.picollm['with-top-choices'];
+    const prompt = data.prompt;
+    const numTopChoices = data.parameters['num-top-choices'];
+
+    runGenerateTest(prompt, data.expectations, {
+      numTopChoices: numTopChoices
+    });
+  });
+
+  test(`should be able to generate with streamCallback`, () => {
+    const data = testData.picollm.default;
+    const prompt = data.prompt;
+
+    const pieces: string[] = [];
+
+    runGenerateTest(prompt, data.expectations, {
+      streamCallback: token => { pieces.push(token); }
+    });
+
+    expect(pieces.join('')).toEqual(data.expectations[0].completion);
+  });
+
+  test(`should be able to tokenize`, () => {
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+
+    const data = testData.picollm.tokenize;
+    const text = data.text;
+
+    const tokens = picoLLM.tokenize(text, true, false);
+    expect(tokens).toEqual(data.tokens);
+
+    picoLLM.release();
+  });
+
+  test(`should be able to forward`, () => {
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+
+    const logits = picoLLM.forward(79);
+    expect(logits.length).toBeGreaterThan(0);
+
+    const sum = logits.reduce((acc, x) => acc + Math.exp(x), 0);
+    expect(Math.abs(1 - (sum / logits.reduce((acc, x) => acc + Math.exp(x), 0)))).toBeLessThan(0.0001);
+
+    picoLLM.release();
+  });
+
+  test(`should be able to reset`, () => {
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+
+    const logits = picoLLM.forward(79);
+    picoLLM.reset();
+
+    const newLogits = picoLLM.forward(79);
+    expect(logits).toEqual(newLogits);
+
+    picoLLM.release();
   });
 });
 
-describe('error message stack', () => {
-  test('message stack cleared after read', () => {
-    let error: string[] = [];
-    try {
-      new PicoLLM('invalid');
-    } catch (e: any) {
-      error = e.messageStack;
-    }
+describe('PicoLLM Dialog tests', () => {
+  test('should be able to get prompt', async () => {
+    const data = testData.dialog;
+    const conversation = data.conversation as [string, string][];
+    const prompts = data.prompts;
 
-    expect(error.length).toBeGreaterThan(0);
-    expect(error.length).toBeLessThanOrEqual(8);
+    await runDialogTest(prompts, conversation);
+  });
 
-    try {
-      new PicoLLM('invalid');
-    } catch (e: any) {
-      for (let i = 0; i < error.length; i++) {
-        expect(error[i]).toEqual(e.messageStack[i]);
-      }
-    }
+  test('should be able to get prompt with system', async () => {
+    const data = testData.dialog;
+    const conversation = data.conversation as [string, string][];
+    const system = data.system;
+    const prompts = data['prompts-with-system'];
+
+    await runDialogTest(prompts, conversation, {
+      system: system
+    });
+  });
+
+  test('should be able to get prompt with history', async () => {
+    const data = testData.dialog;
+    const conversation = data.conversation as [string, string][];
+    const prompts = data['prompts-with-history'];
+
+    await runDialogTest(prompts, conversation, {
+      history: 0
+    });
+  });
+
+  test('should be able to get prompt with system and history', async () => {
+    const data = testData.dialog;
+    const conversation = data.conversation as [string, string][];
+    const system = data.system;
+    const prompts = data['prompts-with-system-and-history'];
+
+    await runDialogTest(prompts, conversation, {
+      system: system,
+      history: 0
+    });
   });
 });

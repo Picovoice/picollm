@@ -24,7 +24,7 @@ import {
   PicoLLMCompletion,
   PicoLLMGenerateOptions,
   PicoLLMOptions,
-  PicoLLMInputOptions, PicoLLMCompletionToken, PicoLLMEndpoint,
+  PicoLLMInputOptions,
 } from './types';
 
 import { getSystemLibraryPath } from './platforms';
@@ -40,7 +40,16 @@ type PicoLLMGenerateResult = {
       completion_tokens: number;
     };
     endpoint: number;
-    completion_tokens: PicoLLMCompletionToken[];
+    completion_tokens: {
+      token: {
+        token: string;
+        log_prob: number;
+      }
+      top_choices: {
+        token: string;
+        log_prob: number;
+      }[];
+    }[];
     completion: string;
   };
   status: PvStatus;
@@ -62,7 +71,7 @@ type PicoLLMContextLengthResult = {
   status: PvStatus;
 };
 type PicoLLMHardwareDevicesResult = {
-  hardwareDevices: string[];
+  hardware_devices: string[];
   status: PvStatus;
 };
 type PicoLLMResult = {
@@ -86,7 +95,18 @@ export class PicoLLM {
   private readonly _version: string;
 
   /**
-   * Creates an instance of PicoLLM.
+   * Creates an instance of picoLLM.
+   *
+   * @param accessKey AccessKey obtained from Picovoice Console (https://console.picovoice.ai/)
+   * @param modelPath Absolute path to the file containing LLM parameters.
+   * @param options Optional init configuration arguments, see PicoLLMInitOptions for details.
+   * @param options.device String representation of the device to use for inference. If set to `best`,
+   * picoLLM picks the most suitable device. If set to `cpu`, the engine will run on the CPU with the default number of
+   * threads. To specify the number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}`
+   * is the desired number of threads. The number of threads is capped at the max available cores determined by the browser.
+   * @param options.libraryPath Absolute path to picoLLM's dynamic library.
+   *
+   * @returns An instance of the PicoLLM.
    */
   constructor(accessKey: string, modelPath: string, options: PicoLLMOptions = {}) {
     if (
@@ -142,24 +162,65 @@ export class PicoLLM {
     this._version = pvPicoLLM.version();
   }
 
+  /**
+   * Get model's context length.
+   */
   get contextLength(): number {
     return this._contextLength;
   }
 
+  /**
+   * Get maximum number of top choices for `.generate()`.
+   */
   get maxTopChoices(): number {
     return this._maxTopChoices;
   }
 
+  /**
+   *  Get the model's name.
+   */
   get model(): string {
     return this._model;
   }
 
+  /**
+   * Get PicoLLM version.
+   */
   get version(): string {
     return this._version;
   }
 
   /**
-   * Processes a given audio data and returns its transcription.
+   * Given a text prompt and a set of generation parameters, creates a completion text and relevant metadata.
+   *
+   * @param prompt Prompt.
+   * @param options Optional generate configuration arguments, see PicoLLMGenerateOptions for details.
+   * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
+   * to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be
+   * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
+   * @param options.stopPhrases The generation process stops when it encounters any of these phrases in the completion. The
+   * already generated completion, including the encountered stop phrase, will be returned. The `endpoint` parameter
+   * in `PicoLLMCompletion` output will be `PicoLLMEndpoint.STOP_PHRASE_ENCOUNTERED`. Set to `undefined` to turn off this
+   * feature.
+   * @param options.seed The internal random number generator uses it as its seed if set to a positive integer value.
+   * Seeding enforces deterministic outputs.  Set to `undefined` for randomized outputs for a given prompt.
+   * @param options.presencePenalty It penalizes logits already appearing in the partial completion if set to a positive
+   * value. If set to `0` or `undefined`, it has no effect.
+   * @param options.frequencyPenalty If set to a positive floating-point value, it penalizes logits proportional to the
+   * frequency of their appearance in the partial completion. If set to `0` or `undefined`, it has no effect.
+   * @param options.temperature Sampling temperature. Temperature is a non-negative floating-point value that controls the
+   * randomness of the sampler. A higher temperature smoothens the samplers' output, increasing the randomness. In
+   * contrast, a lower temperature creates a narrower distribution and reduces variability. Setting it to `0` or
+   * `undefined` selects the maximum logit during sampling.
+   * @param options.topP A positive floating-point number within 0, and 1. It restricts the sampler's choices to
+   * high-probability logits that form the `topP` portion of the probability mass. Hence, it avoids randomly
+   * selecting unlikely logits. A value of `1` or `undefined` enables the sampler to pick any token with non-zero
+   * probability turning off the feature.
+   * @param options.numTopChoices If set to a positive value, picoLLM returns the list of the highest probability tokens
+   * for any generated token. Set to `0` to turn off the feature. The maximum number of top choices is `.maxTopChoices`.
+   * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
+   * completion string becomes available.
+   * @returns Completion result.
    */
   generate(prompt: string, options: PicoLLMGenerateOptions = {}): PicoLLMCompletion {
     if (
@@ -215,6 +276,16 @@ export class PicoLLM {
     }
 
     const completion = picollmGenerateResult!.completion;
+    const completionTokens = completion.completion_tokens.map(x => ({
+      token: {
+        token: x.token.token,
+        logProb: x.token.log_prob
+      },
+      topChoices: x.top_choices.map(t => ({
+        token: t.token,
+        logProb: t.log_prob,
+      })),
+    }));
 
     return {
       usage: {
@@ -222,11 +293,20 @@ export class PicoLLM {
         completionTokens: completion.usage.completion_tokens,
       },
       endpoint: completion.endpoint,
-      completionTokens: completion.completion_tokens,
+      completionTokens: completionTokens,
       completion: completion.completion
     };
   }
 
+  /**
+   * Tokenizes a given text using the model's tokenizer. This is a low-level function meant for benchmarking and
+   * advanced usage. `.generate()` should be used when possible.
+   *
+   * @param text Text.
+   * @param bos If set to `True`, the tokenizer prepends the beginning of the sentence token to the result.
+   * @param eos If set to `True`, the tokenizer appends the end of the sentence token to the result.
+   * @returns Tokens representing the input text.
+   */
   tokenize(text: string, bos: boolean, eos: boolean): number[] {
     if (
       this._handle === 0 ||
@@ -261,6 +341,13 @@ export class PicoLLM {
     return picollmTokenizeResult!.tokens;
   }
 
+  /**
+   * Performs a single forward pass given a token and returns the logits. This is a low-level function for
+   * benchmarking and advanced usage. `.generate()` should be used when possible.
+   *
+   * @param token Input token.
+   * @returns Logits.
+   */
   forward(token: number): number[] {
     if (
       this._handle === 0 ||
@@ -285,6 +372,11 @@ export class PicoLLM {
     return picollmForwardResult!.logits;
   }
 
+  /**
+   * Resets the internal state of LLM. It should be called in conjunction with `.forward()` when processing a new
+   * sequence of tokens. This is a low-level function for benchmarking and advanced usage. `.generate()` should be
+   * used when possible.
+   */
   reset(): void {
     if (
       this._handle === 0 ||
@@ -307,6 +399,17 @@ export class PicoLLM {
     }
   }
 
+  /**
+   * Return the Dialog object corresponding to the loaded model. The model needs to be instruction-tuned and have a
+   * specific chat template.
+   *
+   * @param mode Some models (e.g., `phi-2`) define multiple chat template models. For example, `phi-2` allows
+   * both `qa` and `chat` templates.
+   * @param history History refers to the number of latest back-and-forths to include in the prompt. Setting history
+   * to `undefined` will embed the entire dialog in the prompt.
+   * @param system System instruction to embed in the prompt for configuring the model's responses.
+   * @returns Constructed dialog object.
+   */
   getDialog(mode?: string, history: number = 0, system?: string): Dialog {
     if (
       this._handle === 0 ||
@@ -354,10 +457,7 @@ export class PicoLLM {
   }
 
   /**
-   * Releases the resources acquired by PicoLLM.
-   *
-   * Be sure to call this when finished with the instance
-   * to reclaim the memory that was allocated by the C library.
+   * Releases resources acquired by WebAssembly module.
    */
   release(): void {
     if (this._handle !== 0) {
@@ -373,6 +473,12 @@ export class PicoLLM {
     }
   }
 
+  /**
+   * Lists all available devices that picoLLM can use for inference. Each entry in the list can be the `device` argument
+   * of `.create` method.
+   *
+   * @returns List of all available devices that picoLLM can use for inference.
+   */
   static listAvailableDevices(options: PicoLLMInputOptions = {}): string[] {
     const {
       libraryPath = getSystemLibraryPath(),
@@ -382,7 +488,7 @@ export class PicoLLM {
 
     let picollmHardwareDevicesResult: PicoLLMHardwareDevicesResult | null = null;
     try {
-      picollmHardwareDevicesResult = pvPicoLLM.forward();
+      picollmHardwareDevicesResult = pvPicoLLM.list_hardware_devices();
     } catch (err: any) {
       pvStatusToException(<PvStatus>err.code, err);
     }
@@ -397,7 +503,7 @@ export class PicoLLM {
       }
     }
 
-    return picollmHardwareDevicesResult!.hardwareDevices;
+    return picollmHardwareDevicesResult!.hardware_devices;
   }
 
   private getContextLength(): number {

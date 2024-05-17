@@ -104,6 +104,23 @@ For more information about Python demos go to [demo/python](demo/python/README.m
 
 ### Node.js Demos
 
+Install the demo package:
+
+```console
+yarn global add @picovoice/picollm-node-demo
+```
+
+Run the following in the terminal:
+
+```console
+picollm-completion-demo --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
+downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
+
+For more information about Node.js demos go to [demo/nodejs](./demo/nodejs).
+
 ### Android Demos
 
 Using Android Studio, open the [Completion demo](demo/android/Completion/) as an Android project, copy your AccessKey into MainActivity.java, and run the application.
@@ -194,6 +211,26 @@ downloaded from Picovoice Console, and `${PROMPT}` to a prompt string. Finally, 
 the resources using `pllm.release()`.
 
 ### Node.js SDK
+
+Install the Node.js SDK:
+
+```console
+yarn add @picovoice/picollm-node
+```
+
+Create instances of the picoLLM class:
+
+```javascript
+const PicoLLM = require("@picovoice/picollm-node");
+const pllm = new PicoLLM('${ACCESS_KEY}', '${MODEL_PATH}');
+
+const res = pllm.generate('${PROMPT}');
+console.log(res.completion);
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` to the path to a model file
+downloaded from Picovoice Console, and `${PROMPT}` to a prompt string. Finally, when done be sure to explicitly release
+the resources using `pllm.release()`.
 
 ### Android SDK
 

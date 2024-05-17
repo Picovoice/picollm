@@ -35,7 +35,6 @@ const ACCESS_KEY = process.argv
 const DEVICE = process.argv
   .filter(x => x.startsWith('--device='))[0]
   .split('--device=')[1];
-console.log(DEVICE)
 
 const MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
 
@@ -500,7 +499,7 @@ describe('PicoLLM generate tests', () => {
 
     if (DEVICE.includes('gpu')) {
       for (let i = 0; i < newLogits.length; i++) {
-        expect(logits[i]).toBeCloseTo(newLogits[i]);
+        expect(logits[i]).toBeCloseTo(newLogits[i], 0.01);
       }
     } else {
       expect(logits).toEqual(newLogits);

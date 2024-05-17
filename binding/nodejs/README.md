@@ -94,7 +94,7 @@ Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, and `g
 template. You can either directly format the prompt or use a dialog helper:
 
 ```javascript
-const dialog = pllm.getdialog();
+const dialog = pllm.getDialog();
 dialog.addHumanRequest(prompt);
 
 const res = pllm.generate(dialog.prompt());

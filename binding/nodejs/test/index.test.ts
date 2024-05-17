@@ -32,7 +32,9 @@ const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]
   .split('--access_key=')[1];
 
-const DEVICE = process.argv[1];
+const DEVICE = process.argv
+  .filter(x => x.startsWith('--device='))[0]
+  .split('--device=')[1];
 
 const MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
 
@@ -355,7 +357,7 @@ describe('PicoLLM generate tests', () => {
     if (DEVICE.includes('gpu')) {
       return;
     }
-    
+
     const data = testData.picollm['with-temperature-and-identical-seeds'];
     const prompt = data.prompt;
     const completionTokenLimit = data.parameters['completion-token-limit'];

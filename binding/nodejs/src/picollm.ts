@@ -10,7 +10,6 @@
 //
 
 import * as fs from 'fs';
-import * as utf8 from "utf8";
 
 import PvStatus from './pv_status_t';
 import {
@@ -252,13 +251,6 @@ export class PicoLLM {
       );
     }
 
-    let streamCallbackWrapper = null;
-    if (streamCallback) {
-      streamCallbackWrapper = (token: string): void => {
-        streamCallback(utf8.decode(token));
-      };
-    }
-
     let picollmGenerateResult: PicoLLMGenerateResult | null = null;
     try {
       picollmGenerateResult = this._pvPicoLLM.generate(
@@ -273,7 +265,7 @@ export class PicoLLM {
         temperature,
         topP,
         numTopChoices,
-        streamCallbackWrapper);
+        streamCallback);
     } catch (err: any) {
       pvStatusToException(<PvStatus>err.code, err);
     }

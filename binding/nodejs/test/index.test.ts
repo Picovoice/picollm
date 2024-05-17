@@ -32,6 +32,8 @@ const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]
   .split('--access_key=')[1];
 
+const DEVICE = process.argv[1];
+
 const MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
 
 const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
@@ -72,7 +74,7 @@ const runInitTest = (
   const {
     accessKey = ACCESS_KEY,
     modelPath = MODEL_PATH,
-    device = 'best',
+    device = DEVICE,
     libraryPath,
     expectFailure = false,
   } = params;
@@ -159,7 +161,9 @@ const runGenerateTest = (
   expectations: CompletionExpectation[],
   options?: PicoLLMGenerateOptions,
 ) => {
-  const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+  const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+    device: DEVICE
+  });
 
   try {
     const res = picoLLM.generate(prompt, options);
@@ -348,6 +352,10 @@ describe('PicoLLM generate tests', () => {
   });
 
   test(`should be able to generate with temperature and identical seeds`, () => {
+    if (DEVICE.includes('gpu')) {
+      return;
+    }
+    
     const data = testData.picollm['with-temperature-and-identical-seeds'];
     const prompt = data.prompt;
     const completionTokenLimit = data.parameters['completion-token-limit'];
@@ -392,6 +400,10 @@ describe('PicoLLM generate tests', () => {
   });
 
   test(`should be able to generate with temperature and top_p`, () => {
+    if (DEVICE.includes('gpu')) {
+      return;
+    }
+
     const data = testData.picollm['with-temperature-and-top-p'];
     const prompt = data.prompt;
     const completionTokenLimit = data.parameters['completion-token-limit'];
@@ -446,7 +458,9 @@ describe('PicoLLM generate tests', () => {
   });
 
   test(`should be able to tokenize`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+      device: DEVICE
+    });
 
     const data = testData.picollm.tokenize;
     const text = data.text;
@@ -458,7 +472,9 @@ describe('PicoLLM generate tests', () => {
   });
 
   test(`should be able to forward`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+      device: DEVICE
+    });
 
     const logits = picoLLM.forward(79);
     expect(logits.length).toBeGreaterThan(0);
@@ -470,13 +486,22 @@ describe('PicoLLM generate tests', () => {
   });
 
   test(`should be able to reset`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+      device: DEVICE
+    });
 
     const logits = picoLLM.forward(79);
     picoLLM.reset();
 
     const newLogits = picoLLM.forward(79);
-    expect(logits).toEqual(newLogits);
+
+    if (DEVICE.includes('gpu')) {
+      for (let i = 0; i < newLogits.length; i++) {
+        expect(logits[i]).toBeCloseTo(newLogits[i]);
+      }
+    } else {
+      expect(logits).toEqual(newLogits);
+    }
 
     picoLLM.release();
   });

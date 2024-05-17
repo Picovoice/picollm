@@ -35,6 +35,7 @@ const ACCESS_KEY = process.argv
 const DEVICE = process.argv
   .filter(x => x.startsWith('--device='))[0]
   .split('--device=')[1];
+console.log(DEVICE)
 
 const MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
 

@@ -100,10 +100,12 @@ export class PicoLLM {
    * @param accessKey AccessKey obtained from Picovoice Console (https://console.picovoice.ai/)
    * @param modelPath Absolute path to the file containing LLM parameters.
    * @param options Optional init configuration arguments, see PicoLLMInitOptions for details.
-   * @param options.device String representation of the device to use for inference. If set to `best`,
-   * picoLLM picks the most suitable device. If set to `cpu`, the engine will run on the CPU with the default number of
-   * threads. To specify the number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}`
-   * is the desired number of threads. The number of threads is capped at the max available cores determined by the browser.
+   * @param options.device String representation of the device (e.g., CPU or GPU) to use for inference. If set to `best`,
+   * picoLLM picks the most suitable device. If set to `gpu`, the engine uses the first available GPU device. To
+   * select a specific GPU device, set this argument to `gpu:${GPU_INDEX}`, where `${GPU_INDEX}` is the index of the
+   * target GPU. If set to `cpu`, the engine will run on the CPU with the default number of threads. To specify the
+   * number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of
+   * threads.
    * @param options.libraryPath Absolute path to picoLLM's dynamic library.
    *
    * @returns An instance of the PicoLLM.
@@ -457,7 +459,7 @@ export class PicoLLM {
   }
 
   /**
-   * Releases resources acquired by WebAssembly module.
+   * Releases resources acquired by picoLLM.
    */
   release(): void {
     if (this._handle !== 0) {

@@ -316,7 +316,9 @@ describe('PicoLLM generate tests', () => {
     const seeds = data.parameters.seeds;
     const temperature = data.parameters.temperature;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+      device: DEVICE
+    });
 
     const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
 
@@ -364,7 +366,9 @@ describe('PicoLLM generate tests', () => {
     const seed = data.parameters.seed;
     const temperature = data.parameters.temperature;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+      device: DEVICE
+    });
 
     const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
 
@@ -414,7 +418,9 @@ describe('PicoLLM generate tests', () => {
     const topP = data.parameters['top-p'];
     const expectations = data.expectations;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH);
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+      device: DEVICE
+    });
 
     const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
 

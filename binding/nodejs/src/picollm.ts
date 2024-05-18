@@ -475,7 +475,7 @@ export class PicoLLM {
 
   /**
    * Lists all available devices that picoLLM can use for inference. Each entry in the list can be the `device` argument
-   * of `.create` method.
+   * of the constructor.
    *
    * @returns List of all available devices that picoLLM can use for inference.
    */

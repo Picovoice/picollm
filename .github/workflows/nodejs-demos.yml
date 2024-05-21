@@ -27,10 +27,10 @@ jobs:
     runs-on: ${{ matrix.machine }}
 
     strategy:
+      fail-fast: false
       matrix:
         xpu: [ cpu ]
         machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows ]
-        node-version: [16.x, 18.x, 20.x]
         include:
           - xpu: gpu
             machine: pv-linux

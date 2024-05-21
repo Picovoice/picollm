@@ -45,16 +45,16 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: yarn install
-
 #### Remove after release ####
 
     - name: Build Node.js binding
       run: yarn install && yarn build
-      working-directory: ../../binding/nodejs
+      working-directory: binding/nodejs
 
 ####
+
+    - name: Install dependencies
+      run: yarn install
 
     - name: Download resource files
       run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm

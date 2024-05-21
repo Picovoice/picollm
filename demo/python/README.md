@@ -16,7 +16,7 @@ models. picoLLM Inference Engine is:
 ## Compatibility
 
 - Python 3.8+
-- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64), and Raspberry Pi (5, 4, and 3).
+- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64), and Raspberry Pi (5 and 3).
 
 ## Installation
 
@@ -97,7 +97,7 @@ picollm_demo_chat --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH}
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console and `${MODEL_PATH}` with the path to a model file
-downloaded from Picovoice Console. 
+downloaded from Picovoice Console.
 
 To get information about all the available options in the demo, run the following:
 

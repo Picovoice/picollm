@@ -52,7 +52,7 @@ jobs:
 
     - name: Build Node.js binding
       run: yarn install && yarn build
-      working-directory: binding/node.js
+      working-directory: binding/nodejs
 
 ####
 

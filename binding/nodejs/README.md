@@ -1,4 +1,4 @@
-# picoLLM Inference Engine Python Binding
+# picoLLM Inference Engine Node.js Binding
 
 Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
 
@@ -15,13 +15,21 @@ models. picoLLM Inference Engine is:
 
 ## Compatibility
 
-- Python 3.8+
+- Node.js 16+
 - Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64), and Raspberry Pi (5 and 4).
 
 ## Installation
 
+Using `Yarn`:
+
 ```console
-pip3 install picollm
+yarn add @picovoice/picollm-node
+```
+
+or using `npm`:
+
+```console
+npm install --save @picovoice/picollm-node
 ```
 
 ## Models
@@ -30,29 +38,29 @@ picoLLM Inference Engine supports the following open-weight models. The models a
 [Picovoice Console](https://console.picovoice.ai/).
 
 - Gemma
-    - `gemma-2b`
-    - `gemma-2b-it`
-    - `gemma-7b`
-    - `gemma-7b-it`
+  - `gemma-2b`
+  - `gemma-2b-it`
+  - `gemma-7b`
+  - `gemma-7b-it`
 - Llama-2
-    - `llama-2-7b`
-    - `llama-2-7b-chat`
-    - `llama-2-13b`
-    - `llama-2-13b-chat`
-    - `llama-2-70b`
-    - `llama-2-70b-chat`
+  - `llama-2-7b`
+  - `llama-2-7b-chat`
+  - `llama-2-13b`
+  - `llama-2-13b-chat`
+  - `llama-2-70b`
+  - `llama-2-70b-chat`
 - Llama-3
-    - `llama-3-8b`
-    - `llama-3-8b-instruct`
-    - `llama-3-70b`
-    - `llama-3-70b-instruct`
+  - `llama-3-8b`
+  - `llama-3-8b-instruct`
+  - `llama-3-70b`
+  - `llama-3-70b-instruct`
 - Mistral
-    - `mistral-7b-v0.1`
-    - `mistral-7b-instruct-v0.1`
-    - `mistral-7b-instruct-v0.2`
+  - `mistral-7b-v0.1`
+  - `mistral-7b-instruct-v0.1`
+  - `mistral-7b-instruct-v0.2`
 - Mixtral
-    - `mixtral-8x7b-v0.1`
-    - `mixtral-8x7b-instruct-v0.1`
+  - `mixtral-8x7b-v0.1`
+  - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
   - `phi2`
 
@@ -68,15 +76,15 @@ offline and completely free for open-weight models. Everyone who signs up for
 
 Create an instance of the engine and generate a prompt completion:
 
-```python
-import picollm
+```javascript
+const { PicoLLM } = require("@picovoice/picollm-node");
 
-pllm = picollm.create(
-    access_key='${ACCESS_KEY}',
-    model_path='${MODEL_PATH}')
+const pllm = new PicoLLM(
+    '${ACCESS_KEY}',
+    '${MODEL_PATH}');
 
-res = pllm.generate(prompt='${PROMPT}')
-print(res.completion)
+const res = pllm.generate('${PROMPT}');
+console.log(res.completion);
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
@@ -85,22 +93,21 @@ downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, and `gemma-2b-it`) have a specific chat
 template. You can either directly format the prompt or use a dialog helper:
 
-```python
-dialog = pllm.get_dialog()
-dialog.add_human_request(prompt)
+```javascript
+const dialog = pllm.getDialog();
+dialog.addHumanRequest(prompt);
 
-res = pllm.generate(prompt=dialog.prompt())
-dialog.add_llm_response(res.completion)
-print(res.completion)
+const res = pllm.generate(dialog.prompt());
+dialog.addLLMResponse(res.completion);
+console.log(res.completion);
 ```
 
 Finally, when done, be sure to release the resources explicitly:
 
-```python
+```javascript
 pllm.release()
 ```
 
 ## Demos
 
-[picollmdemo](https://pypi.org/project/picollmdemo/) provides command-line utilities for LLM completion and chat using
-picoLLM.
+[picoLLM Node.js demo package](https://www.npmjs.com/package/@picovoice/picollm-node-demo) provides command-line utilities for processing audio using picoLLM.

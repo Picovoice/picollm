@@ -1,0 +1,58 @@
+{
+  "name": "@picovoice/picollm-node",
+  "version": "1.0.0",
+  "description": "Picovoice picoLLM Node.js binding",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "scripts": {
+    "build": "npm-run-all --parallel build:**",
+    "build:all": "tsc",
+    "build:types": "tsc --declaration --declarationMap --emitDeclarationOnly --outDir ./dist/types",
+    "prepack": "npm run build",
+    "prepare": "node copy.js",
+    "test": "jest --no-cache",
+    "lint": "eslint . --ext .js,.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Picovoice/picollm.git",
+    "directory": "binding/nodejs"
+  },
+  "keywords": [
+    "node",
+    "ai",
+    "offline",
+    "llm"
+  ],
+  "author": "Picovoice Inc.",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Picovoice/picollm/issues"
+  },
+  "homepage": "https://picovoice.ai/products/picollm/",
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "@types/node": "^18.11.9",
+    "@typescript-eslint/eslint-plugin": "^5.19.0",
+    "@typescript-eslint/parser": "^5.19.0",
+    "eslint": "^8.13.0",
+    "eslint-plugin-jest": "^27.1.6",
+    "jest": "^27.5.1",
+    "mkdirp": "^1.0.4",
+    "ncp": "^2.0.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.6.2",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.6.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "cpu": [
+    "!ia32",
+    "!mips",
+    "!ppc",
+    "!ppc64"
+  ],
+  "dependencies": {}
+}

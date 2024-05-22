@@ -1,4 +1,4 @@
-# picoLLM Inference Engine Python Demos
+# picoLLM Inference Engine Node.js Demos
 
 Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
 
@@ -15,13 +15,21 @@ models. picoLLM Inference Engine is:
 
 ## Compatibility
 
-- Python 3.8+
+- Node.js 16+
 - Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64), and Raspberry Pi (5 and 4).
 
 ## Installation
 
+Using `Yarn`:
+
 ```console
-pip3 install picollmdemo
+yarn global add @picovoice/picollm-node-demo
+```
+
+or using `npm`:
+
+```console
+npm install --save @picovoice/picollm-node-demo
 ```
 
 ## Models
@@ -30,29 +38,29 @@ picoLLM Inference Engine supports the following open-weight models. The models a
 [Picovoice Console](https://console.picovoice.ai/).
 
 - Gemma
-    - `gemma-2b`
-    - `gemma-2b-it`
-    - `gemma-7b`
-    - `gemma-7b-it`
+  - `gemma-2b`
+  - `gemma-2b-it`
+  - `gemma-7b`
+  - `gemma-7b-it`
 - Llama-2
-    - `llama-2-7b`
-    - `llama-2-7b-chat`
-    - `llama-2-13b`
-    - `llama-2-13b-chat`
-    - `llama-2-70b`
-    - `llama-2-70b-chat`
+  - `llama-2-7b`
+  - `llama-2-7b-chat`
+  - `llama-2-13b`
+  - `llama-2-13b-chat`
+  - `llama-2-70b`
+  - `llama-2-70b-chat`
 - Llama-3
-    - `llama-3-8b`
-    - `llama-3-8b-instruct`
-    - `llama-3-70b`
-    - `llama-3-70b-instruct`
+  - `llama-3-8b`
+  - `llama-3-8b-instruct`
+  - `llama-3-70b`
+  - `llama-3-70b-instruct`
 - Mistral
-    - `mistral-7b-v0.1`
-    - `mistral-7b-instruct-v0.1`
-    - `mistral-7b-instruct-v0.2`
+  - `mistral-7b-v0.1`
+  - `mistral-7b-instruct-v0.1`
+  - `mistral-7b-instruct-v0.2`
 - Mixtral
-    - `mixtral-8x7b-v0.1`
-    - `mixtral-8x7b-instruct-v0.1`
+  - `mixtral-8x7b-v0.1`
+  - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
   - `phi2`
 
@@ -76,7 +84,7 @@ conversation with the LLM, similar to ChatGPT.
 Run the demo by entering the following in the terminal:
 
 ```console
-picollm_demo_completion --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
+picollm-completion-demo --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
@@ -85,7 +93,7 @@ downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 To get information about all the available options in the demo, run the following:
 
 ```console
-picollm_demo_completion --help
+picollm-completion-demo --help
 ```
 
 ### Chat Demo
@@ -93,7 +101,7 @@ picollm_demo_completion --help
 To run an instruction-tuned model for chat, run the following in the terminal:
 
 ```console
-picollm_demo_chat --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH}
+picollm-chat-demo --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH}
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console and `${MODEL_PATH}` with the path to a model file
@@ -102,5 +110,5 @@ downloaded from Picovoice Console.
 To get information about all the available options in the demo, run the following:
 
 ```console
-picollm_demo_chat --help
+picollm-chat-demo --help
 ```

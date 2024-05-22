@@ -1,0 +1,63 @@
+name: Node.js Demos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'demo/nodejs/**'
+      - '!demo/nodejs/README.md'
+      - 'lib/node/**'
+      - '.github/workflows/nodejs-demos.yml'
+
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - 'demo/nodejs/**'
+      - '!demo/nodejs/README.md'
+      - 'lib/node/**'
+      - '.github/workflows/nodejs-demos.yml'
+
+defaults:
+  run:
+    working-directory: demo/nodejs
+
+jobs:
+  build-self-hosted:
+    runs-on: ${{ matrix.machine }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        xpu: [ cpu ]
+        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows ]
+        include:
+          - xpu: gpu
+            machine: pv-linux
+          - xpu: gpu
+            machine: pv-windows
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+#### Remove after release ####
+
+    - name: Build Node.js binding
+      run: yarn install && yarn build
+      working-directory: binding/nodejs
+
+####
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Download resource files
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm
+
+    - name: Test
+      run: yarn completion --access_key ${{secrets.PV_VALID_ACCESS_KEY}} --model_path phi2-290.pllm --completion_token_limit 10 --prompt "Hello my name is" --device ${{matrix.xpu}}

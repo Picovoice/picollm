@@ -3,7 +3,7 @@
   "description": "",
   "author": "Picovoice Inc",
   "license": "Apache-2.0",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "web",
     "ai",
@@ -29,7 +29,7 @@
     "test": "cypress run --spec test/picollm.test.ts --browser chrome --headed"
   },
   "dependencies": {
-    "@picovoice/web-utils": "~1.4.0"
+    "@picovoice/web-utils": "~1.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.21.3",

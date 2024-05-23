@@ -148,13 +148,6 @@ const releaseRequest = async (): Promise<any> => {
 };
 
 /**
- * Handle worker errors, specially those related to memory.
- */
-self.onerror = (e): void => {
-  self.postMessage(checkError(e.error));
-};
-
-/**
  * picoLLM worker handler.
  */
 self.onmessage = async function (

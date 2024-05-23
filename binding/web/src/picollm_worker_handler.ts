@@ -150,8 +150,8 @@ const releaseRequest = async (): Promise<any> => {
 /**
  * Handle worker errors, specially those related to memory.
  */
-self.onerror = (error): void => {
-  self.postMessage(checkError(error));
+self.onerror = (e): void => {
+  self.postMessage(checkError(e.error));
 };
 
 /**

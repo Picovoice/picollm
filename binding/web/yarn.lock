@@ -1119,10 +1119,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@picovoice/web-utils@~1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.0.tgz#ebcf5847b61311217d0db95cdd8c1721484435af"
-  integrity sha512-7xwnXzQEOj3a9x58RsZ77ykrmrQg6+HI8NfzHXlqqlAewunnZ7VaLEhdJVtzaM+rOzTUJOTL0bqbx2eOgHEbyw==
+"@picovoice/web-utils@~1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.1.tgz#207c5e308b1f7b9127bab83b4b3d9a653d630ffb"
+  integrity sha512-WoC+PAYXEpeLzq76URCX+UC5ZRJPJCLcxCgIaZ3Sx9uUVtobSvHbnWAFDW8Q5OTmsRF52gKqr08uqH+LNC7V+Q==
   dependencies:
     commander "^10.0.1"
 

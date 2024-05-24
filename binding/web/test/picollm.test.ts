@@ -243,6 +243,7 @@ describe('PicoLLM basic tests', function () {
     cy.loadModel().then(async chunks => {
       await runInitTest(PicoLLMWorker, chunks, {
         device: "nan",
+        expectFailure: true,
       });
     });
   });

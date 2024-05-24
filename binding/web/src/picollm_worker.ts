@@ -133,7 +133,9 @@ export class PicoLLMWorker {
       command: 'init',
       accessKey: accessKey,
       modelPath: modelPath,
-      device: device,
+      options: {
+        device: device,
+      },
       sdk: this._sdk,
       wasmSimd: this._wasmSimd,
     });

@@ -1,6 +1,7 @@
 binding/android/PicoLLMTestApp/** linguist-detectable=false
 binding/android/PicoLLM/picollm/src/main/java/ai/picovoice/picollm/dialog/** linguist-detectable=false
 binding/ios/PicoLLMAppTest/** linguist-detectable=false
+binding/nodejs/** linguist-detectable=false
 binding/web/cypress/** linguist-detectable=false
 binding/web/scripts/** linguist-detectable=false
 binding/web/src/picollm.ts linguist-detectable=false

@@ -15,7 +15,7 @@ Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
 picoLLM Inference Engine is a highly accurate and cross-platform SDK optimized for running compressed large language
 models. picoLLM Inference Engine is:
 
-- Accurate; picoLLM Compression improves GPTQ by up to 98%.
+- Accurate; picoLLM Compression improves GPTQ by [significant margins](https://picovoice.ai/blog/picollm-towards-optimal-llm-quantization/)
 - Private; LLM inference runs 100% locally.
 - Cross-Platform
     - Linux (x86_64), macOS (arm64, x86_64), and Windows (x86_64)
@@ -29,6 +29,15 @@ models. picoLLM Inference Engine is:
 
 - [picoLLM](#picollm-inference-engine)
     - [Table of Contents](#table-of-contents)
+    - [Showcases](#showcases)
+      - [Raspberry Pi](#raspberry-pi)
+      - [Android](#android)
+      - [iOS](#ios)
+      - [Cross-Browser Local LLM](#cross-browser-local-llm)
+      - [Llama-3-70B-Instruct on GeForce RTX 4090](#llama-3-70b-instruct-on-geforce-rtx-4090)
+      - [Local LLM-Powered Voice Assistant on Raspberry Pi](#local-llm-powered-voice-assistant-on-raspberry-pi)
+      - [Local Llama-3-8B-Instruct Voice Assistant on CPU](#local-llama-3-8b-instruct-voice-assistant-on-cpu)
+    - [Accuracy](#accuracy)
     - [Models](#models)
     - [AccessKey](#accesskey)
     - [Demos](#demos)
@@ -47,6 +56,45 @@ models. picoLLM Inference Engine is:
         - [C](#c-sdk)
     - [Releases](#releases)
     - [FAQ](#faq)
+
+## Showcases
+
+### Raspberry Pi
+
+[![Local LLM on Raspberry Pi](https://img.youtube.com/vi/CeKPXZ_8hkI/0.jpg)](https://www.youtube.com/watch?v=CeKPXZ_8hkI)
+
+### Android
+
+[![How to Run a Local LLM on Android](https://img.youtube.com/vi/XeUMkue-5lI/0.jpg)](https://www.youtube.com/watch?v=XeUMkue-5lI)
+
+### iOS
+
+[![How to Run a Local LLM on iOS](https://img.youtube.com/vi/dNK5esdkI0Y/0.jpg)](https://www.youtube.com/watch?v=dNK5esdkI0Y)
+
+### Cross-Browser Local LLM
+
+[Live Demo — Works offline!](https://picovoice.ai/picollm/)
+
+### Llama-3-70B-Instruct on GeForce RTX 4090
+
+[![Llama-3-70B-Instruct on GeForce RTX 4090](https://img.youtube.com/vi/4mcVwbOOIqk/0.jpg)](https://www.youtube.com/watch?v=4mcVwbOOIqk)
+
+### Local LLM-Powered Voice Assistant on Raspberry Pi
+
+[![Local LLM-Powered Voice Assistant on Raspberry Pi](https://img.youtube.com/vi/GEndT3RGRvw/0.jpg)](https://www.youtube.com/watch?v=GEndT3RGRvw)
+
+### Local Llama-3-8B-Instruct Voice Assistant on CPU
+
+[![Local Llama-3-8B-Instruct Voice Assistant on CPU](https://img.youtube.com/vi/uV0GlXDFSPw/0.jpg)](https://www.youtube.com/watch?v=uV0GlXDFSPw)
+
+## Accuracy
+
+picoLLM Compression is a novel large language model (LLM) quantization algorithm developed within Picovoice. Given a task-specific cost function, picoLLM Compression automatically learns the optimal bit allocation strategy across and within LLM's weights. Existing techniques require a fixed bit allocation scheme, which is subpar.
+
+For example, picoLLM Compression recovers MMLU score degradation of widely adopted GPTQ by 91%, 99%, and 100% at 2, 3, 
+and 4-bit settings. The figure below depicts the MMLU comparison between picoLLM and GPTQ for Llama-3-8b [[1]](https://picovoice.ai/blog/picollm-towards-optimal-llm-quantization/).
+
+![picoLLM Compression vs GPTQ MMLU scores when applied to Llama-3-8B](./resources/mmlu-llama-3-8b.svg)
 
 ## Models
 
@@ -126,13 +174,13 @@ picollm-completion-demo --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
 downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 
-For more information about Node.js demos go to [demo/nodejs](./demo/nodejs).
+For more information about Node.js demos go to [Node.js demo](./demo/nodejs).
 
 ### Android Demos
 
-Using Android Studio, open the [Completion demo](demo/android/Completion/) as an Android project, copy your AccessKey into MainActivity.java, and run the application.
+Using Android Studio, open the [Completion demo](demo/android/Completion) as an Android project, copy your AccessKey into MainActivity.java, and run the application.
 
-To learn about how to use picoLLM in a chat application, try out the [Chat demo](demo/android/Chat/).
+To learn about how to use picoLLM in a chat application, try out the [Chat demo](demo/android/Chat).
 
 For more information about Android demos go to [demo/android](demo/android/README.md).
 

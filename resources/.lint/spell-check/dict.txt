@@ -22,6 +22,7 @@ logit
 logits
 mipmap
 mixtral
+mmlu
 picollm
 picollmactivitydemo
 picollmdemo

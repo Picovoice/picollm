@@ -101,7 +101,8 @@ export async function loadModel(model: PicoLLMModel): Promise<string> {
   if (
     cacheFileOverwrite ||
     pvFile.meta === undefined ||
-    cacheFileVersion > pvFile.meta.version!
+    cacheFileVersion > pvFile.meta.version! ||
+    (pvFile.meta.pageSize !== pvFile.pageSize)
   ) {
     const modelChunks = Array.isArray(modelFile) ? modelFile : [modelFile];
     for (const modelChunk of modelChunks) {

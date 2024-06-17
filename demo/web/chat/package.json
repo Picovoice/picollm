@@ -16,7 +16,7 @@
   "author": "Picovoice Inc",
   "license": "Apache-2.0",
   "dependencies": {
-    "@picovoice/picollm-web": "~1.0.5"
+    "@picovoice/picollm-web": "~1.0.6"
   },
   "devDependencies": {
     "http-server": "^14.0.0"

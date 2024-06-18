@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@picovoice/picollm-web@~1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@picovoice/picollm-web/-/picollm-web-1.0.6.tgz#3412214c28b9605642dc04fdf690f7ba65aab4b2"
-  integrity sha512-0pI3Nd+SOtEh17tmIwbqN0lmO+WgODWnx9FxqlBjzyIwS8CGCH8cdZOEHRjd/SIt8NAmUc7o15yXQMeJNQ8eWg==
+"@picovoice/picollm-web@~1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@picovoice/picollm-web/-/picollm-web-1.0.7.tgz#98111e9d28f149e6f95e802b1d32e5114413662d"
+  integrity sha512-vllhlFaDhhsKuuUCidq60YXH7DTwvJBRTI1QUphxfRGCtm7Th/DF9lX6e48PIFFavT+VIeG/1AgJ9oT9Z/Z9og==
   dependencies:
     "@picovoice/web-utils" "~1.4.1"
 

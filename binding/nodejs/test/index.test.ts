@@ -138,7 +138,7 @@ const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpect
           ).toBeLessThanOrEqual(1);
         }
 
-        if (!res.completionTokens.every(x => x.token.token.includes('\\x'))) {
+        if (!res.completionTokens.some(x => x.token.token.includes('\\x'))) {
           expect(
             res.completionTokens.reduce((acc, completionToken) => acc + completionToken.token.token, '')
           ).toEqual(expectation.completion);

@@ -1,6 +1,6 @@
 {
   "name": "@picovoice/picollm-node-demo",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Picovoice PicoLLM Node.js chat and completion demos",
   "scripts": {
     "chat": "node chat.js",

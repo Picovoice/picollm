@@ -276,11 +276,13 @@ yarn add @picovoice/picollm-node
 Create instances of the picoLLM class:
 
 ```javascript
-const PicoLLM = require("@picovoice/picollm-node");
+const { PicoLLM } = require("@picovoice/picollm-node");
 const pllm = new PicoLLM('${ACCESS_KEY}', '${MODEL_PATH}');
 
 const res = pllm.generate('${PROMPT}');
 console.log(res.completion);
+
+pllm.release();
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` to the path to a model file

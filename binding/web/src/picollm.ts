@@ -14,19 +14,15 @@
 import { Mutex } from 'async-mutex';
 
 import {
-  aligned_alloc_type,
   arrayBufferToStringAtIndex,
   base64ToUint8Array,
-  buildWasm,
   isAccessKeyValid,
-  pv_free_type,
-  PvError,
   unsignedAddress,
 } from '@picovoice/web-utils';
 
 import { simd } from 'wasm-feature-detect';
 
-import initXpu from 'pv-xpu-web-worker';
+import lib from "../lib/pv_picollm_simd";
 
 import {
   PicoLLMModel,
@@ -43,44 +39,9 @@ import {
 import * as PicoLLMErrors from './picollm_errors';
 import { pvStatusToException } from './picollm_errors';
 
-import picoLLMWebWorkerHelperSimd from '../lib/pv_picollm_web_worker_helper_simd.wasm';
 import { loadModel } from './utils';
 
 import { Dialog, DIALOGS } from './dialog';
-
-export class PicoLLMStreamCallback {
-  private _wasmMemory: WebAssembly.Memory | undefined;
-
-  private _userCallback?: (token: string) => void;
-
-  public constructor(memory: WebAssembly.Memory) {
-    this._wasmMemory = memory;
-  }
-
-  public release(): void {
-    this._wasmMemory = undefined;
-  }
-
-  public setUserCallback(userCallback?: (token: string) => void): void {
-    this._userCallback = userCallback;
-  }
-
-  public streamCallbackWasm = (tokenAddress: number): void => {
-    if (this._wasmMemory === undefined) {
-      return;
-    }
-
-    const tokenAddressUnsigned = unsignedAddress(tokenAddress);
-    const memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
-    const token = arrayBufferToStringAtIndex(
-      memoryBufferUint8,
-      tokenAddressUnsigned
-    );
-    if (this._userCallback) {
-      this._userCallback(token);
-    }
-  };
-}
 
 /**
  * WebAssembly function types
@@ -91,7 +52,7 @@ type pv_picollm_init_type = (
   device: number,
   object: number
 ) => Promise<number>;
-type pv_picollm_delete_type = (object: number) => Promise<void>;
+type pv_picollm_delete_type = (object: number) => void;
 type pv_picollm_generate_type = (
   object: number,
   prompt: number,
@@ -115,8 +76,8 @@ type pv_picollm_generate_type = (
 type pv_picollm_delete_completion_tokens_type = (
   object: number,
   numCompletionTokens: number
-) => Promise<void>;
-type pv_picollm_delete_completion_type = (completion: number) => Promise<void>;
+) => void;
+type pv_picollm_delete_completion_type = (completion: number) => void;
 type pv_picollm_tokenize_type = (
   object: number,
   text: number,
@@ -124,23 +85,23 @@ type pv_picollm_tokenize_type = (
   eos: boolean,
   numTokens: number,
   tokens: number
-) => Promise<number>;
-type pv_picollm_delete_tokens_type = (tokens: number) => Promise<void>;
+) => number;
+type pv_picollm_delete_tokens_type = (tokens: number) => void;
 type pv_picollm_forward_type = (
   object: number,
   token: number,
   numLogits: number,
   logits: number
 ) => Promise<number>;
-type pv_picollm_delete_logits_type = (logits: number) => Promise<void>;
-type pv_picollm_reset_type = (object: number) => Promise<number>;
-type pv_picollm_model_type = (object: number, model: number) => Promise<number>;
+type pv_picollm_delete_logits_type = (logits: number) => void;
+type pv_picollm_reset_type = (object: number) => number;
+type pv_picollm_model_type = (object: number, model: number) => number;
 type pv_picollm_context_length_type = (
   object: number,
   contextLength: number
-) => Promise<number>;
-type pv_picollm_version_type = () => Promise<number>;
-type pv_picollm_max_top_choices_type = () => Promise<number>;
+) => number;
+type pv_picollm_version_type = () => number;
+type pv_picollm_max_top_choices_type = () => number;
 type pv_picollm_list_hardware_devices_type = (
   hardwareDevices: number,
   numHardwareDevices: number
@@ -148,64 +109,76 @@ type pv_picollm_list_hardware_devices_type = (
 type pv_picollm_free_hardware_devices_type = (
   hardwareDevices: number,
   numHardwareDevices: number
-) => Promise<void>;
-type pv_set_sdk_type = (sdk: number) => Promise<void>;
+) => void;
+type pv_set_sdk_type = (sdk: number) => void;
 type pv_get_error_stack_type = (
   messageStack: number,
   messageStackDepth: number
-) => Promise<number>;
-type pv_free_error_stack_type = (messageStack: number) => Promise<void>;
+) => number;
+type pv_free_error_stack_type = (messageStack: number) => void;
+
+/**
+ * PicoLLM Module Type
+ */
+type PicoLLMModule = EmscriptenModule & {
+  _pv_free: (address: number) => void;
+
+  _pv_picollm_init: pv_picollm_init_type;
+  _pv_picollm_delete: pv_picollm_delete_type;
+  _pv_picollm_delete_completion_tokens: pv_picollm_delete_completion_tokens_type;
+  _pv_picollm_delete_completion: pv_picollm_delete_completion_type;
+  _pv_picollm_delete_tokens: pv_picollm_delete_tokens_type;
+  _pv_picollm_delete_logits: pv_picollm_delete_logits_type;
+  _pv_picollm_reset: pv_picollm_reset_type;
+
+  _pv_picollm_model: pv_picollm_model_type;
+  _pv_picollm_context_length: pv_picollm_context_length_type;
+  _pv_picollm_version: pv_picollm_version_type;
+  _pv_picollm_max_top_choices: pv_picollm_max_top_choices_type;
+
+  _pv_picollm_list_hardware_devices: pv_picollm_list_hardware_devices_type;
+  _pv_picollm_free_hardware_devices: pv_picollm_free_hardware_devices_type;
+
+  _pv_set_sdk: pv_set_sdk_type;
+  _pv_get_error_stack: pv_get_error_stack_type;
+  _pv_free_error_stack: pv_free_error_stack_type;
+
+  // em default functions
+  addFunction: typeof addFunction;
+  ccall: typeof ccall;
+  cwrap: typeof cwrap;
+}
 
 /**
  * JavaScript/WebAssembly Binding for picoLLM.
  */
 
 type PicoLLMWasmOutput = {
-  aligned_alloc: aligned_alloc_type;
-  memory: WebAssembly.Memory;
-  pvFree: pv_free_type;
+  module: PicoLLMModule;
+
+  pv_picollm_generate: pv_picollm_generate_type,
+  pv_picollm_tokenize: pv_picollm_tokenize_type,
+  pv_picollm_forward: pv_picollm_forward_type,
 
   contextLength: number;
   maxTopChoices: number;
   model: string;
   version: string;
-  streamCallback: PicoLLMStreamCallback;
 
   objectAddress: number;
   messageStackAddressAddressAddress: number;
   messageStackDepthAddress: number;
-
-  pvPicoLLMDelete: pv_picollm_delete_type;
-  pvPicoLLMGenerate: pv_picollm_generate_type;
-  pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens_type;
-  pvPicoLLMDeleteCompletion: pv_picollm_delete_completion_type;
-  pvPicoLLMTokenize: pv_picollm_tokenize_type;
-  pvPicoLLMDeleteTokens: pv_picollm_delete_tokens_type;
-  pvPicoLLMForward: pv_picollm_forward_type;
-  pvPicoLLMDeleteLogits: pv_picollm_delete_logits_type;
-  pvPicoLLMReset: pv_picollm_reset_type;
-  pvGetErrorStack: pv_get_error_stack_type;
-  pvFreeErrorStack: pv_free_error_stack_type;
 };
 
-const DEFAULT_DEVICE = 'best';
+const DEFAULT_DEVICE = 'cpu';
 
 export class PicoLLM {
-  private readonly _pvPicoLLMDelete: pv_picollm_delete_type;
-  private readonly _pvPicoLLMGenerate: pv_picollm_generate_type;
-  private readonly _pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens_type;
-  private readonly _pvPicoLLMDeleteCompletion: pv_picollm_delete_completion_type;
-  private readonly _pvPicoLLMTokenize: pv_picollm_tokenize_type;
-  private readonly _pvPicoLLMDeleteTokens: pv_picollm_delete_tokens_type;
-  private readonly _pvPicoLLMForward: pv_picollm_forward_type;
-  private readonly _pvPicoLLMDeleteLogits: pv_picollm_delete_logits_type;
-  private readonly _pvPicoLLMReset: pv_picollm_reset_type;
-  private readonly _pvGetErrorStack: pv_get_error_stack_type;
-  private readonly _pvFreeErrorStack: pv_free_error_stack_type;
+  private readonly _module: PicoLLMModule | undefined;
 
-  private _wasmMemory: WebAssembly.Memory | undefined;
-  private readonly _aligned_alloc: aligned_alloc_type;
-  private readonly _pvFree: pv_free_type;
+  private readonly _pv_picollm_generate: pv_picollm_generate_type;
+  private readonly _pv_picollm_tokenize: pv_picollm_tokenize_type;
+  private readonly _pv_picollm_forward: pv_picollm_forward_type;
+
   private readonly _functionMutex: Mutex;
 
   private readonly _objectAddress: number;
@@ -216,7 +189,6 @@ export class PicoLLM {
   private readonly _maxTopChoices: number;
   private readonly _model: string;
   private readonly _version: string;
-  private readonly _streamCallback: PicoLLMStreamCallback;
 
   private static _wasmSimd: string;
   private static _sdk: string = 'web';
@@ -224,29 +196,16 @@ export class PicoLLM {
   private static _picoLLMMutex = new Mutex();
 
   private constructor(handleWasm: PicoLLMWasmOutput) {
+    this._module = handleWasm.module;
+
+    this._pv_picollm_generate = handleWasm.pv_picollm_generate;
+    this._pv_picollm_tokenize = handleWasm.pv_picollm_tokenize;
+    this._pv_picollm_forward = handleWasm.pv_picollm_forward;
+
     this._contextLength = handleWasm.contextLength;
     this._maxTopChoices = handleWasm.maxTopChoices;
     this._model = handleWasm.model;
     this._version = handleWasm.version;
-    this._streamCallback = handleWasm.streamCallback;
-
-    this._pvPicoLLMDelete = handleWasm.pvPicoLLMDelete;
-    this._pvPicoLLMGenerate = handleWasm.pvPicoLLMGenerate;
-    this._pvPicoLLMDeleteCompletionTokens =
-      handleWasm.pvPicoLLMDeleteCompletionTokens;
-    this._pvPicoLLMDeleteCompletion = handleWasm.pvPicoLLMDeleteCompletion;
-    this._pvPicoLLMTokenize = handleWasm.pvPicoLLMTokenize;
-    this._pvPicoLLMDeleteTokens = handleWasm.pvPicoLLMDeleteTokens;
-    this._pvPicoLLMForward = handleWasm.pvPicoLLMForward;
-    this._pvPicoLLMDeleteLogits = handleWasm.pvPicoLLMDeleteLogits;
-    this._pvPicoLLMReset = handleWasm.pvPicoLLMReset;
-
-    this._pvGetErrorStack = handleWasm.pvGetErrorStack;
-    this._pvFreeErrorStack = handleWasm.pvFreeErrorStack;
-
-    this._wasmMemory = handleWasm.memory;
-    this._pvFree = handleWasm.pvFree;
-    this._aligned_alloc = handleWasm.aligned_alloc;
 
     this._functionMutex = new Mutex();
 
@@ -353,7 +312,7 @@ export class PicoLLM {
             this._wasmSimd,
             accessKey,
             modelPath,
-            device
+            device,
           );
           return new PicoLLM(wasmOutput);
         })
@@ -413,119 +372,91 @@ export class PicoLLM {
       streamCallback,
     } = options;
 
-    this._streamCallback.setUserCallback(streamCallback);
-
     return new Promise<PicoLLMCompletion>((resolve, reject) => {
       this._functionMutex
         .runExclusive(async () => {
-          if (this._wasmMemory === undefined) {
+          if (this._module === undefined) {
             throw new PicoLLMErrors.PicoLLMInvalidStateError(
               'Attempted to call PicoLLM generate after release.'
             );
           }
 
-          let memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
-
           const encoded = new TextEncoder().encode(prompt);
 
-          const promptAddress = await this._aligned_alloc(
-            Uint8Array.BYTES_PER_ELEMENT,
-            (encoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT
-          );
+          const promptAddress = this._module._malloc((encoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
           if (promptAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for prompt'
             );
           }
-          memoryBufferUint8.set(encoded, promptAddress);
-          memoryBufferUint8[promptAddress + encoded.length] = 0;
+          this._module.HEAPU8.set(encoded, promptAddress);
+          this._module.HEAPU8[promptAddress + encoded.length] = 0;
 
           const stopPhrasesAddressAddress =
             stopPhrases.length === 0
               ? 0
-              : await this._aligned_alloc(
-                Int32Array.BYTES_PER_ELEMENT,
-                stopPhrases.length * Int32Array.BYTES_PER_ELEMENT
-              );
+              : this._module._malloc(stopPhrases.length * Int32Array.BYTES_PER_ELEMENT);
 
           const stopPhrasesAddressList: number[] = [];
           for (const stopPhrase of stopPhrases) {
             const stopPhrasesEncoded = new TextEncoder().encode(stopPhrase);
-            const stopPhraseAddress = await this._aligned_alloc(
-              Uint8Array.BYTES_PER_ELEMENT,
-              (stopPhrasesEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT
-            );
+            const stopPhraseAddress = this._module._malloc((stopPhrasesEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
             if (stopPhraseAddress === 0) {
               throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
                 'malloc failed: Cannot allocate memory for stopPhrase'
               );
             }
-            memoryBufferUint8.set(stopPhrasesEncoded, stopPhraseAddress);
-            memoryBufferUint8[
-              stopPhraseAddress + stopPhrasesEncoded.length
-            ] = 0;
+            this._module.HEAPU8.set(stopPhrasesEncoded, stopPhraseAddress);
+            this._module.HEAPU8[stopPhraseAddress + stopPhrasesEncoded.length] = 0;
             stopPhrasesAddressList.push(stopPhraseAddress);
           }
 
-          const memoryBufferInt32 = new Int32Array(this._wasmMemory.buffer);
           if (stopPhrasesAddressAddress > 0) {
-            memoryBufferInt32.set(
+            this._module.HEAP32.set(
               new Int32Array(stopPhrasesAddressList),
               stopPhrasesAddressAddress / Int32Array.BYTES_PER_ELEMENT
             );
           }
 
-          const usageAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT * 2
-          );
+          const usageAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT * 2);
           if (usageAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for usage'
             );
           }
 
-          const endpointAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const endpointAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (endpointAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for endpoint'
             );
           }
 
-          const numCompletionTokensAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const numCompletionTokensAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (numCompletionTokensAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for numCompletionTokens'
             );
           }
 
-          const completionTokensAddressAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const completionTokensAddressAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (completionTokensAddressAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for completionTokens'
             );
           }
 
-          const completionAddressAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const completionAddressAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (completionAddressAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for completion'
             );
           }
 
-          const status = await this._pvPicoLLMGenerate(
+          const streamCallbackFunctionPointer = (streamCallback !== undefined)
+            ? this._module.addFunction(streamCallback, 'vii')
+            : 0;
+          const status = await this._pv_picollm_generate(
             this._objectAddress,
             promptAddress,
             completionTokenLimit,
@@ -537,7 +468,7 @@ export class PicoLLM {
             temperature,
             topP,
             numTopChoices,
-            0,
+            streamCallbackFunctionPointer,
             0,
             usageAddress,
             endpointAddress,
@@ -546,69 +477,52 @@ export class PicoLLM {
             completionAddressAddress
           );
 
-          memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
-          await this._pvFree(promptAddress);
-          await this._pvFree(stopPhrasesAddressAddress);
+          this._module._pv_free(promptAddress);
+          this._module._pv_free(stopPhrasesAddressAddress);
           for (const stopPhraseAddress of stopPhrasesAddressList) {
-            await this._pvFree(stopPhraseAddress);
+            this._module._pv_free(stopPhraseAddress);
           }
 
-          const memoryBufferView = new DataView(this._wasmMemory.buffer);
           if (status !== PvStatus.SUCCESS) {
-            const messageStack = await PicoLLM.getMessageStack(
-              this._pvGetErrorStack,
-              this._pvFreeErrorStack,
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
               this._messageStackAddressAddressAddress,
               this._messageStackDepthAddress,
-              memoryBufferView,
-              memoryBufferUint8
+              this._module.HEAP32,
+              this._module.HEAPU8
             );
 
             throw pvStatusToException(status, 'Generate failed', messageStack);
           }
 
           const usage: PicoLLMUsage = {
-            promptTokens: memoryBufferView.getInt32(usageAddress, true),
-            completionTokens: memoryBufferView.getInt32(
-              usageAddress + Int32Array.BYTES_PER_ELEMENT,
-              true
-            ),
+            promptTokens: this._module.HEAP32[usageAddress / Int32Array.BYTES_PER_ELEMENT],
+            completionTokens: this._module.HEAP32[usageAddress / Int32Array.BYTES_PER_ELEMENT + 1],
           };
-          await this._pvFree(usageAddress);
+          this._module._pv_free(usageAddress);
 
-          const endpoint: PicoLLMEndpoint = memoryBufferView.getInt32(
-            endpointAddress,
-            true
-          );
-          await this._pvFree(endpointAddress);
+          const endpoint: PicoLLMEndpoint = this._module.HEAP32[endpointAddress / Int32Array.BYTES_PER_ELEMENT];
+          this._module._pv_free(endpointAddress);
 
-          const numCompletionTokens = memoryBufferView.getInt32(
-            numCompletionTokensAddress,
-            true
-          );
-          await this._pvFree(numCompletionTokensAddress);
+          const numCompletionTokens = this._module.HEAP32[numCompletionTokensAddress / Int32Array.BYTES_PER_ELEMENT];
+          this._module._pv_free(numCompletionTokensAddress);
 
           const completionTokensAddress = unsignedAddress(
-            memoryBufferView.getInt32(completionTokensAddressAddress, true)
+            this._module.HEAP32[completionTokensAddressAddress / Int32Array.BYTES_PER_ELEMENT]
           );
 
           let completionTokensPtr = completionTokensAddress;
           const completionTokens: PicoLLMCompletionToken[] = [];
           for (let i = 0; i < numCompletionTokens; i++) {
-            const tokenAddress = memoryBufferView.getInt32(
-              completionTokensPtr,
-              true
-            );
+            const tokenAddress = this._module.HEAP32[completionTokensPtr / Int32Array.BYTES_PER_ELEMENT];
             const completionToken = arrayBufferToStringAtIndex(
-              memoryBufferUint8,
+              this._module.HEAPU8,
               tokenAddress
             );
             completionTokensPtr += Int32Array.BYTES_PER_ELEMENT;
 
-            const completionLogProb = memoryBufferView.getFloat32(
-              completionTokensPtr,
-              true
-            );
+            const completionLogProb = this._module.HEAPF32[completionTokensPtr / Float32Array.BYTES_PER_ELEMENT];
             completionTokensPtr += Float32Array.BYTES_PER_ELEMENT;
 
             const token: PicoLLMToken = {
@@ -616,30 +530,24 @@ export class PicoLLM {
               logProb: completionLogProb,
             };
 
-            const numTopChoicesReturn = memoryBufferView.getInt32(
-              completionTokensPtr,
-              true
-            );
+            const numTopChoicesReturn = this._module.HEAP32[completionTokensPtr / Int32Array.BYTES_PER_ELEMENT];
             completionTokensPtr += Int32Array.BYTES_PER_ELEMENT;
 
             const topChoices: PicoLLMToken[] = [];
             let topChoicesPtr = unsignedAddress(
-              memoryBufferView.getInt32(completionTokensPtr, true)
+              this._module.HEAP32[completionTokensPtr / Int32Array.BYTES_PER_ELEMENT]
             );
             for (let j = 0; j < numTopChoicesReturn; j++) {
               const topChoiceTokenAddress = unsignedAddress(
-                memoryBufferView.getInt32(topChoicesPtr, true)
+                this._module.HEAP32[topChoicesPtr / Int32Array.BYTES_PER_ELEMENT]
               );
               const topChoiceToken = arrayBufferToStringAtIndex(
-                memoryBufferUint8,
+                this._module.HEAPU8,
                 topChoiceTokenAddress
               );
               topChoicesPtr += Int32Array.BYTES_PER_ELEMENT;
 
-              const topChoiceLogProb = memoryBufferView.getFloat32(
-                topChoicesPtr,
-                true
-              );
+              const topChoiceLogProb = this._module.HEAPF32[topChoicesPtr / Float32Array.BYTES_PER_ELEMENT];
               topChoicesPtr += Float32Array.BYTES_PER_ELEMENT;
 
               topChoices.push({
@@ -655,22 +563,22 @@ export class PicoLLM {
             });
           }
 
-          await this._pvPicoLLMDeleteCompletionTokens(
+          this._module._pv_picollm_delete_completion_tokens(
             completionTokensAddress,
             numCompletionTokens
           );
-          await this._pvFree(completionTokensAddressAddress);
+          this._module._pv_free(completionTokensAddressAddress);
 
           const completionAddress = unsignedAddress(
-            memoryBufferView.getInt32(completionAddressAddress, true)
+            this._module.HEAP32[completionAddressAddress / Int32Array.BYTES_PER_ELEMENT]
           );
           const completion = arrayBufferToStringAtIndex(
-            memoryBufferUint8,
+            this._module.HEAPU8,
             completionAddress
           );
 
-          await this._pvPicoLLMDeleteCompletion(completionAddress);
-          await this._pvFree(completionAddressAddress);
+          this._module._pv_picollm_delete_completion(completionAddress);
+          this._module._pv_free(completionAddressAddress);
 
           return {
             usage,
@@ -705,49 +613,38 @@ export class PicoLLM {
     return new Promise<number[]>((resolve, reject) => {
       this._functionMutex
         .runExclusive(async () => {
-          if (this._wasmMemory === undefined) {
+          if (this._module === undefined) {
             throw new PicoLLMErrors.PicoLLMInvalidStateError(
               'Attempted to call PicoLLM tokenize after release.'
             );
           }
 
-          let memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
-
           const encoded = new TextEncoder().encode(text);
 
-          const textAddress = await this._aligned_alloc(
-            Uint8Array.BYTES_PER_ELEMENT,
-            (encoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT
-          );
+          const textAddress = this._module._malloc((encoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
           if (textAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for text'
             );
           }
-          memoryBufferUint8.set(encoded, textAddress);
-          memoryBufferUint8[textAddress + encoded.length] = 0;
+          this._module.HEAPU8.set(encoded, textAddress);
+          this._module.HEAPU8[textAddress + encoded.length] = 0;
 
-          const numTokensAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const numTokensAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (numTokensAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for numTokens'
             );
           }
 
-          const tokensAddressAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const tokensAddressAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (tokensAddressAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for tokens'
             );
           }
 
-          const status = await this._pvPicoLLMTokenize(
+          const status = this._pv_picollm_tokenize(
             this._objectAddress,
             textAddress,
             bos,
@@ -755,42 +652,36 @@ export class PicoLLM {
             numTokensAddress,
             tokensAddressAddress
           );
+          this._module._pv_free(textAddress);
 
-          memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
-          await this._pvFree(textAddress);
-
-          const memoryBufferView = new DataView(this._wasmMemory.buffer);
           if (status !== PvStatus.SUCCESS) {
-            const messageStack = await PicoLLM.getMessageStack(
-              this._pvGetErrorStack,
-              this._pvFreeErrorStack,
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
               this._messageStackAddressAddressAddress,
               this._messageStackDepthAddress,
-              memoryBufferView,
-              memoryBufferUint8
+              this._module.HEAP32,
+              this._module.HEAPU8
             );
 
             throw pvStatusToException(status, 'Tokenize failed', messageStack);
           }
 
-          const numTokens = memoryBufferView.getInt32(numTokensAddress, true);
-          await this._pvFree(numTokensAddress);
+          const numTokens = this._module.HEAP32[numTokensAddress / Int32Array.BYTES_PER_ELEMENT];
+          this._module._pv_free(numTokensAddress);
 
           const tokens: number[] = [];
           const tokensAddress = unsignedAddress(
-            memoryBufferView.getInt32(tokensAddressAddress, true)
+            this._module.HEAP32[tokensAddressAddress / Int32Array.BYTES_PER_ELEMENT]
           );
           for (let i = 0; i < numTokens; i++) {
             tokens.push(
-              memoryBufferView.getInt32(
-                tokensAddress + i * Int32Array.BYTES_PER_ELEMENT,
-                true
-              )
+              this._module.HEAP32[tokensAddress / Int32Array.BYTES_PER_ELEMENT + i]
             );
           }
 
-          await this._pvPicoLLMDeleteTokens(tokensAddress);
-          await this._pvFree(tokensAddressAddress);
+          this._module._pv_picollm_delete_tokens(tokensAddress);
+          this._module._pv_free(tokensAddressAddress);
 
           return tokens;
         })
@@ -814,73 +705,57 @@ export class PicoLLM {
     return new Promise<number[]>((resolve, reject) => {
       this._functionMutex
         .runExclusive(async () => {
-          if (this._wasmMemory === undefined) {
+          if (this._module === undefined) {
             throw new PicoLLMErrors.PicoLLMInvalidStateError(
               'Attempted to call PicoLLM forward after release.'
             );
           }
 
-          const numLogitsAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const numLogitsAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (numLogitsAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for numLogits'
             );
           }
 
-          const logitsAddressAddress = await this._aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const logitsAddressAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (logitsAddressAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for logits'
             );
           }
 
-          const status = await this._pvPicoLLMForward(
+          const status = await this._pv_picollm_forward(
             this._objectAddress,
             token,
             numLogitsAddress,
             logitsAddressAddress
           );
 
-          const memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
-          const memoryBufferView = new DataView(this._wasmMemory.buffer);
-
           if (status !== PvStatus.SUCCESS) {
-            const messageStack = await PicoLLM.getMessageStack(
-              this._pvGetErrorStack,
-              this._pvFreeErrorStack,
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
               this._messageStackAddressAddressAddress,
               this._messageStackDepthAddress,
-              memoryBufferView,
-              memoryBufferUint8
+              this._module.HEAP32,
+              this._module.HEAPU8
             );
 
             throw pvStatusToException(status, 'Forward failed', messageStack);
           }
 
-          const numLogits = memoryBufferView.getInt32(numLogitsAddress, true);
-          await this._pvFree(numLogitsAddress);
+          const numLogits = this._module.HEAP32[numLogitsAddress / Int32Array.BYTES_PER_ELEMENT];
+          this._module._pv_free(numLogitsAddress);
 
           const logits: number[] = [];
-          const logitsAddress = unsignedAddress(
-            memoryBufferView.getInt32(logitsAddressAddress, true)
-          );
+          const logitsAddress = unsignedAddress(this._module.HEAP32[logitsAddressAddress]);
           for (let i = 0; i < numLogits; i++) {
-            logits.push(
-              memoryBufferView.getFloat32(
-                logitsAddress + i * Float32Array.BYTES_PER_ELEMENT,
-                true
-              )
-            );
+            logits.push(this._module.HEAPF32[logitsAddress / Float32Array.BYTES_PER_ELEMENT + i]);
           }
 
-          await this._pvPicoLLMDeleteLogits(logitsAddress);
-          await this._pvFree(logitsAddressAddress);
+          this._module._pv_picollm_delete_logits(logitsAddress);
+          this._module._pv_free(logitsAddressAddress);
 
           return logits;
         })
@@ -902,23 +777,21 @@ export class PicoLLM {
     return new Promise<void>((resolve, reject) => {
       this._functionMutex
         .runExclusive(async () => {
-          if (this._wasmMemory === undefined) {
+          if (this._module === undefined) {
             throw new PicoLLMErrors.PicoLLMInvalidStateError(
               'Attempted to call PicoLLM forward after release.'
             );
           }
-          const status = await this._pvPicoLLMReset(this._objectAddress);
+          const status = this._module._pv_picollm_reset(this._objectAddress);
 
-          const memoryBufferUint8 = new Uint8Array(this._wasmMemory.buffer);
-          const memoryBufferView = new DataView(this._wasmMemory.buffer);
           if (status !== PvStatus.SUCCESS) {
-            const messageStack = await PicoLLM.getMessageStack(
-              this._pvGetErrorStack,
-              this._pvFreeErrorStack,
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
               this._messageStackAddressAddressAddress,
               this._messageStackDepthAddress,
-              memoryBufferView,
-              memoryBufferUint8
+              this._module.HEAP32,
+              this._module.HEAPU8
             );
 
             throw pvStatusToException(status, 'Reset failed', messageStack);
@@ -986,13 +859,15 @@ export class PicoLLM {
    * Releases resources acquired by WebAssembly module.
    */
   public async release(): Promise<void> {
-    await this._pvPicoLLMDelete(this._objectAddress);
-    await this._pvFree(this._messageStackAddressAddressAddress);
-    await this._pvFree(this._messageStackDepthAddress);
-    this._streamCallback.release();
+    if (!this._module) {
+      return;
+    }
 
-    delete this._wasmMemory;
-    this._wasmMemory = undefined;
+    this._module._pv_picollm_delete(this._objectAddress);
+    this._module._pv_free(this._messageStackAddressAddressAddress);
+    this._module._pv_free(this._messageStackDepthAddress);
+
+    this._module.destroy(this._module);
   }
 
   /**
@@ -1005,133 +880,89 @@ export class PicoLLM {
     return new Promise<string[]>((resolve, reject) => {
       PicoLLM._picoLLMMutex
         .runExclusive(async () => {
-          const memory: WebAssembly.Memory = new WebAssembly.Memory({
-            initial: 4096,
-          });
-
           const isSimd = await simd();
           if (!isSimd) {
             throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
           }
 
-          const picoLLMWorkerWasmBuffer = base64ToUint8Array(picoLLMWebWorkerHelperSimd);
-          const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
+          const blob = new Blob([base64ToUint8Array(lib as any)], { type: 'application/javascript' });
+          const objectURL = URL.createObjectURL(blob);
+          const createModule = await this.loadModuleFromUrl(objectURL);
 
-          const pvError = new PvError();
-
-          const streamCallback = new PicoLLMStreamCallback(memory);
-
-          const exports = await buildWasm(memory, this._wasmSimd, pvError, {
-            ...xpuWebWorkerImports,
-            stream_callback_wasm: streamCallback.streamCallbackWasm,
+          const module: PicoLLMModule = await createModule({
+            mainScriptUrlOrBlob: blob,
+            wasmBinary: base64ToUint8Array(this._wasmSimd),
           });
-          xpuWebWorkerImports.aligned_alloc = exports.aligned_alloc;
 
-          const aligned_alloc = exports.aligned_alloc as aligned_alloc_type;
-          const pv_free = exports.pv_free as pv_free_type;
-          const pv_picollm_list_hardware_devices =
-            exports.pv_picollm_list_hardware_devices as pv_picollm_list_hardware_devices_type;
-          const pv_picollm_free_hardware_devices =
-            exports.pv_picollm_free_hardware_devices as pv_picollm_free_hardware_devices_type;
-          const pv_get_error_stack =
-            exports.pv_get_error_stack as pv_get_error_stack_type;
-          const pv_free_error_stack =
-            exports.pv_free_error_stack as pv_free_error_stack_type;
-
-          const hardwareDevicesAddressAddress = await aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const hardwareDevicesAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (hardwareDevicesAddressAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for hardwareDevices'
             );
           }
 
-          const numHardwareDevicesAddress = await aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const numHardwareDevicesAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (numHardwareDevicesAddress === 0) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for numHardwareDevices'
             );
           }
 
-          const status: PvStatus = await pv_picollm_list_hardware_devices(
+          const status: PvStatus = await module._pv_picollm_list_hardware_devices(
             hardwareDevicesAddressAddress,
             numHardwareDevicesAddress
           );
 
-          const messageStackDepthAddress = await aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const messageStackDepthAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (!messageStackDepthAddress) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory for messageStackDepth'
             );
           }
 
-          const messageStackAddressAddressAddress = await aligned_alloc(
-            Int32Array.BYTES_PER_ELEMENT,
-            Int32Array.BYTES_PER_ELEMENT
-          );
+          const messageStackAddressAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
           if (!messageStackAddressAddressAddress) {
             throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
               'malloc failed: Cannot allocate memory messageStack'
             );
           }
 
-          const memoryBufferView = new DataView(memory.buffer);
-          const memoryBufferUint8 = new Uint8Array(memory.buffer);
           if (status !== PvStatus.SUCCESS) {
-            const messageStack = await PicoLLM.getMessageStack(
-              pv_get_error_stack,
-              pv_free_error_stack,
+            const messageStack = PicoLLM.getMessageStack(
+              module._pv_get_error_stack,
+              module._pv_free_error_stack,
               messageStackAddressAddressAddress,
               messageStackDepthAddress,
-              memoryBufferView,
-              memoryBufferUint8
+              module.HEAP32,
+              module.HEAPU8,
             );
-            await pv_free(messageStackAddressAddressAddress);
-            await pv_free(messageStackDepthAddress);
+            module._pv_free(messageStackAddressAddressAddress);
+            module._pv_free(messageStackDepthAddress);
 
             throw pvStatusToException(
               status,
               'Get context length failed',
               messageStack,
-              pvError
             );
           }
-          await pv_free(messageStackAddressAddressAddress);
-          await pv_free(messageStackDepthAddress);
+          module._pv_free(messageStackAddressAddressAddress);
+          module._pv_free(messageStackDepthAddress);
 
-          const numHardwareDevices: number = memoryBufferView.getInt32(
-            numHardwareDevicesAddress,
-            true
-          );
-          await pv_free(numHardwareDevicesAddress);
+          const numHardwareDevices: number = module.HEAP32[numHardwareDevicesAddress / Int32Array.BYTES_PER_ELEMENT];
+          module._pv_free(numHardwareDevicesAddress);
 
-          const hardwareDevicesAddress = unsignedAddress(
-            memoryBufferView.getInt32(hardwareDevicesAddressAddress, true)
-          );
+          const hardwareDevicesAddress = unsignedAddress(module.HEAP32[hardwareDevicesAddressAddress / Int32Array.BYTES_PER_ELEMENT]);
 
           const hardwareDevices: string[] = [];
           for (let i = 0; i < numHardwareDevices; i++) {
-            const deviceAddress = memoryBufferView.getInt32(
-              hardwareDevicesAddress + i * Int32Array.BYTES_PER_ELEMENT,
-              true
-            );
-            hardwareDevices.push(
-              arrayBufferToStringAtIndex(memoryBufferUint8, deviceAddress)
-            );
+            const deviceAddress = module.HEAP32[hardwareDevicesAddress / Int32Array.BYTES_PER_ELEMENT + i];
+            hardwareDevices.push(arrayBufferToStringAtIndex(module.HEAPU8, deviceAddress));
           }
-          await pv_picollm_free_hardware_devices(
+          module._pv_picollm_free_hardware_devices(
             hardwareDevicesAddress,
             numHardwareDevices
           );
-          await pv_free(hardwareDevicesAddressAddress);
+          module._pv_free(hardwareDevicesAddressAddress);
 
           return hardwareDevices;
         })
@@ -1150,147 +981,88 @@ export class PicoLLM {
     modelPath: string,
     device: string
   ): Promise<PicoLLMWasmOutput> {
-    const memory = new WebAssembly.Memory({ initial: 4096 });
+    const blob = new Blob([base64ToUint8Array(lib as any)], { type: 'application/javascript' });
+    const objectURL = URL.createObjectURL(blob);
+    const createModule = await this.loadModuleFromUrl(objectURL);
 
-    let memoryBufferUint8 = new Uint8Array(memory.buffer);
-
-    const picoLLMWorkerWasmBuffer = base64ToUint8Array(picoLLMWebWorkerHelperSimd);
-    const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
-
-    const pvError = new PvError();
-
-    const streamCallback = new PicoLLMStreamCallback(memory);
-
-    const exports = await buildWasm(memory, wasmBase64, pvError, {
-      ...xpuWebWorkerImports,
-      stream_callback_wasm: streamCallback.streamCallbackWasm,
+    const module: PicoLLMModule = await createModule({
+      mainScriptUrlOrBlob: blob,
+      wasmBinary: base64ToUint8Array(wasmBase64),
     });
-    for (const [k, v] of Object.entries(exports)) {
-      // @ts-ignore
-      xpuWebWorkerImports[k] = v;
-    }
 
-    const aligned_alloc = exports.aligned_alloc as aligned_alloc_type;
-    const pv_free = exports.pv_free as pv_free_type;
 
-    const pv_picollm_init = exports.pv_picollm_init as pv_picollm_init_type;
-    const pv_picollm_delete =
-      exports.pv_picollm_delete as pv_picollm_delete_type;
-    const pv_picollm_generate =
-      exports.pv_picollm_generate as pv_picollm_generate_type;
-    const pv_picollm_delete_completion_tokens =
-      exports.pv_picollm_delete_completion_tokens as pv_picollm_delete_completion_tokens_type;
-    const pv_picollm_delete_completion =
-      exports.pv_picollm_delete_completion as pv_picollm_delete_completion_type;
-    const pv_picollm_tokenize =
-      exports.pv_picollm_tokenize as pv_picollm_tokenize_type;
-    const pv_picollm_delete_tokens =
-      exports.pv_picollm_delete_tokens as pv_picollm_delete_tokens_type;
-    const pv_picollm_forward =
-      exports.pv_picollm_forward as pv_picollm_forward_type;
-    const pv_picollm_delete_logits =
-      exports.pv_picollm_delete_logits as pv_picollm_delete_logits_type;
-    const pv_picollm_reset = exports.pv_picollm_reset as pv_picollm_reset_type;
+    // setup async functions
+    const pv_picollm_init: pv_picollm_init_type = this.wrapAsyncFunction(module, "pv_picollm_init", 4);
+    const pv_picollm_generate: pv_picollm_generate_type = this.wrapAsyncFunction(module, "pv_picollm_generate", 18);
+    const pv_picollm_tokenize: pv_picollm_tokenize_type = this.wrapAsyncFunction(module, "pv_picollm_tokenize", 4);
+    const pv_picollm_forward: pv_picollm_forward_type = this.wrapAsyncFunction(module, "pv_picollm_forward", 6);
 
-    const pv_picollm_model = exports.pv_picollm_model as pv_picollm_model_type;
-    const pv_picollm_context_length =
-      exports.pv_picollm_context_length as pv_picollm_context_length_type;
-    const pv_picollm_version =
-      exports.pv_picollm_version as pv_picollm_version_type;
-    const pv_picollm_max_top_choices =
-      exports.pv_picollm_max_top_choices as pv_picollm_max_top_choices_type;
-    const pv_set_sdk = exports.pv_set_sdk as pv_set_sdk_type;
-    const pv_get_error_stack =
-      exports.pv_get_error_stack as pv_get_error_stack_type;
-    const pv_free_error_stack =
-      exports.pv_free_error_stack as pv_free_error_stack_type;
-
-    const objectAddressAddress = await aligned_alloc(
-      Int32Array.BYTES_PER_ELEMENT,
-      Int32Array.BYTES_PER_ELEMENT
-    );
+    const objectAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
     if (objectAddressAddress === 0) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
 
-    const accessKeyAddress = await aligned_alloc(
-      Uint8Array.BYTES_PER_ELEMENT,
-      (accessKey.length + 1) * Uint8Array.BYTES_PER_ELEMENT
-    );
+    const accessKeyAddress = module._malloc((accessKey.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
     if (accessKeyAddress === 0) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
     for (let i = 0; i < accessKey.length; i++) {
-      memoryBufferUint8[accessKeyAddress + i] = accessKey.charCodeAt(i);
+      module.HEAPU8[accessKeyAddress + i] = accessKey.charCodeAt(i);
     }
-    memoryBufferUint8[accessKeyAddress + accessKey.length] = 0;
+    module.HEAPU8[accessKeyAddress + accessKey.length] = 0;
 
     const modelPathEncoded = new TextEncoder().encode(modelPath);
-    const modelPathAddress = await aligned_alloc(
-      Uint8Array.BYTES_PER_ELEMENT,
-      (modelPathEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT
-    );
-
+    const modelPathAddress = module._malloc((modelPathEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
     if (modelPathAddress === 0) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
 
-    memoryBufferUint8.set(modelPathEncoded, modelPathAddress);
-    memoryBufferUint8[modelPathAddress + modelPathEncoded.length] = 0;
+    module.HEAPU8.set(modelPathEncoded, modelPathAddress);
+    module.HEAPU8[modelPathAddress + modelPathEncoded.length] = 0;
 
-    const deviceAddress = await aligned_alloc(
-      Uint8Array.BYTES_PER_ELEMENT,
-      (device.length + 1) * Uint8Array.BYTES_PER_ELEMENT
-    );
+    const deviceAddress = module._malloc((device.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
     if (deviceAddress === 0) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
     for (let i = 0; i < device.length; i++) {
-      memoryBufferUint8[deviceAddress + i] = device.charCodeAt(i);
+      module.HEAPU8[deviceAddress + i] = device.charCodeAt(i);
     }
-    memoryBufferUint8[deviceAddress + device.length] = 0;
+    module.HEAPU8[deviceAddress + device.length] = 0;
 
     const sdkEncoded = new TextEncoder().encode(this._sdk);
-    const sdkAddress = await aligned_alloc(
-      Uint8Array.BYTES_PER_ELEMENT,
-      (sdkEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT
-    );
+    const sdkAddress = module._malloc((sdkEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
     if (!sdkAddress) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
-    memoryBufferUint8.set(sdkEncoded, sdkAddress);
-    memoryBufferUint8[sdkAddress + sdkEncoded.length] = 0;
-    await pv_set_sdk(sdkAddress);
+    module.HEAPU8.set(sdkEncoded, sdkAddress);
+    module.HEAPU8[sdkAddress + sdkEncoded.length] = 0;
+    module._pv_set_sdk(sdkAddress);
 
-    const messageStackDepthAddress = await aligned_alloc(
-      Int32Array.BYTES_PER_ELEMENT,
-      Int32Array.BYTES_PER_ELEMENT
-    );
+    const messageStackDepthAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
     if (!messageStackDepthAddress) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
 
-    const messageStackAddressAddressAddress = await aligned_alloc(
-      Int32Array.BYTES_PER_ELEMENT,
-      Int32Array.BYTES_PER_ELEMENT
-    );
+    const messageStackAddressAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
     if (!messageStackAddressAddressAddress) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
+
+    console.log("init")
 
     let status: PvStatus = await pv_picollm_init(
       accessKeyAddress,
@@ -1299,116 +1071,106 @@ export class PicoLLM {
       objectAddressAddress
     );
 
-    await pv_free(accessKeyAddress);
-    await pv_free(modelPathAddress);
-    await pv_free(deviceAddress);
+    console.log(module)
 
-    const memoryBufferView = new DataView(memory.buffer);
-    memoryBufferUint8 = new Uint8Array(memory.buffer);
+    module._pv_free(accessKeyAddress);
+    module._pv_free(modelPathAddress);
+    module._pv_free(deviceAddress);
 
     if (status !== PvStatus.SUCCESS) {
-      const messageStack = await PicoLLM.getMessageStack(
-        pv_get_error_stack,
-        pv_free_error_stack,
+      const messageStack = PicoLLM.getMessageStack(
+        module._pv_get_error_stack,
+        module._pv_free_error_stack,
         messageStackAddressAddressAddress,
         messageStackDepthAddress,
-        memoryBufferView,
-        memoryBufferUint8
+        module.HEAP32,
+        module.HEAPU8,
       );
 
       throw pvStatusToException(
         status,
         'Initialization failed',
         messageStack,
-        pvError
       );
     }
 
-    const objectAddress = memoryBufferView.getInt32(objectAddressAddress, true);
-    await pv_free(objectAddressAddress);
+    const objectAddress = module.HEAP32[objectAddressAddress];
+    module._pv_free(objectAddressAddress);
 
-    const maxTopChoices = await pv_picollm_max_top_choices();
+    const maxTopChoices = module._pv_picollm_max_top_choices();
 
-    const versionAddress = await pv_picollm_version();
+    const versionAddress = module._pv_picollm_version();
     const version = arrayBufferToStringAtIndex(
-      memoryBufferUint8,
+      module.HEAPU8,
       versionAddress
     );
 
-    const contextLengthAddress = await aligned_alloc(
-      Int32Array.BYTES_PER_ELEMENT,
-      Int32Array.BYTES_PER_ELEMENT
-    );
-
+    const contextLengthAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
     if (contextLengthAddress === 0) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
 
-    status = await pv_picollm_context_length(
+    status = module._pv_picollm_context_length(
       objectAddress,
       contextLengthAddress
     );
     if (status !== PvStatus.SUCCESS) {
-      const messageStack = await PicoLLM.getMessageStack(
-        pv_get_error_stack,
-        pv_free_error_stack,
+      const messageStack = PicoLLM.getMessageStack(
+        module._pv_get_error_stack,
+        module._pv_free_error_stack,
         messageStackAddressAddressAddress,
         messageStackDepthAddress,
-        memoryBufferView,
-        memoryBufferUint8
+        module.HEAP32,
+        module.HEAPU8
       );
 
       throw pvStatusToException(
         status,
         'Get context length failed',
         messageStack,
-        pvError
       );
     }
 
-    const contextLength = memoryBufferView.getInt32(contextLengthAddress, true);
-    await pv_free(contextLengthAddress);
+    const contextLength = module.HEAP32[contextLengthAddress / Int32Array.BYTES_PER_ELEMENT];
+    module._pv_free(contextLengthAddress);
 
-    const modelAddressAddress = await aligned_alloc(
-      Int32Array.BYTES_PER_ELEMENT,
-      Int32Array.BYTES_PER_ELEMENT
-    );
+    const modelAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
     if (modelAddressAddress === 0) {
       throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
         'malloc failed: Cannot allocate memory'
       );
     }
-    status = await pv_picollm_model(objectAddress, modelAddressAddress);
+    status = module._pv_picollm_model(objectAddress, modelAddressAddress);
     if (status !== PvStatus.SUCCESS) {
-      const messageStack = await PicoLLM.getMessageStack(
-        pv_get_error_stack,
-        pv_free_error_stack,
+      const messageStack = PicoLLM.getMessageStack(
+        module._pv_get_error_stack,
+        module._pv_free_error_stack,
         messageStackAddressAddressAddress,
         messageStackDepthAddress,
-        memoryBufferView,
-        memoryBufferUint8
+        module.HEAP32,
+        module.HEAPU8
       );
 
       throw pvStatusToException(
         status,
         'Failed to get model name',
         messageStack,
-        pvError
       );
     }
 
-    const modelAddress = memoryBufferView.getInt32(modelAddressAddress, true);
-    await pv_free(modelAddressAddress);
-    const model = arrayBufferToStringAtIndex(memoryBufferUint8, modelAddress);
+    const modelAddress = module.HEAP32[modelAddressAddress / Int32Array.BYTES_PER_ELEMENT];
+    module._pv_free(modelAddressAddress);
+    const model = arrayBufferToStringAtIndex(module.HEAPU8, modelAddress);
 
     return {
-      aligned_alloc,
-      memory: memory,
-      pvFree: pv_free,
+      module: module,
 
-      streamCallback: streamCallback,
+      pv_picollm_generate: pv_picollm_generate,
+      pv_picollm_tokenize: pv_picollm_tokenize,
+      pv_picollm_forward: pv_picollm_forward,
+
       contextLength: contextLength,
       maxTopChoices: maxTopChoices,
       model: model,
@@ -1417,62 +1179,48 @@ export class PicoLLM {
       objectAddress: objectAddress,
       messageStackAddressAddressAddress: messageStackAddressAddressAddress,
       messageStackDepthAddress: messageStackDepthAddress,
-
-      pvPicoLLMDelete: pv_picollm_delete,
-      pvPicoLLMGenerate: pv_picollm_generate,
-      pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens,
-      pvPicoLLMDeleteCompletion: pv_picollm_delete_completion,
-      pvPicoLLMTokenize: pv_picollm_tokenize,
-      pvPicoLLMDeleteTokens: pv_picollm_delete_tokens,
-      pvPicoLLMForward: pv_picollm_forward,
-      pvPicoLLMDeleteLogits: pv_picollm_delete_logits,
-      pvPicoLLMReset: pv_picollm_reset,
-
-      pvGetErrorStack: pv_get_error_stack,
-      pvFreeErrorStack: pv_free_error_stack,
     };
   }
 
-  private static async getMessageStack(
+  private static getMessageStack(
     pv_get_error_stack: pv_get_error_stack_type,
     pv_free_error_stack: pv_free_error_stack_type,
     messageStackAddressAddressAddress: number,
     messageStackDepthAddress: number,
-    memoryBufferView: DataView,
-    memoryBufferUint8: Uint8Array
-  ): Promise<string[]> {
-    const status = await pv_get_error_stack(
-      messageStackAddressAddressAddress,
-      messageStackDepthAddress
-    );
+    memoryBufferInt32: Int32Array,
+    memoryBufferUint8: Uint8Array,
+  ): string[] {
+    const status = pv_get_error_stack(messageStackAddressAddressAddress, messageStackDepthAddress);
     if (status !== PvStatus.SUCCESS) {
-      throw pvStatusToException(status, 'Unable to get PicoLLM error state');
+      throw new Error(`Unable to get error state: ${status}`);
     }
 
-    const messageStackAddressAddress = memoryBufferView.getInt32(
-      messageStackAddressAddressAddress,
-      true
-    );
+    const messageStackAddressAddress = memoryBufferInt32[messageStackAddressAddressAddress / Int32Array.BYTES_PER_ELEMENT];
 
-    const messageStackDepth = memoryBufferView.getInt32(
-      messageStackDepthAddress,
-      true
-    );
+    const messageStackDepth = memoryBufferInt32[messageStackDepthAddress / Int32Array.BYTES_PER_ELEMENT];
     const messageStack: string[] = [];
     for (let i = 0; i < messageStackDepth; i++) {
-      const messageStackAddress = memoryBufferView.getInt32(
-        messageStackAddressAddress + i * Int32Array.BYTES_PER_ELEMENT,
-        true
-      );
-      const message = arrayBufferToStringAtIndex(
-        memoryBufferUint8,
-        messageStackAddress
-      );
+      const messageStackAddress = memoryBufferInt32[
+        (messageStackAddressAddress / Int32Array.BYTES_PER_ELEMENT) + i];
+      const message = arrayBufferToStringAtIndex(memoryBufferUint8, messageStackAddress);
       messageStack.push(message);
     }
 
-    await pv_free_error_stack(messageStackAddressAddress);
-
+    pv_free_error_stack(messageStackAddressAddress);
     return messageStack;
+  }
+
+  private static async loadModuleFromUrl(url: string): Promise<any> {
+    return (await import(url)).default;
+  }
+
+  private static wrapAsyncFunction(module: PicoLLMModule, functionName: string, numArgs: number): (...args: any[]) => any {
+    // @ts-ignore
+    return module.cwrap(
+      functionName,
+      "number",
+      Array(numArgs).fill("number"),
+      { async: true }
+    );
   }
 }

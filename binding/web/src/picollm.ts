@@ -149,9 +149,7 @@ type PicoLLMModule = EmscriptenModule & {
   cwrap: typeof cwrap;
 }
 
-/**
- * JavaScript/WebAssembly Binding for picoLLM.
- */
+const DEFAULT_DEVICE = 'cpu:4';
 
 type PicoLLMWasmOutput = {
   module: PicoLLMModule;
@@ -170,8 +168,38 @@ type PicoLLMWasmOutput = {
   messageStackDepthAddress: number;
 };
 
-const DEFAULT_DEVICE = 'cpu';
+class PicoLLMStreamCallback {
+  private _module: PicoLLMModule;
 
+  private _userCallback?: (token: string) => void;
+
+  public constructor(module: PicoLLMModule) {
+    this._module = module;
+  }
+
+  public setUserCallback(userCallback?: (token: string) => void): void {
+    this._userCallback = userCallback;
+  }
+
+  public streamCallbackWasm = (tokenAddress: number): void => {
+    if (this._module === undefined) {
+      return;
+    }
+
+    const tokenAddressUnsigned = unsignedAddress(tokenAddress);
+    const token = arrayBufferToStringAtIndex(
+      this._module.HEAPU8,
+      tokenAddressUnsigned
+    );
+    if (this._userCallback) {
+      this._userCallback(token);
+    }
+  };
+}
+
+/**
+ * JavaScript/WebAssembly Binding for picoLLM.
+ */
 export class PicoLLM {
   private readonly _module: PicoLLMModule | undefined;
 
@@ -190,6 +218,9 @@ export class PicoLLM {
   private readonly _model: string;
   private readonly _version: string;
 
+  private readonly _streamCallback: PicoLLMStreamCallback;
+  private readonly _streamCallbackFnPointer: number;
+
   private static _wasmSimd: string;
   private static _sdk: string = 'web';
 
@@ -206,6 +237,9 @@ export class PicoLLM {
     this._maxTopChoices = handleWasm.maxTopChoices;
     this._model = handleWasm.model;
     this._version = handleWasm.version;
+
+    this._streamCallback = new PicoLLMStreamCallback(this._module);
+    this._streamCallbackFnPointer = this._module.addFunction(this._streamCallback.streamCallbackWasm, 'vii');
 
     this._functionMutex = new Mutex();
 
@@ -453,9 +487,12 @@ export class PicoLLM {
             );
           }
 
-          const streamCallbackFunctionPointer = (streamCallback !== undefined)
-            ? this._module.addFunction(streamCallback, 'vii')
-            : 0;
+          let streamCallbackFnPointer = 0;
+          if (streamCallback !== undefined) {
+            this._streamCallback.setUserCallback(streamCallback);
+            streamCallbackFnPointer = this._streamCallbackFnPointer;
+          }
+
           const status = await this._pv_picollm_generate(
             this._objectAddress,
             promptAddress,
@@ -468,7 +505,7 @@ export class PicoLLM {
             temperature,
             topP,
             numTopChoices,
-            streamCallbackFunctionPointer,
+            streamCallbackFnPointer,
             0,
             usageAddress,
             endpointAddress,
@@ -1062,16 +1099,12 @@ export class PicoLLM {
       );
     }
 
-    console.log("init")
-
     let status: PvStatus = await pv_picollm_init(
       accessKeyAddress,
       modelPathAddress,
       deviceAddress,
       objectAddressAddress
     );
-
-    console.log(module)
 
     module._pv_free(accessKeyAddress);
     module._pv_free(modelPathAddress);
@@ -1094,7 +1127,7 @@ export class PicoLLM {
       );
     }
 
-    const objectAddress = module.HEAP32[objectAddressAddress];
+    const objectAddress = module.HEAP32[objectAddressAddress / Int32Array.BYTES_PER_ELEMENT];
     module._pv_free(objectAddressAddress);
 
     const maxTopChoices = module._pv_picollm_max_top_choices();

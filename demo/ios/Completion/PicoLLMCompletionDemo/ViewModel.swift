@@ -40,7 +40,7 @@ You can download directly to your device or airdrop from a Mac.
     @Published var generatePresencePenalty = 0.0
     @Published var generateFrequencyPenalty = 0.0
     @Published var generateNumTopChoices = 0.0
-    @Published var enableGenerateButton = true
+    @Published var isGenerating = false
 
     @Published var completionPromptText = ""
     @Published var completionText = ""
@@ -140,7 +140,7 @@ You can download directly to your device or airdrop from a Mac.
             return
         }
 
-        enableGenerateButton = false
+        isGenerating = true
         completionPromptText = promptText
         completionText = ""
         tpsText = ""
@@ -171,7 +171,18 @@ You can download directly to your device or airdrop from a Mac.
 
             DispatchQueue.main.async { [self] in
                 promptText = ""
-                enableGenerateButton = true
+                isGenerating = false
+            }
+        }
+    }
+    
+    public func interrupt() {
+        do {
+            try picollm?.interrupt();
+        } catch {
+            DispatchQueue.main.async { [self] in
+                errorMessage = "\(error.localizedDescription)"
+                enableLoadModelButton = true
             }
         }
     }

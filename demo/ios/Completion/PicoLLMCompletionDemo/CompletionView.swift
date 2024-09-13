@@ -28,7 +28,7 @@ struct CompletionView: View {
                                 .padding(.horizontal, 12)
                         }
                     )
-                    .disabled(!viewModel.enableGenerateButton)
+                    .disabled(viewModel.isGenerating)
                     Spacer()
                     Text("picoLLM Completion Demo")
                     Spacer()
@@ -41,7 +41,7 @@ struct CompletionView: View {
                 Spacer()
 
                 HStack(alignment: .center) {
-                    if !viewModel.enableGenerateButton {
+                    if viewModel.isGenerating {
                         ProgressView(value: 0).progressViewStyle(CircularProgressViewStyle())
                         Text("Generating...")
                             .padding(.horizontal, 12)
@@ -72,20 +72,19 @@ struct CompletionView: View {
                         .onSubmit {
                             viewModel.generate()
                         }
-                        .disabled(!viewModel.enableGenerateButton)
+                        .disabled(viewModel.isGenerating)
                     HStack(alignment: .center) {
                         Spacer()
-                        Button(action: viewModel.generate) {
-                            Image(systemName: "arrow.up")
+                        Button(action: viewModel.isGenerating ? viewModel.interrupt : viewModel.generate) {
+                            Image(systemName: viewModel.isGenerating ? "stop.fill" : "arrow.up")
                                 .imageScale(.medium)
-                                .background(Constants.btnColor(viewModel.enableGenerateButton))
+                                .background(Constants.activeBlue)
                                 .foregroundColor(.white)
                                 .padding(6)
                         }.background(
-                            Capsule().fill(Constants.btnColor(viewModel.enableGenerateButton))
+                            Capsule().fill(Constants.activeBlue)
                         )
                         .padding(.horizontal, 4)
-                        .disabled(!viewModel.enableGenerateButton)
                     }
                 }
                 .padding(.vertical, 12)
@@ -102,7 +101,7 @@ struct CompletionView: View {
         VStack {
             ScrollViewReader { proxy in
                 ScrollView {
-                    if showStats && viewModel.enableGenerateButton {
+                    if showStats && !viewModel.isGenerating {
                         Text(viewModel.statsText)
                             .padding(12)
                     } else {
@@ -128,14 +127,14 @@ struct CompletionView: View {
                         .imageScale(.large)
                 }
                 .padding(.horizontal, 12)
-                .disabled(!viewModel.enableGenerateButton)
+                .disabled(viewModel.isGenerating)
                 Spacer()
                 Button(
                     action: {() in showStats = !showStats},
                     label: {
                         Image(systemName: "chevron.left")
                             .imageScale(.small)
-                        if showStats && viewModel.enableGenerateButton {
+                        if showStats && !viewModel.isGenerating {
                             Text("/")
                         } else {
                             Text(" ")
@@ -147,7 +146,7 @@ struct CompletionView: View {
                 .padding(.horizontal, 12)
                 .disabled(
                     viewModel.errorMessage.count > 0 ||
-                    !viewModel.enableGenerateButton ||
+                    viewModel.isGenerating ||
                     viewModel.completionText.isEmpty)
             }
             .padding(.bottom, 12)

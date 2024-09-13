@@ -73,6 +73,7 @@ type pv_picollm_generate_type = (
   num_completion_tokens: number,
   completion: number
 ) => Promise<number>;
+type pv_picollm_interrupt_type = (object: number) => number;
 type pv_picollm_delete_completion_tokens_type = (
   object: number,
   numCompletionTokens: number
@@ -124,6 +125,7 @@ type PicoLLMModule = EmscriptenModule & {
   _pv_free: (address: number) => void;
 
   _pv_picollm_init: pv_picollm_init_type;
+  _pv_picollm_interrupt: pv_picollm_interrupt_type;
   _pv_picollm_delete: pv_picollm_delete_type;
   _pv_picollm_delete_completion_tokens: pv_picollm_delete_completion_tokens_type;
   _pv_picollm_delete_completion: pv_picollm_delete_completion_type;
@@ -169,7 +171,7 @@ type PicoLLMWasmOutput = {
 };
 
 class PicoLLMStreamCallback {
-  private _module: PicoLLMModule;
+  private readonly _module: PicoLLMModule;
 
   private _userCallback?: (token: string) => void;
 
@@ -631,6 +633,22 @@ export class PicoLLM {
           reject(error);
         });
     });
+  }
+
+  /**
+   * Interrupts `generate()` if generation is in progress. Otherwise, it has no effect.
+   */
+  public interrupt(): void {
+    if (this._module === undefined) {
+      throw new PicoLLMErrors.PicoLLMInvalidStateError(
+        'Attempted to call PicoLLM interrupt after release.'
+      );
+    }
+
+    const status = this._module._pv_picollm_interrupt(this._objectAddress);
+    if (status !== PvStatus.SUCCESS) {
+      throw pvStatusToException(status, 'Interrupt failed');
+    }
   }
 
   /**

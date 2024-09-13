@@ -91,6 +91,10 @@ export type PicoLLMWorkerGenerateRequest = {
   options: PicoLLMGenerateOptions;
 };
 
+export type PicoLLMWorkerInterruptRequest = {
+  command: 'interrupt';
+};
+
 export type PicoLLMWorkerTokenizeRequest = {
   command: 'tokenize';
   text: string;
@@ -114,6 +118,7 @@ export type PicoLLMWorkerReleaseRequest = {
 export type PicoLLMWorkerRequest =
   | PicoLLMWorkerInitRequest
   | PicoLLMWorkerGenerateRequest
+  | PicoLLMWorkerInterruptRequest
   | PicoLLMWorkerTokenizeRequest
   | PicoLLMWorkerForwardRequest
   | PicoLLMWorkerResetRequest

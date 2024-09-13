@@ -17,6 +17,7 @@ window.onload = () => {
 
   const initButton = document.getElementById("init");
   const generateButton = document.getElementById("generate");
+  const interruptButton = document.getElementById("interrupt");
   const changeModelButton = document.getElementById("changeModel");
 
   const accessKey = document.getElementById("accessKey");
@@ -174,6 +175,7 @@ window.onload = () => {
 
     prompt.disabled = true;
     generateButton.disabled = true;
+    interruptButton.style.visibility = 'visible';
     isText = true;
     tokensPerSec.innerText = '-';
 
@@ -216,6 +218,7 @@ window.onload = () => {
       generateButton.disabled = false;
       resultTokens.innerText = JSON.stringify(completionTokens, null, 2);
       codeIcon.style.display = 'inline-block';
+      interruptButton.style.visibility = 'hidden';
 
       status.innerText = "Generating complete."
     } catch (e) {
@@ -224,6 +227,14 @@ window.onload = () => {
       stopDot();
     }
   };
+
+  interruptButton.onclick = () => {
+    if (!picoLLM) {
+      return;
+    }
+
+    picoLLM.interrupt();
+  }
 
   codeIcon.onclick = () => {
     if (isText) {

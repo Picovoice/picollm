@@ -81,6 +81,11 @@
       cursor: pointer;
       display: none;
     }
+
+    #interrupt {
+      float: right;
+      visibility: hidden;
+    }
   </style>
 </head>
 <body>
@@ -112,6 +117,7 @@
         </div>
         <div style="display: flex; justify-content: space-between; margin-top: 5px;">
           <span>Tokens per second: <span id="tokensPerSec">-</span></span>
+          <button id="interrupt">Stop</button>
         </div>
         <hr />
         <div class="result-container">

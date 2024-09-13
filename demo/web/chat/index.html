@@ -119,6 +119,11 @@
         color: #377dff;
       }
     }
+
+    #interrupt {
+      float: right;
+      visibility: hidden;
+    }
   </style>
 </head>
 <body>
@@ -151,6 +156,9 @@
     <div class="messageArea">
       <textarea id="message" placeholder="Message picoLLM"></textarea>
       <button id="send">Send</button>
+    </div>
+    <div>
+      <button id="interrupt">Stop</button>
     </div>
   </div>
 </body>

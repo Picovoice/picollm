@@ -17,6 +17,7 @@ import {
   PicoLLMWorkerFailureResponse,
   PicoLLMWorkerForwardRequest,
   PicoLLMWorkerGenerateRequest,
+  PicoLLMWorkerInterruptRequest,
   PicoLLMWorkerInitRequest,
   PicoLLMWorkerRequest,
   PicoLLMWorkerTokenizeRequest,
@@ -96,6 +97,14 @@ const generateRequest = async (
   };
 };
 
+const interruptRequest = async (
+  _: PicoLLMWorkerInterruptRequest
+): Promise<void> => {
+  if (picoLLM !== null) {
+    picoLLM.interrupt();
+  }
+};
+
 const tokenizeRequest = async (
   request: PicoLLMWorkerTokenizeRequest
 ): Promise<any> => {
@@ -160,6 +169,9 @@ self.onmessage = async function (
         break;
       case 'generate':
         self.postMessage(await generateRequest(event.data));
+        break;
+      case 'interrupt':
+        await interruptRequest(event.data);
         break;
       case 'tokenize':
         self.postMessage(await tokenizeRequest(event.data));

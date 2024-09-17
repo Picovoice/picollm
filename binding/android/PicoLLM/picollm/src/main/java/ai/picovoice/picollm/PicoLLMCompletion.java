@@ -120,7 +120,8 @@ public class PicoLLMCompletion {
     public enum Endpoint {
         END_OF_SENTENCE,
         COMPLETION_TOKEN_LIMIT_REACHED,
-        STOP_PHRASE_ENCOUNTERED
+        STOP_PHRASE_ENCOUNTERED,
+        INTERRUPTED
     }
 
     /**

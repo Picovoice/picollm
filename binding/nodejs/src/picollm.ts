@@ -224,7 +224,7 @@ export class PicoLLM {
    * completion string becomes available.
    * @returns Completion result.
    */
-  generate(prompt: string, options: PicoLLMGenerateOptions = {}): PicoLLMCompletion {
+  async generate(prompt: string, options: PicoLLMGenerateOptions = {}): Promise<PicoLLMCompletion> {
     if (
       this._handle === 0 ||
       this._handle === null ||
@@ -255,7 +255,7 @@ export class PicoLLM {
 
     let picollmGenerateResult: PicoLLMGenerateResult | null = null;
     try {
-      picollmGenerateResult = this._pvPicoLLM.generate(
+      picollmGenerateResult = await this._pvPicoLLM.generate(
         this._handle,
         prompt,
         completionTokenLimit,
@@ -298,6 +298,31 @@ export class PicoLLM {
       completionTokens: completionTokens,
       completion: completion.completion
     };
+  }
+
+  /**
+   * Interrupts generate()` if generation is in progress. Otherwise, it has no effect.
+   */
+  interrupt(): void {
+    if (
+      this._handle === 0 ||
+      this._handle === null ||
+      this._handle === undefined
+    ) {
+      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
+    }
+
+    let picollmInterruptResult: PicoLLMResult | null = null;
+    try {
+      picollmInterruptResult = this._pvPicoLLM.interrupt(this._handle);
+    } catch (err: any) {
+      pvStatusToException(<PvStatus>err.code, err);
+    }
+
+    const status = picollmInterruptResult!.status;
+    if (status !== PvStatus.SUCCESS) {
+      this.handlePvStatus(status, 'PicoLLM failed to interrupt');
+    }
   }
 
   /**

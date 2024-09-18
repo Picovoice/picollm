@@ -9,7 +9,7 @@
 
 import PvPicoLLM
 
-// Usage information.
+/// Usage information.
 public struct PicoLLMUsage: Codable {
     public let promptTokens: Int
 
@@ -23,11 +23,12 @@ public struct PicoLLMUsage: Codable {
     }
 }
 
-// Reasons for ending the generation process.
+/// Reasons for ending the generation process.
 public enum PicoLLMEndpoint: Codable {
     case endOfSentence
     case completionTokenLimitReached
     case stopPhraseEncountered
+    case interrupted
 
     public static func fromC(cEndpoint: pv_picollm_endpoint_t) -> PicoLLMEndpoint? {
         switch cEndpoint {
@@ -37,13 +38,15 @@ public enum PicoLLMEndpoint: Codable {
             return PicoLLMEndpoint.completionTokenLimitReached
         case PV_PICOLLM_ENDPOINT_STOP_PHRASE_ENCOUNTERED:
             return PicoLLMEndpoint.stopPhraseEncountered
+        case PV_PICOLLM_ENDPOINT_INTERRUPTED:
+            return PicoLLMEndpoint.interrupted
         default:
             return nil
         }
     }
 }
 
-// Generated token and its log probability.
+/// Generated token and its log probability.
 public struct PicoLLMToken: Codable {
     public let token: String
 
@@ -57,7 +60,7 @@ public struct PicoLLMToken: Codable {
     }
 }
 
-// Generated token within completion and top alternative tokens.
+/// Generated token within completion and top alternative tokens.
 public struct PicoLLMCompletionToken: Codable {
     public let token: PicoLLMToken
 
@@ -71,7 +74,7 @@ public struct PicoLLMCompletionToken: Codable {
     }
 }
 
-// Result object containing stats and generated tokens.
+/// Result object containing stats and generated tokens.
 public struct PicoLLMCompletion: Codable {
     public let usage: PicoLLMUsage
 
@@ -93,7 +96,7 @@ public struct PicoLLMCompletion: Codable {
     }
 }
 
-// Private callback for hoisting C callback into Swift callback.
+/// Private callback for hoisting C callback into Swift callback.
 func cStreamCallback (completion: UnsafePointer<CChar>?, context: UnsafeMutableRawPointer?) {
     let object = Unmanaged<PicoLLM>.fromOpaque(context!).takeUnretainedValue()
 
@@ -310,6 +313,20 @@ public class PicoLLM {
             endpoint: endpoint,
             completionTokens: completionTokens,
             completion: completion)
+    }
+
+    /// Interrupts `pv_picollm_generate()` if generation is in progress. Otherwise, it has no effect.
+    /// - Throws: PicoLLMError
+    public func interrupt() throws {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling interrupt")
+        }
+
+        let status = pv_picollm_interrupt(self.handle)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM interrupt failed", messageStack)
+        }
     }
 
     /// Tokenizes a given text using the model's tokenizer.

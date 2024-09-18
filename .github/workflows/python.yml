@@ -58,6 +58,11 @@ jobs:
         binding\python\.venv\Scripts\activate
         echo PATH=$PATH >> $GITHUB_ENV
 
+    # ************REMOVE AFTER RELEASE ***************
+      run: python3 setup.py sdist bdist_wheel
+      working-directory: binding/python
+    # ************REMOVE AFTER RELEASE ***************
+
     - name: Install Python dependencies
       run: python3 -m pip install -r binding/python/requirements.txt
 

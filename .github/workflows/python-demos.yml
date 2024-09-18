@@ -51,6 +51,7 @@ jobs:
         echo PATH=$PATH >> $GITHUB_ENV
 
     # ************REMOVE AFTER RELEASE ***************
+    - name: build local binding
       run: python3 setup.py sdist bdist_wheel
       working-directory: binding/python
     # ************REMOVE AFTER RELEASE ***************

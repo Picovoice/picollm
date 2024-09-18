@@ -517,6 +517,7 @@ int picovoice_main(int argc, char **argv) {
 
     signal(SIGINT, interrupt_handler);
     fprintf(stdout, "Loaded model: `%s`\n", model);
+    fprintf(stdout, "Generating... (press Ctrl+C to interrupt)\n");
 
     pv_picollm_usage_t usage;
     pv_picollm_endpoint_t endpoint;

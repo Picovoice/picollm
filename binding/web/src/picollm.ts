@@ -557,7 +557,7 @@ export class PicoLLM {
           let completionTokensPtr = completionTokensAddress;
           const completionTokens: PicoLLMCompletionToken[] = [];
           for (let i = 0; i < numCompletionTokens; i++) {
-            const tokenAddress = this._module.HEAP32[completionTokensPtr / Int32Array.BYTES_PER_ELEMENT];
+            const tokenAddress = unsignedAddress(this._module.HEAP32[completionTokensPtr / Int32Array.BYTES_PER_ELEMENT]);
             const completionToken = arrayBufferToStringAtIndex(
               this._module.HEAPU8,
               tokenAddress
@@ -610,7 +610,6 @@ export class PicoLLM {
             numCompletionTokens
           );
           this._module._pv_free(completionTokensAddressAddress);
-
           const completionAddress = unsignedAddress(
             this._module.HEAP32[completionAddressAddress / Int32Array.BYTES_PER_ELEMENT]
           );

@@ -342,12 +342,14 @@ class PicoLLMEndpoints(Enum):
     END_OF_SENTENCE = 0
     COMPLETION_TOKEN_LIMIT_REACHED = 1
     STOP_PHRASE_ENCOUNTERED = 2
+    INTERRUPTED = 3
 
     def __str__(self) -> str:
         return {
             self.END_OF_SENTENCE: 'END_OF_SENTENCE',
             self.COMPLETION_TOKEN_LIMIT_REACHED: 'COMPLETION_TOKEN_LIMIT_REACHED',
             self.STOP_PHRASE_ENCOUNTERED: 'STOP_PHRASE_ENCOUNTERED',
+            self.INTERRUPTED: 'INTERRUPTED',
         }[self]
 
 
@@ -574,6 +576,12 @@ class PicoLLM(object):
         ]
         self._generate_func.restype = self.PicovoiceStatuses
 
+        self._interrupt_func = library.pv_picollm_interrupt
+        self._interrupt_func.argtypes = [
+            POINTER(self.CPicoLLM),
+        ]
+        self._interrupt_func.restype = self.PicovoiceStatuses
+
         self._delete_completion_tokens_func = library.pv_picollm_delete_completion_tokens
         self._delete_completion_tokens_func.argtypes = [
             POINTER(self.CPicoLLMCompletionToken),
@@ -793,6 +801,18 @@ class PicoLLM(object):
             completion=completion
         )
 
+    def interrupt(self) -> None:
+        """
+        Interrupts `generate()` if generation is in progress. Otherwise, it has no effect.
+        """
+
+        status = self._interrupt_func(self._handle)
+        if status is not self.PicovoiceStatuses.SUCCESS:
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message="`pv_picollm_interrupt` failed.",
+                message_stack=self.get_error_stack()
+            )
+        
     def tokenize(self, text, bos: bool, eos: bool) -> Sequence[int]:
         """
         Tokenizes a given text using the model's tokenizer. This is a low-level function meant for benchmarking and

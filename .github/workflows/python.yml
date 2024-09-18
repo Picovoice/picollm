@@ -44,6 +44,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    # ************REMOVE AFTER RELEASE ***************
+    - name: build local binding
+      run: python3 -m pip install setuptools && python3 -m pip install wheel && python3 -m setup sdist bdist_wheel
+      working-directory: binding/python
+    # ************REMOVE AFTER RELEASE ***************
+
     - name: Setup Python virtualenv (*nix)
       if: ${{ matrix.machine != 'pv-windows' }}
       run: |
@@ -57,12 +63,6 @@ jobs:
         python3 -m venv binding\python\.venv
         binding\python\.venv\Scripts\activate
         echo PATH=$PATH >> $GITHUB_ENV
-
-    # ************REMOVE AFTER RELEASE ***************
-    - name: build local binding
-      run: python3 -m pip install setuptools && python3 -m pip install wheel && python3 -m setup sdist bdist_wheel
-      working-directory: binding/python
-    # ************REMOVE AFTER RELEASE ***************
 
     - name: Install Python dependencies
       run: python3 -m pip install -r binding/python/requirements.txt

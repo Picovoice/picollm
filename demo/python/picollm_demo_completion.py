@@ -15,8 +15,6 @@ from argparse import ArgumentParser
 
 import picollm
 
-is_interrupt = False
-
 
 def main():
     parser = ArgumentParser()
@@ -137,10 +135,10 @@ def main():
     print("Generating... (press Ctrl+C to interrupt)\n")
 
     start_sec = [0.]
+    is_interrupt = [False]
 
     def interrupt_generate(_, __):
-        global is_interrupt
-        is_interrupt = True
+        is_interrupt[0] = True
         print("\n\nInterrupting generate...")
         o.interrupt()
 
@@ -148,8 +146,7 @@ def main():
         if start_sec[0] == 0.:
             start_sec[0] = time.time()
 
-        global is_interrupt
-        if not is_interrupt:
+        if not is_interrupt[0]:
             print(token, flush=True, end='')
 
     signal.signal(signal.SIGINT, interrupt_generate)

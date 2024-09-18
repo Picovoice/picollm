@@ -14,8 +14,6 @@ from argparse import ArgumentParser
 
 import picollm
 
-is_interrupt = False
-
 
 def main() -> None:
     parser = ArgumentParser()
@@ -139,15 +137,15 @@ def main() -> None:
 
     dialog = o.get_dialog(mode=dialog_mode, history=history, system=system_instruction)
 
+    is_interrupt = [False]
+
     def interrupt_generate(_, __):
-        global is_interrupt
-        is_interrupt = True
+        is_interrupt[0] = True
         print("\n\nInterrupting generate...")
         o.interrupt()
 
     def stream_callback(token: str):
-        global is_interrupt
-        if not is_interrupt:
+        if not is_interrupt[0]:
             print(token, flush=True, end='')
 
     signal.signal(signal.SIGINT, interrupt_generate)

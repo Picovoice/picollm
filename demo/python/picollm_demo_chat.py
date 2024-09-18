@@ -10,6 +10,7 @@
 #
 
 import signal
+import sys
 from argparse import ArgumentParser
 
 import picollm
@@ -144,16 +145,20 @@ def main() -> None:
         print("\n\nInterrupting generate...")
         o.interrupt()
 
+    def chat_exit(_, __):
+        sys.exit(0)
+
     def stream_callback(token: str):
         if not is_interrupt[0]:
             print(token, flush=True, end='')
 
-    signal.signal(signal.SIGINT, interrupt_generate)
-
     try:
         while True:
+            signal.signal(signal.SIGINT, chat_exit)
             prompt = input(">>> ")
             dialog.add_human_request(prompt)
+
+            signal.signal(signal.SIGINT, interrupt_generate)
             res = o.generate(
                 prompt=dialog.prompt(),
                 completion_token_limit=completion_token_limit,

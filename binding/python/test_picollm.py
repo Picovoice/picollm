@@ -9,10 +9,12 @@
 # specific language governing permissions and limitations under the License.
 #
 
+import concurrent.futures
 import json
 import math
 import os
 import sys
+import time
 import unittest
 from dataclasses import dataclass
 from typing import (
@@ -35,6 +37,7 @@ from ._picollm import (
     MistralChatDialog,
     Phi2ChatDialog,
     Phi2QADialog,
+    Phi3Dialog,
     PicoLLM,
     PicoLLMCompletion,
     PicoLLMEndpoints,
@@ -370,6 +373,18 @@ class PicollmTestCase(unittest.TestCase):
 
         self.assertEqual(''.join(pieces), expectations[0].completion)
 
+    def test_interrupt(self) -> None:
+        data = self.data["default"]
+        prompt = data["prompt"]
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            llm_future = executor.submit(
+                self._picollm.generate,
+                prompt)
+            time.sleep(1)
+            self._picollm.interrupt()
+            res = llm_future.result()
+            self.assertEqual(res.endpoint, PicoLLMEndpoints.INTERRUPTED)
+
     def test_tokenize(self) -> None:
         text = self.data["tokenize"]["text"]
         expected_tokens = self.data["tokenize"]["tokens"]
@@ -451,6 +466,7 @@ class DialogTestCase(unittest.TestCase):
             "mistral-chat-dialog": MistralChatDialog,
             "phi2-chat-dialog": Phi2ChatDialog,
             "phi2-qa-dialog": Phi2QADialog,
+            "phi3-chat-dialog": Phi3Dialog
         }
 
         path = os.path.join(os.path.dirname(__file__), '../../resources/.test/test_data.json')

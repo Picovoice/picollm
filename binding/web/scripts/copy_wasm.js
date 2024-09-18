@@ -4,8 +4,8 @@ const { join } = require("path");
 const wasmFiles = [
   "pv_picollm.wasm",
   "pv_picollm_simd.wasm",
-  "pv_picollm_web_worker_helper.wasm",
-  "pv_picollm_web_worker_helper_simd.wasm",
+  "pv_picollm.js",
+  "pv_picollm_simd.js",
 ]
 
 console.log("Copying the WASM model...");

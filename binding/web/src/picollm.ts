@@ -152,7 +152,7 @@ type PicoLLMModule = EmscriptenModule & {
 }
 
 const getDefaultDevice = (): string => {
-  const numWorkers = Math.min(Math.round((self.navigator.hardwareConcurrency ?? 2) / 2), 1);
+  const numWorkers = Math.max(Math.round((self.navigator.hardwareConcurrency ?? 2) / 2), 1);
   return `cpu:${numWorkers}`;
 };
 
@@ -924,8 +924,6 @@ export class PicoLLM {
     this._module._pv_picollm_delete(this._objectAddress);
     this._module._pv_free(this._messageStackAddressAddressAddress);
     this._module._pv_free(this._messageStackDepthAddress);
-
-    this._module.destroy(this._module);
   }
 
   /**

@@ -8,9 +8,9 @@
     "@picovoice/web-utils" "~1.4.1"
 
 "@picovoice/web-utils@~1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.1.tgz#207c5e308b1f7b9127bab83b4b3d9a653d630ffb"
-  integrity sha512-WoC+PAYXEpeLzq76URCX+UC5ZRJPJCLcxCgIaZ3Sx9uUVtobSvHbnWAFDW8Q5OTmsRF52gKqr08uqH+LNC7V+Q==
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.2.tgz#2ddc44552d15fa1a4958e0c3384e58545255eea1"
+  integrity sha512-pF5Uw3Vm4mOWJ2H3Zc7E/nDr/O7OhbvgEK6W7cx9MNNK3qq51MqiGluPpZ8a2K61BuIzxcNMC1mXWpmIAWVolA==
   dependencies:
     commander "^10.0.1"
 

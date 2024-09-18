@@ -13,13 +13,26 @@ models. picoLLM Inference Engine is:
 - Runs on CPU and GPU
 - Free for open-weight models
 
+## Requirements
+
+PicoLLM Web Binding uses [SharedArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer) to generate
+text. Modern browsers require the following response headers to allow the usage of `SharedArrayBuffers`:
+
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+Refer to our [Web demos](https://github.com/Picovoice/picollm/tree/master/demo/web) for example on creating a server
+with the corresponding response headers.
+
 ## Compatibility
 
 - Chrome / Edge
 - Firefox
 - Safari
 
-**NOTE**: IndexedDB and SIMD are required to use `picoLLM`.
+**NOTE**: IndexedDB, SIMD and SharedArrayBuffers are required to use `picoLLM`.
 
 ## Installation
 
@@ -186,6 +199,15 @@ const res = await picoLLM.generate(dialog.prompt())
 dialog.addLLMResponse(res.completion)
 print(res.completion)
 ```
+
+### Interrupt Text Generation
+
+```typescript
+picoLLM.interrupt();
+```
+
+This will stop text generation and if it was properly interrupted, it will set `res.completion.endpoint` 
+as an interrupted state.
 
 ### Clean Up
 

@@ -47,6 +47,14 @@ type DialogExpectations = {
   'phi2-qa-dialog': string,
 }
 
+const sleep = async (ms: number) => {
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
+};
+
 const runInitTest = async (
   instance: typeof PicoLLM | typeof PicoLLMWorker,
   chunks: Blob[],
@@ -454,6 +462,20 @@ const generateTests = () => {
       });
 
       expect(pieces.join('')).to.eq(data.expectations[0].completion);
+    });
+  });
+
+  it(`should be able to interrupt`, () => {
+    cy.loadPicoLLM().then(async picoLLM => {
+      const data = testData.picollm.default;
+      const prompt = data.prompt;
+
+      const generatePromise = picoLLM.generate(prompt);
+
+      await sleep(500);
+
+      const res = await generatePromise;
+      expect(res.endpoint).to.eq(PicoLLMEndpoint.INTERRUPTED);
     });
   });
 

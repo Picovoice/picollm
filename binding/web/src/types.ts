@@ -28,6 +28,7 @@ export enum PicoLLMEndpoint {
   END_OF_SENTENCE,
   COMPLETION_TOKEN_LIMIT_REACHED,
   STOP_PHRASE_ENCOUNTERED,
+  INTERRUPTED,
 }
 
 export type PicoLLMModel = {

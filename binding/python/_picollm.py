@@ -268,13 +268,14 @@ class Phi3Dialog(Dialog):
         llm = (list() if self._history == 0 else self._llm[-self._history:]) if self._history is not None else self._llm
 
         res = list()
-        res.append(f"<|system|>\n{self._system if self._system is not None else ''}<|end|>\n")
+        if self._system is not None:
+            res.append(f"<|system|>\n{self._system}<|end|>\n")
 
         for h, l in zip(human, llm):
             res.append(f"<|user|>\n{h.strip()}<|end|>\n")
             res.append(f"<|assistant|>\n{l.strip()}<|end|>\n")
         res.append(f"<|user|>\n{human[-1].strip()}<|end|>\n")
-        res.append("<|assistant|>")
+        res.append("<|assistant|>\n")
 
         return ''.join(res)
 

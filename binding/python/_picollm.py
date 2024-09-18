@@ -840,7 +840,7 @@ class PicoLLM(object):
                 message="`pv_picollm_interrupt` failed.",
                 message_stack=self.get_error_stack()
             )
-        
+
     def tokenize(self, text, bos: bool, eos: bool) -> Sequence[int]:
         """
         Tokenizes a given text using the model's tokenizer. This is a low-level function meant for benchmarking and

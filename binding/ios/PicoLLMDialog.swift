@@ -160,6 +160,47 @@ public class Phi2ChatDialog: Phi2Dialog {
     }
 }
 
+/// Dialog helper for `phi3`.
+public class Phi3ChatDialog: BasePicoLLMDialog {
+    public override func prompt() throws -> String {
+        if self.humanRequests.count == self.llmResponses.count {
+            throw PicoLLMInvalidStateError("Only subclasses of PicoLLMDialog can return create prompts.")
+        }
+
+        let humanRequests = (self.history == nil) ?
+            self.humanRequests[...] :
+            self.humanRequests[(self.humanRequests.count - Int(self.history!) - 1)...]
+        let llmResponses = (self.history == nil) ?
+            self.llmResponses[...] :
+            self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
+
+        var res = ""
+        if system != nil {
+            instruction = String(format: "<|system|>\n%@<|end|>\n", system!)
+        }
+        for i in 0..<llmResponses.count {
+            res += String(
+                format: "<|user|>\n%@<|end|>\n",
+                humanRequests[i].trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            res += String(
+                format: "<|assistant|>\n%@<|end|>\n",
+                llmResponses[i].trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+        }
+
+        res += String(
+            format: "<|user|>\n%@<|end|>\n",
+            humanRequests.last!.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+        res += String(
+            format: "<|assistant|>\n"
+        )
+
+        return res
+    }
+}
+
 /// Dialog helper for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2`.
 public class MistralChatDialog: BasePicoLLMDialog {
     public override func prompt() throws -> String {

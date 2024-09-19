@@ -49,6 +49,8 @@ picoLLM Inference Engine supports the following open-weight models. The models a
   - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
   - `phi2`
+- Phi-3
+  - `phi3`
 
 ## Usage
 

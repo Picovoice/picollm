@@ -90,7 +90,7 @@ static volatile bool is_interrupt = false;
 void interrupt_handler(int _) {
     (void) _;
     is_interrupt = true;
-    fprintf(stdout, "\nInterrupting generation...\n");
+    fprintf(stdout, "\n\nInterrupting generation...\n");
     pv_picollm_interrupt_func(picollm);
 }
 

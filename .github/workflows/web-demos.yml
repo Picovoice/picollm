@@ -30,6 +30,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    #### REMOVE AFTER RELEASE ####
+
+    - name: Install dependencies and build SDK
+      run: yarn && yarn copywasm && yarn build
+      working-directory: binding/web
+
+    ####
+
     - name: Install dependencies
       run: yarn install
 
@@ -42,6 +50,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    #### REMOVE AFTER RELEASE ####
+
+    - name: Install dependencies and build SDK
+      run: yarn && yarn copywasm && yarn build
+      working-directory: binding/web
+
+    ####
 
     - name: Install dependencies
       run: yarn install

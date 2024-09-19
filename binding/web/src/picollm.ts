@@ -152,7 +152,8 @@ type PicoLLMModule = EmscriptenModule & {
 }
 
 const getDefaultDevice = (): string => {
-  const numWorkers = Math.max(Math.round((self.navigator.hardwareConcurrency ?? 2) / 2), 1);
+  // use at most 8 workers, usually 50% of workers but for to at least 1.
+  const numWorkers = Math.min(Math.max(Math.round((self.navigator.hardwareConcurrency ?? 2) / 2), 1), 8);
   return `cpu:${numWorkers}`;
 };
 

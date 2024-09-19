@@ -176,7 +176,7 @@ public class Phi3ChatDialog: BasePicoLLMDialog {
 
         var res = ""
         if system != nil {
-            instruction = String(format: "<|system|>\n%@<|end|>\n", system!)
+            res += String(format: "<|system|>\n%@<|end|>\n", system!)
         }
         for i in 0..<llmResponses.count {
             res += String(

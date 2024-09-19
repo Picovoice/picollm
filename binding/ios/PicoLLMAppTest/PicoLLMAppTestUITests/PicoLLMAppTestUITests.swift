@@ -353,13 +353,13 @@ class PicoLLMAppTestUITests: BaseTest {
         var res: PicoLLMCompletion?
 
         group.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .background).async {
             do {
                 res = try self.handle!.generate(prompt: testCase.prompt)
             } catch { }
             group.leave()
         }
-
+        sleep(1)
         try handle!.interrupt()
 
         group.wait()
@@ -426,7 +426,6 @@ class PicoLLMAppTestUITests: BaseTest {
             "phi3-chat-dialog": Phi3ChatDialog.self
         ]
         let dialogPrompts = self.dialogTestData![testName] as! [String: String]
-
         let conversation = self.dialogTestData!["conversation"] as! [[String]]
 
         for (dialogClassName, dialogClassType) in dialogClasses {
@@ -437,6 +436,7 @@ class PicoLLMAppTestUITests: BaseTest {
                 try dialog.addHumanRequest(content: conversation[i][0])
                 try dialog.addLLMResponse(content: conversation[i][1])
             }
+
             try dialog.addHumanRequest(content: conversation.last![0])
             XCTAssertEqual(try dialog.prompt(), prompt)
         }

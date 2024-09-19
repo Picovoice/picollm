@@ -12,6 +12,7 @@
   ],
   "ignorePaths": [
     // Binaries
+    "**/wasm/**",
     "**/*.a",
     "**/*.dll",
     "**/*.dylib",

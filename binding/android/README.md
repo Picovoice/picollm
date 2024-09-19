@@ -78,7 +78,7 @@ Android APKs have a size limit which does not allow for the direct inclusion of 
    - Download the file from within the app.
 
 4. **ADB Push (for testing or manual installation):**
-   - Use the Android Debug Bridge (ADB) command [`adb push`](https://developer.android.com/studio/command-line/adb#copyfiles) to transfer the model file directly to a connected device.
+   - Use the Android Debug Bridge (ADB) command [`adb push`](https://developer.android.com/tools/adb#copyfiles) to transfer the model file directly to a connected device.
    - Access the file programmatically within your app.
 
 ## AccessKey

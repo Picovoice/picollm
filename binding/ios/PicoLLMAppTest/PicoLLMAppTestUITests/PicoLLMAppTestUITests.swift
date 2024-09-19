@@ -345,6 +345,27 @@ class PicoLLMAppTestUITests: BaseTest {
         XCTAssertEqual(pieces, expected)
     }
 
+    func testInterrupt() throws {
+        let testCase = PicollmTestCase(name: "default", data: self.picollmTestData!)
+
+        let group = DispatchGroup()
+
+        var res: PicoLLMCompletion?
+        
+        group.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                res = try self.handle!.generate(prompt: testCase.prompt)
+            } catch { }
+            group.leave()
+        }
+
+        try handle!.interrupt()
+
+        group.wait()
+        XCTAssertEqual(res!.endpoint, .interrupted)
+    }
+
     func testTokenize() throws {
         let tokenizeData = self.picollmTestData!["tokenize"] as! [String: Any]
         let text = tokenizeData["text"] as! String
@@ -401,7 +422,8 @@ class PicoLLMAppTestUITests: BaseTest {
             "llama-3-chat-dialog": Llama3ChatDialog.self,
             "mistral-chat-dialog": MistralChatDialog.self,
             "phi2-chat-dialog": Phi2ChatDialog.self,
-            "phi2-qa-dialog": Phi2QADialog.self
+            "phi2-qa-dialog": Phi2QADialog.self,
+            "phi3-chat-dialog": Phi3ChatDialog.self
         ]
         let dialogPrompts = self.dialogTestData![testName] as! [String: String]
 

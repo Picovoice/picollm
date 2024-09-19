@@ -35,6 +35,7 @@ picollmoutofmemoryerror
 picovoice
 pllm
 pluginutils
+podspec
 readables
 rtld
 salut

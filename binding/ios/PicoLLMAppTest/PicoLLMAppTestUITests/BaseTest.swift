@@ -17,7 +17,7 @@ class BaseTest: XCTestCase {
     let accessKey: String = "{TESTING_ACCESS_KEY_HERE}"
     let modelURL = URL(string: "{TESTING_MODEL_URL_HERE}")
 
-    let cleanModel = false
+    let cleanModel = true
 
     var modelPath: String = ""
     var picollmTestData: [String: Any]?

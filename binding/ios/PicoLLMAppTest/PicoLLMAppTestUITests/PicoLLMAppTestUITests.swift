@@ -351,7 +351,7 @@ class PicoLLMAppTestUITests: BaseTest {
         let group = DispatchGroup()
 
         var res: PicoLLMCompletion?
-        
+
         group.enter()
         DispatchQueue.global(qos: .userInitiated).async {
             do {

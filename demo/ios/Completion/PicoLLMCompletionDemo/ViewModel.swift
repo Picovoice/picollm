@@ -175,10 +175,10 @@ You can download directly to your device or airdrop from a Mac.
             }
         }
     }
-    
+
     public func interrupt() {
         do {
-            try picollm?.interrupt();
+            try picollm?.interrupt()
         } catch {
             DispatchQueue.main.async { [self] in
                 errorMessage = "\(error.localizedDescription)"

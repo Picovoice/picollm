@@ -380,7 +380,6 @@ class PicollmTestCase(unittest.TestCase):
             llm_future = executor.submit(
                 self._picollm.generate,
                 prompt)
-            time.sleep(1)
             self._picollm.interrupt()
             res = llm_future.result()
             self.assertEqual(res.endpoint, PicoLLMEndpoints.INTERRUPTED)

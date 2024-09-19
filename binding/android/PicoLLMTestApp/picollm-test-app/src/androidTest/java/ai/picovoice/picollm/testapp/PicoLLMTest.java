@@ -37,6 +37,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import ai.picovoice.picollm.GemmaChatDialog;
@@ -45,6 +49,7 @@ import ai.picovoice.picollm.Llama3ChatDialog;
 import ai.picovoice.picollm.MistralChatDialog;
 import ai.picovoice.picollm.Phi2ChatDialog;
 import ai.picovoice.picollm.Phi2QADialog;
+import ai.picovoice.picollm.Phi3ChatDialog;
 import ai.picovoice.picollm.PicoLLM;
 import ai.picovoice.picollm.PicoLLMCompletion;
 import ai.picovoice.picollm.PicoLLMDialog;
@@ -506,6 +511,29 @@ public class PicoLLMTest {
         }
 
         @Test
+        public void testInterrupt() throws Exception {
+            JsonObject currentTestData = testData
+                    .getAsJsonObject("picollm")
+                    .getAsJsonObject("default");
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            try {
+                Future<PicoLLMCompletion> resFuture = executor.submit(() ->
+                        picollm.generate(
+                                currentTestData.get("prompt").getAsString(),
+                                new PicoLLMGenerateParams.Builder().build()));
+
+                picollm.interrupt();
+
+                PicoLLMCompletion res = resFuture.get();
+
+                assertEquals(res.getEndpoint(), PicoLLMCompletion.Endpoint.INTERRUPTED);
+            } finally {
+                executor.shutdown();
+            }
+        }
+
+        @Test
         public void testTokenize() throws Exception {
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
@@ -663,6 +691,8 @@ public class PicoLLMTest {
                     return new Phi2ChatDialog.Builder();
                 case "phi2-qa-dialog":
                     return new Phi2QADialog.Builder();
+                case "phi3-chat-dialog":
+                    return new Phi3ChatDialog.Builder();
                 default:
                     return null;
             }

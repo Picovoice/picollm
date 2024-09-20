@@ -181,52 +181,52 @@ class PicollmTestCase(unittest.TestCase):
             for x in expectations
         ]
 
-    # def test_generate_default(self) -> None:
-    #     data = self.data["default"]
-    #     prompt = data["prompt"]
-    #     expectations = self._parse_expectations(data["expectations"])
-    #
-    #     self._verify_completion(res=self._picollm.generate(prompt=prompt), expectations=expectations)
-    #
-    # def test_generate_with_completion_token_limit(self) -> None:
-    #     data = self.data["with-completion-token-limit"]
-    #     prompt = data["prompt"]
-    #     completion_token_limit = data["parameters"]["completion-token-limit"]
-    #     expectations = self._parse_expectations(data["expectations"])
-    #
-    #     self._verify_completion(
-    #         res=self._picollm.generate(prompt=prompt, completion_token_limit=completion_token_limit),
-    #         expectations=expectations)
-    #
-    # def test_generate_with_stop_phrases(self) -> None:
-    #     data = self.data["with-stop-phrases"]
-    #     prompt = data["prompt"]
-    #     stop_phrases = set(data["parameters"]["stop-phrases"])
-    #     expectations = self._parse_expectations(data["expectations"])
-    #
-    #     self._verify_completion(
-    #         res=self._picollm.generate(prompt=prompt, stop_phrases=stop_phrases),
-    #         expectations=expectations)
-    #
-    # def test_generate_with_presence_penalty(self) -> None:
-    #     data = self.data["with-presence-penalty"]
-    #     prompt = data["prompt"]
-    #     presence_penalty = data["parameters"]["presence-penalty"]
-    #     expectations = self._parse_expectations(data["expectations"])
-    #
-    #     self._verify_completion(
-    #         res=self._picollm.generate(prompt=prompt, presence_penalty=presence_penalty),
-    #         expectations=expectations)
-    #
-    # def test_generate_with_frequency_penalty(self) -> None:
-    #     data = self.data["with-frequency-penalty"]
-    #     prompt = data["prompt"]
-    #     frequency_penalty = data["parameters"]["frequency-penalty"]
-    #     expectations = self._parse_expectations(data["expectations"])
-    #
-    #     self._verify_completion(
-    #         res=self._picollm.generate(prompt=prompt, frequency_penalty=frequency_penalty),
-    #         expectations=expectations)
+    def test_generate_default(self) -> None:
+        data = self.data["default"]
+        prompt = data["prompt"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        self._verify_completion(res=self._picollm.generate(prompt=prompt), expectations=expectations)
+
+    def test_generate_with_completion_token_limit(self) -> None:
+        data = self.data["with-completion-token-limit"]
+        prompt = data["prompt"]
+        completion_token_limit = data["parameters"]["completion-token-limit"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        self._verify_completion(
+            res=self._picollm.generate(prompt=prompt, completion_token_limit=completion_token_limit),
+            expectations=expectations)
+
+    def test_generate_with_stop_phrases(self) -> None:
+        data = self.data["with-stop-phrases"]
+        prompt = data["prompt"]
+        stop_phrases = set(data["parameters"]["stop-phrases"])
+        expectations = self._parse_expectations(data["expectations"])
+
+        self._verify_completion(
+            res=self._picollm.generate(prompt=prompt, stop_phrases=stop_phrases),
+            expectations=expectations)
+
+    def test_generate_with_presence_penalty(self) -> None:
+        data = self.data["with-presence-penalty"]
+        prompt = data["prompt"]
+        presence_penalty = data["parameters"]["presence-penalty"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        self._verify_completion(
+            res=self._picollm.generate(prompt=prompt, presence_penalty=presence_penalty),
+            expectations=expectations)
+
+    def test_generate_with_frequency_penalty(self) -> None:
+        data = self.data["with-frequency-penalty"]
+        prompt = data["prompt"]
+        frequency_penalty = data["parameters"]["frequency-penalty"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        self._verify_completion(
+            res=self._picollm.generate(prompt=prompt, frequency_penalty=frequency_penalty),
+            expectations=expectations)
 
     def test_generate_with_temperature(self) -> None:
         data = self.data["with-temperature"]
@@ -273,189 +273,189 @@ class PicollmTestCase(unittest.TestCase):
 
         self.assertNotEqual(res.completion, res2.completion)
 
-    # def test_generate_with_temperature_and_identical_seeds(self) -> None:
-    #     if 'gpu' not in self._device:
-    #         data = self.data["with-temperature-and-identical-seeds"]
-    #         prompt = data["prompt"]
-    #         completion_token_limit = data["parameters"]["completion-token-limit"]
-    #         seed = data["parameters"]["seed"]
-    #         temperature = data["parameters"]["temperature"]
-    #
-    #         num_prompt_tokens = len(self._picollm.tokenize(prompt, bos=True, eos=False))
-    #
-    #         res = self._picollm.generate(
-    #             prompt=prompt,
-    #             completion_token_limit=completion_token_limit,
-    #             seed=seed,
-    #             temperature=temperature)
-    #
-    #         res2 = self._picollm.generate(
-    #             prompt=prompt,
-    #             completion_token_limit=completion_token_limit,
-    #             seed=seed,
-    #             temperature=temperature)
-    #
-    #         self._verify_completion(
-    #             res=res,
-    #             expectations=[
-    #                 CompletionExpectation(
-    #                     num_prompt_tokens=num_prompt_tokens,
-    #                     num_completion_tokens=res.usage.completion_tokens,
-    #                     endpoint=res.endpoint,
-    #                     num_top_choices=0,
-    #                     completion=res.completion),
-    #             ])
-    #
-    #         self._verify_completion(
-    #             res=res2,
-    #             expectations=[
-    #                 CompletionExpectation(
-    #                     num_prompt_tokens=num_prompt_tokens,
-    #                     num_completion_tokens=res2.usage.completion_tokens,
-    #                     endpoint=res.endpoint,
-    #                     num_top_choices=0,
-    #                     completion=res2.completion),
-    #             ])
-    #
-    #         self.assertEqual(res.completion, res2.completion)
-    #
-    # def test_generate_with_temperature_and_top_p(self) -> None:
-    #     if 'gpu' not in self._device:
-    #         data = self.data["with-temperature-and-top-p"]
-    #         prompt = data["prompt"]
-    #         completion_token_limit = data["parameters"]["completion-token-limit"]
-    #         seed = data["parameters"]["seed"]
-    #         temperature = data["parameters"]["temperature"]
-    #         top_p = data["parameters"]["top-p"]
-    #         expectations = data["expectations"]
-    #
-    #         num_prompt_tokens = len(self._picollm.tokenize(prompt, bos=True, eos=False))
-    #
-    #         res = self._picollm.generate(
-    #             prompt=prompt,
-    #             completion_token_limit=completion_token_limit,
-    #             seed=seed,
-    #             temperature=temperature,
-    #             top_p=top_p)
-    #
-    #         self._verify_completion(
-    #             res=res,
-    #             expectations=[
-    #                 CompletionExpectation(
-    #                     num_prompt_tokens=num_prompt_tokens,
-    #                     num_completion_tokens=res.usage.completion_tokens,
-    #                     endpoint=res.endpoint,
-    #                     num_top_choices=0,
-    #                     completion=x
-    #                 ) for x in expectations
-    #             ])
-    #
-    # def test_generate_with_top_choices(self) -> None:
-    #     data = self.data["with-top-choices"]
-    #     prompt = data["prompt"]
-    #     num_top_choices = data["parameters"]["num-top-choices"]
-    #     expectations = self._parse_expectations(data["expectations"])
-    #
-    #     self._verify_completion(
-    #         res=self._picollm.generate(prompt=prompt, num_top_choices=num_top_choices),
-    #         expectations=expectations)
-    #
-    # def test_generate_with_stream_callback(self) -> None:
-    #     data = self.data["default"]
-    #     prompt = data["prompt"]
-    #     expectations = self._parse_expectations(data["expectations"])
-    #
-    #     pieces = list()
-    #
-    #     def stream_callback(x: str) -> None:
-    #         pieces.append(x)
-    #
-    #     self._verify_completion(
-    #         res=self._picollm.generate(prompt=prompt, stream_callback=stream_callback),
-    #         expectations=expectations)
-    #
-    #     self.assertEqual(''.join(pieces), expectations[0].completion)
-    #
-    # def test_interrupt(self) -> None:
-    #     data = self.data["default"]
-    #     prompt = data["prompt"]
-    #     with concurrent.futures.ThreadPoolExecutor() as executor:
-    #         llm_future = executor.submit(
-    #             self._picollm.generate,
-    #             prompt)
-    #         self._picollm.interrupt()
-    #         res = llm_future.result()
-    #         self.assertEqual(res.endpoint, PicoLLMEndpoints.INTERRUPTED)
-    #
-    # def test_tokenize(self) -> None:
-    #     text = self.data["tokenize"]["text"]
-    #     expected_tokens = self.data["tokenize"]["tokens"]
-    #
-    #     tokens = self._picollm.tokenize(text, bos=True, eos=False)
-    #     self.assertListEqual(list(tokens), expected_tokens)
-    #
-    # def test_forward(self) -> None:
-    #     logits = self._picollm.forward(79)
-    #     self.assertGreater(len(logits), 0)
-    #     for x in logits:
-    #         self.assertIsInstance(x, float)
-    #
-    #     self.assertAlmostEqual(sum([math.exp(x) for x in logits]) / sum(math.exp(x) for x in logits), 1.)
-    #
-    # def test_reset(self) -> None:
-    #     logits = self._picollm.forward(79)
-    #     self._picollm.reset()
-    #
-    #     if 'gpu' in self._device:
-    #         for x, y in zip(logits, self._picollm.forward(79)):
-    #             self.assertAlmostEqual(x, y, delta=0.01)
-    #     else:
-    #         self.assertListEqual(list(logits), list(self._picollm.forward(79)))
-    #
-    # def test_model(self) -> None:
-    #     self.assertEqual(self._picollm.model, 'phi2 [2.90 v1]')
-    #
-    # def test_context_length(self) -> None:
-    #     self.assertEqual(self._picollm.context_length, 2048)
-    #
-    # def test_max_top_choices(self) -> None:
-    #     self.assertIsInstance(self._picollm.max_top_choices, int)
-    #     self.assertGreater(self._picollm.max_top_choices, 0)
-    #
-    # def test_get_dialog(self) -> None:
-    #     self.assertIsInstance(self._picollm.get_dialog(), Dialog)
-    #     self.assertIsInstance(self._picollm.get_dialog(mode='chat'), Dialog)
-    #
-    # def test_version(self):
-    #     self.assertIsInstance(self._picollm.version, str)
-    #
-    # def test_message_stack(self):
-    #     relative_path = '../..'
-    #
-    #     error = None
-    #     try:
-    #         c = PicoLLM(
-    #             access_key=self._access_key,
-    #             model_path=self._model_path,
-    #             device="invalid",
-    #             library_path=pv_library_path(relative_path))
-    #         self.assertIsNone(c)
-    #     except PicoLLMError as e:
-    #         error = e.message_stack
-    #
-    #     self.assertIsNotNone(error)
-    #     self.assertGreater(len(error), 0)
-    #
-    #     try:
-    #         c = PicoLLM(
-    #             access_key=self._access_key,
-    #             model_path=self._model_path,
-    #             device="invalid",
-    #             library_path=pv_library_path(relative_path))
-    #         self.assertIsNone(c)
-    #     except PicoLLMError as e:
-    #         self.assertEqual(len(error), len(e.message_stack))
-    #         self.assertListEqual(list(error), list(e.message_stack))
+    def test_generate_with_temperature_and_identical_seeds(self) -> None:
+        if 'gpu' not in self._device:
+            data = self.data["with-temperature-and-identical-seeds"]
+            prompt = data["prompt"]
+            completion_token_limit = data["parameters"]["completion-token-limit"]
+            seed = data["parameters"]["seed"]
+            temperature = data["parameters"]["temperature"]
+
+            num_prompt_tokens = len(self._picollm.tokenize(prompt, bos=True, eos=False))
+
+            res = self._picollm.generate(
+                prompt=prompt,
+                completion_token_limit=completion_token_limit,
+                seed=seed,
+                temperature=temperature)
+
+            res2 = self._picollm.generate(
+                prompt=prompt,
+                completion_token_limit=completion_token_limit,
+                seed=seed,
+                temperature=temperature)
+
+            self._verify_completion(
+                res=res,
+                expectations=[
+                    CompletionExpectation(
+                        num_prompt_tokens=num_prompt_tokens,
+                        num_completion_tokens=res.usage.completion_tokens,
+                        endpoint=res.endpoint,
+                        num_top_choices=0,
+                        completion=res.completion),
+                ])
+
+            self._verify_completion(
+                res=res2,
+                expectations=[
+                    CompletionExpectation(
+                        num_prompt_tokens=num_prompt_tokens,
+                        num_completion_tokens=res2.usage.completion_tokens,
+                        endpoint=res.endpoint,
+                        num_top_choices=0,
+                        completion=res2.completion),
+                ])
+
+            self.assertEqual(res.completion, res2.completion)
+
+    def test_generate_with_temperature_and_top_p(self) -> None:
+        if 'gpu' not in self._device:
+            data = self.data["with-temperature-and-top-p"]
+            prompt = data["prompt"]
+            completion_token_limit = data["parameters"]["completion-token-limit"]
+            seed = data["parameters"]["seed"]
+            temperature = data["parameters"]["temperature"]
+            top_p = data["parameters"]["top-p"]
+            expectations = data["expectations"]
+
+            num_prompt_tokens = len(self._picollm.tokenize(prompt, bos=True, eos=False))
+
+            res = self._picollm.generate(
+                prompt=prompt,
+                completion_token_limit=completion_token_limit,
+                seed=seed,
+                temperature=temperature,
+                top_p=top_p)
+
+            self._verify_completion(
+                res=res,
+                expectations=[
+                    CompletionExpectation(
+                        num_prompt_tokens=num_prompt_tokens,
+                        num_completion_tokens=res.usage.completion_tokens,
+                        endpoint=res.endpoint,
+                        num_top_choices=0,
+                        completion=x
+                    ) for x in expectations
+                ])
+
+    def test_generate_with_top_choices(self) -> None:
+        data = self.data["with-top-choices"]
+        prompt = data["prompt"]
+        num_top_choices = data["parameters"]["num-top-choices"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        self._verify_completion(
+            res=self._picollm.generate(prompt=prompt, num_top_choices=num_top_choices),
+            expectations=expectations)
+
+    def test_generate_with_stream_callback(self) -> None:
+        data = self.data["default"]
+        prompt = data["prompt"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        pieces = list()
+
+        def stream_callback(x: str) -> None:
+            pieces.append(x)
+
+        self._verify_completion(
+            res=self._picollm.generate(prompt=prompt, stream_callback=stream_callback),
+            expectations=expectations)
+
+        self.assertEqual(''.join(pieces), expectations[0].completion)
+
+    def test_interrupt(self) -> None:
+        data = self.data["default"]
+        prompt = data["prompt"]
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            llm_future = executor.submit(
+                self._picollm.generate,
+                prompt)
+            self._picollm.interrupt()
+            res = llm_future.result()
+            self.assertEqual(res.endpoint, PicoLLMEndpoints.INTERRUPTED)
+
+    def test_tokenize(self) -> None:
+        text = self.data["tokenize"]["text"]
+        expected_tokens = self.data["tokenize"]["tokens"]
+
+        tokens = self._picollm.tokenize(text, bos=True, eos=False)
+        self.assertListEqual(list(tokens), expected_tokens)
+
+    def test_forward(self) -> None:
+        logits = self._picollm.forward(79)
+        self.assertGreater(len(logits), 0)
+        for x in logits:
+            self.assertIsInstance(x, float)
+
+        self.assertAlmostEqual(sum([math.exp(x) for x in logits]) / sum(math.exp(x) for x in logits), 1.)
+
+    def test_reset(self) -> None:
+        logits = self._picollm.forward(79)
+        self._picollm.reset()
+
+        if 'gpu' in self._device:
+            for x, y in zip(logits, self._picollm.forward(79)):
+                self.assertAlmostEqual(x, y, delta=0.01)
+        else:
+            self.assertListEqual(list(logits), list(self._picollm.forward(79)))
+
+    def test_model(self) -> None:
+        self.assertEqual(self._picollm.model, 'phi2 [2.90 v1]')
+
+    def test_context_length(self) -> None:
+        self.assertEqual(self._picollm.context_length, 2048)
+
+    def test_max_top_choices(self) -> None:
+        self.assertIsInstance(self._picollm.max_top_choices, int)
+        self.assertGreater(self._picollm.max_top_choices, 0)
+
+    def test_get_dialog(self) -> None:
+        self.assertIsInstance(self._picollm.get_dialog(), Dialog)
+        self.assertIsInstance(self._picollm.get_dialog(mode='chat'), Dialog)
+
+    def test_version(self):
+        self.assertIsInstance(self._picollm.version, str)
+
+    def test_message_stack(self):
+        relative_path = '../..'
+
+        error = None
+        try:
+            c = PicoLLM(
+                access_key=self._access_key,
+                model_path=self._model_path,
+                device="invalid",
+                library_path=pv_library_path(relative_path))
+            self.assertIsNone(c)
+        except PicoLLMError as e:
+            error = e.message_stack
+
+        self.assertIsNotNone(error)
+        self.assertGreater(len(error), 0)
+
+        try:
+            c = PicoLLM(
+                access_key=self._access_key,
+                model_path=self._model_path,
+                device="invalid",
+                library_path=pv_library_path(relative_path))
+            self.assertIsNone(c)
+        except PicoLLMError as e:
+            self.assertEqual(len(error), len(e.message_stack))
+            self.assertListEqual(list(error), list(e.message_stack))
 
 
 class DialogTestCase(unittest.TestCase):
@@ -515,10 +515,10 @@ class CreateTestCase(unittest.TestCase):
         cls._access_key = sys.argv[1]
         cls._model_path = sys.argv[2]
 
-    # def test_create(self) -> None:
-    #     o = create(access_key=self._access_key, model_path=self._model_path, library_path=pv_library_path('../..'))
-    #     self.assertIsInstance(o, PicoLLM)
-    #     o.release()
+    def test_create(self) -> None:
+        o = create(access_key=self._access_key, model_path=self._model_path, library_path=pv_library_path('../..'))
+        self.assertIsInstance(o, PicoLLM)
+        o.release()
 
 
 class AvailableDevicesTestCase(unittest.TestCase):

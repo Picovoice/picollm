@@ -1,16 +1,16 @@
 PODS:
-  - picoLLM-iOS (1.0.0)
+  - picoLLM-iOS (1.1.0)
 
 DEPENDENCIES:
-  - picoLLM-iOS (~> 1.0.0)
+  - picoLLM-iOS (from `https://raw.githubusercontent.com/Picovoice/picollm/v1.1-ios/binding/ios/picoLLM-iOS.podspec`)
 
-SPEC REPOS:
-  trunk:
-    - picoLLM-iOS
+EXTERNAL SOURCES:
+  picoLLM-iOS:
+    :podspec: https://raw.githubusercontent.com/Picovoice/picollm/v1.1-ios/binding/ios/picoLLM-iOS.podspec
 
 SPEC CHECKSUMS:
-  picoLLM-iOS: 02cdb501b4beb74a9c1dea29d5cf461d65ea4a6c
+  picoLLM-iOS: dc03cd7e992c702ff34c667f9a35dd9a8084c061
 
-PODFILE CHECKSUM: 5ceffe351e8a95d803e0000324674ffa525cbb43
+PODFILE CHECKSUM: 51304d5689a6025865f0d87106b6efef0b049eb8
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.11.3

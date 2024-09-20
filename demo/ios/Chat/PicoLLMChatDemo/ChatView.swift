@@ -26,7 +26,7 @@ struct ChatView: View {
                 Spacer()
 
                 HStack(alignment: .center) {
-                    if !viewModel.enableGenerateButton {
+                    if viewModel.isGenerating {
                         ProgressView(value: 0).progressViewStyle(CircularProgressViewStyle())
                         Text("Generating...")
                             .padding(.horizontal, 12)
@@ -53,20 +53,20 @@ struct ChatView: View {
                         .onSubmit {
                             viewModel.generate()
                         }
-                        .disabled(isError || !viewModel.enableGenerateButton)
+                        .disabled(isError || viewModel.isGenerating)
                     HStack(alignment: .center) {
                         Spacer()
-                        Button(action: viewModel.generate) {
-                            Image(systemName: "arrow.up")
+                        Button(action: viewModel.isGenerating ? viewModel.interrupt : viewModel.generate) {
+                            Image(systemName: viewModel.isGenerating ? "stop.fill" : "arrow.up")
                                 .imageScale(.medium)
-                                .background(Constants.btnColor(viewModel.enableGenerateButton && !isError))
+                                .background(Constants.btnColor(!isError))
                                 .foregroundColor(.white)
                                 .padding(6)
                         }.background(
-                            Capsule().fill(Constants.btnColor(viewModel.enableGenerateButton && !isError))
+                            Capsule().fill(Constants.btnColor(!isError))
                         )
                         .padding(.horizontal, 4)
-                        .disabled(isError || !viewModel.enableGenerateButton)
+                        .disabled(isError)
                     }
                 }
                 .padding(.vertical, 12)
@@ -111,7 +111,7 @@ struct ChatView: View {
                         .imageScale(.large)
                 }
                 .padding(.horizontal, 12)
-                .disabled(!viewModel.enableGenerateButton)
+                .disabled(viewModel.isGenerating)
                 Spacer()
                 Button(action: viewModel.clearText) {
                     Image(systemName: "arrow.counterclockwise")
@@ -120,7 +120,7 @@ struct ChatView: View {
                 .padding(.horizontal, 12)
                 .disabled(
                     viewModel.errorMessage.count > 0 ||
-                    !viewModel.enableGenerateButton ||
+                    viewModel.isGenerating ||
                     viewModel.chatText.isEmpty)
             }
             .padding(.bottom, 12)

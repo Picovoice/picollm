@@ -34,7 +34,7 @@ You can download directly to your device or airdrop from a Mac.
     @Published var picoLLMLoaded = false
 
     @Published var promptText = ""
-    @Published var enableGenerateButton = true
+    @Published var isGenerating = false
 
     @Published var chatText: [Message] = []
 
@@ -116,7 +116,7 @@ You can download directly to your device or airdrop from a Mac.
 
         errorMessage = ""
 
-        enableGenerateButton = false
+        isGenerating = true
         numTokens = 0
 
         DispatchQueue.global(qos: .userInitiated).async { [self] in
@@ -143,7 +143,18 @@ You can download directly to your device or airdrop from a Mac.
 
             DispatchQueue.main.async { [self] in
                 promptText = ""
-                enableGenerateButton = true
+                isGenerating = false
+            }
+        }
+    }
+
+    public func interrupt() {
+        do {
+            try picollm?.interrupt()
+        } catch {
+            DispatchQueue.main.async { [self] in
+                errorMessage = "\(error.localizedDescription)"
+                enableLoadModelButton = true
             }
         }
     }

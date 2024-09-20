@@ -23,7 +23,6 @@ import {
 import { simd } from 'wasm-feature-detect';
 
 import createModule from "./lib/pv_picollm_simd";
-import lib64 from "./lib/pv_picollm_simd.txt";
 
 import {
   PicoLLMModel,
@@ -228,6 +227,7 @@ export class PicoLLM {
   private readonly _streamCallbackFnPointer: number;
 
   private static _wasmSimd: string;
+  private static _wasmLib: string;
   private static _sdk: string = 'web';
 
   private static _picoLLMMutex = new Mutex();
@@ -325,6 +325,16 @@ export class PicoLLM {
   public static setWasmSimd(wasmSimd: string): void {
     if (this._wasmSimd === undefined) {
       this._wasmSimd = wasmSimd;
+    }
+  }
+
+  /**
+   * Set base64 wasm lib file in text format.
+   * @param wasmLib Base64'd wasm lib file in text format.
+   */
+  public static setWasmLib(wasmLib: string): void {
+    if (this._wasmLib === undefined) {
+      this._wasmLib = wasmLib;
     }
   }
 
@@ -940,7 +950,7 @@ export class PicoLLM {
             throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
           }
 
-          const blob = new Blob([base64ToUint8Array(lib64 as any)], { type: 'application/javascript' });
+          const blob = new Blob([base64ToUint8Array(this._wasmLib)], { type: 'application/javascript' });
 
           const module: PicoLLMModule = await createModule({
             mainScriptUrlOrBlob: blob,
@@ -1034,7 +1044,7 @@ export class PicoLLM {
     modelPath: string,
     device: string
   ): Promise<PicoLLMWasmOutput> {
-    const blob = new Blob([base64ToUint8Array(lib64 as any)], { type: 'application/javascript' });
+    const blob = new Blob([base64ToUint8Array(this._wasmLib)], { type: 'application/javascript' });
 
     const module: PicoLLMModule = await createModule({
       mainScriptUrlOrBlob: blob,

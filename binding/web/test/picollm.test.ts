@@ -179,7 +179,8 @@ const runDialogTest = async (
   const { history, system } = params;
 
   for (const [k, v] of Object.entries(expectations)) {
-    const o = new DIALOG_CLASSES[k](history, system);
+    const DialogClass = DIALOG_CLASSES[k];
+    const o = new DialogClass(history, system);
     for (let i = 0; i < conversations.length - 1; i++) {
       const [human, llm] = conversations[i];
       o.addHumanRequest(human);
@@ -531,7 +532,7 @@ describe('PicoLLM generate tests (worker)', () => {
   generateTests();
 });
 
-describe.only('PicoLLM Dialog tests', () => {
+describe('PicoLLM Dialog tests', () => {
   it('should be able to get prompt', async () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];

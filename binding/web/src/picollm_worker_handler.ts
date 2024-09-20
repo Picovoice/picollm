@@ -68,6 +68,7 @@ const initRequest = async (request: PicoLLMWorkerInitRequest): Promise<any> => {
   }
 
   PicoLLM.setWasmSimd(request.wasmSimd);
+  PicoLLM.setWasmLib(request.wasmLib);
   PicoLLM.setSdk(request.sdk);
   picoLLM = await PicoLLM._init(
     request.accessKey,

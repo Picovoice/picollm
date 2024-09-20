@@ -28,7 +28,7 @@ export class Dialog {
    * to `undefined` will embed the entire dialog in the prompt.
    * @param system Instruction to embed in the prompt for configuring the model's responses.
    */
-  constructor(history?: number, system?: string) {
+  public constructor(history?: number, system?: string) {
     this._history = history;
     this._system = system;
 

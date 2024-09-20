@@ -532,7 +532,7 @@ describe('PicoLLM generate tests (worker)', () => {
   generateTests();
 });
 
-describe('PicoLLM Dialog tests', () => {
+describe.only('PicoLLM Dialog tests', () => {
   it('should be able to get prompt', async () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];

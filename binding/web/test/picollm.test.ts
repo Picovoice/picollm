@@ -22,6 +22,16 @@ import testData from './test_data.json';
 
 const ACCESS_KEY = Cypress.env('ACCESS_KEY');
 
+const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
+  'gemma-chat-dialog': GemmaChatDialog,
+  "llama-2-chat-dialog": Llama2ChatDialog,
+  "llama-3-chat-dialog": Llama3ChatDialog,
+  "mistral-chat-dialog": MistralChatDialog,
+  'phi2-chat-dialog': Phi2ChatDialog,
+  'phi2-qa-dialog': Phi2QADialog,
+  'phi3-dialog': Phi3Dialog,
+};
+
 type CompletionExpectation = {
   'num-prompt-tokens': number,
   'num-completion-tokens': number,
@@ -30,42 +40,12 @@ type CompletionExpectation = {
   'completion': string
 };
 
-type DialogExpectations = {
-  'gemma-chat-dialog': string,
-  "llama-2-chat-dialog": string,
-  "llama-3-chat-dialog": string,
-  "mistral-chat-dialog": string,
-  'phi2-chat-dialog': string,
-  'phi2-qa-dialog': string,
-  'phi3-dialog': string,
-}
-
 const sleep = async (ms: number) => {
   return new Promise<void>(resolve => {
     setTimeout(() => {
       resolve();
     }, ms);
   });
-};
-
-const getDialog = (key: string, history?: number, system?: string): Dialog => {
-  if (key === 'gemma-chat-dialog') {
-    return new GemmaChatDialog(history, system);
-  } else if (key === 'llama-2-chat-dialog') {
-    return new Llama2ChatDialog(history, system);
-  } else if (key === 'llama-3-chat-dialog') {
-    return new Llama3ChatDialog(history, system);
-  } else if (key === 'mistral-chat-dialog') {
-    return new MistralChatDialog(history, system);
-  } else if (key === 'phi2-chat-dialog') {
-    return new Phi2ChatDialog(history, system);
-  } else if (key === 'phi2-qa-dialog') {
-    return new Phi2QADialog(history, system);
-  } else if (key === 'phi3-dialog') {
-    return new Phi3Dialog(history, system);
-  }
-
-  throw new Error('Unable to get dialog class');
 };
 
 const runInitTest = async (
@@ -179,7 +159,7 @@ const runGenerateTest = async (
 };
 
 const runDialogTest = async (
-  expectations: DialogExpectations,
+  expectations: Record<string, string>,
   conversations: [string, string][],
   params: {
     history?: number,
@@ -189,7 +169,7 @@ const runDialogTest = async (
   const { history, system } = params;
 
   for (const [k, v] of Object.entries(expectations)) {
-    const o = getDialog(k, history, system);
+    const o = new DIALOG_CLASSES[k](history, system);
     for (let i = 0; i < conversations.length - 1; i++) {
       const [human, llm] = conversations[i];
       o.addHumanRequest(human);
@@ -547,7 +527,7 @@ describe.only('PicoLLM Dialog tests', () => {
     const conversation = data.conversation as [string, string][];
     const prompts = data.prompts;
 
-    await runDialogTest(prompts as DialogExpectations, conversation);
+    await runDialogTest(prompts, conversation);
   });
 
   it('should be able to get prompt with system', async () => {
@@ -556,7 +536,7 @@ describe.only('PicoLLM Dialog tests', () => {
     const system = data.system;
     const prompts = data['prompts-with-system'];
 
-    await runDialogTest(prompts as DialogExpectations, conversation, {
+    await runDialogTest(prompts, conversation, {
       system: system
     });
   });
@@ -566,7 +546,7 @@ describe.only('PicoLLM Dialog tests', () => {
     const conversation = data.conversation as [string, string][];
     const prompts = data['prompts-with-history'];
 
-    await runDialogTest(prompts as DialogExpectations, conversation, {
+    await runDialogTest(prompts, conversation, {
       history: 0
     });
   });
@@ -577,7 +557,7 @@ describe.only('PicoLLM Dialog tests', () => {
     const system = data.system;
     const prompts = data['prompts-with-system-and-history'];
 
-    await runDialogTest(prompts as DialogExpectations, conversation, {
+    await runDialogTest(prompts, conversation, {
       system: system,
       history: 0
     });

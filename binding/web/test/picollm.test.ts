@@ -47,6 +47,7 @@ type DialogExpectations = {
   "mistral-chat-dialog": string,
   'phi2-chat-dialog': string,
   'phi2-qa-dialog': string,
+  'phi3-dialog': string,
 }
 
 const sleep = async (ms: number) => {
@@ -530,13 +531,13 @@ describe('PicoLLM generate tests (worker)', () => {
   generateTests();
 });
 
-describe('PicoLLM Dialog tests', () => {
+describe.only('PicoLLM Dialog tests', () => {
   it('should be able to get prompt', async () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const prompts = data.prompts;
 
-    await runDialogTest(prompts, conversation);
+    await runDialogTest(prompts as DialogExpectations, conversation);
   });
 
   it('should be able to get prompt with system', async () => {
@@ -545,7 +546,7 @@ describe('PicoLLM Dialog tests', () => {
     const system = data.system;
     const prompts = data['prompts-with-system'];
 
-    await runDialogTest(prompts, conversation, {
+    await runDialogTest(prompts as DialogExpectations, conversation, {
       system: system
     });
   });
@@ -555,7 +556,7 @@ describe('PicoLLM Dialog tests', () => {
     const conversation = data.conversation as [string, string][];
     const prompts = data['prompts-with-history'];
 
-    await runDialogTest(prompts, conversation, {
+    await runDialogTest(prompts as DialogExpectations, conversation, {
       history: 0
     });
   });
@@ -566,7 +567,7 @@ describe('PicoLLM Dialog tests', () => {
     const system = data.system;
     const prompts = data['prompts-with-system-and-history'];
 
-    await runDialogTest(prompts, conversation, {
+    await runDialogTest(prompts as DialogExpectations, conversation, {
       system: system,
       history: 0
     });

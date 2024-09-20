@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { join } = require("path");
+const { join, extname } = require("path");
 
 const wasmFiles = [
   "pv_picollm.wasm",
@@ -25,6 +25,10 @@ try {
   fs.mkdirSync(outputDirectory, { recursive: true });
   wasmFiles.forEach(file => {
     fs.copyFileSync(join(sourceDirectory, file), join(outputDirectory, file))
+    const ext = extname(file);
+    if (ext === ".js") {
+      fs.copyFileSync(join(sourceDirectory, file), join(outputDirectory, file.replace(ext, ".txt")));
+    }
   })
 } catch (error) {
   console.error(error);

@@ -12,6 +12,7 @@ cuda
 cwrap
 dotdotdot
 dylib
+embedder
 emscripten
 endoftext
 gptq

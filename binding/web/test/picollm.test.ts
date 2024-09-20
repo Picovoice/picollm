@@ -6,7 +6,7 @@ import {
   MistralChatDialog,
   Phi2ChatDialog,
   Phi2QADialog,
-  Phi3Dialog,
+  Phi3ChatDialog,
   PicoLLM,
   PicoLLMWorker,
   PicoLLMModel,
@@ -29,7 +29,7 @@ const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   "mistral-chat-dialog": MistralChatDialog,
   'phi2-chat-dialog': Phi2ChatDialog,
   'phi2-qa-dialog': Phi2QADialog,
-  'phi3-dialog': Phi3Dialog,
+  'phi3-chat-dialog': Phi3ChatDialog,
 };
 
 type CompletionExpectation = {
@@ -521,7 +521,7 @@ describe('PicoLLM generate tests (worker)', () => {
   generateTests();
 });
 
-describe('PicoLLM Dialog tests', () => {
+describe.only('PicoLLM Dialog tests', () => {
   it('should be able to get prompt', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];

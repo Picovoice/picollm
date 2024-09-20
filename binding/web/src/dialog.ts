@@ -232,7 +232,7 @@ export class Phi2ChatDialog extends Phi2Dialog {
 /**
  * Dialog helper for `phi-3` `chat` mode.
  */
-export class Phi3Dialog extends Dialog {
+export class Phi3ChatDialog extends Dialog {
   public prompt(): string {
     if (this._humanRequests.length === this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
@@ -242,14 +242,16 @@ export class Phi3Dialog extends Dialog {
     const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llmResponses.slice(-this._history)) : this._llmResponses;
 
     const res: string[] = [];
-    res.push(`<|system|>\n${(this._system) ? this._system : ''}<|end|>\n`);
+    if (this._system !== undefined) {
+      res.push(`<|system|>\n${this._system}<|end|>\n`);
+    }
 
     for (let i = 0; i < llm.length; i++) {
       res.push(`<|user|>\n${human[i]}<|end|>\n`);
       res.push(`<|assistant|>\n${llm[i]}<|end|>\n`);
     }
     res.push(`<|user|>\n${human.at(-1)}<|end|>\n`);
-    res.push(`<|assistant|>`);
+    res.push(`<|assistant|>\n`);
 
     return res.join('');
   }
@@ -271,5 +273,8 @@ export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof D
     "qa": Phi2QADialog,
     "chat": Phi2ChatDialog
   },
-  "phi3": Phi3Dialog,
+  "phi3": {
+    "default": Phi3ChatDialog,
+    "chat": Phi3ChatDialog,
+  },
 };

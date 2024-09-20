@@ -522,44 +522,55 @@ describe('PicoLLM generate tests (worker)', () => {
 });
 
 describe('PicoLLM Dialog tests', () => {
-  it('should be able to get prompt', async () => {
+  it('should be able to get prompt', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const prompts = data.prompts;
 
-    await runDialogTest(prompts, conversation);
+    cy.wrap(null).then(async () => {
+      await runDialogTest(prompts, conversation);
+    });
   });
 
-  it('should be able to get prompt with system', async () => {
+  it('should be able to get prompt with system', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const system = data.system;
     const prompts = data['prompts-with-system'];
 
-    await runDialogTest(prompts, conversation, {
-      system: system
+
+    cy.wrap(null).then(async () => {
+      await runDialogTest(prompts, conversation, {
+        system: system
+      });
     });
   });
 
-  it('should be able to get prompt with history', async () => {
+  it('should be able to get prompt with history', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const prompts = data['prompts-with-history'];
 
-    await runDialogTest(prompts, conversation, {
-      history: 0
+
+    cy.wrap(null).then(async () => {
+      await runDialogTest(prompts, conversation, {
+        history: 0
+      });
     });
   });
 
-  it('should be able to get prompt with system and history', async () => {
+  it('should be able to get prompt with system and history', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const system = data.system;
     const prompts = data['prompts-with-system-and-history'];
 
-    await runDialogTest(prompts, conversation, {
-      system: system,
-      history: 0
+
+    cy.wrap(null).then(async () => {
+      await runDialogTest(prompts, conversation, {
+        system: system,
+        history: 0
+      });
     });
   });
 });

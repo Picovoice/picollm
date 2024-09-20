@@ -133,11 +133,11 @@ window.onload = () => {
     }
 
     status.innerText = "Generating response"
-    interruptButton.style.visibility = 'visible';
     startDot();
 
     message.disabled = true;
-    sendButton.disabled = true;
+    sendButton.style.display = 'none';
+    interruptButton.style.display = 'inline-block';
 
     dialog.addHumanRequest(message.value);
     addHumanMessage(message.value);
@@ -159,8 +159,8 @@ window.onload = () => {
       result.innerHTML += '\n';
 
       message.disabled = false;
-      sendButton.disabled = false;
-      interruptButton.style.visibility = 'hidden';
+      sendButton.style.display = 'inline-block';
+      interruptButton.style.display = 'none';
       message.focus();
 
       status.innerText = "Generating complete."

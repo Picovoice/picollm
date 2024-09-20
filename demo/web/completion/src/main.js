@@ -174,8 +174,8 @@ window.onload = () => {
     numTokens = -1;
 
     prompt.disabled = true;
-    generateButton.disabled = true;
-    interruptButton.style.visibility = 'visible';
+    generateButton.style.display = 'none';
+    interruptButton.style.display = 'inline-block';
     isText = true;
     tokensPerSec.innerText = '-';
 
@@ -215,10 +215,10 @@ window.onload = () => {
       tokensPerSec.innerText = `${Math.round((completionTokens.length / elapsedSec) * 100) / 100}`;
 
       prompt.disabled = false;
-      generateButton.disabled = false;
+      generateButton.style.display = 'inline-block';
+      interruptButton.style.display = 'none';
       resultTokens.innerText = JSON.stringify(completionTokens, null, 2);
       codeIcon.style.display = 'inline-block';
-      interruptButton.style.visibility = 'hidden';
 
       status.innerText = "Generating complete."
     } catch (e) {

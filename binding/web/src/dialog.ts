@@ -273,8 +273,5 @@ export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof D
     "qa": Phi2QADialog,
     "chat": Phi2ChatDialog
   },
-  "phi3": {
-    "default": Phi3ChatDialog,
-    "chat": Phi3ChatDialog,
-  },
+  "phi3": Phi3ChatDialog,
 };

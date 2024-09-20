@@ -120,14 +120,8 @@
       }
     }
 
-    .stopButtonArea {
-      width: 60%;
-      max-width: 500px;
-    }
-
     #interrupt {
-      float: right;
-      visibility: hidden;
+      display: none;
     }
   </style>
 </head>
@@ -161,8 +155,6 @@
     <div class="messageArea">
       <textarea id="message" placeholder="Message picoLLM"></textarea>
       <button id="send">Send</button>
-    </div>
-    <div class="stopButtonArea">
       <button id="interrupt">Stop</button>
     </div>
   </div>

@@ -152,11 +152,7 @@ type PicoLLMModule = EmscriptenModule & {
   cwrap: typeof cwrap;
 }
 
-const getDefaultDevice = (): string => {
-  // use at most 8 workers, usually 50% of workers but for to at least 1.
-  const numWorkers = Math.min(Math.max(Math.round((self.navigator.hardwareConcurrency ?? 2) / 2), 1), 8);
-  return `cpu:${numWorkers}`;
-};
+const DEFAULT_DEVICE = 'best';
 
 type PicoLLMWasmOutput = {
   module: PicoLLMModule;
@@ -343,7 +339,7 @@ export class PicoLLM {
     modelPath: string,
     options: PicoLLMInitOptions = {}
   ): Promise<PicoLLM> {
-    const { device = getDefaultDevice() } = options;
+    const { device = DEFAULT_DEVICE } = options;
 
     if (!isAccessKeyValid(accessKey)) {
       throw new PicoLLMErrors.PicoLLMInvalidArgumentError('Invalid AccessKey');

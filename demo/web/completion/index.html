@@ -83,8 +83,7 @@
     }
 
     #interrupt {
-      float: right;
-      visibility: hidden;
+      display: none;
     }
   </style>
 </head>
@@ -114,10 +113,10 @@
           <label for="prompt"></label>
           <textarea id="prompt"></textarea>
           <button id="generate" style="width: 10%">Generate</button>
+          <button id="interrupt" style="width: 10%">Stop</button>
         </div>
         <div style="display: flex; justify-content: space-between; margin-top: 5px;">
           <span>Tokens per second: <span id="tokensPerSec">-</span></span>
-          <button id="interrupt">Stop</button>
         </div>
         <hr />
         <div class="result-container">

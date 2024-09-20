@@ -41,7 +41,7 @@ import {
   PicoLLMWorkerResponse,
 } from './types';
 
-import picoLLMWasmSimd from '../lib/pv_picollm_simd.wasm';
+import picoLLMWasmSimd from './lib/pv_picollm_simd.wasm';
 
 import * as PicoLLMErrors from './picollm_errors';
 

@@ -19,7 +19,7 @@ const sourceDirectory = join(
   "wasm"
 );
 
-const outputDirectory = join(__dirname, "..", "lib");
+const outputDirectory = join(__dirname, "..", "src", "lib");
 
 try {
   fs.mkdirSync(outputDirectory, { recursive: true });

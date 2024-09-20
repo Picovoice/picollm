@@ -22,7 +22,8 @@ import {
 
 import { simd } from 'wasm-feature-detect';
 
-import lib from "../lib/pv_picollm_simd";
+import createModule from "./lib/pv_picollm_simd";
+import lib64 from "./lib/pv_picollm_simd.txt";
 
 import {
   PicoLLMModel,
@@ -131,6 +132,7 @@ type PicoLLMModule = EmscriptenModule & {
   _pv_picollm_delete_completion: pv_picollm_delete_completion_type;
   _pv_picollm_delete_tokens: pv_picollm_delete_tokens_type;
   _pv_picollm_delete_logits: pv_picollm_delete_logits_type;
+  _pv_picollm_tokenize: pv_picollm_tokenize_type;
   _pv_picollm_reset: pv_picollm_reset_type;
 
   _pv_picollm_model: pv_picollm_model_type;
@@ -161,7 +163,6 @@ type PicoLLMWasmOutput = {
   module: PicoLLMModule;
 
   pv_picollm_generate: pv_picollm_generate_type,
-  pv_picollm_tokenize: pv_picollm_tokenize_type,
   pv_picollm_forward: pv_picollm_forward_type,
 
   contextLength: number;
@@ -210,7 +211,6 @@ export class PicoLLM {
   private readonly _module: PicoLLMModule | undefined;
 
   private readonly _pv_picollm_generate: pv_picollm_generate_type;
-  private readonly _pv_picollm_tokenize: pv_picollm_tokenize_type;
   private readonly _pv_picollm_forward: pv_picollm_forward_type;
 
   private readonly _functionMutex: Mutex;
@@ -236,7 +236,6 @@ export class PicoLLM {
     this._module = handleWasm.module;
 
     this._pv_picollm_generate = handleWasm.pv_picollm_generate;
-    this._pv_picollm_tokenize = handleWasm.pv_picollm_tokenize;
     this._pv_picollm_forward = handleWasm.pv_picollm_forward;
 
     this._contextLength = handleWasm.contextLength;
@@ -702,7 +701,7 @@ export class PicoLLM {
             );
           }
 
-          const status = this._pv_picollm_tokenize(
+          const status = this._module._pv_picollm_tokenize(
             this._objectAddress,
             textAddress,
             bos,
@@ -807,7 +806,7 @@ export class PicoLLM {
           this._module._pv_free(numLogitsAddress);
 
           const logits: number[] = [];
-          const logitsAddress = unsignedAddress(this._module.HEAP32[logitsAddressAddress]);
+          const logitsAddress = unsignedAddress(this._module.HEAP32[logitsAddressAddress / Int32Array.BYTES_PER_ELEMENT]);
           for (let i = 0; i < numLogits; i++) {
             logits.push(this._module.HEAPF32[logitsAddress / Float32Array.BYTES_PER_ELEMENT + i]);
           }
@@ -941,9 +940,7 @@ export class PicoLLM {
             throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
           }
 
-          const blob = new Blob([base64ToUint8Array(lib as any)], { type: 'application/javascript' });
-          const objectURL = URL.createObjectURL(blob);
-          const createModule = await this.loadModuleFromUrl(objectURL);
+          const blob = new Blob([base64ToUint8Array(lib64 as any)], { type: 'application/javascript' });
 
           const module: PicoLLMModule = await createModule({
             mainScriptUrlOrBlob: blob,
@@ -1037,9 +1034,7 @@ export class PicoLLM {
     modelPath: string,
     device: string
   ): Promise<PicoLLMWasmOutput> {
-    const blob = new Blob([base64ToUint8Array(lib as any)], { type: 'application/javascript' });
-    const objectURL = URL.createObjectURL(blob);
-    const createModule = await this.loadModuleFromUrl(objectURL);
+    const blob = new Blob([base64ToUint8Array(lib64 as any)], { type: 'application/javascript' });
 
     const module: PicoLLMModule = await createModule({
       mainScriptUrlOrBlob: blob,
@@ -1050,7 +1045,6 @@ export class PicoLLM {
     // setup async functions
     const pv_picollm_init: pv_picollm_init_type = this.wrapAsyncFunction(module, "pv_picollm_init", 4);
     const pv_picollm_generate: pv_picollm_generate_type = this.wrapAsyncFunction(module, "pv_picollm_generate", 18);
-    const pv_picollm_tokenize: pv_picollm_tokenize_type = this.wrapAsyncFunction(module, "pv_picollm_tokenize", 4);
     const pv_picollm_forward: pv_picollm_forward_type = this.wrapAsyncFunction(module, "pv_picollm_forward", 6);
 
     const objectAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
@@ -1220,7 +1214,6 @@ export class PicoLLM {
       module: module,
 
       pv_picollm_generate: pv_picollm_generate,
-      pv_picollm_tokenize: pv_picollm_tokenize,
       pv_picollm_forward: pv_picollm_forward,
 
       contextLength: contextLength,
@@ -1260,10 +1253,6 @@ export class PicoLLM {
 
     pv_free_error_stack(messageStackAddressAddress);
     return messageStack;
-  }
-
-  private static async loadModuleFromUrl(url: string): Promise<any> {
-    return (await import(url)).default;
   }
 
   private static wrapAsyncFunction(module: PicoLLMModule, functionName: string, numArgs: number): (...args: any[]) => any {

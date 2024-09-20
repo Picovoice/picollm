@@ -6,6 +6,7 @@ import {
   MistralChatDialog,
   Phi2ChatDialog,
   Phi2QADialog,
+  Phi3Dialog,
   PicoLLM,
   PicoLLMWorker,
   PicoLLMModel,
@@ -28,6 +29,7 @@ const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   "mistral-chat-dialog": MistralChatDialog,
   'phi2-chat-dialog': Phi2ChatDialog,
   'phi2-qa-dialog': Phi2QADialog,
+  'phi3-dialog': Phi3Dialog,
 };
 
 type CompletionExpectation = {
@@ -470,9 +472,13 @@ const generateTests = () => {
       const data = testData.picollm.default;
       const prompt = data.prompt;
 
-      const generatePromise = picoLLM.generate(prompt);
+      const generatePromise = picoLLM.generate(prompt, {
+        completionTokenLimit: 200
+      });
 
       await sleep(500);
+
+      picoLLM.interrupt();
 
       const res = await generatePromise;
       expect(res.endpoint).to.eq(PicoLLMEndpoint.INTERRUPTED);
@@ -494,8 +500,8 @@ const generateTests = () => {
       const logits = await picoLLM.forward(79);
       expect(logits.length).to.gt(0);
 
-      const sum = logits.reduce((acc, x) => acc + Math.exp(x), 0);
-      expect(Math.abs(1 - (sum / logits.reduce((acc, x) => acc + Math.exp(x), 0)))).to.be.lt(0.0001);
+      const sum = logits.reduce((acc: number, x: number) => acc + Math.exp(x), 0);
+      expect(Math.abs(1 - (sum / logits.reduce((acc: number, x: number) => acc + Math.exp(x), 0)))).to.be.lt(0.0001);
     });
   });
 };

@@ -233,10 +233,6 @@ export class Phi2ChatDialog extends Phi2Dialog {
  * Dialog helper for `phi-3` `chat` mode.
  */
 export class Phi3Dialog extends Dialog {
-  constructor(history?: number, system?: string) {
-    super(history, (system) ? system : "You are a helpful assistant.");
-  }
-
   public prompt(): string {
     if (this._humanRequests.length === this._llmResponses.length) {
       throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");

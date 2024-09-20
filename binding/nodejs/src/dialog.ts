@@ -230,6 +230,34 @@ export class Phi2ChatDialog extends Phi2Dialog {
   }
 }
 
+/**
+ * Dialog helper for `phi-3` `chat` mode.
+ */
+export class Phi3ChatDialog extends Dialog {
+  public prompt(): string {
+    if (this._humanRequests.length === this._llmResponses.length) {
+      throw new PicoLLMErrors.PicoLLMRuntimeError("Cannot create a prompt without an outstanding human request");
+    }
+
+    const human = (this._history !== undefined) ? this._humanRequests.slice(-(this._history + 1)) : this._humanRequests;
+    const llm = (this._history !== undefined) ? ((this._history === 0) ? [] : this._llmResponses.slice(-this._history)) : this._llmResponses;
+
+    const res: string[] = [];
+    if (this._system !== undefined) {
+      res.push(`<|system|>\n${this._system}<|end|>\n`);
+    }
+
+    for (let i = 0; i < llm.length; i++) {
+      res.push(`<|user|>\n${human[i]}<|end|>\n`);
+      res.push(`<|assistant|>\n${llm[i]}<|end|>\n`);
+    }
+    res.push(`<|user|>\n${human.at(-1)}<|end|>\n`);
+    res.push(`<|assistant|>\n`);
+
+    return res.join('');
+  }
+}
+
 export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof Dialog } } = {
   "gemma-2b-it": GemmaChatDialog,
   "gemma-7b-it": GemmaChatDialog,
@@ -245,5 +273,9 @@ export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof D
     "default": Phi2QADialog,
     "qa": Phi2QADialog,
     "chat": Phi2ChatDialog
-  }
+  },
+  "phi3": {
+    "default": Phi3ChatDialog,
+    "chat": Phi3ChatDialog,
+  },
 };

@@ -475,6 +475,7 @@ describe('PicoLLM generate tests', () => {
       streamCallback: token => { pieces.push(token); }
     });
 
+    await sleep(100);
     expect(pieces.join('')).toEqual(data.expectations[0].completion);
   });
 

@@ -162,20 +162,22 @@ async function completionDemo() {
   console.log(`picoLLM '${picoLLM.version}'`);
   console.log(`Loaded '${picoLLM.model}'`);
 
+  let interrupted = false;
   const dialog = picoLLM.getDialog(dialogMode, history, systemInstruction);
 
   const streamCallback = (token) => {
     process.stdout.write(token);
   };
 
-  process.on('SIGINT', function() {
-    picoLLM.release();
-    rl.close();
-    process.exit();
+  process.stdin.on("keypress", (key, str) => {
+    if (str.sequence === '\x03') {
+      interrupted = true;
+      picoLLM.interrupt();
+    }
   });
 
   try {
-    while (true) {
+    while (!interrupted) {
       const prompt = await getPrompt();
       dialog.addHumanRequest(prompt);
       const res = await picoLLM.generate(
@@ -200,6 +202,7 @@ async function completionDemo() {
   } finally {
     picoLLM.release();
     rl.close();
+    process.exit();
   }
 
 }

@@ -63,6 +63,8 @@ picoLLM Inference Engine supports the following open-weight models. The models a
   - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
   - `phi2`
+- Phi-3
+  - `phi3`
 
 ## AccessKey
 
@@ -83,7 +85,7 @@ const pllm = new PicoLLM(
     '${ACCESS_KEY}',
     '${MODEL_PATH}');
 
-const res = pllm.generate('${PROMPT}');
+const res = await pllm.generate('${PROMPT}');
 console.log(res.completion);
 ```
 
@@ -92,6 +94,12 @@ downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 
 Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, and `gemma-2b-it`) have a specific chat
 template. You can either directly format the prompt or use a dialog helper:
+
+Call `interrupt` to stop prompt generation:
+
+```javascript
+pllm.interrupt();
+```
 
 ```javascript
 const dialog = pllm.getDialog();

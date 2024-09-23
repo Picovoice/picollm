@@ -497,6 +497,8 @@ describe('PicoLLM generate tests', () => {
 
     const res = await generatePromise;
     expect(res.endpoint).toEqual(PicoLLMEndpoint.INTERRUPTED);
+
+    picoLLM.release();
   });
 
   test(`should be able to tokenize`, () => {

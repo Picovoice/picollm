@@ -46,7 +46,7 @@ jobs:
       run: yarn install
 
     - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/03-/phi2-290.pllm -o test/phi2-290.pllm
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/03-280e68c/phi2-290.pllm -o test/phi2-290.pllm
 
     - name: Test
       run: yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.xpu}}

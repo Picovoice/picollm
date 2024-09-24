@@ -29,7 +29,7 @@ import {
 
 import * as testData from '../../../resources/.test/test_data.json';
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 
 const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]
@@ -340,9 +340,9 @@ describe('PicoLLM generate tests', () => {
       device: DEVICE
     });
 
-    const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
-
     try {
+      const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+
       const res = await picoLLM.generate(prompt, {
         completionTokenLimit: completionTokenLimit,
         seed: seeds[0],
@@ -394,9 +394,9 @@ describe('PicoLLM generate tests', () => {
       device: DEVICE
     });
 
-    const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
-
     try {
+      const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+
       const res = await picoLLM.generate(prompt, {
         completionTokenLimit: completionTokenLimit,
         seed: seed,

@@ -135,7 +135,6 @@ async function completionDemo() {
   console.log(">>> Press `Enter` to exit: ");
 
   readline.emitKeypressEvents(process.stdin);
-  process.stdin.setRawMode(true);
 
   process.stdin.on("keypress", (key, str) => {
     if (str.sequence === '\r') {

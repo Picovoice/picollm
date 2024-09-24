@@ -174,7 +174,9 @@ const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpect
 const runGenerateTest = async (
   prompt: string,
   expectations: CompletionExpectation[],
-  options?: PicoLLMGenerateOptions,
+  options: PicoLLMGenerateOptions = {
+    streamCallback: () => {},
+  },
 ) => {
   const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
     device: DEVICE

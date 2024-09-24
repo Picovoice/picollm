@@ -32,5 +32,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
 
-    implementation files('/home/ian/work/github/picollm/binding/android/PicoLLM/picollm/build/outputs/aar/picollm-release.aar')
+    implementation 'ai.picovoice:picollm-android:1.1.0'
 }

@@ -11,6 +11,7 @@ import {
   Phi2Dialog,
   Phi2QADialog,
   Phi2ChatDialog,
+  Phi3ChatDialog,
 } from './dialog';
 
 import {
@@ -27,6 +28,7 @@ import {
   PicoLLMWorkerInitResponse,
   PicoLLMWorkerGenerateRequest,
   PicoLLMWorkerGenerateResponse,
+  PicoLLMWorkerInterruptRequest,
   PicoLLMWorkerTokenizeRequest,
   PicoLLMWorkerTokenizeResponse,
   PicoLLMWorkerForwardRequest,
@@ -39,12 +41,15 @@ import {
   PicoLLMWorkerResponse,
 } from './types';
 
-import picoLLMWasmSimd from '../lib/pv_picollm_simd.wasm';
+import picoLLMWasmSimd from './lib/pv_picollm_simd.wasm';
+import picoLLMWasmLib from './lib/pv_picollm_simd.txt';
 
 import * as PicoLLMErrors from './picollm_errors';
 
 PicoLLM.setWasmSimd(picoLLMWasmSimd);
 PicoLLMWorker.setWasmSimd(picoLLMWasmSimd);
+PicoLLM.setWasmLib(picoLLMWasmLib);
+PicoLLMWorker.setWasmLib(picoLLMWasmLib);
 
 export {
   Dialog,
@@ -56,6 +61,7 @@ export {
   Phi2Dialog,
   Phi2QADialog,
   Phi2ChatDialog,
+  Phi3ChatDialog,
   PicoLLM,
   PicoLLMCompletion,
   PicoLLMCompletionToken,
@@ -71,6 +77,7 @@ export {
   PicoLLMWorkerInitResponse,
   PicoLLMWorkerGenerateRequest,
   PicoLLMWorkerGenerateResponse,
+  PicoLLMWorkerInterruptRequest,
   PicoLLMWorkerTokenizeRequest,
   PicoLLMWorkerTokenizeResponse,
   PicoLLMWorkerForwardRequest,

@@ -41,6 +41,9 @@
     "**/proguard-rules.pro",
 
     // Python
-    "**/__pycache__/**"
+    "**/__pycache__/**",
+
+    // JS
+    "**/lib/wasm/**/*.js"
   ]
 }

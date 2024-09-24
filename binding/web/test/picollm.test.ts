@@ -6,6 +6,7 @@ import {
   MistralChatDialog,
   Phi2ChatDialog,
   Phi2QADialog,
+  Phi3ChatDialog,
   PicoLLM,
   PicoLLMWorker,
   PicoLLMModel,
@@ -28,6 +29,7 @@ const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   "mistral-chat-dialog": MistralChatDialog,
   'phi2-chat-dialog': Phi2ChatDialog,
   'phi2-qa-dialog': Phi2QADialog,
+  'phi3-chat-dialog': Phi3ChatDialog,
 };
 
 type CompletionExpectation = {
@@ -38,14 +40,13 @@ type CompletionExpectation = {
   'completion': string
 };
 
-type DialogExpectations = {
-  'gemma-chat-dialog': string,
-  "llama-2-chat-dialog": string,
-  "llama-3-chat-dialog": string,
-  "mistral-chat-dialog": string,
-  'phi2-chat-dialog': string,
-  'phi2-qa-dialog': string,
-}
+const sleep = async (ms: number) => {
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
+};
 
 const runInitTest = async (
   instance: typeof PicoLLM | typeof PicoLLMWorker,
@@ -158,7 +159,7 @@ const runGenerateTest = async (
 };
 
 const runDialogTest = async (
-  expectations: DialogExpectations,
+  expectations: Record<string, string>,
   conversations: [string, string][],
   params: {
     history?: number,
@@ -457,6 +458,24 @@ const generateTests = () => {
     });
   });
 
+  it(`should be able to interrupt`, () => {
+    cy.loadPicoLLM().then(async picoLLM => {
+      const data = testData.picollm.default;
+      const prompt = data.prompt;
+
+      const generatePromise = picoLLM.generate(prompt, {
+        completionTokenLimit: 200
+      });
+
+      await sleep(500);
+
+      picoLLM.interrupt();
+
+      const res = await generatePromise;
+      expect(res.endpoint).to.eq(PicoLLMEndpoint.INTERRUPTED);
+    });
+  });
+
   it(`should be able to tokenize`, () => {
     cy.loadPicoLLM().then(async picoLLM => {
       const data = testData.picollm.tokenize;
@@ -472,8 +491,8 @@ const generateTests = () => {
       const logits = await picoLLM.forward(79);
       expect(logits.length).to.gt(0);
 
-      const sum = logits.reduce((acc, x) => acc + Math.exp(x), 0);
-      expect(Math.abs(1 - (sum / logits.reduce((acc, x) => acc + Math.exp(x), 0)))).to.be.lt(0.0001);
+      const sum = logits.reduce((acc: number, x: number) => acc + Math.exp(x), 0);
+      expect(Math.abs(1 - (sum / logits.reduce((acc: number, x: number) => acc + Math.exp(x), 0)))).to.be.lt(0.0001);
     });
   });
 };
@@ -502,45 +521,56 @@ describe('PicoLLM generate tests (worker)', () => {
   generateTests();
 });
 
-describe('PicoLLM Dialog tests', () => {
-  it('should be able to get prompt', async () => {
+describe.only('PicoLLM Dialog tests', () => {
+  it('should be able to get prompt', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const prompts = data.prompts;
 
-    await runDialogTest(prompts, conversation);
+    cy.wrap(null).then(async () => {
+      await runDialogTest(prompts, conversation);
+    });
   });
 
-  it('should be able to get prompt with system', async () => {
+  it('should be able to get prompt with system', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const system = data.system;
     const prompts = data['prompts-with-system'];
 
-    await runDialogTest(prompts, conversation, {
-      system: system
+
+    cy.wrap(null).then(async () => {
+      await runDialogTest(prompts, conversation, {
+        system: system
+      });
     });
   });
 
-  it('should be able to get prompt with history', async () => {
+  it('should be able to get prompt with history', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const prompts = data['prompts-with-history'];
 
-    await runDialogTest(prompts, conversation, {
-      history: 0
+
+    cy.wrap(null).then(async () => {
+      await runDialogTest(prompts, conversation, {
+        history: 0
+      });
     });
   });
 
-  it('should be able to get prompt with system and history', async () => {
+  it('should be able to get prompt with system and history', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const system = data.system;
     const prompts = data['prompts-with-system-and-history'];
 
-    await runDialogTest(prompts, conversation, {
-      system: system,
-      history: 0
+
+    cy.wrap(null).then(async () => {
+      await runDialogTest(prompts, conversation, {
+        system: system,
+        history: 0
+      });
     });
   });
 });

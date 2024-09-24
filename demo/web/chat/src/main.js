@@ -14,6 +14,7 @@ window.onload = () => {
 
   const initButton = document.getElementById("init");
   const sendButton = document.getElementById("send");
+  const interruptButton = document.getElementById("interrupt");
   const changeModelButton = document.getElementById("changeModel");
   const resetDialogButton = document.getElementById("resetDialog");
 
@@ -135,7 +136,8 @@ window.onload = () => {
     startDot();
 
     message.disabled = true;
-    sendButton.disabled = true;
+    sendButton.style.display = 'none';
+    interruptButton.style.display = 'inline-block';
 
     dialog.addHumanRequest(message.value);
     addHumanMessage(message.value);
@@ -157,7 +159,8 @@ window.onload = () => {
       result.innerHTML += '\n';
 
       message.disabled = false;
-      sendButton.disabled = false;
+      sendButton.style.display = 'inline-block';
+      interruptButton.style.display = 'none';
       message.focus();
 
       status.innerText = "Generating complete."
@@ -167,6 +170,14 @@ window.onload = () => {
       stopDot();
     }
   };
+
+  interruptButton.onclick = () => {
+    if (!picoLLM) {
+      return;
+    }
+
+    picoLLM.interrupt();
+  }
 
   resetDialogButton.onclick = () => {
     result.innerHTML = '';

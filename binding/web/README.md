@@ -13,13 +13,26 @@ models. picoLLM Inference Engine is:
 - Runs on CPU and GPU
 - Free for open-weight models
 
+## Requirements
+
+PicoLLM Web Binding uses [SharedArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer) to generate
+text. Modern browsers require the following response headers to allow the usage of `SharedArrayBuffers`:
+
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+Refer to our [Web demos](https://github.com/Picovoice/picollm/tree/master/demo/web) for example on creating a server
+with the corresponding response headers.
+
 ## Compatibility
 
 - Chrome / Edge
 - Firefox
 - Safari
 
-**NOTE**: IndexedDB and SIMD are required to use `picoLLM`.
+**NOTE**: IndexedDB, SIMD and SharedArrayBuffers are required to use `picoLLM`.
 
 ## Installation
 
@@ -46,6 +59,7 @@ picoLLM Inference Engine on Web supports the following open-weight models. The m
 - Llama-2
   - `llama-2-7b`
   - `llama-2-7b-chat`
+- Llama-3
   - `llama-3-8b`
   - `llama-3-8b-instruct`
 - Mistral
@@ -54,8 +68,10 @@ picoLLM Inference Engine on Web supports the following open-weight models. The m
   - `mistral-7b-instruct-v0.2`
 - Phi-2
   - `phi2`
+- Phi-3
+  - `phi3`
 
-**NOTE**: Only gemma and Phi-2 models have been tested on multiple browsers across different platforms.
+**NOTE**: Only Gemma, Phi-2, and Phi-3 models have been tested on multiple browsers across different platforms.
 The rest of the models depend on the user's system in order to run properly.
 
 ## AccessKey
@@ -186,6 +202,15 @@ const res = await picoLLM.generate(dialog.prompt())
 dialog.addLLMResponse(res.completion)
 print(res.completion)
 ```
+
+### Interrupt Text Generation
+
+```typescript
+picoLLM.interrupt();
+```
+
+This will stop text generation and if it was properly interrupted, it will set `res.completion.endpoint` 
+as an interrupted state.
 
 ### Clean Up
 

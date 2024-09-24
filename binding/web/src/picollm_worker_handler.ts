@@ -17,6 +17,7 @@ import {
   PicoLLMWorkerFailureResponse,
   PicoLLMWorkerForwardRequest,
   PicoLLMWorkerGenerateRequest,
+  PicoLLMWorkerInterruptRequest,
   PicoLLMWorkerInitRequest,
   PicoLLMWorkerRequest,
   PicoLLMWorkerTokenizeRequest,
@@ -67,6 +68,7 @@ const initRequest = async (request: PicoLLMWorkerInitRequest): Promise<any> => {
   }
 
   PicoLLM.setWasmSimd(request.wasmSimd);
+  PicoLLM.setWasmLib(request.wasmLib);
   PicoLLM.setSdk(request.sdk);
   picoLLM = await PicoLLM._init(
     request.accessKey,
@@ -94,6 +96,14 @@ const generateRequest = async (
     command: 'ok',
     completion,
   };
+};
+
+const interruptRequest = async (
+  _: PicoLLMWorkerInterruptRequest
+): Promise<void> => {
+  if (picoLLM !== null) {
+    picoLLM.interrupt();
+  }
 };
 
 const tokenizeRequest = async (
@@ -160,6 +170,9 @@ self.onmessage = async function (
         break;
       case 'generate':
         self.postMessage(await generateRequest(event.data));
+        break;
+      case 'interrupt':
+        await interruptRequest(event.data);
         break;
       case 'tokenize':
         self.postMessage(await tokenizeRequest(event.data));

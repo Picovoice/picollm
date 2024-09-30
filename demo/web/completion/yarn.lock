@@ -5,12 +5,12 @@
 "@picovoice/picollm-web@../../../binding/web":
   version "1.1.0"
   dependencies:
-    "@picovoice/web-utils" "~1.4.1"
+    "@picovoice/web-utils" "~1.4.3"
 
-"@picovoice/web-utils@~1.4.1":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.2.tgz#2ddc44552d15fa1a4958e0c3384e58545255eea1"
-  integrity sha512-pF5Uw3Vm4mOWJ2H3Zc7E/nDr/O7OhbvgEK6W7cx9MNNK3qq51MqiGluPpZ8a2K61BuIzxcNMC1mXWpmIAWVolA==
+"@picovoice/web-utils@~1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.3.tgz#1de0b20d6080c18d295c6df37c09d88bf7c4f555"
+  integrity sha512-7JN3YYsSD9Gtce6YKG3XqpX49dkeu7jTdbox7rHQA/X/Q3zxopXA9zlCKSq6EIjFbiX2iuzDKUx1XrFa3d8c0w==
   dependencies:
     commander "^10.0.1"
 
@@ -202,18 +202,6 @@ lodash@^4.17.14:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
-
-mime-db@1.52.0:
-  version "1.52.0"
-  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"
-  integrity sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==
-
-mime-types@^2.1.35:
-  version "2.1.35"
-  resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.35.tgz#381a871b62a734450660ae3deee44813f70d959a"
-  integrity sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==
-  dependencies:
-    mime-db "1.52.0"
 
 mime@^1.6.0:
   version "1.6.0"

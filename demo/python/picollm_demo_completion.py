@@ -9,6 +9,7 @@
 # specific language governing permissions and limitations under the License.
 #
 
+import signal
 import time
 from argparse import ArgumentParser
 
@@ -131,14 +132,24 @@ def main():
         library_path=library_path)
     print(f"picoLLM `{o.version}`")
     print(f"Loaded `{o.model}`")
+    print("Generating... (press Ctrl+C to interrupt)\n")
 
     start_sec = [0.]
+    is_interrupt = [False]
 
-    def stream_callback(x: str) -> None:
+    def interrupt_generate(_, __):
+        is_interrupt[0] = True
+        print("\n\nInterrupting generate...")
+        o.interrupt()
+
+    def stream_callback(token: str):
         if start_sec[0] == 0.:
             start_sec[0] = time.time()
 
-        print(x, flush=True, end='')
+        if not is_interrupt[0]:
+            print(token, flush=True, end='')
+
+    signal.signal(signal.SIGINT, interrupt_generate)
 
     try:
         completion = o.generate(

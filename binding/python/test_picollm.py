@@ -9,6 +9,7 @@
 # specific language governing permissions and limitations under the License.
 #
 
+import concurrent.futures
 import json
 import math
 import os
@@ -35,6 +36,7 @@ from ._picollm import (
     MistralChatDialog,
     Phi2ChatDialog,
     Phi2QADialog,
+    Phi3Dialog,
     PicoLLM,
     PicoLLMCompletion,
     PicoLLMEndpoints,
@@ -85,28 +87,31 @@ class PicollmTestCase(unittest.TestCase):
                     library_path=pv_library_path('../..'))
 
     def test_init_with_invalid_model_path(self) -> None:
-        with self.assertRaises(PicoLLMIOError):
-            PicoLLM(
-                access_key=self._access_key,
-                model_path="/invalid.pllm",
-                device=self._device,
-                library_path=pv_library_path('../..'))
+        if 'raspberry-pi' not in pv_library_path('../..'):
+            with self.assertRaises(PicoLLMIOError):
+                PicoLLM(
+                    access_key=self._access_key,
+                    model_path="/invalid.pllm",
+                    device=self._device,
+                    library_path=pv_library_path('../..'))
 
     def test_init_with_invalid_device(self) -> None:
-        with self.assertRaises(PicoLLMInvalidArgumentError):
-            PicoLLM(
-                access_key=self._access_key,
-                model_path=self._model_path,
-                device='cpu:nan',
-                library_path=pv_library_path('../..'))
+        if 'raspberry-pi' not in pv_library_path('../..'):
+            with self.assertRaises(PicoLLMInvalidArgumentError):
+                PicoLLM(
+                    access_key=self._access_key,
+                    model_path=self._model_path,
+                    device='cpu:nan',
+                    library_path=pv_library_path('../..'))
 
     def test_init_with_invalid_library_path(self) -> None:
-        with self.assertRaises(OSError):
-            PicoLLM(
-                access_key=self._access_key,
-                model_path=self._model_path,
-                device=self._device,
-                library_path="/invalid.so")
+        if 'raspberry-pi' not in pv_library_path('../..'):
+            with self.assertRaises(OSError):
+                PicoLLM(
+                    access_key=self._access_key,
+                    model_path=self._model_path,
+                    device=self._device,
+                    library_path="/invalid.so")
 
     @staticmethod
     def _verify_completion_helper(res: PicoLLMCompletion, expectation: CompletionExpectation) -> bool:
@@ -162,7 +167,8 @@ class PicollmTestCase(unittest.TestCase):
             return {
                 "END_OF_SENTENCE": PicoLLMEndpoints.END_OF_SENTENCE,
                 "COMPLETION_TOKEN_LIMIT_REACHED": PicoLLMEndpoints.COMPLETION_TOKEN_LIMIT_REACHED,
-                "STOP_PHRASE_ENCOUNTERED": PicoLLMEndpoints.STOP_PHRASE_ENCOUNTERED
+                "STOP_PHRASE_ENCOUNTERED": PicoLLMEndpoints.STOP_PHRASE_ENCOUNTERED,
+                "INTERRUPTED": PicoLLMEndpoints.INTERRUPTED
             }[ep]
 
         return [
@@ -370,6 +376,17 @@ class PicollmTestCase(unittest.TestCase):
 
         self.assertEqual(''.join(pieces), expectations[0].completion)
 
+    def test_interrupt(self) -> None:
+        data = self.data["default"]
+        prompt = data["prompt"]
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            llm_future = executor.submit(
+                self._picollm.generate,
+                prompt)
+            self._picollm.interrupt()
+            res = llm_future.result()
+            self.assertEqual(res.endpoint, PicoLLMEndpoints.INTERRUPTED)
+
     def test_tokenize(self) -> None:
         text = self.data["tokenize"]["text"]
         expected_tokens = self.data["tokenize"]["tokens"]
@@ -451,6 +468,7 @@ class DialogTestCase(unittest.TestCase):
             "mistral-chat-dialog": MistralChatDialog,
             "phi2-chat-dialog": Phi2ChatDialog,
             "phi2-qa-dialog": Phi2QADialog,
+            "phi3-chat-dialog": Phi3Dialog
         }
 
         path = os.path.join(os.path.dirname(__file__), '../../resources/.test/test_data.json')
@@ -500,6 +518,7 @@ class CreateTestCase(unittest.TestCase):
     def test_create(self) -> None:
         o = create(access_key=self._access_key, model_path=self._model_path, library_path=pv_library_path('../..'))
         self.assertIsInstance(o, PicoLLM)
+        o.release()
 
 
 class AvailableDevicesTestCase(unittest.TestCase):
@@ -516,4 +535,4 @@ if __name__ == '__main__':
         print("usage: test_picollm.py ${AccessKey} ${ModelFile} ${device}")
         exit(1)
 
-    unittest.main(argv=sys.argv[:1])
+    unittest.main(argv=sys.argv[:1], verbosity=2)

@@ -9,6 +9,8 @@
 # specific language governing permissions and limitations under the License.
 #
 
+import signal
+import sys
 from argparse import ArgumentParser
 
 import picollm
@@ -132,13 +134,31 @@ def main() -> None:
         library_path=library_path)
     print(f"picoLLM `{o.version}`")
     print(f"Loaded `{o.model}`")
+    print("Enter a prompt to start chatting (press Ctrl+C to interrupt the LLM)")
 
     dialog = o.get_dialog(mode=dialog_mode, history=history, system=system_instruction)
 
+    is_interrupt = [False]
+
+    def interrupt_generate(_, __):
+        is_interrupt[0] = True
+        print("\n\nInterrupting generate...")
+        o.interrupt()
+
+    def chat_exit(_, __):
+        sys.exit(0)
+
+    def stream_callback(token: str):
+        if not is_interrupt[0]:
+            print(token, flush=True, end='')
+
     try:
         while True:
+            signal.signal(signal.SIGINT, chat_exit)
             prompt = input(">>> ")
             dialog.add_human_request(prompt)
+
+            signal.signal(signal.SIGINT, interrupt_generate)
             res = o.generate(
                 prompt=dialog.prompt(),
                 completion_token_limit=completion_token_limit,
@@ -148,11 +168,9 @@ def main() -> None:
                 frequency_penalty=frequency_penalty,
                 temperature=temperature,
                 top_p=top_p,
-                stream_callback=lambda x: print(x, flush=True, end=''))
+                stream_callback=stream_callback)
             print()
             dialog.add_llm_response(res.completion)
-    except KeyboardInterrupt:
-        pass
     finally:
         o.release()
 

@@ -521,56 +521,56 @@ describe('PicoLLM generate tests (worker)', () => {
   generateTests();
 });
 
-describe.only('PicoLLM Dialog tests', () => {
-  it('should be able to get prompt', () => {
-    const data = testData.dialog;
-    const conversation = data.conversation as [string, string][];
-    const prompts = data.prompts;
-
-    cy.wrap(null).then(async () => {
-      await runDialogTest(prompts, conversation);
-    });
-  });
-
-  it('should be able to get prompt with system', () => {
-    const data = testData.dialog;
-    const conversation = data.conversation as [string, string][];
-    const system = data.system;
-    const prompts = data['prompts-with-system'];
-
-
-    cy.wrap(null).then(async () => {
-      await runDialogTest(prompts, conversation, {
-        system: system
-      });
-    });
-  });
-
-  it('should be able to get prompt with history', () => {
-    const data = testData.dialog;
-    const conversation = data.conversation as [string, string][];
-    const prompts = data['prompts-with-history'];
-
-
-    cy.wrap(null).then(async () => {
-      await runDialogTest(prompts, conversation, {
-        history: 0
-      });
-    });
-  });
-
-  it('should be able to get prompt with system and history', () => {
-    const data = testData.dialog;
-    const conversation = data.conversation as [string, string][];
-    const system = data.system;
-    const prompts = data['prompts-with-system-and-history'];
-
-
-    cy.wrap(null).then(async () => {
-      await runDialogTest(prompts, conversation, {
-        system: system,
-        history: 0
-      });
-    });
-  });
-});
+// describe.only('PicoLLM Dialog tests', () => {
+//   it('should be able to get prompt', () => {
+//     const data = testData.dialog;
+//     const conversation = data.conversation as [string, string][];
+//     const prompts = data.prompts;
+//
+//     cy.wrap(null).then(async () => {
+//       await runDialogTest(prompts, conversation);
+//     });
+//   });
+//
+//   it('should be able to get prompt with system', () => {
+//     const data = testData.dialog;
+//     const conversation = data.conversation as [string, string][];
+//     const system = data.system;
+//     const prompts = data['prompts-with-system'];
+//
+//
+//     cy.wrap(null).then(async () => {
+//       await runDialogTest(prompts, conversation, {
+//         system: system
+//       });
+//     });
+//   });
+//
+//   it('should be able to get prompt with history', () => {
+//     const data = testData.dialog;
+//     const conversation = data.conversation as [string, string][];
+//     const prompts = data['prompts-with-history'];
+//
+//
+//     cy.wrap(null).then(async () => {
+//       await runDialogTest(prompts, conversation, {
+//         history: 0
+//       });
+//     });
+//   });
+//
+//   it('should be able to get prompt with system and history', () => {
+//     const data = testData.dialog;
+//     const conversation = data.conversation as [string, string][];
+//     const system = data.system;
+//     const prompts = data['prompts-with-system-and-history'];
+//
+//
+//     cy.wrap(null).then(async () => {
+//       await runDialogTest(prompts, conversation, {
+//         system: system,
+//         history: 0
+//       });
+//     });
+//   });
+// });

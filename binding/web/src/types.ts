@@ -28,6 +28,7 @@ export enum PicoLLMEndpoint {
   END_OF_SENTENCE,
   COMPLETION_TOKEN_LIMIT_REACHED,
   STOP_PHRASE_ENCOUNTERED,
+  INTERRUPTED,
 }
 
 export type PicoLLMModel = {
@@ -82,6 +83,7 @@ export type PicoLLMWorkerInitRequest = {
   modelPath: string;
   options: PicoLLMInitOptions;
   wasmSimd: string;
+  wasmLib: string;
   sdk: string;
 };
 
@@ -89,6 +91,10 @@ export type PicoLLMWorkerGenerateRequest = {
   command: 'generate';
   prompt: string;
   options: PicoLLMGenerateOptions;
+};
+
+export type PicoLLMWorkerInterruptRequest = {
+  command: 'interrupt';
 };
 
 export type PicoLLMWorkerTokenizeRequest = {
@@ -114,6 +120,7 @@ export type PicoLLMWorkerReleaseRequest = {
 export type PicoLLMWorkerRequest =
   | PicoLLMWorkerInitRequest
   | PicoLLMWorkerGenerateRequest
+  | PicoLLMWorkerInterruptRequest
   | PicoLLMWorkerTokenizeRequest
   | PicoLLMWorkerForwardRequest
   | PicoLLMWorkerResetRequest

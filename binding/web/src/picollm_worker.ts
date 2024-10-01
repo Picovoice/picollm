@@ -246,6 +246,15 @@ export class PicoLLMWorker {
   }
 
   /**
+   * Interrupts `generate()` if generation is in progress. Otherwise, it has no effect.
+   */
+  public interrupt(): void {
+    this._worker.postMessage({
+      command: 'interrupt',
+    });
+  }
+
+  /**
    * Tokenizes a given text using the model's tokenizer. This is a low-level function meant for benchmarking and
    * advanced usage. `.generate()` should be used when possible.
    *

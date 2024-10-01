@@ -1,5 +1,4 @@
 declare const initXpu: (memory: WebAssembly.Memory, xpuHelperWasm?: Uint8Array) => {
-    pv_matrix_vector_multiply_web_worker_wasm: (objAddress: number, matrixAddress: number, vectorAddress: number, m: number, n: number, resultAddress: number, statusAddress: number) => Promise<void>;
     aligned_alloc: (alignment: number, size: number) => Promise<number>;
     free: (address: number) => Promise<void>;
     pv_picollm_table_forward: (objAddress: number, numTokens: number, xAddress: number, yAddress: number) => Promise<void>;

@@ -5,13 +5,15 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'demo/ios/**'
       - '.github/workflows/ios-demos.yml'
+      - 'demo/ios/**'
+      - '!demo/ios/README.md'
   pull_request:
     branches: [ main, 'v[0-9]+.[0-9]+' ]
     paths:
-      - 'demo/ios/**'
       - '.github/workflows/ios-demos.yml'
+      - 'demo/ios/**'
+      - '!demo/ios/README.md'
 
 jobs:
   build-completion-demo:
@@ -28,7 +30,7 @@ jobs:
         run: gem install cocoapods
 
       - name: Run Cocoapods
-        run: pod install
+        run: pod install --repo-update
 
       - name: Build
         run: xcrun xcodebuild build
@@ -53,7 +55,7 @@ jobs:
         run: gem install cocoapods
 
       - name: Run Cocoapods
-        run: pod install
+        run: pod install --repo-update
 
       - name: Build
         run: xcrun xcodebuild build

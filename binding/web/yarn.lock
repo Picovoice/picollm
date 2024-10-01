@@ -1119,10 +1119,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@picovoice/web-utils@~1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.1.tgz#207c5e308b1f7b9127bab83b4b3d9a653d630ffb"
-  integrity sha512-WoC+PAYXEpeLzq76URCX+UC5ZRJPJCLcxCgIaZ3Sx9uUVtobSvHbnWAFDW8Q5OTmsRF52gKqr08uqH+LNC7V+Q==
+"@picovoice/web-utils@~1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.3.tgz#1de0b20d6080c18d295c6df37c09d88bf7c4f555"
+  integrity sha512-7JN3YYsSD9Gtce6YKG3XqpX49dkeu7jTdbox7rHQA/X/Q3zxopXA9zlCKSq6EIjFbiX2iuzDKUx1XrFa3d8c0w==
   dependencies:
     commander "^10.0.1"
 
@@ -1214,6 +1214,9 @@
     undici-types "~5.26.4"
 
 "@types/pv-xpu-web-worker@../../lib/wasm/dist/types/xpu_web_worker":
+  version "0.0.0"
+
+"@types/pv-xpu-webgpu@../../lib/wasm/dist/types/xpu_webgpu":
   version "0.0.0"
 
 "@types/resolve@1.20.2":
@@ -3365,6 +3368,9 @@ punycode@^2.1.0, punycode@^2.1.1:
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
 pv-xpu-web-worker@../../lib/wasm/dist/xpu_web_worker/esm:
+  version "0.0.0"
+
+pv-xpu-webgpu@../../lib/wasm/dist/xpu_webgpu/esm:
   version "0.0.0"
 
 qs@~6.10.3:

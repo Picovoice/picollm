@@ -46,6 +46,7 @@ picoLLM Inference Engine on Web supports the following open-weight models. The m
 - Llama-2
   - `llama-2-7b`
   - `llama-2-7b-chat`
+- Llama-3
   - `llama-3-8b`
   - `llama-3-8b-instruct`
 - Mistral
@@ -54,8 +55,10 @@ picoLLM Inference Engine on Web supports the following open-weight models. The m
   - `mistral-7b-instruct-v0.2`
 - Phi-2
   - `phi2`
+- Phi-3
+  - `phi3`
 
-**NOTE**: Only gemma and Phi-2 models have been tested on multiple browsers across different platforms.
+**NOTE**: Only Gemma, Phi-2, and Phi-3 models have been tested on multiple browsers across different platforms.
 The rest of the models depend on the user's system in order to run properly.
 
 ## AccessKey
@@ -186,6 +189,15 @@ const res = await picoLLM.generate(dialog.prompt())
 dialog.addLLMResponse(res.completion)
 print(res.completion)
 ```
+
+### Interrupt Text Generation
+
+```typescript
+picoLLM.interrupt();
+```
+
+This will stop text generation and if it was properly interrupted, it will set `res.completion.endpoint` 
+as an interrupted state.
 
 ### Clean Up
 

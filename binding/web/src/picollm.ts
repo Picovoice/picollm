@@ -26,7 +26,8 @@ import {
 
 import { simd } from 'wasm-feature-detect';
 
-import initXpu from 'pv-xpu-web-worker';
+import initXpuWebWorker from 'pv-xpu-web-worker';
+import initXpuWebGPU from "pv-xpu-webgpu";
 
 import {
   PicoLLMModel,
@@ -116,6 +117,7 @@ type pv_picollm_delete_completion_tokens_type = (
   object: number,
   numCompletionTokens: number
 ) => Promise<void>;
+type pv_picollm_interrupt_type = (object: number) => Promise<number>;
 type pv_picollm_delete_completion_type = (completion: number) => Promise<void>;
 type pv_picollm_tokenize_type = (
   object: number,
@@ -177,6 +179,7 @@ type PicoLLMWasmOutput = {
 
   pvPicoLLMDelete: pv_picollm_delete_type;
   pvPicoLLMGenerate: pv_picollm_generate_type;
+  pvPicoLLMInterrupt: pv_picollm_interrupt_type;
   pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens_type;
   pvPicoLLMDeleteCompletion: pv_picollm_delete_completion_type;
   pvPicoLLMTokenize: pv_picollm_tokenize_type;
@@ -193,6 +196,7 @@ const DEFAULT_DEVICE = 'best';
 export class PicoLLM {
   private readonly _pvPicoLLMDelete: pv_picollm_delete_type;
   private readonly _pvPicoLLMGenerate: pv_picollm_generate_type;
+  private readonly _pvPicoLLMInterrupt: pv_picollm_interrupt_type;
   private readonly _pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens_type;
   private readonly _pvPicoLLMDeleteCompletion: pv_picollm_delete_completion_type;
   private readonly _pvPicoLLMTokenize: pv_picollm_tokenize_type;
@@ -232,6 +236,7 @@ export class PicoLLM {
 
     this._pvPicoLLMDelete = handleWasm.pvPicoLLMDelete;
     this._pvPicoLLMGenerate = handleWasm.pvPicoLLMGenerate;
+    this._pvPicoLLMInterrupt = handleWasm.pvPicoLLMInterrupt;
     this._pvPicoLLMDeleteCompletionTokens =
       handleWasm.pvPicoLLMDeleteCompletionTokens;
     this._pvPicoLLMDeleteCompletion = handleWasm.pvPicoLLMDeleteCompletion;
@@ -671,7 +676,6 @@ export class PicoLLM {
 
           await this._pvPicoLLMDeleteCompletion(completionAddress);
           await this._pvFree(completionAddressAddress);
-
           return {
             usage,
             endpoint,
@@ -686,6 +690,22 @@ export class PicoLLM {
           reject(error);
         });
     });
+  }
+
+  /**
+   * Interrupts `generate()` if generation is in progress. Otherwise, it has no effect.
+   */
+  public async interrupt(): Promise<void> {
+    if (this._wasmMemory === undefined) {
+      throw new PicoLLMErrors.PicoLLMInvalidStateError(
+        'Attempted to call PicoLLM interrupt after release.'
+      );
+    }
+
+    const status = await this._pvPicoLLMInterrupt(this._objectAddress);
+    if (status !== PvStatus.SUCCESS) {
+      throw pvStatusToException(status, 'Interrupt failed');
+    }
   }
 
   /**
@@ -1015,7 +1035,8 @@ export class PicoLLM {
           }
 
           const picoLLMWorkerWasmBuffer = base64ToUint8Array(picoLLMWebWorkerHelperSimd);
-          const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
+          const xpuWebWorkerImports = initXpuWebWorker(memory, picoLLMWorkerWasmBuffer);
+          const xpuWebGPUImports = initXpuWebGPU(memory, picoLLMWorkerWasmBuffer);
 
           const pvError = new PvError();
 
@@ -1023,9 +1044,17 @@ export class PicoLLM {
 
           const exports = await buildWasm(memory, this._wasmSimd, pvError, {
             ...xpuWebWorkerImports,
+            ...xpuWebGPUImports,
             stream_callback_wasm: streamCallback.streamCallbackWasm,
           });
-          xpuWebWorkerImports.aligned_alloc = exports.aligned_alloc;
+          for (const [k, v] of Object.entries(exports)) {
+            // @ts-ignore
+            xpuWebWorkerImports[k] = v;
+          }
+          for (const [k, v] of Object.entries(exports)) {
+            // @ts-ignore
+            xpuWebGPUImports[k] = v;
+          }
 
           const aligned_alloc = exports.aligned_alloc as aligned_alloc_type;
           const pv_free = exports.pv_free as pv_free_type;
@@ -1155,7 +1184,8 @@ export class PicoLLM {
     let memoryBufferUint8 = new Uint8Array(memory.buffer);
 
     const picoLLMWorkerWasmBuffer = base64ToUint8Array(picoLLMWebWorkerHelperSimd);
-    const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
+    const xpuWebWorkerImports = initXpuWebWorker(memory, picoLLMWorkerWasmBuffer);
+    const xpuWebGPUImports = initXpuWebGPU(memory, picoLLMWorkerWasmBuffer);
 
     const pvError = new PvError();
 
@@ -1163,11 +1193,16 @@ export class PicoLLM {
 
     const exports = await buildWasm(memory, wasmBase64, pvError, {
       ...xpuWebWorkerImports,
+      ...xpuWebGPUImports,
       stream_callback_wasm: streamCallback.streamCallbackWasm,
     });
     for (const [k, v] of Object.entries(exports)) {
       // @ts-ignore
       xpuWebWorkerImports[k] = v;
+    }
+    for (const [k, v] of Object.entries(exports)) {
+      // @ts-ignore
+      xpuWebGPUImports[k] = v;
     }
 
     const aligned_alloc = exports.aligned_alloc as aligned_alloc_type;
@@ -1178,6 +1213,8 @@ export class PicoLLM {
       exports.pv_picollm_delete as pv_picollm_delete_type;
     const pv_picollm_generate =
       exports.pv_picollm_generate as pv_picollm_generate_type;
+    const pv_picollm_interrupt =
+      exports.pv_picollm_interrupt as pv_picollm_interrupt_type;
     const pv_picollm_delete_completion_tokens =
       exports.pv_picollm_delete_completion_tokens as pv_picollm_delete_completion_tokens_type;
     const pv_picollm_delete_completion =
@@ -1420,6 +1457,7 @@ export class PicoLLM {
 
       pvPicoLLMDelete: pv_picollm_delete,
       pvPicoLLMGenerate: pv_picollm_generate,
+      pvPicoLLMInterrupt: pv_picollm_interrupt,
       pvPicoLLMDeleteCompletionTokens: pv_picollm_delete_completion_tokens,
       pvPicoLLMDeleteCompletion: pv_picollm_delete_completion,
       pvPicoLLMTokenize: pv_picollm_tokenize,

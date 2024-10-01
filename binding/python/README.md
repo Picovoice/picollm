@@ -55,6 +55,8 @@ picoLLM Inference Engine supports the following open-weight models. The models a
     - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
   - `phi2`
+- Phi-3
+  - `phi3`
 
 ## AccessKey
 
@@ -92,6 +94,11 @@ dialog.add_human_request(prompt)
 res = pllm.generate(prompt=dialog.prompt())
 dialog.add_llm_response(res.completion)
 print(res.completion)
+```
+
+To interrupt completion generation before it has finished:
+```python
+pllm.interrupt()
 ```
 
 Finally, when done, be sure to release the resources explicitly:

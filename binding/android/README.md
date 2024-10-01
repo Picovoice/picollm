@@ -60,6 +60,8 @@ picoLLM Inference Engine supports the following open-weight models. The models a
     - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
   - `phi2`
+- Phi-3
+  - `phi3`
 
 ### Model File Deployment
 
@@ -78,7 +80,7 @@ Android APKs have a size limit which does not allow for the direct inclusion of 
    - Download the file from within the app.
 
 4. **ADB Push (for testing or manual installation):**
-   - Use the Android Debug Bridge (ADB) command [`adb push`](https://developer.android.com/studio/command-line/adb#copyfiles) to transfer the model file directly to a connected device.
+   - Use the Android Debug Bridge (ADB) command [`adb push`](https://developer.android.com/tools/adb#copyfiles) to transfer the model file directly to a connected device.
    - Access the file programmatically within your app.
 
 ## AccessKey
@@ -115,6 +117,11 @@ try {
 ```
 
 Replace `${PROMPT}` with a text prompt.
+
+To interrupt completion generation before it has finished:
+```java
+picollm.interrupt();
+```
 
 Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, and `gemma-2b-it`) have a specific chat
 template. You can either directly format the prompt or use a dialog helper:

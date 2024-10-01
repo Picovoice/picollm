@@ -42,6 +42,8 @@ class PicoLLMNative {
             int numTopChoices,
             PicoLLMStreamCallback streamCallback) throws PicoLLMException;
 
+    static native void interrupt(long object) throws PicoLLMException;
+
     static native int[] tokenize(
             long object,
             String text,

@@ -11,6 +11,7 @@ import {
   Phi2Dialog,
   Phi2QADialog,
   Phi2ChatDialog,
+  Phi3ChatDialog,
 } from './dialog';
 
 import {
@@ -27,6 +28,7 @@ import {
   PicoLLMWorkerInitResponse,
   PicoLLMWorkerGenerateRequest,
   PicoLLMWorkerGenerateResponse,
+  PicoLLMWorkerInterruptRequest,
   PicoLLMWorkerTokenizeRequest,
   PicoLLMWorkerTokenizeResponse,
   PicoLLMWorkerForwardRequest,
@@ -56,6 +58,7 @@ export {
   Phi2Dialog,
   Phi2QADialog,
   Phi2ChatDialog,
+  Phi3ChatDialog,
   PicoLLM,
   PicoLLMCompletion,
   PicoLLMCompletionToken,
@@ -71,6 +74,7 @@ export {
   PicoLLMWorkerInitResponse,
   PicoLLMWorkerGenerateRequest,
   PicoLLMWorkerGenerateResponse,
+  PicoLLMWorkerInterruptRequest,
   PicoLLMWorkerTokenizeRequest,
   PicoLLMWorkerTokenizeResponse,
   PicoLLMWorkerForwardRequest,

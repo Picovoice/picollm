@@ -2,17 +2,17 @@
 # yarn lockfile v1
 
 
-"@picovoice/picollm-web@~1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@picovoice/picollm-web/-/picollm-web-1.0.7.tgz#98111e9d28f149e6f95e802b1d32e5114413662d"
-  integrity sha512-vllhlFaDhhsKuuUCidq60YXH7DTwvJBRTI1QUphxfRGCtm7Th/DF9lX6e48PIFFavT+VIeG/1AgJ9oT9Z/Z9og==
+"@picovoice/picollm-web@~1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@picovoice/picollm-web/-/picollm-web-1.1.0.tgz#e8706e134787d6738765ec81a1f29ac7668a4982"
+  integrity sha512-3Nxc9rLCf2/AmWIvB6pnsWDX/Q399bLT0sBR1pVJpxcS3ZMh5BLVHx7599bhAVBqBYUY6DZRBLRmmH1Yhk0Ycw==
   dependencies:
-    "@picovoice/web-utils" "~1.4.1"
+    "@picovoice/web-utils" "~1.4.3"
 
-"@picovoice/web-utils@~1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.1.tgz#207c5e308b1f7b9127bab83b4b3d9a653d630ffb"
-  integrity sha512-WoC+PAYXEpeLzq76URCX+UC5ZRJPJCLcxCgIaZ3Sx9uUVtobSvHbnWAFDW8Q5OTmsRF52gKqr08uqH+LNC7V+Q==
+"@picovoice/web-utils@~1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@picovoice/web-utils/-/web-utils-1.4.3.tgz#1de0b20d6080c18d295c6df37c09d88bf7c4f555"
+  integrity sha512-7JN3YYsSD9Gtce6YKG3XqpX49dkeu7jTdbox7rHQA/X/Q3zxopXA9zlCKSq6EIjFbiX2iuzDKUx1XrFa3d8c0w==
   dependencies:
     commander "^10.0.1"
 

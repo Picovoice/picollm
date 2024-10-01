@@ -36,7 +36,7 @@ jobs:
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp.test || true
 
     - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/03-280e68c/phi2-290.pllm -o phi2-290.pllm
 
     - name: Make Android dir
       run: ~/Android/Sdk/platform-tools/adb shell mkdir -p /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external
@@ -89,7 +89,7 @@ jobs:
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp.test || true
 
     - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/latest/phi2-290.pllm -o phi2-290.pllm
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/03-280e68c/phi2-290.pllm -o phi2-290.pllm
 
     - name: Make Android dir
       run: ~/Android/Sdk/platform-tools/adb shell mkdir -p /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external

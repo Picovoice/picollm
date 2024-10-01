@@ -1,6 +1,6 @@
 {
   "name": "@picovoice/picollm-node",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Picovoice picoLLM Node.js binding",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -10,7 +10,7 @@
     "build:types": "tsc --declaration --declarationMap --emitDeclarationOnly --outDir ./dist/types",
     "prepack": "npm run build",
     "prepare": "node copy.js",
-    "test": "jest --no-cache",
+    "test": "jest --no-cache --detectOpenHandles",
     "lint": "eslint . --ext .js,.ts"
   },
   "repository": {

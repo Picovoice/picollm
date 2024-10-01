@@ -96,6 +96,12 @@ const generateRequest = async (
   };
 };
 
+const interruptRequest = async (): Promise<void> => {
+  if (picoLLM !== null) {
+    await picoLLM.interrupt();
+  }
+};
+
 const tokenizeRequest = async (
   request: PicoLLMWorkerTokenizeRequest
 ): Promise<any> => {
@@ -160,6 +166,9 @@ self.onmessage = async function (
         break;
       case 'generate':
         self.postMessage(await generateRequest(event.data));
+        break;
+      case 'interrupt':
+        await interruptRequest();
         break;
       case 'tokenize':
         self.postMessage(await tokenizeRequest(event.data));

@@ -252,6 +252,34 @@ class Phi2ChatDialog(Phi2Dialog):
         super().__init__(human_tag='Human', llm_tag='AI', history=history, system=system)
 
 
+class Phi3Dialog(Dialog):
+    """
+    Dialog helper for `phi3`.
+    """
+
+    def __init__(self, history: Optional[int] = None, system: Optional[str] = None) -> None:
+        super().__init__(history=history, system=system)
+
+    def prompt(self) -> str:
+        if len(self._human) == len(self._llm):
+            raise RuntimeError("Cannot create a prompt without an outstanding human request")
+
+        human = self._human if self._history is None else self._human[-(self._history + 1):]
+        llm = (list() if self._history == 0 else self._llm[-self._history:]) if self._history is not None else self._llm
+
+        res = list()
+        if self._system is not None:
+            res.append(f"<|system|>\n{self._system}<|end|>\n")
+
+        for h, l in zip(human, llm):
+            res.append(f"<|user|>\n{h.strip()}<|end|>\n")
+            res.append(f"<|assistant|>\n{l.strip()}<|end|>\n")
+        res.append(f"<|user|>\n{human[-1].strip()}<|end|>\n")
+        res.append("<|assistant|>\n")
+
+        return ''.join(res)
+
+
 class PicoLLMError(Exception):
     def __init__(self, message: str = '', message_stack: Optional[Sequence[str]] = None) -> None:
         super().__init__(message)
@@ -342,12 +370,14 @@ class PicoLLMEndpoints(Enum):
     END_OF_SENTENCE = 0
     COMPLETION_TOKEN_LIMIT_REACHED = 1
     STOP_PHRASE_ENCOUNTERED = 2
+    INTERRUPTED = 3
 
     def __str__(self) -> str:
         return {
             self.END_OF_SENTENCE: 'END_OF_SENTENCE',
             self.COMPLETION_TOKEN_LIMIT_REACHED: 'COMPLETION_TOKEN_LIMIT_REACHED',
             self.STOP_PHRASE_ENCOUNTERED: 'STOP_PHRASE_ENCOUNTERED',
+            self.INTERRUPTED: 'INTERRUPTED',
         }[self]
 
 
@@ -574,6 +604,12 @@ class PicoLLM(object):
         ]
         self._generate_func.restype = self.PicovoiceStatuses
 
+        self._interrupt_func = library.pv_picollm_interrupt
+        self._interrupt_func.argtypes = [
+            POINTER(self.CPicoLLM),
+        ]
+        self._interrupt_func.restype = self.PicovoiceStatuses
+
         self._delete_completion_tokens_func = library.pv_picollm_delete_completion_tokens
         self._delete_completion_tokens_func.argtypes = [
             POINTER(self.CPicoLLMCompletionToken),
@@ -793,6 +829,18 @@ class PicoLLM(object):
             completion=completion
         )
 
+    def interrupt(self) -> None:
+        """
+        Interrupts `generate()` if generation is in progress. Otherwise, it has no effect.
+        """
+
+        status = self._interrupt_func(self._handle)
+        if status is not self.PicovoiceStatuses.SUCCESS:
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message="`pv_picollm_interrupt` failed.",
+                message_stack=self.get_error_stack()
+            )
+
     def tokenize(self, text, bos: bool, eos: bool) -> Sequence[int]:
         """
         Tokenizes a given text using the model's tokenizer. This is a low-level function meant for benchmarking and
@@ -926,6 +974,7 @@ class PicoLLM(object):
             'qa': Phi2QADialog,
             'chat': Phi2ChatDialog,
         },
+        'phi3': Phi3Dialog
     }
 
     def get_dialog(
@@ -980,6 +1029,7 @@ __all__ = [
     'Phi2ChatDialog',
     'Phi2Dialog',
     'Phi2QADialog',
+    'Phi3Dialog',
     'PicoLLM',
     'PicoLLMActivationError',
     'PicoLLMActivationLimitError',

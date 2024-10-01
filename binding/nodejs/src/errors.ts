@@ -60,11 +60,13 @@ export class PicoLLMActivationThrottledError extends PicoLLMError {}
 export class PicoLLMActivationRefusedError extends PicoLLMError {}
 
 export function pvStatusToException(
-  pvStatus: PvStatus,
+  pvStatus: PvStatus | string,
   errorMessage: string,
   messageStack: string[] = []
 ): void {
-  switch (pvStatus) {
+  const status = (typeof pvStatus === "string") ? PvStatus[pvStatus as any] : pvStatus;
+
+  switch (status) {
     case PvStatus.OUT_OF_MEMORY:
       throw new PicoLLMOutOfMemoryError(errorMessage, messageStack);
     case PvStatus.IO_ERROR:
@@ -89,7 +91,7 @@ export function pvStatusToException(
       throw new PicoLLMActivationRefusedError(errorMessage, messageStack);
     default:
       // eslint-disable-next-line no-console
-      console.warn(`Unmapped error code: ${pvStatus}`);
+      console.warn(`Unmapped error code: ${status}`);
       throw new PicoLLMError(errorMessage);
   }
 }

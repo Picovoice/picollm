@@ -17,6 +17,7 @@ window.onload = () => {
 
   const initButton = document.getElementById("init");
   const generateButton = document.getElementById("generate");
+  const interruptButton = document.getElementById("interrupt");
   const changeModelButton = document.getElementById("changeModel");
 
   const accessKey = document.getElementById("accessKey");
@@ -173,7 +174,8 @@ window.onload = () => {
     numTokens = -1;
 
     prompt.disabled = true;
-    generateButton.disabled = true;
+    generateButton.style.display = 'none';
+    interruptButton.style.display = 'inline-block';
     isText = true;
     tokensPerSec.innerText = '-';
 
@@ -213,7 +215,8 @@ window.onload = () => {
       tokensPerSec.innerText = `${Math.round((completionTokens.length / elapsedSec) * 100) / 100}`;
 
       prompt.disabled = false;
-      generateButton.disabled = false;
+      generateButton.style.display = 'inline-block';
+      interruptButton.style.display = 'none';
       resultTokens.innerText = JSON.stringify(completionTokens, null, 2);
       codeIcon.style.display = 'inline-block';
 
@@ -224,6 +227,14 @@ window.onload = () => {
       stopDot();
     }
   };
+
+  interruptButton.onclick = () => {
+    if (!picoLLM) {
+      return;
+    }
+
+    picoLLM.interrupt();
+  }
 
   codeIcon.onclick = () => {
     if (isText) {

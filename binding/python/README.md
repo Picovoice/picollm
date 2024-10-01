@@ -96,6 +96,11 @@ dialog.add_llm_response(res.completion)
 print(res.completion)
 ```
 
+To interrupt completion generation before it has finished:
+```python
+pllm.interrupt()
+```
+
 Finally, when done, be sure to release the resources explicitly:
 
 ```python

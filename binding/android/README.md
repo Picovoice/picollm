@@ -116,6 +116,11 @@ try {
 
 Replace `${PROMPT}` with a text prompt.
 
+To interrupt completion generation before it has finished:
+```java
+picollm.interrupt();
+```
+
 Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, and `gemma-2b-it`) have a specific chat
 template. You can either directly format the prompt or use a dialog helper:
 

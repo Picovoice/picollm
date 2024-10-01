@@ -73,6 +73,7 @@ typedef enum {
     PV_PICOLLM_ENDPOINT_END_OF_SENTENCE = 0,
     PV_PICOLLM_ENDPOINT_COMPLETION_TOKEN_LIMIT_REACHED = 1,
     PV_PICOLLM_ENDPOINT_STOP_PHRASE_ENCOUNTERED = 2,
+    PV_PICOLLM_ENDPOINT_INTERRUPTED = 3,
 } pv_picollm_endpoint_t;
 
 /**
@@ -163,6 +164,13 @@ PV_API pv_status_t pv_picollm_generate(
         pv_picollm_completion_token_t **completion_tokens,
         int32_t *num_completion_tokens,
         char **completion);
+
+/**
+ * Interrupts `pv_picollm_generate()` if generation is in progress. Otherwise, it has no effect.
+ * @param object picoLLM object.
+ * @return Status code. Returns `PV_STATUS_INVALID_ARGUMENT` on failure.
+ */
+PV_API pv_status_t pv_picollm_interrupt(pv_picollm_t *object);
 
 /**
  * Deletes completion tokens returned by `pv_picollm_generate()`.

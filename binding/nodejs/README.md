@@ -92,14 +92,13 @@ console.log(res.completion);
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
 downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 
+To interrupt completion generation before it has finished:
+```javascript
+pllm.interrupt()
+```
+
 Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, and `gemma-2b-it`) have a specific chat
 template. You can either directly format the prompt or use a dialog helper:
-
-Call `interrupt` to stop prompt generation:
-
-```javascript
-pllm.interrupt();
-```
 
 ```javascript
 const dialog = pllm.getDialog();

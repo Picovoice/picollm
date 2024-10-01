@@ -26,7 +26,8 @@ import {
 
 import { simd } from 'wasm-feature-detect';
 
-import initXpu from 'pv-xpu-web-worker';
+import initXpuWebWorker from 'pv-xpu-web-worker';
+import initXpuWebGPU from "pv-xpu-webgpu";
 
 import {
   PicoLLMModel,
@@ -675,7 +676,6 @@ export class PicoLLM {
 
           await this._pvPicoLLMDeleteCompletion(completionAddress);
           await this._pvFree(completionAddressAddress);
-
           return {
             usage,
             endpoint,
@@ -1035,7 +1035,8 @@ export class PicoLLM {
           }
 
           const picoLLMWorkerWasmBuffer = base64ToUint8Array(picoLLMWebWorkerHelperSimd);
-          const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
+          const xpuWebWorkerImports = initXpuWebWorker(memory, picoLLMWorkerWasmBuffer);
+          const xpuWebGPUImports = initXpuWebGPU(memory, picoLLMWorkerWasmBuffer);
 
           const pvError = new PvError();
 
@@ -1043,9 +1044,17 @@ export class PicoLLM {
 
           const exports = await buildWasm(memory, this._wasmSimd, pvError, {
             ...xpuWebWorkerImports,
+            ...xpuWebGPUImports,
             stream_callback_wasm: streamCallback.streamCallbackWasm,
           });
-          xpuWebWorkerImports.aligned_alloc = exports.aligned_alloc;
+          for (const [k, v] of Object.entries(exports)) {
+            // @ts-ignore
+            xpuWebWorkerImports[k] = v;
+          }
+          for (const [k, v] of Object.entries(exports)) {
+            // @ts-ignore
+            xpuWebGPUImports[k] = v;
+          }
 
           const aligned_alloc = exports.aligned_alloc as aligned_alloc_type;
           const pv_free = exports.pv_free as pv_free_type;
@@ -1175,7 +1184,8 @@ export class PicoLLM {
     let memoryBufferUint8 = new Uint8Array(memory.buffer);
 
     const picoLLMWorkerWasmBuffer = base64ToUint8Array(picoLLMWebWorkerHelperSimd);
-    const xpuWebWorkerImports = initXpu(memory, picoLLMWorkerWasmBuffer);
+    const xpuWebWorkerImports = initXpuWebWorker(memory, picoLLMWorkerWasmBuffer);
+    const xpuWebGPUImports = initXpuWebGPU(memory, picoLLMWorkerWasmBuffer);
 
     const pvError = new PvError();
 
@@ -1183,11 +1193,16 @@ export class PicoLLM {
 
     const exports = await buildWasm(memory, wasmBase64, pvError, {
       ...xpuWebWorkerImports,
+      ...xpuWebGPUImports,
       stream_callback_wasm: streamCallback.streamCallbackWasm,
     });
     for (const [k, v] of Object.entries(exports)) {
       // @ts-ignore
       xpuWebWorkerImports[k] = v;
+    }
+    for (const [k, v] of Object.entries(exports)) {
+      // @ts-ignore
+      xpuWebGPUImports[k] = v;
     }
 
     const aligned_alloc = exports.aligned_alloc as aligned_alloc_type;

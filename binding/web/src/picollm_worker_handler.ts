@@ -96,14 +96,10 @@ const generateRequest = async (
   };
 };
 
-const interruptRequest = async (): Promise<any> => {
-  if (picoLLM === null) {
-    return notInitializedError;
+const interruptRequest = async (): Promise<void> => {
+  if (picoLLM !== null) {
+    await picoLLM.interrupt();
   }
-  await picoLLM.interrupt();
-  return {
-    command: 'ok',
-  };
 };
 
 const tokenizeRequest = async (
@@ -172,7 +168,7 @@ self.onmessage = async function (
         self.postMessage(await generateRequest(event.data));
         break;
       case 'interrupt':
-        self.postMessage(await interruptRequest());
+        await interruptRequest();
         break;
       case 'tokenize':
         self.postMessage(await tokenizeRequest(event.data));

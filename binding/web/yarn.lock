@@ -1216,6 +1216,9 @@
 "@types/pv-xpu-web-worker@../../lib/wasm/dist/types/xpu_web_worker":
   version "0.0.0"
 
+"@types/pv-xpu-webgpu@../../lib/wasm/dist/types/xpu_webgpu":
+  version "0.0.0"
+
 "@types/resolve@1.20.2":
   version "1.20.2"
   resolved "https://registry.yarnpkg.com/@types/resolve/-/resolve-1.20.2.tgz#97d26e00cd4a0423b4af620abecf3e6f442b7975"
@@ -3365,6 +3368,9 @@ punycode@^2.1.0, punycode@^2.1.1:
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
 pv-xpu-web-worker@../../lib/wasm/dist/xpu_web_worker/esm:
+  version "0.0.0"
+
+pv-xpu-webgpu@../../lib/wasm/dist/xpu_webgpu/esm:
   version "0.0.0"
 
 qs@~6.10.3:

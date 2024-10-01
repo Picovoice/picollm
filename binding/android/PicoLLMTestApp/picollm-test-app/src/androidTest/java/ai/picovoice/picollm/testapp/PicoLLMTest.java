@@ -663,25 +663,6 @@ public class PicoLLMTest {
             return parameters;
         }
 
-        PicoLLM picollm;
-
-        @Before
-        public void Setup() throws PicoLLMException {
-            picollm = new PicoLLM.Builder()
-                    .setAccessKey(accessKey)
-                    .setModelPath(modelPath)
-                    .setDevice(device)
-                    .build();
-        }
-
-        @After
-        public void Teardown() {
-            if (picollm != null) {
-                picollm.delete();
-                picollm = null;
-            }
-        }
-
         public PicoLLMDialog.Builder getDialogBuilder(String dialogName) {
             switch (dialogName) {
                 case "gemma-chat-dialog":

@@ -91,6 +91,10 @@ public class PicoLLMTest {
 
         @Test
         public void testInitFailWithInvalidAccessKey() {
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
             assertThrows(PicoLLMException.class, () ->
                     new PicoLLM.Builder()
                             .setAccessKey("invalid==")
@@ -523,6 +527,7 @@ public class PicoLLMTest {
                                 currentTestData.get("prompt").getAsString(),
                                 new PicoLLMGenerateParams.Builder().build()));
 
+                Thread.sleep(500);
                 picollm.interrupt();
 
                 PicoLLMCompletion res = resFuture.get();

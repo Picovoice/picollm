@@ -30,7 +30,7 @@ jobs:
         run: gem install cocoapods
 
       - name: Run Cocoapods
-        run: pod install
+        run: pod install --repo-update
 
       - name: Build
         run: xcrun xcodebuild build
@@ -55,7 +55,7 @@ jobs:
         run: gem install cocoapods
 
       - name: Run Cocoapods
-        run: pod install
+        run: pod install --repo-update
 
       - name: Build
         run: xcrun xcodebuild build

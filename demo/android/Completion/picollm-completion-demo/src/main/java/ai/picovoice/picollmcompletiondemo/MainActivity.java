@@ -156,7 +156,18 @@ public class MainActivity extends AppCompatActivity {
         updateUIState(UIState.INIT);
 
         promptButton = findViewById(R.id.promptButton);
-        promptButton.setOnClickListener(view -> generateCompletion());
+        promptButton.setOnClickListener(view -> {
+            if (currentAppState == UIState.PROMPT) {
+                generateCompletion();
+            } else if (currentAppState == UIState.GENERATING_COMPLETION) {
+                try {
+                    picollm.interrupt();
+                } catch (PicoLLMException e) {
+                    updateUIState(UIState.PROMPT);
+                    mainHandler.post(() -> completionText.setText(e.toString()));
+                }
+            }
+        });
 
         promptEditText = findViewById(R.id.promptEditText);
         promptEditText.setOnEditorActionListener((v, actionId, event) -> {
@@ -404,6 +415,11 @@ public class MainActivity extends AppCompatActivity {
                                     getResources(),
                                     R.drawable.prompt_button_enabled,
                                     null));
+                    promptButton.setImageDrawable(
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
+                                    R.drawable.prompt_button_arrow,
+                                    null));
                     promptButton.setEnabled(true);
                     loadNewModelButton.setImageDrawable(
                             ResourcesCompat.getDrawable(
@@ -429,9 +445,14 @@ public class MainActivity extends AppCompatActivity {
                     promptButton.setBackground(
                             ResourcesCompat.getDrawable(
                                     getResources(),
-                                    R.drawable.prompt_button_disabled,
+                                    R.drawable.prompt_button_enabled,
                                     null));
-                    promptButton.setEnabled(false);
+                    promptButton.setImageDrawable(
+                            ResourcesCompat.getDrawable(
+                                    getResources(),
+                                    R.drawable.prompt_button_stop,
+                                    null));
+                    promptButton.setEnabled(true);
                     loadNewModelButton.setImageDrawable(
                             ResourcesCompat.getDrawable(
                                     getResources(),

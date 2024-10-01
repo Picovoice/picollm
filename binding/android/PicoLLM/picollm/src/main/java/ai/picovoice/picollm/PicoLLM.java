@@ -15,6 +15,8 @@ package ai.picovoice.picollm;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.text.TextUtils;
+
 /**
  * Android binding for picoLLM.
  */
@@ -45,6 +47,7 @@ public class PicoLLM {
         phi2Map.put("qa", Phi2QADialog.class);
         phi2Map.put("chat", Phi2ChatDialog.class);
         DIALOGS.put("phi2", phi2Map);
+        DIALOGS.put("phi3", Phi3ChatDialog.class);
     }
 
     public static void setSdk(String sdk) {
@@ -147,6 +150,15 @@ public class PicoLLM {
                 generateParams.getTopP(),
                 generateParams.getNumTopChoices(),
                 generateParams.getStreamCallback());
+    }
+
+    /**
+     * Interrupts `.generate()` if generation is in progress. Otherwise, it has no effect.
+     *
+     * @throws PicoLLMException if interrupt fails.
+     */
+    public void interrupt() throws PicoLLMException {
+        PicoLLMNative.interrupt(handle);
     }
 
     /**
@@ -306,7 +318,7 @@ public class PicoLLM {
                                 String.format(
                                         "`%s` requires a mode. Available modes are: %s",
                                         model,
-                                        String.join(", ", dialogModeMap.keySet())));
+                                        TextUtils.join(", ", dialogModeMap.keySet())));
                     }
                     return instantiateDialog(dialogModeMap.get("default"), history, system);
                 } else {
@@ -316,7 +328,7 @@ public class PicoLLM {
                                         "`%s` doesn't have a `%s` mode. Available modes are: %s",
                                         model,
                                         mode,
-                                        String.join(", ", dialogModeMap.keySet())));
+                                        TextUtils.join(", ", dialogModeMap.keySet())));
                     }
                     return instantiateDialog(dialogModeMap.get(mode), history, system);
                 }

@@ -12,6 +12,7 @@
 "use strict";
 
 const { program } = require("commander");
+const readline = require("readline");
 const { PicoLLM } = require("@picovoice/picollm-node");
 
 program
@@ -131,6 +132,21 @@ async function completionDemo() {
   console.log(`picoLLM '${picoLLM.version}'`);
   console.log(`Loaded '${picoLLM.model}'`);
 
+  console.log(">>> Press `Enter` to exit: ");
+
+  readline.emitKeypressEvents(process.stdin);
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+  }
+
+  process.stdin.on("keypress", (key, str) => {
+    if (str.sequence === '\r') {
+      picoLLM.interrupt();
+    }  else if (str.sequence === '\x03') {
+      picoLLM.interrupt();
+    }
+  });
+
   const startSec = [0];
 
   const streamCallback = (token) => {
@@ -168,8 +184,8 @@ async function completionDemo() {
     console.error(e);
   } finally {
     picoLLM.release();
+    process.exit();
   }
-
 }
 
 completionDemo();

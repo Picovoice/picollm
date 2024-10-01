@@ -20,6 +20,7 @@ import {
   MistralChatDialog,
   Phi2ChatDialog,
   Phi2QADialog,
+  Phi3ChatDialog,
   PicoLLM,
   PicoLLMGenerateOptions,
   PicoLLMCompletion,
@@ -27,6 +28,8 @@ import {
 } from '../src';
 
 import * as testData from '../../../resources/.test/test_data.json';
+
+jest.setTimeout(60000);
 
 const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]
@@ -45,6 +48,7 @@ const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   "mistral-chat-dialog": MistralChatDialog,
   'phi2-chat-dialog': Phi2ChatDialog,
   'phi2-qa-dialog': Phi2QADialog,
+  'phi3-chat-dialog': Phi3ChatDialog,
 };
 
 type CompletionExpectation = {
@@ -62,7 +66,16 @@ type DialogExpectations = {
   "mistral-chat-dialog": string,
   'phi2-chat-dialog': string,
   'phi2-qa-dialog': string,
+  'phi3-chat-dialog': string,
 }
+
+const sleep = async (ms: number) => {
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
+};
 
 const runInitTest = (
   params: {
@@ -82,9 +95,10 @@ const runInitTest = (
   } = params;
 
   let isFailed = false;
+  let picoLLM: PicoLLM | undefined = undefined;
 
   try {
-    const picoLLM = new PicoLLM(
+    picoLLM = new PicoLLM(
       accessKey,
       modelPath,
       {
@@ -99,13 +113,15 @@ const runInitTest = (
     expect(picoLLM.version.length).toBeGreaterThan(0);
     expect(typeof picoLLM.model).toEqual('string');
     expect(picoLLM.model.length).toBeGreaterThan(0);
-
-    picoLLM.release();
   } catch (e) {
     if (expectFailure) {
       isFailed = true;
     } else {
       expect(e).toBeUndefined();
+    }
+  } finally {
+    if (picoLLM) {
+      picoLLM.release();
     }
   }
 
@@ -158,17 +174,19 @@ const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpect
   }
 };
 
-const runGenerateTest = (
+const runGenerateTest = async (
   prompt: string,
   expectations: CompletionExpectation[],
-  options?: PicoLLMGenerateOptions,
+  options: PicoLLMGenerateOptions = {
+    streamCallback: () => {},
+  },
 ) => {
   const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
     device: DEVICE
   });
 
   try {
-    const res = picoLLM.generate(prompt, options);
+    const res = await picoLLM.generate(prompt, options);
     verifyCompletion(res, expectations);
   } catch (e) {
     expect(e).toBeUndefined();
@@ -177,7 +195,7 @@ const runGenerateTest = (
   }
 };
 
-const runDialogTest = async (
+const runDialogTest = (
   expectations: DialogExpectations,
   conversations: [string, string][],
   params: {
@@ -214,6 +232,7 @@ describe('PicoLLM basic tests', function () {
         MODEL_PATH,
       );
       expect(picollm).toBeUndefined();
+      picollm.release();
     } catch (e: any) {
       messageStack = e.messageStack;
     }
@@ -227,6 +246,7 @@ describe('PicoLLM basic tests', function () {
         MODEL_PATH,
       );
       expect(picollm).toBeUndefined();
+      picollm.release();
     } catch (e: any) {
       expect(messageStack.length).toEqual(e.messageStack.length);
     }
@@ -262,54 +282,54 @@ describe('PicoLLM basic tests', function () {
 });
 
 describe('PicoLLM generate tests', () => {
-  test(`should be able to generate default`, () => {
+  test(`should be able to generate default`, async () => {
     const data = testData.picollm.default;
     const prompt = data.prompt;
 
-    runGenerateTest(prompt, data.expectations);
+    await runGenerateTest(prompt, data.expectations);
   });
 
-  test(`should be able to generate with completion token limit`, () => {
+  test(`should be able to generate with completion token limit`, async () => {
     const data = testData.picollm['with-completion-token-limit'];
     const prompt = data.prompt;
     const completionTokenLimit = data.parameters['completion-token-limit'];
 
-    runGenerateTest(prompt, data.expectations, {
+    await runGenerateTest(prompt, data.expectations, {
       completionTokenLimit: completionTokenLimit
     });
   });
 
-  test(`should be able to generate with stop phrases`, () => {
+  test(`should be able to generate with stop phrases`, async () => {
     const data = testData.picollm['with-stop-phrases'];
     const prompt = data.prompt;
     const stopPhrases = data.parameters['stop-phrases'];
 
-    runGenerateTest(prompt, data.expectations, {
+    await runGenerateTest(prompt, data.expectations, {
       stopPhrases: stopPhrases
     });
   });
 
-  test(`should be able to generate with presence penalty`, () => {
+  test(`should be able to generate with presence penalty`, async () => {
     const data = testData.picollm['with-presence-penalty'];
     const prompt = data.prompt;
     const presencePenalty = data.parameters['presence-penalty'];
 
-    runGenerateTest(prompt, data.expectations, {
+    await runGenerateTest(prompt, data.expectations, {
       presencePenalty: presencePenalty
     });
   });
 
-  test(`should be able to generate with frequency penalty`, () => {
+  test(`should be able to generate with frequency penalty`, async () => {
     const data = testData.picollm['with-frequency-penalty'];
     const prompt = data.prompt;
     const frequencyPenalty = data.parameters['frequency-penalty'];
 
-    runGenerateTest(prompt, data.expectations, {
+    await runGenerateTest(prompt, data.expectations, {
       frequencyPenalty: frequencyPenalty
     });
   });
 
-  test(`should be able to generate with temperature`, () => {
+  test(`should be able to generate with temperature`, async () => {
     const data = testData.picollm['with-temperature'];
     const prompt = data.prompt;
     const completionTokenLimit = data.parameters['completion-token-limit'];
@@ -320,42 +340,46 @@ describe('PicoLLM generate tests', () => {
       device: DEVICE
     });
 
-    const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+    try {
+      const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
 
-    const res = picoLLM.generate(prompt, {
-      completionTokenLimit: completionTokenLimit,
-      seed: seeds[0],
-      temperature: temperature
-    });
+      const res = await picoLLM.generate(prompt, {
+        completionTokenLimit: completionTokenLimit,
+        seed: seeds[0],
+        temperature: temperature
+      });
 
-    const res2 = picoLLM.generate(prompt, {
-      completionTokenLimit: completionTokenLimit,
-      seed: seeds[1],
-      temperature: temperature
-    });
+      const res2 = await picoLLM.generate(prompt, {
+        completionTokenLimit: completionTokenLimit,
+        seed: seeds[1],
+        temperature: temperature
+      });
 
-    verifyCompletion(res, [{
-      'num-prompt-tokens': numPromptTokens,
-      'num-completion-tokens': res.usage.completionTokens,
-      'endpoint': PicoLLMEndpoint[res.endpoint],
-      'num-top-choices': 0,
-      'completion': res.completion
-    }]);
+      verifyCompletion(res, [{
+        'num-prompt-tokens': numPromptTokens,
+        'num-completion-tokens': res.usage.completionTokens,
+        'endpoint': PicoLLMEndpoint[res.endpoint],
+        'num-top-choices': 0,
+        'completion': res.completion
+      }]);
 
-    verifyCompletion(res2, [{
-      'num-prompt-tokens': numPromptTokens,
-      'num-completion-tokens': res2.usage.completionTokens,
-      'endpoint': PicoLLMEndpoint[res2.endpoint],
-      'num-top-choices': 0,
-      'completion': res2.completion
-    }]);
+      verifyCompletion(res2, [{
+        'num-prompt-tokens': numPromptTokens,
+        'num-completion-tokens': res2.usage.completionTokens,
+        'endpoint': PicoLLMEndpoint[res2.endpoint],
+        'num-top-choices': 0,
+        'completion': res2.completion
+      }]);
 
-    expect(res.completion).not.toEqual(res2.completion);
-
-    picoLLM.release();
+      expect(res.completion).not.toEqual(res2.completion);
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
+    }
   });
 
-  test(`should be able to generate with temperature and identical seeds`, () => {
+  test(`should be able to generate with temperature and identical seeds`, async () => {
     if (DEVICE.includes('gpu')) {
       return;
     }
@@ -370,42 +394,46 @@ describe('PicoLLM generate tests', () => {
       device: DEVICE
     });
 
-    const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+    try {
+      const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
 
-    const res = picoLLM.generate(prompt, {
-      completionTokenLimit: completionTokenLimit,
-      seed: seed,
-      temperature: temperature
-    });
+      const res = await picoLLM.generate(prompt, {
+        completionTokenLimit: completionTokenLimit,
+        seed: seed,
+        temperature: temperature
+      });
 
-    const res2 = picoLLM.generate(prompt, {
-      completionTokenLimit: completionTokenLimit,
-      seed: seed,
-      temperature: temperature
-    });
+      const res2 = await picoLLM.generate(prompt, {
+        completionTokenLimit: completionTokenLimit,
+        seed: seed,
+        temperature: temperature
+      });
 
-    verifyCompletion(res, [{
-      'num-prompt-tokens': numPromptTokens,
-      'num-completion-tokens': res.usage.completionTokens,
-      'endpoint': PicoLLMEndpoint[res.endpoint],
-      'num-top-choices': 0,
-      'completion': res.completion
-    }]);
+      verifyCompletion(res, [{
+        'num-prompt-tokens': numPromptTokens,
+        'num-completion-tokens': res.usage.completionTokens,
+        'endpoint': PicoLLMEndpoint[res.endpoint],
+        'num-top-choices': 0,
+        'completion': res.completion
+      }]);
 
-    verifyCompletion(res2, [{
-      'num-prompt-tokens': numPromptTokens,
-      'num-completion-tokens': res2.usage.completionTokens,
-      'endpoint': PicoLLMEndpoint[res2.endpoint],
-      'num-top-choices': 0,
-      'completion': res2.completion
-    }]);
+      verifyCompletion(res2, [{
+        'num-prompt-tokens': numPromptTokens,
+        'num-completion-tokens': res2.usage.completionTokens,
+        'endpoint': PicoLLMEndpoint[res2.endpoint],
+        'num-top-choices': 0,
+        'completion': res2.completion
+      }]);
 
-    expect(res.completion).toEqual(res2.completion);
-
-    picoLLM.release();
+      expect(res.completion).toEqual(res2.completion);
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
+    }
   });
 
-  test(`should be able to generate with temperature and top_p`, () => {
+  test(`should be able to generate with temperature and top_p`, async () => {
     if (DEVICE.includes('gpu')) {
       return;
     }
@@ -424,45 +452,80 @@ describe('PicoLLM generate tests', () => {
 
     const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
 
-    const res = picoLLM.generate(prompt, {
-      completionTokenLimit: completionTokenLimit,
-      seed: seed,
-      temperature: temperature,
-      topP: topP,
-    });
+    try {
+      const res = await picoLLM.generate(prompt, {
+        completionTokenLimit: completionTokenLimit,
+        seed: seed,
+        temperature: temperature,
+        topP: topP,
+      });
 
-    verifyCompletion(res, expectations.map(x => ({
-      'num-prompt-tokens': numPromptTokens,
-      'num-completion-tokens': res.usage.completionTokens,
-      'endpoint': PicoLLMEndpoint[res.endpoint],
-      'num-top-choices': 0,
-      'completion': x
-    })));
-
-    picoLLM.release();
+      verifyCompletion(res, expectations.map(x => ({
+        'num-prompt-tokens': numPromptTokens,
+        'num-completion-tokens': res.usage.completionTokens,
+        'endpoint': PicoLLMEndpoint[res.endpoint],
+        'num-top-choices': 0,
+        'completion': x
+      })));
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
+    }
   });
 
-  test(`should be able to generate with top choices`, () => {
+  test(`should be able to generate with top choices`, async () => {
     const data = testData.picollm['with-top-choices'];
     const prompt = data.prompt;
     const numTopChoices = data.parameters['num-top-choices'];
 
-    runGenerateTest(prompt, data.expectations, {
+    await runGenerateTest(prompt, data.expectations, {
       numTopChoices: numTopChoices
     });
   });
 
-  test(`should be able to generate with streamCallback`, () => {
+  test(`should be able to generate with streamCallback`, async () => {
     const data = testData.picollm.default;
     const prompt = data.prompt;
 
     const pieces: string[] = [];
 
-    runGenerateTest(prompt, data.expectations, {
+    await runGenerateTest(prompt, data.expectations, {
       streamCallback: token => { pieces.push(token); }
     });
 
+    await sleep(100);
     expect(pieces.join('')).toEqual(data.expectations[0].completion);
+  });
+
+  test(`should be able to interrupt`, async () => {
+    const data = testData.picollm.default;
+    const prompt = data.prompt;
+
+    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+      device: DEVICE
+    });
+
+    try {
+      const generatePromise = picoLLM.generate(prompt, {
+        completionTokenLimit: 200
+      });
+
+      if (process.platform === "win32") {
+        await sleep(10);
+      } else {
+        await sleep(500);
+      }
+
+      picoLLM.interrupt();
+
+      const res = await generatePromise;
+      expect(res.endpoint).toEqual(PicoLLMEndpoint.INTERRUPTED);
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
+    }
   });
 
   test(`should be able to tokenize`, () => {
@@ -473,10 +536,14 @@ describe('PicoLLM generate tests', () => {
     const data = testData.picollm.tokenize;
     const text = data.text;
 
-    const tokens = picoLLM.tokenize(text, true, false);
-    expect(tokens).toEqual(data.tokens);
-
-    picoLLM.release();
+    try {
+      const tokens = picoLLM.tokenize(text, true, false);
+      expect(tokens).toEqual(data.tokens);
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
+    }
   });
 
   test(`should be able to forward`, () => {
@@ -484,13 +551,17 @@ describe('PicoLLM generate tests', () => {
       device: DEVICE
     });
 
-    const logits = picoLLM.forward(79);
-    expect(logits.length).toBeGreaterThan(0);
+    try {
+      const logits = picoLLM.forward(79);
+      expect(logits.length).toBeGreaterThan(0);
 
-    const sum = logits.reduce((acc, x) => acc + Math.exp(x), 0);
-    expect(Math.abs(1 - (sum / logits.reduce((acc, x) => acc + Math.exp(x), 0)))).toBeLessThan(0.0001);
-
-    picoLLM.release();
+      const sum = logits.reduce((acc, x) => acc + Math.exp(x), 0);
+      expect(Math.abs(1 - (sum / logits.reduce((acc, x) => acc + Math.exp(x), 0)))).toBeLessThan(0.0001);
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
+    }
   });
 
   test(`should be able to reset`, () => {
@@ -498,60 +569,64 @@ describe('PicoLLM generate tests', () => {
       device: DEVICE
     });
 
-    const logits = picoLLM.forward(79);
-    picoLLM.reset();
+    try {
+      const logits = picoLLM.forward(79);
+      picoLLM.reset();
 
-    const newLogits = picoLLM.forward(79);
+      const newLogits = picoLLM.forward(79);
 
-    if (DEVICE.includes('gpu')) {
-      for (let i = 0; i < newLogits.length; i++) {
-        expect(logits[i]).toBeCloseTo(newLogits[i], 0.01);
+      if (DEVICE.includes('gpu')) {
+        for (let i = 0; i < newLogits.length; i++) {
+          expect(logits[i]).toBeCloseTo(newLogits[i], 0.01);
+        }
+      } else {
+        expect(logits).toEqual(newLogits);
       }
-    } else {
-      expect(logits).toEqual(newLogits);
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
     }
-
-    picoLLM.release();
   });
 });
 
 describe('PicoLLM Dialog tests', () => {
-  test('should be able to get prompt', async () => {
+  test('should be able to get prompt', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const prompts = data.prompts;
 
-    await runDialogTest(prompts, conversation);
+    runDialogTest(prompts, conversation);
   });
 
-  test('should be able to get prompt with system', async () => {
+  test('should be able to get prompt with system', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const system = data.system;
     const prompts = data['prompts-with-system'];
 
-    await runDialogTest(prompts, conversation, {
+    runDialogTest(prompts, conversation, {
       system: system
     });
   });
 
-  test('should be able to get prompt with history', async () => {
+  test('should be able to get prompt with history', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const prompts = data['prompts-with-history'];
 
-    await runDialogTest(prompts, conversation, {
+    runDialogTest(prompts, conversation, {
       history: 0
     });
   });
 
-  test('should be able to get prompt with system and history', async () => {
+  test('should be able to get prompt with system and history', () => {
     const data = testData.dialog;
     const conversation = data.conversation as [string, string][];
     const system = data.system;
     const prompts = data['prompts-with-system-and-history'];
 
-    await runDialogTest(prompts, conversation, {
+    runDialogTest(prompts, conversation, {
       system: system,
       history: 0
     });

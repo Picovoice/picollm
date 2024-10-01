@@ -1,11 +1,11 @@
 {
   "name": "picollm-web-chat-demo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A demo to show how to create a picoLLM inference engine on a web worker and have a back-and-forth conversation with the LLM, similar to ChatGPT.",
   "main": "index.js",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "yarn run http-server -a localhost -p 5000"
   },
   "keywords": [
     "Picovoice",
@@ -16,8 +16,7 @@
   "author": "Picovoice Inc",
   "license": "Apache-2.0",
   "dependencies": {
-    "@picovoice/picollm-web": "../../../binding/web",
-    "mime-types": "^2.1.35"
+    "@picovoice/picollm-web": "../../../binding/web"
   },
   "devDependencies": {
     "http-server": "^14.0.0"

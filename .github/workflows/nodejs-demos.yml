@@ -45,14 +45,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-#### Remove after release ####
-
-    - name: Build Node.js binding
-      run: yarn install && yarn build
-      working-directory: binding/nodejs
-
-####
-
     - name: Install dependencies
       run: yarn install
 

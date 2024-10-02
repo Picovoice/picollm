@@ -91,7 +91,7 @@ models. picoLLM Inference Engine is:
 
 picoLLM Compression is a novel large language model (LLM) quantization algorithm developed within Picovoice. Given a task-specific cost function, picoLLM Compression automatically learns the optimal bit allocation strategy across and within LLM's weights. Existing techniques require a fixed bit allocation scheme, which is subpar.
 
-For example, picoLLM Compression recovers MMLU score degradation of widely adopted GPTQ by 91%, 99%, and 100% at 2, 3, 
+For example, picoLLM Compression recovers MMLU score degradation of widely adopted GPTQ by 91%, 99%, and 100% at 2, 3,
 and 4-bit settings. The figure below depicts the MMLU comparison between picoLLM and GPTQ for Llama-3-8b [[1]](https://picovoice.ai/blog/picollm-towards-optimal-llm-quantization/).
 
 ![picoLLM Compression vs GPTQ MMLU scores when applied to Llama-3-8B](./resources/mmlu-llama-3-8b.svg)
@@ -127,6 +127,8 @@ picoLLM Inference Engine supports the following open-weight models. The models a
     - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
     - `phi2`
+- Phi-3
+    - `phi3`
 
 ## AccessKey
 
@@ -412,3 +414,14 @@ pv_picollm_delete(pllm);
 ```
 
 ## Releases
+
+### v1.1.0 - October 1st, 2024
+
+- Added `interrupt()` function for halting completion generation early
+- Performance improvements
+- Added support for phi3
+- Bug fixes
+
+### v1.0.0 - May 28th, 2024
+
+- Initial release

@@ -281,10 +281,8 @@ Create instances of the picoLLM class:
 const { PicoLLM } = require("@picovoice/picollm-node");
 const pllm = new PicoLLM('${ACCESS_KEY}', '${MODEL_PATH}');
 
-const res = pllm.generate('${PROMPT}');
+const res = await pllm.generate('${PROMPT}');
 console.log(res.completion);
-
-pllm.release();
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` to the path to a model file

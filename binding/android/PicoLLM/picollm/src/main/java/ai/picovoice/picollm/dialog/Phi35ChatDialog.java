@@ -12,12 +12,7 @@
 
 package ai.picovoice.picollm;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ai.picovoice.picollm.dialog.Phi3ChatDialog;
-import ai.picovoice.picollm.PicoLLMException;
-import ai.picovoice.picollm.PicoLLMInvalidStateException;
 
 /**
  * Represents a dialog helper specific for the `phi3.5` model.

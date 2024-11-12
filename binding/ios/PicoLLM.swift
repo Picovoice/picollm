@@ -515,7 +515,7 @@ public class PicoLLM {
         "mistral-7b-instruct-v0.2": MistralChatDialog.self,
         "mixtral-8x7b-instruct-v0.1": MixtralChatDialog.self,
         "phi3": Phi3ChatDialog.self,
-        "phi3.5": Phi35ChatDialog.self,
+        "phi3.5": Phi35ChatDialog.self
     ]
 
     private static let phi2Dialogs: [String: Phi2Dialog.Type] = [

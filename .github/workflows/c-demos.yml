@@ -59,7 +59,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Python virtualenv (*nix)
-        if: ${{ matrix.machine != 'pv-windows' }}
+        if: ${{ matrix.machine != 'pv-windows' && matrix.machine != 'pv-windows-igpu' }}
         run: |
           python3 -m venv binding/python/.venv
           . binding/python/.venv/bin/activate

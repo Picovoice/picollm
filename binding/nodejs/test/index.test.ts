@@ -69,6 +69,7 @@ type DialogExpectations = {
   'phi2-chat-dialog': string,
   'phi2-qa-dialog': string,
   'phi3-chat-dialog': string,
+  'phi3.5-chat-dialog': string,
 }
 
 const sleep = async (ms: number) => {

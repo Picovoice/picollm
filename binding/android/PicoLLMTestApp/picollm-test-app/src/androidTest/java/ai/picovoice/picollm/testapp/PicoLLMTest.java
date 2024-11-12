@@ -680,7 +680,7 @@ public class PicoLLMTest {
                     return new Phi2QADialog.Builder();
                 case "phi3-chat-dialog":
                     return new Phi3ChatDialog.Builder();
-                case "phi35-chat-dialog":
+                case "phi3.5-chat-dialog":
                     return new Phi35ChatDialog.Builder();
                 default:
                     return null;

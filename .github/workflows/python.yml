@@ -64,7 +64,7 @@ jobs:
       run: python3 -m pip install -r binding/python/requirements.txt
 
     - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/03-280e68c/phi2-290.pllm -o phi2-290.pllm
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/04-d5f2aa0/phi2-290.pllm -o phi2-290.pllm
 
     - name: Test
       run: python3 -m binding.python.test_picollm ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.pllm ${{matrix.xpu}}

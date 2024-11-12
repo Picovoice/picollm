@@ -57,6 +57,8 @@ picoLLM Inference Engine on Web supports the following open-weight models. The m
   - `phi2`
 - Phi-3
   - `phi3`
+- Phi-3.5
+  - `phi3.5`
 
 **NOTE**: Only Gemma, Phi-2, and Phi-3 models have been tested on multiple browsers across different platforms.
 The rest of the models depend on the user's system in order to run properly.

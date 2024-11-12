@@ -201,7 +201,7 @@
       "mistral-chat-dialog": "[INST] Hi [/INST] Hey</s>[INST] Hola [/INST] ¡Oye!</s>[INST] Salut [/INST]",
       "phi2-chat-dialog": "Human: Hi\nAI: Hey\nHuman: Hola\nAI: ¡Oye!\nHuman: Salut\nAI:",
       "phi2-qa-dialog": "Instruct: Hi\nOutput: Hey\nInstruct: Hola\nOutput: ¡Oye!\nInstruct: Salut\nOutput:",
-      "phi3-chat-dialog": "<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
+      "phi3-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
       "phi3.5-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n"
     },
     "prompts-with-history": {
@@ -211,7 +211,7 @@
       "mistral-chat-dialog": "[INST] Salut [/INST]",
       "phi2-chat-dialog": "Human: Salut\nAI:",
       "phi2-qa-dialog": "Instruct: Salut\nOutput:",
-      "phi3-chat-dialog": "<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
+      "phi3-chat-dialog": "<|user|>\nSalut<|end|>\n<|assistant|>\n",
       "phi3.5-chat-dialog": "<|user|>\nSalut<|end|>\n<|assistant|>\n"
     },
     "prompts-with-system-and-history": {
@@ -221,7 +221,7 @@
       "mistral-chat-dialog": "[INST] Salut [/INST]",
       "phi2-chat-dialog": "Human: Salut\nAI:",
       "phi2-qa-dialog": "Instruct: Salut\nOutput:",
-      "phi3-chat-dialog": "<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
+      "phi3-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
       "phi3.5-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n"
     }
   }

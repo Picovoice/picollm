@@ -46,7 +46,7 @@ jobs:
         echo PATH=$PATH >> $GITHUB_ENV
 
     - name: Setup Python virtualenv (windows)
-      if: ${{ matrix.machine == 'pv-windows' }}
+      if: ${{ matrix.machine == 'pv-windows' || matrix.machine == 'pv-windows-igpu' }}
       run: |
         python3 -m venv .venv
         .venv\Scripts\activate

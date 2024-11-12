@@ -51,6 +51,9 @@ jobs:
           - xpu: cpu
             machine: pv-windows
             make_file: "MinGW Makefiles"
+          - xpu: gpu
+            machine: pv-windows-igpu
+            make_file: "MinGW Makefiles"
 
     steps:
       - uses: actions/checkout@v3

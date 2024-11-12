@@ -12,6 +12,7 @@ import {
   Phi2QADialog,
   Phi2ChatDialog,
   Phi3ChatDialog,
+  Phi35ChatDialog,
 } from './dialog';
 
 import {
@@ -59,6 +60,7 @@ export {
   Phi2QADialog,
   Phi2ChatDialog,
   Phi3ChatDialog,
+  Phi35ChatDialog,
   PicoLLM,
   PicoLLMCompletion,
   PicoLLMCompletionToken,

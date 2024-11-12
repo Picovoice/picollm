@@ -36,6 +36,8 @@ jobs:
             machine: pv-linux
           - xpu: gpu
             machine: pv-windows
+          - xpu: gpu
+            machine: pv-windows-igpu
 
     steps:
     - uses: actions/checkout@v3

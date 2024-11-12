@@ -279,6 +279,13 @@ class Phi3Dialog(Dialog):
 
         return ''.join(res)
 
+class Phi35Dialog(Phi3Dialog):
+    """
+    Dialog helper for `phi3.5`.
+    """
+
+    def __init__(self, history: Optional[int] = None, system: Optional[str] = None) -> None:
+        super().__init__(history=history, system=system)
 
 class PicoLLMError(Exception):
     def __init__(self, message: str = '', message_stack: Optional[Sequence[str]] = None) -> None:
@@ -974,7 +981,8 @@ class PicoLLM(object):
             'qa': Phi2QADialog,
             'chat': Phi2ChatDialog,
         },
-        'phi3': Phi3Dialog
+        'phi3': Phi3Dialog,
+        'phi3.5': Phi35Dialog
     }
 
     def get_dialog(
@@ -1030,6 +1038,7 @@ __all__ = [
     'Phi2Dialog',
     'Phi2QADialog',
     'Phi3Dialog',
+    'Phi35Dialog',
     'PicoLLM',
     'PicoLLMActivationError',
     'PicoLLMActivationLimitError',

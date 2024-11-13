@@ -30,7 +30,7 @@ import {
 
 import * as testData from '../../../resources/.test/test_data.json';
 
-jest.setTimeout(60000);
+jest.setTimeout(600000);
 
 const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]

@@ -12,8 +12,6 @@
 
 package ai.picovoice.picollm;
 
-import ai.picovoice.picollm.dialog.Phi3ChatDialog;
-
 /**
  * Represents a dialog helper specific for the `phi3.5` model.
  */

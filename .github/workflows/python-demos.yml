@@ -38,6 +38,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    # ************REMOVE AFTER RELEASE ***************
+    - name: build local binding
+      run: python3 -m setup sdist bdist_wheel
+      working-directory: binding/python
+    # ************REMOVE AFTER RELEASE ***************
+
     - name: Setup Python virtualenv (*nix)
       if: ${{ matrix.machine != 'pv-windows' && matrix.machine != 'pv-windows-igpu' }}
       run: |

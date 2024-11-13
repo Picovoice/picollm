@@ -413,7 +413,7 @@ pv_picollm_delete(pllm);
 
 ## Releases
 
-### v1.2.0 - October 1st, 2024
+### v1.2.0 - November 18th, 2024
 
 - Performance improvements
 - Added support for phi3.5

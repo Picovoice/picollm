@@ -1,0 +1,16 @@
+PODS:
+  - picoLLM-iOS (1.2.0)
+
+DEPENDENCIES:
+  - picoLLM-iOS (~> 1.2.0)
+
+SPEC REPOS:
+  trunk:
+    - picoLLM-iOS
+
+SPEC CHECKSUMS:
+  picoLLM-iOS: 9ff6baa0b9e577d99491f4fa63f898a16fc6925c
+
+PODFILE CHECKSUM: 0fc8e4e6c396032024417ef0a8a5b036c1d24c70
+
+COCOAPODS: 1.15.2

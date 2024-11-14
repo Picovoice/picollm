@@ -2,9 +2,9 @@ source 'https://cdn.cocoapods.org/'
 platform :ios, '16.0'
 
 target 'PicoLLMAppTest' do
-  pod 'picoLLM-iOS', '-> 1.2.0'
+  pod 'picoLLM-iOS', '~> 1.2.0'
 end
 
 target 'PicoLLMAppTestUITests' do
-  pod 'picoLLM-iOS', '-> 1.2.0'
+  pod 'picoLLM-iOS', '~> 1.2.0'
 end

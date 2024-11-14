@@ -257,6 +257,13 @@ export class Phi3ChatDialog extends Dialog {
   }
 }
 
+/**
+ * Dialog helper for `phi-3.5` `chat` mode.
+ */
+export class Phi35ChatDialog extends Phi3ChatDialog {
+
+}
+
 export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof Dialog } } = {
   "gemma-2b-it": GemmaChatDialog,
   "gemma-7b-it": GemmaChatDialog,
@@ -274,4 +281,5 @@ export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof D
     "chat": Phi2ChatDialog
   },
   "phi3": Phi3ChatDialog,
+  "phi3.5": Phi35ChatDialog,
 };

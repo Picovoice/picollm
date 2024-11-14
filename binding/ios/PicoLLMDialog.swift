@@ -201,6 +201,11 @@ public class Phi3ChatDialog: BasePicoLLMDialog {
     }
 }
 
+/// Dialog helper for `phi3.5`.
+public class Phi35ChatDialog: Phi3ChatDialog {
+
+}
+
 /// Dialog helper for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2`.
 public class MistralChatDialog: BasePicoLLMDialog {
     public override func prompt() throws -> String {

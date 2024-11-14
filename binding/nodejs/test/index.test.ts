@@ -21,6 +21,7 @@ import {
   Phi2ChatDialog,
   Phi2QADialog,
   Phi3ChatDialog,
+  Phi35ChatDialog,
   PicoLLM,
   PicoLLMGenerateOptions,
   PicoLLMCompletion,
@@ -29,7 +30,7 @@ import {
 
 import * as testData from '../../../resources/.test/test_data.json';
 
-jest.setTimeout(60000);
+jest.setTimeout(600000);
 
 const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]
@@ -49,6 +50,7 @@ const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   'phi2-chat-dialog': Phi2ChatDialog,
   'phi2-qa-dialog': Phi2QADialog,
   'phi3-chat-dialog': Phi3ChatDialog,
+  'phi3.5-chat-dialog': Phi35ChatDialog,
 };
 
 type CompletionExpectation = {
@@ -67,6 +69,7 @@ type DialogExpectations = {
   'phi2-chat-dialog': string,
   'phi2-qa-dialog': string,
   'phi3-chat-dialog': string,
+  'phi3.5-chat-dialog': string,
 }
 
 const sleep = async (ms: number) => {

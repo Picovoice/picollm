@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = 'picoLLM-iOS'
   s.module_name = 'PicoLLM'
-  s.version = '1.1.0'
+  s.version = '1.2.0'
   s.license = {:type => 'Apache 2.0'}
   s.summary = 'picoLLM Inference Engine'
   s.description =
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   DESC
   s.homepage = 'https://github.com/Picovoice/picollm/tree/master/binding/ios'
   s.author = { 'Picovoice' => 'hello@picovoice.ai' }
-  s.source = { :git => "https://github.com/Picovoice/picollm.git", :tag => "picoLLM-iOS-v1.1.0" }
+  s.source = { :git => "https://github.com/Picovoice/picollm.git", :tag => "picoLLM-iOS-v1.2.0" }
   s.ios.deployment_target = '16.0'
   s.swift_version = '5.0'
   s.vendored_frameworks = 'lib/ios/PvPicoLLM.xcframework'

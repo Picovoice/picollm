@@ -8,8 +8,10 @@ export type AttentionPrecomputeEncodingType = {
     dimension: number;
     steps: number;
     theta: number;
+    ropeScalesAddress: number;
+    ropeScale: number;
 } & PvXpuType<{
-    pv_picollm_attention_precompute_encoding_wasm: (encodingAddress: number, dimension: number, steps: number, theta: number) => void;
+    pv_picollm_attention_precompute_encoding_wasm: (encodingAddress: number, dimension: number, steps: number, theta: number, ropeScalesAddress: number, ropeScale: number) => void;
 }>;
 export type AttentionAttendAtOnceType = {
     numHeads: number;

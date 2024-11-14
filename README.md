@@ -413,6 +413,11 @@ pv_picollm_delete(pllm);
 
 ## Releases
 
+### v1.2.0 - November 14th, 2024
+
+- Performance improvements
+- Added support for phi3.5
+
 ### v1.1.0 - October 1st, 2024
 
 - Added `interrupt()` function for halting completion generation early

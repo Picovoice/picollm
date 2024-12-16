@@ -1,1 +1,1 @@
-picollm==../../binding/python/dist/picollm-1.2.2-py3-none-any.whl
+../../binding/python/dist/picollm-1.2.2-py3-none-any.whl

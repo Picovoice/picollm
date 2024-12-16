@@ -51,6 +51,9 @@ picoLLM Inference Engine supports the following open-weight models. The models a
     - `llama-3-8b-instruct`
     - `llama-3-70b`
     - `llama-3-70b-instruct`
+- Llama-3.2
+    - `llama3.2-1b-instruct`
+    - `llama3.2-3b-instruct`
 - Mistral
     - `mistral-7b-v0.1`
     - `mistral-7b-instruct-v0.1`

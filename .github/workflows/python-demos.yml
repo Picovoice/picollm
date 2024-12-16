@@ -54,7 +54,9 @@ jobs:
 
     # ************ REMOVE AFTER RELEASE ***************
     - name: build local binding
-      run: python3 -m setup sdist bdist_wheel
+      run: |
+        python3 -m pip install wheel
+        python3 -m setup sdist bdist_wheel
       working-directory: binding/python
     # ************ REMOVE AFTER RELEASE ***************
 

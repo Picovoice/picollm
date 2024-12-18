@@ -1,1 +1,1 @@
-picollm==1.2.1
+picollm==1.2.2

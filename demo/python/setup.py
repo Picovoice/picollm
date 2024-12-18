@@ -27,7 +27,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
 
 setuptools.setup(
     name="picollmdemo",
-    version="1.2.1",
+    version="1.2.2",
     author="Picovoice",
     author_email="hello@picovoice.ai",
     description="picoLLM Inference Engine demos",
@@ -35,7 +35,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Picovoice/picollm",
     packages=["picollmdemo"],
-    install_requires=["picollm==1.2.1"],
+    install_requires=["picollm==1.2.2"],
     include_package_data=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",

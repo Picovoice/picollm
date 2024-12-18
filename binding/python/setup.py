@@ -43,6 +43,7 @@ include picollm/lib/mac/arm64/*.dylib
 include picollm/lib/mac/x86_64/*.dylib
 include picollm/lib/raspberry-pi/**/*.so
 include picollm/lib/windows/amd64/*.dll
+include picollm/lib/windows/arm64/*.dll
 """
 
 with open(os.path.join(os.path.dirname(__file__), 'MANIFEST.in'), 'w') as f:

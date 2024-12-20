@@ -70,5 +70,6 @@ drawerlayout
 Unmanaged
 Unretained
 Podfile
+xcodeproj
 xcworkspace
 webgpu

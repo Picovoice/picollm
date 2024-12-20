@@ -2,5 +2,5 @@ source 'https://cdn.cocoapods.org/'
 platform :ios, '16.0'
 
 target 'PicoLLMCompletionDemo' do
-  pod 'picoLLM-iOS', '~> 1.2.2'
+  pod 'picoLLM-iOS', :podspec => 'https://raw.githubusercontent.com/Picovoice/picollm/refs/heads/v1.2.3/binding/ios/picoLLM-iOS.podspec'
 end

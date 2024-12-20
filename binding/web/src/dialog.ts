@@ -150,6 +150,13 @@ export class Llama3ChatDialog extends Dialog {
 }
 
 /**
+ * Dialog helper for `llama-3.2-1b-instruct` and `llama-3.2-3b-instruct`.
+ */
+export class Llama32ChatDialog extends Llama3ChatDialog {
+
+}
+
+/**
  * Dialog helper for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2`.
  */
 export class MistralChatDialog extends Dialog {
@@ -272,6 +279,8 @@ export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof D
   'llama-2-70b-chat': Llama2ChatDialog,
   'llama-3-8b-instruct': Llama3ChatDialog,
   'llama-3-70b-instruct': Llama3ChatDialog,
+  'llama-3.2-1b-instruct': Llama32ChatDialog,
+  'llama-3.2-3b-instruct': Llama32ChatDialog,
   'mistral-7b-instruct-v0.1': MistralChatDialog,
   'mistral-7b-instruct-v0.2': MistralChatDialog,
   'mixtral-8x7b-instruct-v0.1': MixtralChatDialog,

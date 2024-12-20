@@ -176,6 +176,15 @@ class Llama3ChatDialog(Dialog):
         return ''.join(res)
 
 
+class Llama32ChatDialog(Llama3ChatDialog):
+    """
+    Dialog helper for `llama-3.2-1b-instruct` and `llama-3.2-3b-instruct`.
+    """
+
+    def __init__(self, history: Optional[int] = None, system: Optional[str] = None) -> None:
+        super().__init__(history=history, system=system)
+
+
 class MistralChatDialog(Dialog):
     """
     Dialog helper for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2`.
@@ -975,6 +984,8 @@ class PicoLLM(object):
         'llama-2-70b-chat': Llama2ChatDialog,
         'llama-3-8b-instruct': Llama3ChatDialog,
         'llama-3-70b-instruct': Llama3ChatDialog,
+        'llama-3.2-1b-instruct': Llama32ChatDialog,
+        'llama-3.2-3b-instruct': Llama32ChatDialog,
         'mistral-7b-instruct-v0.1': MistralChatDialog,
         'mistral-7b-instruct-v0.2': MistralChatDialog,
         'mixtral-8x7b-instruct-v0.1': MixtralChatDialog,
@@ -1034,6 +1045,7 @@ __all__ = [
     'GemmaChatDialog',
     'Llama2ChatDialog',
     'Llama3ChatDialog',
+    'Llama32ChatDialog',
     'MistralChatDialog',
     'MixtralChatDialog',
     'Phi2ChatDialog',

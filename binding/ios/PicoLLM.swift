@@ -511,6 +511,8 @@ public class PicoLLM {
         "llama-2-70b-chat": Llama2ChatDialog.self,
         "llama-3-8b-chat": Llama3ChatDialog.self,
         "llama-3-70b-chat": Llama3ChatDialog.self,
+        "llama-3.2-1b-chat": Llama32ChatDialog.self,
+        "llama-3.2-3b-chat": Llama32ChatDialog.self,
         "mistral-7b-instruct-v0.1": MistralChatDialog.self,
         "mistral-7b-instruct-v0.2": MistralChatDialog.self,
         "mixtral-8x7b-instruct-v0.1": MixtralChatDialog.self,

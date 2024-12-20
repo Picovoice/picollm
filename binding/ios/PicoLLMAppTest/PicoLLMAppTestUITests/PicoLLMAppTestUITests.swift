@@ -420,6 +420,7 @@ class PicoLLMAppTestUITests: BaseTest {
             "gemma-chat-dialog": GemmaChatDialog.self,
             "llama-2-chat-dialog": Llama2ChatDialog.self,
             "llama-3-chat-dialog": Llama3ChatDialog.self,
+            "llama-3.2-chat-dialog": Llama32ChatDialog.self,
             "mistral-chat-dialog": MistralChatDialog.self,
             "phi2-chat-dialog": Phi2ChatDialog.self,
             "phi2-qa-dialog": Phi2QADialog.self,

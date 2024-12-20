@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 import ai.picovoice.picollm.GemmaChatDialog;
 import ai.picovoice.picollm.Llama2ChatDialog;
 import ai.picovoice.picollm.Llama3ChatDialog;
+import ai.picovoice.picollm.Llama32ChatDialog;
 import ai.picovoice.picollm.MistralChatDialog;
 import ai.picovoice.picollm.Phi2ChatDialog;
 import ai.picovoice.picollm.Phi2QADialog;
@@ -672,6 +673,8 @@ public class PicoLLMTest {
                     return new Llama2ChatDialog.Builder();
                 case "llama-3-chat-dialog":
                     return new Llama3ChatDialog.Builder();
+                case "llama-3.2-chat-dialog":
+                    return new Llama32ChatDialog.Builder();
                 case "mistral-chat-dialog":
                     return new MistralChatDialog.Builder();
                 case "phi2-chat-dialog":
@@ -682,6 +685,8 @@ public class PicoLLMTest {
                     return new Phi3ChatDialog.Builder();
                 case "phi3.5-chat-dialog":
                     return new Phi35ChatDialog.Builder();
+                case "llama-3.2-chat-dialog":
+                    return new Llama32ChatDialog.Builder();
                 default:
                     return null;
             }

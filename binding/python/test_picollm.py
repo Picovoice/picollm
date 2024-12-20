@@ -467,7 +467,7 @@ class DialogTestCase(unittest.TestCase):
             "gemma-chat-dialog": GemmaChatDialog,
             "llama-2-chat-dialog": Llama2ChatDialog,
             "llama-3-chat-dialog": Llama3ChatDialog,
-            "llama-3.2x-chat-dialog": Llama32ChatDialog,
+            "llama-3.2-chat-dialog": Llama32ChatDialog,
             "mistral-chat-dialog": MistralChatDialog,
             "phi2-chat-dialog": Phi2ChatDialog,
             "phi2-qa-dialog": Phi2QADialog,

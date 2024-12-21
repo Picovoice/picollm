@@ -78,9 +78,9 @@ conversation with the LLM, similar to ChatGPT.
 pod install
 ```
 
-2. Open the `PicoLLMCompletionDemo.xcworkspace` in XCode
+2. Open the `PicoLLMCompletionDemo.xcodeproj` in XCode
 
-3. Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](./Completion/PicoLLMCompletionDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
+3. Replace `"${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](./Completion/PicoLLMCompletionDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
 
 4. Build and run the project on your device.
 
@@ -98,7 +98,7 @@ pod install
 pod install
 ```
 
-2. Open the `PicoLLMChatDemo.xcworkspace` in XCode
+2. Open the `PicoLLMChatDemo.xcodeproj` in XCode
 
 3. Replace `let ACCESS_KEY = "${YOUR_ACCESS_KEY_HERE}"` in the file [VieModel.swift](./Chat/PicoLLMChatDemo/ViewModel.swift) with your AccessKey obtained from [Picovoice Console](https://console.picovoice.ai/).
 

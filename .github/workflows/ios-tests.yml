@@ -28,9 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Run Cocoapods
-        run: pod install --repo-update
-
       - name: Inject AccessKey
         run: sed -i '.bak' 's:{TESTING_ACCESS_KEY_HERE}:${{secrets.PV_VALID_ACCESS_KEY}}:'
           PicoLLMAppTestUITests/BaseTest.swift
@@ -42,7 +39,7 @@ jobs:
       - name: XCode Build
         run: xcrun xcodebuild build-for-testing
           -configuration Debug
-          -workspace PicoLLMAppTest.xcworkspace
+          -project PicoLLMAppTest.xcodeproj
           -sdk iphoneos
           -scheme PicoLLMAppTest
           -derivedDataPath ddp
@@ -50,6 +47,6 @@ jobs:
 
       - name: Run Tests on Simulator
         run: xcrun xcodebuild test
-          -workspace PicoLLMAppTest.xcworkspace
+          -project PicoLLMAppTest.xcodeproj
           -scheme PicoLLMAppTest
           -destination 'platform=iOS Simulator,name=iPhone 13,OS=16.4'

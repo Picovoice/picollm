@@ -26,16 +26,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Cocoapods
-        run: gem install cocoapods
-
-      - name: Run Cocoapods
-        run: pod install --repo-update
-
       - name: Build
         run: xcrun xcodebuild build
           -configuration Debug
-          -workspace PicoLLMCompletionDemo.xcworkspace
+          -project PicoLLMCompletionDemo.xcodeproj
           -sdk iphoneos
           -scheme PicoLLMCompletionDemo
           -derivedDataPath ddp
@@ -51,16 +45,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Cocoapods
-        run: gem install cocoapods
-
-      - name: Run Cocoapods
-        run: pod install --repo-update
-
       - name: Build
         run: xcrun xcodebuild build
           -configuration Debug
-          -workspace PicoLLMChatDemo.xcworkspace
+          -project PicoLLMChatDemo.xcodeproj
           -sdk iphoneos
           -scheme PicoLLMChatDemo
           -derivedDataPath ddp

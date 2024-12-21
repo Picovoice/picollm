@@ -8,9 +8,9 @@ Pod::Spec.new do |s|
   <<-DESC
   picoLLM Inference Engine iOS SDK.
   DESC
-  s.homepage = 'https://github.com/Picovoice/picollm/tree/master/binding/ios'
+  s.homepage = 'https://github.com/Picovoice/picollm/tree/main/binding/ios'
   s.author = { 'Picovoice' => 'hello@picovoice.ai' }
-  s.source = { :git => "https://github.com/Picovoice/picollm.git", :tag => "picoLLM-iOS-v1.2.3" }
+  s.source = { :git => "https://github.com/Picovoice/picollm.git", :tag => s.version.to_s }
   s.ios.deployment_target = '16.0'
   s.swift_version = '5.0'
   s.vendored_frameworks = 'lib/ios/PvPicoLLM.xcframework'

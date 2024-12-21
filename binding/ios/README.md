@@ -20,8 +20,14 @@ models. picoLLM Inference Engine is:
 
 ## Installation
 <!-- markdown-link-check-disable -->
-The picoLLM iOS binding is available via [CocoaPods](https://cocoapods.org/pods/picoLLM-iOS). To import it into your iOS project, add the following line to your Podfile:
+The picoLLM iOS binding is available via [Swift Package Manager](https://www.swift.org/documentation/package-manager/) or [CocoaPods](https://cocoapods.org/pods/picoLLM-iOS).
 <!-- markdown-link-check-enable -->
+
+To import the package using SPM, open up your project's Package Dependencies in XCode and add:
+```
+https://github.com/Picovoice/picollm.git
+```
+To import it into your iOS project using CocoaPods, add the following line to your Podfile:
 
 ```ruby
 pod 'picoLLM-iOS'

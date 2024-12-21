@@ -3,3 +3,6 @@
 __pycache__
 *.bin
 *.pllm
+.build
+Package.resolved
+.swiftpm

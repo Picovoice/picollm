@@ -11,10 +11,12 @@
 		02A1194B268D39A700A2AC99 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A1194A268D39A700A2AC99 /* ContentView.swift */; };
 		02A1194D268D39AB00A2AC99 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02A1194C268D39AB00A2AC99 /* Assets.xcassets */; };
 		02A1195F268D3FD600A2AC99 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A1195E268D3FD600A2AC99 /* ViewModel.swift */; };
-		3D2B8D90C4122A3A0C8C682D /* libPods-PicoLLMChatDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7231C033B41A0972F723C1A6 /* libPods-PicoLLMChatDemo.a */; };
+		34B26B822D1A069900C33299 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34B26B812D1A069900C33299 /* PicoLLM */; };
 		C789D24B2BEA8E5D005FDB10 /* LoadModelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D24A2BEA8E5D005FDB10 /* LoadModelView.swift */; };
 		C789D24D2BEA8EAE005FDB10 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D24C2BEA8EAE005FDB10 /* ChatView.swift */; };
 		C789D2512BEAD752005FDB10 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D2502BEAD752005FDB10 /* Constants.swift */; };
+		E1E0137E2D16114E00DB0C2F /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = E1E0137D2D16114E00DB0C2F /* PicoLLM */; };
+		E1E013842D162B3D00DB0C2F /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = E1E013832D162B3D00DB0C2F /* PicoLLM */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,9 +26,6 @@
 		02A1194C268D39AB00A2AC99 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		02A11951268D39AB00A2AC99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		02A1195E268D3FD600A2AC99 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
-		195F7C81D2A651BE1E18D367 /* Pods-PicoLLMChatDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMChatDemo.debug.xcconfig"; path = "Target Support Files/Pods-PicoLLMChatDemo/Pods-PicoLLMChatDemo.debug.xcconfig"; sourceTree = "<group>"; };
-		7231C033B41A0972F723C1A6 /* libPods-PicoLLMChatDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PicoLLMChatDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		B4721F6A98EC8D37F91281AB /* Pods-PicoLLMChatDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PicoLLMChatDemo.release.xcconfig"; path = "Target Support Files/Pods-PicoLLMChatDemo/Pods-PicoLLMChatDemo.release.xcconfig"; sourceTree = "<group>"; };
 		C789D24A2BEA8E5D005FDB10 /* LoadModelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadModelView.swift; sourceTree = "<group>"; };
 		C789D24C2BEA8EAE005FDB10 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		C789D2502BEAD752005FDB10 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -37,7 +36,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D2B8D90C4122A3A0C8C682D /* libPods-PicoLLMChatDemo.a in Frameworks */,
+				34B26B822D1A069900C33299 /* PicoLLM in Frameworks */,
+				E1E0137E2D16114E00DB0C2F /* PicoLLM in Frameworks */,
+				E1E013842D162B3D00DB0C2F /* PicoLLM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,8 +50,6 @@
 			children = (
 				02A11947268D39A700A2AC99 /* PicoLLMChatDemo */,
 				02A11946268D39A700A2AC99 /* Products */,
-				8DB92FF3DC81AB04D3FF7242 /* Pods */,
-				F770462E5CFAB5B7D2E94AD8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -77,23 +76,6 @@
 			path = PicoLLMChatDemo;
 			sourceTree = "<group>";
 		};
-		8DB92FF3DC81AB04D3FF7242 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				195F7C81D2A651BE1E18D367 /* Pods-PicoLLMChatDemo.debug.xcconfig */,
-				B4721F6A98EC8D37F91281AB /* Pods-PicoLLMChatDemo.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		F770462E5CFAB5B7D2E94AD8 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				7231C033B41A0972F723C1A6 /* libPods-PicoLLMChatDemo.a */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -101,11 +83,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 02A11954268D39AB00A2AC99 /* Build configuration list for PBXNativeTarget "PicoLLMChatDemo" */;
 			buildPhases = (
-				1F448DADB90CE82863E78546 /* [CP] Check Pods Manifest.lock */,
 				02A11941268D39A700A2AC99 /* Sources */,
 				02A11942268D39A700A2AC99 /* Frameworks */,
 				02A11943268D39A700A2AC99 /* Resources */,
-				FA42AEB90E30635F6CCC7782 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -140,6 +120,9 @@
 				Base,
 			);
 			mainGroup = 02A1193C268D39A700A2AC99;
+			packageReferences = (
+				34B26B802D1A069900C33299 /* XCRemoteSwiftPackageReference "picollm" */,
+			);
 			productRefGroup = 02A11946268D39A700A2AC99 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -159,48 +142,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		1F448DADB90CE82863E78546 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-PicoLLMChatDemo-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FA42AEB90E30635F6CCC7782 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PicoLLMChatDemo/Pods-PicoLLMChatDemo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PicoLLMChatDemo/Pods-PicoLLMChatDemo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PicoLLMChatDemo/Pods-PicoLLMChatDemo-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		02A11941268D39A700A2AC99 /* Sources */ = {
@@ -339,13 +280,12 @@
 		};
 		02A11955268D39AB00A2AC99 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 195F7C81D2A651BE1E18D367 /* Pods-PicoLLMChatDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = EU9HUJJU2X;
+				DEVELOPMENT_TEAM = 65723695GD;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = PicoLLMChatDemo/Info.plist;
@@ -363,13 +303,12 @@
 		};
 		02A11956268D39AB00A2AC99 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B4721F6A98EC8D37F91281AB /* Pods-PicoLLMChatDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = EU9HUJJU2X;
+				DEVELOPMENT_TEAM = 65723695GD;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = PicoLLMChatDemo/Info.plist;
@@ -407,6 +346,33 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		34B26B802D1A069900C33299 /* XCRemoteSwiftPackageReference "picollm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/picovoice/picollm";
+			requirement = {
+				kind = exactVersion;
+				version = 1.2.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		34B26B812D1A069900C33299 /* PicoLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 34B26B802D1A069900C33299 /* XCRemoteSwiftPackageReference "picollm" */;
+			productName = PicoLLM;
+		};
+		E1E0137D2D16114E00DB0C2F /* PicoLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PicoLLM;
+		};
+		E1E013832D162B3D00DB0C2F /* PicoLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PicoLLM;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 02A1193D268D39A700A2AC99 /* Project object */;
 }

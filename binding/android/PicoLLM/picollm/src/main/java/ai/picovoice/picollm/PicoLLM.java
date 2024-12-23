@@ -38,6 +38,8 @@ public class PicoLLM {
         DIALOGS.put("llama-2-70b-chat", Llama2ChatDialog.class);
         DIALOGS.put("llama-3-8b-instruct", Llama3ChatDialog.class);
         DIALOGS.put("llama-3-70b-instruct", Llama3ChatDialog.class);
+        DIALOGS.put("llama-3.2-1b-instruct", Llama32ChatDialog.class);
+        DIALOGS.put("llama-3.2-3b-instruct", Llama32ChatDialog.class);
         DIALOGS.put("mistral-7b-instruct-v0.1", MistralChatDialog.class);
         DIALOGS.put("mistral-7b-instruct-v0.2", MistralChatDialog.class);
         DIALOGS.put("mixtral-8x7b-instruct-v0.1", MixtralChatDialog.class);

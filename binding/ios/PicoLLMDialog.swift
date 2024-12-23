@@ -323,6 +323,11 @@ public class Llama3ChatDialog: BasePicoLLMDialog {
     }
 }
 
+/// Dialog helper for `llama-3.2-1b-instruct` and `llama-3.2-3b-instruct`.
+public class Llama32ChatDialog: Llama3ChatDialog {
+
+}
+
 /// Dialog helper for `gemma-2b-it` and `gemma-7b-it`.
 public class GemmaChatDialog: BasePicoLLMDialog {
     public override func prompt() throws -> String {

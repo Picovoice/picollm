@@ -9,6 +9,7 @@
 
 import PicoLLM
 import Combine
+import Foundation
 
 class ViewModel: ObservableObject {
 

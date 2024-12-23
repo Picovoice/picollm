@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,6 +11,7 @@
 		02A1194B268D39A700A2AC99 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A1194A268D39A700A2AC99 /* ContentView.swift */; };
 		02A1194D268D39AB00A2AC99 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02A1194C268D39AB00A2AC99 /* Assets.xcassets */; };
 		02A1195F268D3FD600A2AC99 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A1195E268D3FD600A2AC99 /* ViewModel.swift */; };
+		34B26B852D1A070E00C33299 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34B26B842D1A070E00C33299 /* PicoLLM */; };
 		C789D2492BEA8D26005FDB10 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D2482BEA8D26005FDB10 /* SidebarView.swift */; };
 		C789D24B2BEA8E5D005FDB10 /* LoadModelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D24A2BEA8E5D005FDB10 /* LoadModelView.swift */; };
 		C789D24D2BEA8EAE005FDB10 /* CompletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D24C2BEA8EAE005FDB10 /* CompletionView.swift */; };
@@ -37,6 +38,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1E013812D1612E800DB0C2F /* PicoLLM in Frameworks */,
+				34B26B852D1A070E00C33299 /* PicoLLM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,7 +121,7 @@
 			);
 			mainGroup = 02A1193C268D39A700A2AC99;
 			packageReferences = (
-				E1E0137F2D1612E800DB0C2F /* XCLocalSwiftPackageReference "../../../../picollm" */,
+				34B26B832D1A070E00C33299 /* XCRemoteSwiftPackageReference "picollm" */,
 			);
 			productRefGroup = 02A11946268D39A700A2AC99 /* Products */;
 			projectDirPath = "";
@@ -342,14 +344,23 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		E1E0137F2D1612E800DB0C2F /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../../../picollm;
+/* Begin XCRemoteSwiftPackageReference section */
+		34B26B832D1A070E00C33299 /* XCRemoteSwiftPackageReference "picollm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/picovoice/picollm";
+			requirement = {
+				kind = exactVersion;
+				version = 1.2.3;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		34B26B842D1A070E00C33299 /* PicoLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 34B26B832D1A070E00C33299 /* XCRemoteSwiftPackageReference "picollm" */;
+			productName = PicoLLM;
+		};
 		E1E013802D1612E800DB0C2F /* PicoLLM */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PicoLLM;

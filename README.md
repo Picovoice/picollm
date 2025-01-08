@@ -19,7 +19,7 @@ models. picoLLM Inference Engine is:
 - Accurate; picoLLM Compression improves GPTQ by [significant margins](https://picovoice.ai/blog/picollm-towards-optimal-llm-quantization/)
 - Private; LLM inference runs 100% locally.
 - Cross-Platform
-    - Linux (x86_64), macOS (arm64, x86_64), and Windows (x86_64)
+    - Linux (x86_64), macOS (arm64, x86_64), and Windows (x86_64, arm64)
     - Raspberry Pi (5 and 4)
     - Android and iOS
     - Chrome, Safari, Edge, and Firefox

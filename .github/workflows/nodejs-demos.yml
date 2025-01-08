@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         xpu: [ cpu ]
-        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows ]
+        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows, pv-windows-arm64 ]
         include:
           - xpu: gpu
             machine: pv-linux
@@ -46,6 +46,12 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
+
+    # ************ REMOVE AFTER RELEASE ***************
+    - name: build local binding
+      run: yarn install && yarn build
+      working-directory: binding/nodejs
+    # ************ REMOVE AFTER RELEASE ***************
 
     - name: Install dependencies
       run: yarn install

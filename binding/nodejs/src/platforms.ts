@@ -73,6 +73,10 @@ SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_WINDOWS}/${X86_64}`,
   `${PLATFORM_WINDOWS}/amd64/pv_picollm.node`
 );
+SYSTEM_TO_LIBRARY_PATH.set(
+  `${SYSTEM_WINDOWS}/${ARM_64}`,
+  `${PLATFORM_WINDOWS}/arm64/pv_picollm.node`
+);
 
 function absoluteLibraryPath(libraryPath: string): string {
   return path.resolve(__dirname, LIBRARY_PATH_PREFIX, libraryPath);

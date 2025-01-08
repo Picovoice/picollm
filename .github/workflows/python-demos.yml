@@ -61,7 +61,7 @@ jobs:
     # ************ REMOVE AFTER RELEASE ***************
 
     - name: Install Python dependencies
-      run: python3 -m pip install -r requirements.txt
+      run: python3 -m pip install -r requirements.txt --force-reinstall
 
     - name: Download resource files
       run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/04-d5f2aa0/phi2-290.pllm -o phi2-290.pllm

@@ -47,6 +47,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Install yarn
+      run: npm install -g yarn
+
     # ************ REMOVE AFTER RELEASE ***************
     - name: build local binding
       run: yarn install && yarn build

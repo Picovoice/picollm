@@ -129,7 +129,7 @@ export function getPlatform(): string {
     return PLATFORM_MAC;
   }
 
-  if (system === SYSTEM_WINDOWS && arch === X86_64) {
+  if (system === SYSTEM_WINDOWS && (arch === X86_64 || arch == ARM_64)) {
     return PLATFORM_WINDOWS;
   }
 

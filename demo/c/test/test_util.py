@@ -82,7 +82,10 @@ def pv_library_path(relative: str) -> str:
                 relative,
                 'lib/raspberry-pi/%s/libpv_picollm.so' % _PV_MACHINE)
     elif _PV_SYSTEM == 'Windows':
-        library_file = os.path.join(os.path.dirname(__file__), relative, 'lib/windows/amd64/libpv_picollm.dll')
+        if _PV_MACHINE.lower() == 'amd64':
+            library_file = os.path.join(os.path.dirname(__file__), relative, 'lib/windows/amd64/libpv_picollm.dll')
+        elif _PV_MACHINE.lower() == 'arm64':
+            library_file = os.path.join(os.path.dirname(__file__), relative, 'lib/windows/arm64/libpv_picollm.dll')
         os.environ["PATH"] += os.pathsep + os.path.join(os.path.dirname(library_file))
         return library_file
 

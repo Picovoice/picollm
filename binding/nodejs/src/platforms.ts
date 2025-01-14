@@ -73,6 +73,10 @@ SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_WINDOWS}/${X86_64}`,
   `${PLATFORM_WINDOWS}/amd64/pv_picollm.node`
 );
+SYSTEM_TO_LIBRARY_PATH.set(
+  `${SYSTEM_WINDOWS}/${ARM_64}`,
+  `${PLATFORM_WINDOWS}/arm64/pv_picollm.node`
+);
 
 function absoluteLibraryPath(libraryPath: string): string {
   return path.resolve(__dirname, LIBRARY_PATH_PREFIX, libraryPath);
@@ -125,7 +129,7 @@ export function getPlatform(): string {
     return PLATFORM_MAC;
   }
 
-  if (system === SYSTEM_WINDOWS && arch === X86_64) {
+  if (system === SYSTEM_WINDOWS && (arch === X86_64 || arch === ARM_64)) {
     return PLATFORM_WINDOWS;
   }
 
@@ -176,9 +180,9 @@ export function getSystemLibraryPath(): string {
         break;
       }
       case SYSTEM_WINDOWS: {
-        if (arch === X86_64) {
+        if (arch === X86_64 || arch === ARM_64) {
           return absoluteLibraryPath(
-            SYSTEM_TO_LIBRARY_PATH.get(`${SYSTEM_WINDOWS}/${X86_64}`)
+            SYSTEM_TO_LIBRARY_PATH.get(`${SYSTEM_WINDOWS}/${arch}`)
           );
         }
         break;

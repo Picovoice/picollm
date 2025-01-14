@@ -55,7 +55,7 @@ body:
         - macOS (arm64, x86_64)
         - Raspberry Pi
         - Web (WASM)
-        - Windows (x86_64)
+        - Windows (x86_64, arm64)
     validations:
       required: true
   - type: input

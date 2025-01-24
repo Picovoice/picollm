@@ -1,0 +1,63 @@
+name: .NET
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/dotnet.yml'
+      - 'binding/dotnet/**'
+      - '!binding/dotnet/README.md'
+      - 'lib/linux/**'
+      - 'lib/mac/**'
+      - 'lib/raspberry-pi/**'
+      - 'lib/windows/**'
+      - 'resources/.test/**'
+  pull_request:
+    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    paths:
+      - '.github/workflows/dotnet.yml'
+      - 'binding/dotnet/**'
+      - '!binding/dotnet/README.md'
+      - 'lib/linux/**'
+      - 'lib/mac/**'
+      - 'lib/raspberry-pi/**'
+      - 'lib/windows/**'
+      - 'resources/.test/**'
+
+defaults:
+  run:
+    working-directory: binding/dotnet
+
+jobs:
+  build-self-hosted:
+    runs-on: ${{ matrix.machine }}
+    env:
+      ACCESS_KEY: ${{secrets.PV_VALID_ACCESS_KEY}}
+      MODEL_PATH: phi2-290.pllm
+      DEVICE: ${{matrix.xpu}}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        xpu: [ cpu ]
+        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows, pv-windows-arm64 ]
+        include:
+          - xpu: gpu
+            machine: pv-linux
+          - xpu: gpu
+            machine: pv-windows
+          - xpu: gpu
+            machine: pv-windows-igpu
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download resource files
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/04-d5f2aa0/phi2-290.pllm -o phi2-290.pllm
+
+    - name: Build binding
+      run: dotnet build PicoLLM/PicoLLM.csproj --framework net8.0
+
+    - name: Test
+      run: dotnet test --framework net8.0 -v n

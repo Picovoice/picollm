@@ -1,0 +1,9 @@
+.vscode
+.vs
+*.user
+PicoLLM/bin
+PicoLLM/obj
+PicoLLM/Properties
+PicoLLMTest/bin
+PicoLLMTest/obj
+TestResults

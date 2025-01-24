@@ -301,7 +301,7 @@ using Pv;
 
 PicoLLM pllm = PicoLLM.Create("${ACCESS_KEY}", "${MODEL_PATH}");
 
-PicoLLMComplection res = pllm.Generate('${PROMPT}');
+PicoLLMCompletion res = pllm.Generate('${PROMPT}');
 Console.WriteLine(res.Completion);
 ```
 

@@ -15,7 +15,7 @@ models. picoLLM Inference Engine is:
 
 ## Requirements
 
-- .NET 8.0
+- [.NET 8.0](https://dotnet.microsoft.com/download)
 
 ## Compatibility
 
@@ -37,7 +37,7 @@ Platform compatible with .NET 6.0+:
 
 ## Installation
 
-You can install the latest version of picoLLM by getting the latest [picoLLM Nuget package](https://www.nuget.org/packages/PicoLLM/)
+You can install the latest version of picoLLM by getting the latest [picoLLM Nuget package](https://www.nuget.org/packages/PicoLLM/) <!-- markdown-link-check-disable-line -->
 in Visual Studio or using the .NET CLI.
 
 ```console
@@ -100,7 +100,7 @@ using Pv;
 
 PicoLLM pllm = PicoLLM.Create("${ACCESS_KEY}", "${MODEL_PATH}");
 
-PicoLLMComplection res = pllm.Generate('${PROMPT}');
+PicoLLMCompletion res = pllm.Generate('${PROMPT}');
 Console.WriteLine(res.Completion);
 ```
 
@@ -114,7 +114,7 @@ template. You can either directly format the prompt or use a dialog helper:
 dialog = pllm.GetDialog();
 dialog.AddHumanRequest(prompt);
 
-PicoLLMComplection res = pllm.Generate(dialog.Prompt());
+PicoLLMCompletion res = pllm.Generate(dialog.Prompt());
 dialog.AddLLMResponse(res.Completion);
 Console.WriteLine(res.Completion);
 ```
@@ -136,4 +136,4 @@ using(PicoLLM pllm = PicoLLM.Create(accessKey, modelPath))
 
 ## Demos
 
-The [picoLLM dotnet demo project](https://github.com/Picovoice/picollm/tree/master/demo/dotnet) is a .NET application that provides command-line utilities for LLM completion and chat using picoLLM.
+The [picoLLM dotnet demo project](https://github.com/Picovoice/picollm/tree/master/demo/dotnet) is a .NET application that provides command-line utilities for LLM completion and chat using picoLLM. <!-- markdown-link-check-disable-line -->

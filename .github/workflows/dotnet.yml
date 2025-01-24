@@ -34,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.machine }}
     env:
       ACCESS_KEY: ${{secrets.PV_VALID_ACCESS_KEY}}
-      MODEL_PATH: phi2-290.pllm
+      MODEL_PATH: ../../../../phi2-290.pllm
       DEVICE: ${{matrix.xpu}}
 
     strategy:
@@ -55,6 +55,7 @@ jobs:
 
     - name: Download resource files
       run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/04-d5f2aa0/phi2-290.pllm -o phi2-290.pllm
+      working-directory: binding/dotnet
 
     - name: Build binding
       run: dotnet build PicoLLM/PicoLLM.csproj --framework net8.0

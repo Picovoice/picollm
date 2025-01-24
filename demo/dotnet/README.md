@@ -89,7 +89,7 @@ dotnet build -c ChatDemo.Release
 dotnet build -c CompletionDemo.Release
 ```
 
-For both demos, you can use `--help/-h` to see the list of input arguements.
+For both demos, you can use `--help/-h` to see the list of input arguments.
 
 ### Chat Demo
 

@@ -39,8 +39,8 @@ mipmap
 mixtral
 mmlu
 netcoreapp
-netcoreapp
 NETCOREAPP
+netstandard
 Newtonsoft
 Pico
 picollm

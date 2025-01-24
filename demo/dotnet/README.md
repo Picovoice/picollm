@@ -15,25 +15,51 @@ models. picoLLM Inference Engine is:
 
 ## Requirements
 
-- .NET 8.0
+- [.NET 8.0](https://dotnet.microsoft.com/download)
 
 ## Compatibility
 
 - Linux (x86_64)
 - macOS (x86_64, arm64)
-- Windows (x86_64)
+- Windows (x86_64, arm64)
 - Raspberry Pi (4, 5)
 
-## Installation
+## Models
 
-Both demos use [Microsoft's .NET 8.0](https://dotnet.microsoft.com/download).
+picoLLM Inference Engine supports the following open-weight models. The models are on
+[Picovoice Console](https://console.picovoice.ai/).
 
-Build with the dotnet CLI:
-
-```console
-dotnet build -c ChatDemo.Release
-dotnet build -c CompletionDemo.Release
-```
+- Gemma
+    - `gemma-2b`
+    - `gemma-2b-it`
+    - `gemma-7b`
+    - `gemma-7b-it`
+- Llama-2
+    - `llama-2-7b`
+    - `llama-2-7b-chat`
+    - `llama-2-13b`
+    - `llama-2-13b-chat`
+    - `llama-2-70b`
+    - `llama-2-70b-chat`
+- Llama-3
+    - `llama-3-8b`
+    - `llama-3-8b-instruct`
+    - `llama-3-70b`
+    - `llama-3-70b-instruct`
+- Llama-3.2
+    - `llama3.2-1b-instruct`
+    - `llama3.2-3b-instruct`
+- Mistral
+    - `mistral-7b-v0.1`
+    - `mistral-7b-instruct-v0.1`
+    - `mistral-7b-instruct-v0.2`
+- Mixtral
+    - `mixtral-8x7b-v0.1`
+    - `mixtral-8x7b-instruct-v0.1`
+- Phi-2
+  - `phi2`
+- Phi-3
+  - `phi3`
 
 ## AccessKey
 
@@ -54,6 +80,13 @@ NOTE: File path arguments must be absolute paths. The working directory for the 
 
 ```console
 picollm/demo/dotnet/PicoLLMDemo
+```
+
+Build with the dotnet CLI:
+
+```console
+dotnet build -c ChatDemo.Release
+dotnet build -c CompletionDemo.Release
 ```
 
 For both demos, you can use `--help/-h` to see the list of input arguements.

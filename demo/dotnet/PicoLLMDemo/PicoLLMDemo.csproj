@@ -18,6 +18,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="PicoLLM" Version="1.2.0" />
+      <PackageReference Include="PicoLLM" Version="1.1.0" />
     </ItemGroup>
 </Project>

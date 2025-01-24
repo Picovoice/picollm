@@ -12,6 +12,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Pv;
 
@@ -38,9 +40,28 @@ namespace PicoLLMDemo
             {
                 Console.WriteLine($"picoLLM `{picoLLM.Version}`");
                 Console.WriteLine($"Loaded `{picoLLM.Model}`\n");
+                Console.WriteLine("Generating... (press `Space` to interrupt)\n");
+
+                bool isInterrupt = false;
+                Task interruptKeyTask = Task.Run(async () =>
+                {
+                    while (!isInterrupt)
+                    {
+                        if (Console.KeyAvailable)
+                        {
+                            ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
+                            if (keyInfo.Key == ConsoleKey.Spacebar)
+                            {
+                                Console.WriteLine("\n\nInterrupting generation...");
+                                isInterrupt = true;
+                                picoLLM.Interrupt();
+                            }
+                        }
+                        await Task.Delay(100);
+                    }
+                });
 
                 double startSec = 0.0;
-
                 Action<string> streamCallback = (string token) =>
                 {
                     if (startSec == 0.0)
@@ -48,8 +69,11 @@ namespace PicoLLMDemo
                         startSec = DateTime.Now.TimeOfDay.TotalSeconds;
                     }
 
-                    Console.Write(token);
-                    Console.Out.Flush();
+                    if (!isInterrupt)
+                    {
+                        Console.Write(token);
+                        Console.Out.Flush();
+                    }
                 };
 
                 PicoLLMCompletion completion = picoLLM.Generate(
@@ -63,6 +87,8 @@ namespace PicoLLMDemo
                     topP,
                     numTopChoices,
                     streamCallback);
+
+                interruptKeyTask.Wait();
 
                 if (verbose)
                 {

@@ -21,6 +21,8 @@ namespace PicoLLMDemo
 {
     public class ChatDemo
     {
+        private static Action<string> streamCallback;
+
         public static void RunDemo(
             string accessKey,
             string modelPath,
@@ -73,6 +75,15 @@ namespace PicoLLMDemo
                         }
                     });
 
+                    streamCallback = (string token) =>
+                    {
+                        if (!isInterrupt)
+                        {
+                            Console.Write(token);
+                            Console.Out.Flush();
+                        }
+                    };
+
                     response = picoLLM.Generate(
                         dialog.Prompt(),
                         completionTokenLimit,
@@ -82,14 +93,7 @@ namespace PicoLLMDemo
                         frequencyPenalty,
                         temperature,
                         topP,
-                        streamCallback: (string token) =>
-                        {
-                            if (!isInterrupt)
-                            {
-                                Console.Write(token);
-                                Console.Out.Flush();
-                            }
-                        });
+                        streamCallback: streamCallback);
 
                     interruptKeyTask.Wait();
                     Console.WriteLine();

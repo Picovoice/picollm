@@ -46,6 +46,9 @@ jobs:
       run: dotnet restore
 
     # ************** REMOVE AFTER RELEASE ********************
+    - name: Remove local package
+      run: rm -rf ~/.nuget/packages/picollm
+
     - name: Build Local Packages
       run: dotnet build && dotnet pack -c Release
       working-directory: binding/dotnet/PicoLLM

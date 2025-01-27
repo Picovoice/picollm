@@ -54,6 +54,8 @@ picoLLM Inference Engine supports the following open-weight models. The models a
   - `phi2`
 - Phi-3
   - `phi3`
+- Phi-3.5
+  - `phi3.5`
 
 ## Usage
 

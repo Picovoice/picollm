@@ -43,11 +43,12 @@ namespace PicoLLMDemo
                 Console.WriteLine("Generating... (press `Space` to interrupt)\n");
 
                 bool isInterrupt = false;
+                PicoLLMCompletion completion = null;
                 Task interruptKeyTask = Task.Run(async () =>
                 {
-                    while (!isInterrupt)
+                    while (!isInterrupt && completion == null)
                     {
-                        if (Console.KeyAvailable)
+                        if (!Console.IsInputRedirected && Console.KeyAvailable)
                         {
                             ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
                             if (keyInfo.Key == ConsoleKey.Spacebar)
@@ -76,7 +77,7 @@ namespace PicoLLMDemo
                     }
                 };
 
-                PicoLLMCompletion completion = picoLLM.Generate(
+                completion = picoLLM.Generate(
                     prompt,
                     completionTokenLimit,
                     stopPhrases.ToArray(),

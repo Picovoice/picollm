@@ -59,13 +59,13 @@
 
 	<!--.NET 6.0+ libs-->
 	<ItemGroup>
-		<Content Include="..\..\..\lib\mac\arm64\libpv_picollm.dylib">
+		<Content Include="..\..\..\lib\mac\arm64\*">
 			<PackagePath>
-				build/net6.0/lib/mac/arm64/libpv_picollm.dylib;
-				build/net8.0/lib/mac/arm64/libpv_picollm.dylib;
+				build/net6.0/lib/mac/arm64;
+				build/net8.0/lib/mac/arm64;
 			</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>lib\mac\arm64\libpv_picollm.dylib</Link>
+			<Link>lib\mac\arm64\%(Filename)%(Extension)</Link>
 			<Visible>false</Visible>
 		</Content>
 		<Content Include="..\..\..\lib\linux\x86_64\libpv_picollm.so">

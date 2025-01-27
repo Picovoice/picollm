@@ -54,11 +54,12 @@ namespace PicoLLMDemo
                     dialog.AddHumanRequest(prompt);
 
                     bool isInterrupt = false;
+                    PicoLLMCompletion response = null;
                     Task interruptKeyTask = Task.Run(async () =>
                     {
-                        while (!isInterrupt)
+                        while (!isInterrupt && response == null)
                         {
-                            if (Console.KeyAvailable)
+                            if (!Console.IsInputRedirected && Console.KeyAvailable)
                             {
                                 ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
                                 if (keyInfo.Key == ConsoleKey.Spacebar)
@@ -72,7 +73,7 @@ namespace PicoLLMDemo
                         }
                     });
 
-                    PicoLLMCompletion response = picoLLM.Generate(
+                    response = picoLLM.Generate(
                         dialog.Prompt(),
                         completionTokenLimit,
                         stopPhrases.ToArray(),

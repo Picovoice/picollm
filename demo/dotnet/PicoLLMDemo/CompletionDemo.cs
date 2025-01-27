@@ -21,8 +21,6 @@ namespace PicoLLMDemo
 {
     public class CompletionDemo
     {
-        private static Action<string> streamCallback;
-
         public static void RunDemo(
             string accessKey,
             string modelPath,
@@ -65,7 +63,7 @@ namespace PicoLLMDemo
                 });
 
                 double startSec = 0.0;
-                streamCallback = (string token) =>
+                Action<string> streamCallback = (string token) =>
                 {
                     if (startSec == 0.0)
                     {

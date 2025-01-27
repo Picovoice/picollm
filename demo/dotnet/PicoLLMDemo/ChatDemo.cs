@@ -21,8 +21,6 @@ namespace PicoLLMDemo
 {
     public class ChatDemo
     {
-        private static Action<string> streamCallback;
-
         public static void RunDemo(
             string accessKey,
             string modelPath,
@@ -56,12 +54,11 @@ namespace PicoLLMDemo
                     dialog.AddHumanRequest(prompt);
 
                     bool isInterrupt = false;
-                    PicoLLMCompletion response = null;
                     Task interruptKeyTask = Task.Run(async () =>
                     {
-                        while (!isInterrupt && response == null)
+                        while (!isInterrupt)
                         {
-                            if (!Console.IsInputRedirected && Console.KeyAvailable)
+                            if (Console.KeyAvailable)
                             {
                                 ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
                                 if (keyInfo.Key == ConsoleKey.Spacebar)
@@ -75,16 +72,7 @@ namespace PicoLLMDemo
                         }
                     });
 
-                    streamCallback = (string token) =>
-                    {
-                        if (!isInterrupt)
-                        {
-                            Console.Write(token);
-                            Console.Out.Flush();
-                        }
-                    };
-
-                    response = picoLLM.Generate(
+                    PicoLLMCompletion response = picoLLM.Generate(
                         dialog.Prompt(),
                         completionTokenLimit,
                         stopPhrases.ToArray(),
@@ -93,7 +81,14 @@ namespace PicoLLMDemo
                         frequencyPenalty,
                         temperature,
                         topP,
-                        streamCallback: streamCallback);
+                        streamCallback: (string token) =>
+                        {
+                            if (!isInterrupt)
+                            {
+                                Console.Write(token);
+                                Console.Out.Flush();
+                            }
+                        });
 
                     interruptKeyTask.Wait();
                     Console.WriteLine();

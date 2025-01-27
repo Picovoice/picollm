@@ -225,9 +225,11 @@ namespace Pv
     {
         private const string LIBRARY = "libpv_picollm";
         private IntPtr _libraryPointer = IntPtr.Zero;
-        private Action<string> _streamCallback;
 
         private delegate void PicoLLMStreamCallbackDelegate(IntPtr token, IntPtr userData);
+        private PicoLLMStreamCallbackDelegate streamCallbackDelegate = new PicoLLMStreamCallbackDelegate(StreamCallbackWrapper);
+
+        private Action<string> _streamCallback;
 
         static PicoLLM()
         {
@@ -593,7 +595,6 @@ namespace Pv
 
             _streamCallback = streamCallback;
 
-            PicoLLMStreamCallbackDelegate streamCallbackDelegate = new PicoLLMStreamCallbackDelegate(StreamCallbackWrapper);
             IntPtr streamCallbackPtr = Marshal.GetFunctionPointerForDelegate(streamCallbackDelegate);
 
             CPicoLLMUsage cUsage;
@@ -939,6 +940,7 @@ namespace Pv
             {
                 pv_picollm_delete(_libraryPointer);
                 _libraryPointer = IntPtr.Zero;
+                _streamCallback = null;
 
                 // ensures finalizer doesn't trigger if already manually disposed
                 GC.SuppressFinalize(this);

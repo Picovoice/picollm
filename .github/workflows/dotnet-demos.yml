@@ -47,7 +47,12 @@ jobs:
 
     # ************** REMOVE AFTER RELEASE ********************
     - name: Remove local package
+      if: ${{ matrix.machine != 'pv-windows' && matrix.machine != 'pv-windows-igpu' && matrix.machine != 'pv-windows-arm64' }}
       run: rm -rf ~/.nuget/packages/picollm
+
+    - name: Remove local package
+      if: ${{ matrix.machine == 'pv-windows' && matrix.machine == 'pv-windows-igpu' && matrix.machine == 'pv-windows-arm64' }}
+      run: rm ~/.nuget/packages/picollm -r -force
 
     - name: Build Local Packages
       run: dotnet build && dotnet pack -c Release

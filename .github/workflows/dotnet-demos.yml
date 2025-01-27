@@ -52,7 +52,7 @@ jobs:
 
     - name: Remove local package
       if: ${{ matrix.machine == 'pv-windows' || matrix.machine == 'pv-windows-igpu' || matrix.machine == 'pv-windows-arm64' }}
-      run: rm ~/.nuget/packages/picollm -r -force
+      run: rm ~/.nuget/packages/picollm -r -force -ErrorAction SilentlyContinue
 
     - name: Build Local Packages
       run: dotnet build && dotnet pack -c Release

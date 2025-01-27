@@ -145,7 +145,7 @@ namespace PicoLLMTest
             string prompt = data["prompt"].ToObject<string>();
             List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 PicoLLMCompletion res = picoLLM.Generate(prompt);
                 VerifyCompletion(res, expectations);
@@ -160,7 +160,7 @@ namespace PicoLLMTest
             int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
             List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 PicoLLMCompletion res = picoLLM.Generate(prompt, completionTokenLimit: completionTokenLimit);
                 VerifyCompletion(res, expectations);
@@ -175,7 +175,7 @@ namespace PicoLLMTest
             string[] stopPhrases = data["parameters"]["stop-phrases"].ToObject<string[]>();
             List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 PicoLLMCompletion res = picoLLM.Generate(prompt, stopPhrases: stopPhrases);
                 VerifyCompletion(res, expectations);
@@ -190,7 +190,7 @@ namespace PicoLLMTest
             float presencePenalty = data["parameters"]["presence-penalty"].ToObject<float>();
             List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 PicoLLMCompletion res = picoLLM.Generate(prompt, presencePenalty: presencePenalty);
                 VerifyCompletion(res, expectations);
@@ -205,7 +205,7 @@ namespace PicoLLMTest
             float frequencyPenalty = data["parameters"]["frequency-penalty"].ToObject<float>();
             List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 PicoLLMCompletion res = picoLLM.Generate(prompt, frequencyPenalty: frequencyPenalty);
                 VerifyCompletion(res, expectations);
@@ -221,7 +221,7 @@ namespace PicoLLMTest
             float temperature = data["parameters"]["temperature"].ToObject<float>();
             List<int> seeds = data["parameters"]["seeds"].ToObject<List<int>>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 int numPromptTokens = picoLLM.Tokenize(prompt, bos: true, eos: false).Length;
                 PicoLLMCompletion res = picoLLM.Generate(prompt, completionTokenLimit: completionTokenLimit, seed: seeds[0], temperature: temperature);
@@ -251,12 +251,19 @@ namespace PicoLLMTest
                 int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
                 int seed = data["parameters"]["seed"].ToObject<int>();
                 float temperature = data["parameters"]["temperature"].ToObject<float>();
-
-                using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+                Console.WriteLine(seed);
+                using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
                 {
                     int numPromptTokens = picoLLM.Tokenize(prompt, bos: true, eos: false).Length;
-                    PicoLLMCompletion res = picoLLM.Generate(prompt, completionTokenLimit: completionTokenLimit, seed: seed, temperature: temperature);
-                    PicoLLMCompletion res2 = picoLLM.Generate(prompt, completionTokenLimit: completionTokenLimit, seed: seed, temperature: temperature);
+                    PicoLLMCompletion res = picoLLM.Generate(
+                        prompt, completionTokenLimit:
+                        completionTokenLimit,
+                        seed: seed,
+                        temperature: temperature);
+                    PicoLLMCompletion res2 = picoLLM.Generate(
+                        prompt, completionTokenLimit: completionTokenLimit,
+                        seed: seed,
+                        temperature: temperature);
 
                     VerifyCompletion(res, new List<CompletionExpectation>
                     {
@@ -286,7 +293,7 @@ namespace PicoLLMTest
                 float topP = data["parameters"]["top-p"].ToObject<float>();
                 List<string> expectations = data["expectations"].ToObject<List<string>>();
 
-                using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+                using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
                 {
                     int numPromptTokens = picoLLM.Tokenize(prompt, bos: true, eos: false).Length;
                     PicoLLMCompletion res = picoLLM.Generate(prompt, completionTokenLimit: completionTokenLimit, seed: seed, temperature: temperature, topP: topP);
@@ -303,7 +310,7 @@ namespace PicoLLMTest
             int numTopChoices = data["parameters"]["num-top-choices"].ToObject<int>();
             List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 PicoLLMCompletion res = picoLLM.Generate(prompt, numTopChoices: numTopChoices);
                 VerifyCompletion(res, expectations);
@@ -320,7 +327,7 @@ namespace PicoLLMTest
             List<string> pieces = new List<string>();
             Action<string> streamCallback = (string x) => pieces.Add(x);
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 PicoLLMCompletion res = picoLLM.Generate(prompt, streamCallback: streamCallback);
                 VerifyCompletion(res, expectations);
@@ -335,7 +342,7 @@ namespace PicoLLMTest
             JToken data = _testJson["default"];
             string prompt = data["prompt"].ToObject<string>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 Task<PicoLLMCompletion> generateTask = Task.Run(() => picoLLM.Generate(prompt));
                 picoLLM.Interrupt();
@@ -361,7 +368,7 @@ namespace PicoLLMTest
             string text = _testJson["tokenize"]["text"].ToObject<string>();
             int[] expectedTokens = _testJson["tokenize"]["tokens"].ToObject<int[]>();
 
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 int[] tokens = picoLLM.Tokenize(text, bos: true, eos: false);
                 CollectionAssert.AreEqual(expectedTokens, tokens);
@@ -372,7 +379,7 @@ namespace PicoLLMTest
         public void TestForward()
         {
             int testToken = _testJson["tokenize"]["tokens"].ToObject<int[]>()[0];
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 float[] logits = picoLLM.Forward(testToken);
                 Assert.IsTrue(logits.Length > 0);
@@ -386,7 +393,7 @@ namespace PicoLLMTest
         public void TestReset()
         {
             int testToken = _testJson["tokenize"]["tokens"].ToObject<int[]>()[0];
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 float[] logits = picoLLM.Forward(testToken);
                 picoLLM.Reset();
@@ -413,7 +420,7 @@ namespace PicoLLMTest
 
             try
             {
-                p = PicoLLM.Create("invalid", _modelPath);
+                p = PicoLLM.Create("invalid", _modelPath, _device);
                 Assert.IsNull(p);
                 p.Dispose();
             }
@@ -427,7 +434,7 @@ namespace PicoLLMTest
 
             try
             {
-                p = PicoLLM.Create("invalid", _modelPath);
+                p = PicoLLM.Create("invalid", _modelPath, _device);
                 Assert.IsNull(p);
                 p.Dispose();
             }
@@ -443,7 +450,7 @@ namespace PicoLLMTest
         [TestMethod]
         public void TestGetDialog()
         {
-            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath))
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
                 PicoLLMDialog dialog = picoLLM.GetDialog();
                 Assert.IsNotNull(dialog);

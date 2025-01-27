@@ -227,8 +227,7 @@ namespace Pv
         private IntPtr _libraryPointer = IntPtr.Zero;
 
         private delegate void PicoLLMStreamCallbackDelegate(IntPtr token, IntPtr userData);
-        private PicoLLMStreamCallbackDelegate streamCallbackDelegate = new PicoLLMStreamCallbackDelegate(StreamCallbackWrapper);
-
+        private PicoLLMStreamCallbackDelegate _streamCallbackDelegate;
         private Action<string> _streamCallback;
 
         static PicoLLM()
@@ -519,6 +518,7 @@ namespace Pv
 
             Version = Utils.GetUtf8StringFromPtr(pv_picollm_version());
             MaxTopChoices = pv_picollm_max_top_choices();
+            _streamCallbackDelegate = new PicoLLMStreamCallbackDelegate(StreamCallbackWrapper);
         }
 
         /// <summary>
@@ -595,7 +595,7 @@ namespace Pv
 
             _streamCallback = streamCallback;
 
-            IntPtr streamCallbackPtr = Marshal.GetFunctionPointerForDelegate(streamCallbackDelegate);
+            IntPtr streamCallbackPtr = Marshal.GetFunctionPointerForDelegate(_streamCallbackDelegate);
 
             CPicoLLMUsage cUsage;
             PicoLLMEndpoint endpoint;

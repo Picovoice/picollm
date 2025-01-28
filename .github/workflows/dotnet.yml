@@ -46,16 +46,15 @@ jobs:
             test-framework: net8.0
         machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows, pv-windows-arm64 ]
         include:
-          - xpu: gpu
-            machine: pv-linux
-          - xpu: gpu
-            machine: pv-windows
-          - xpu: gpu
-            machine: pv-windows-igpu
           - dotnet:
                 binding-framework: netstandard2.0
                 test-framework: netcoreapp2.1
+            xpu: gpu
             machine: pv-windows
+          - xpu: gpu
+            machine: pv-linux
+          - xpu: gpu
+            machine: pv-windows-igpu
 
 
     steps:

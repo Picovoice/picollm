@@ -55,7 +55,11 @@ jobs:
       run: rm ~/.nuget/packages/picollm -r -force -ErrorAction SilentlyContinue
 
     - name: Build Local Packages
-      run: dotnet build && dotnet pack -c Release
+      run: dotnet build
+      working-directory: binding/dotnet/PicoLLM
+
+    - name: Pack Local Packages
+      run: dotnet pack -c Release
       working-directory: binding/dotnet/PicoLLM
 
     - name: Install Local Packages

@@ -41,6 +41,9 @@ jobs:
       fail-fast: false
       matrix:
         xpu: [ cpu ]
+        dotnet:
+          - binding-framework: net8.0
+            test-framework: net8.0
         machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows, pv-windows-arm64 ]
         include:
           - xpu: gpu
@@ -49,6 +52,11 @@ jobs:
             machine: pv-windows
           - xpu: gpu
             machine: pv-windows-igpu
+          - dotnet:
+                binding-framework: netstandard2.0
+                test-framework: netcoreapp2.1
+            machine: pv-windows
+
 
     steps:
     - uses: actions/checkout@v3
@@ -58,7 +66,7 @@ jobs:
       working-directory: binding/dotnet
 
     - name: Build binding
-      run: dotnet build PicoLLM/PicoLLM.csproj --framework net8.0
+      run: dotnet build PicoLLM/PicoLLM.csproj --framework ${{ matrix.dotnet.binding-framework }}
 
     - name: Test
-      run: dotnet test --framework net8.0 -v n
+      run: dotnet test --framework ${{ matrix.dotnet.test-framework }} -v n

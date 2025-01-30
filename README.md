@@ -7,6 +7,7 @@
 [![npm](https://img.shields.io/npm/v/@picovoice/picollm-web?label=npm%20%5Bweb%5D)](https://www.npmjs.com/package/@picovoice/picollm-web)
 [![CocoaPods](https://img.shields.io/cocoapods/v/picoLLM-iOS)](https://cocoapods.org/pods/picoLLM-iOS)<!-- markdown-link-check-disable-line -->
 [![PyPI](https://img.shields.io/pypi/v/picollm)](https://pypi.org/project/picollm/)
+[![Nuget](https://img.shields.io/nuget/v/picollm)](https://www.nuget.org/packages/PicoLLM/)
 
 Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
 

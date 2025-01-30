@@ -37,7 +37,7 @@ Platform compatible with .NET 6.0+:
 
 ## Installation
 
-You can install the latest version of picoLLM by getting the latest [picoLLM Nuget package](https://www.nuget.org/packages/PicoLLM/) <!-- markdown-link-check-disable-line -->
+You can install the latest version of picoLLM by getting the latest [picoLLM Nuget package](https://www.nuget.org/packages/PicoLLM/)
 in Visual Studio or using the .NET CLI.
 
 ```console

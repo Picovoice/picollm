@@ -136,4 +136,4 @@ using(PicoLLM pllm = PicoLLM.Create(accessKey, modelPath))
 
 ## Demos
 
-The [picoLLM dotnet demo project](https://github.com/Picovoice/picollm/tree/master/demo/dotnet) is a .NET application that provides command-line utilities for LLM completion and chat using picoLLM. <!-- markdown-link-check-disable-line -->
+The [picoLLM dotnet demo project](https://github.com/Picovoice/picollm/tree/main/demo/dotnet) is a .NET application that provides command-line utilities for LLM completion and chat using picoLLM.

@@ -7,6 +7,7 @@
 [![npm](https://img.shields.io/npm/v/@picovoice/picollm-web?label=npm%20%5Bweb%5D)](https://www.npmjs.com/package/@picovoice/picollm-web)
 [![CocoaPods](https://img.shields.io/cocoapods/v/picoLLM-iOS)](https://cocoapods.org/pods/picoLLM-iOS)<!-- markdown-link-check-disable-line -->
 [![PyPI](https://img.shields.io/pypi/v/picollm)](https://pypi.org/project/picollm/)
+[![Nuget](https://img.shields.io/nuget/v/picollm)](https://www.nuget.org/packages/PicoLLM/)
 
 Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
 
@@ -43,6 +44,7 @@ models. picoLLM Inference Engine is:
     - [AccessKey](#accesskey)
     - [Demos](#demos)
         - [Python](#python-demos)
+        - [.NET](#net-demos)
         - [Node.js](#nodejs-demos)
         - [Android](#android-demos)
         - [iOS](#ios-demos)
@@ -50,6 +52,7 @@ models. picoLLM Inference Engine is:
         - [C](#c-demos)
     - [SDKs](#sdks)
         - [Python](#python-sdk)
+        - [.NET](#net-sdk)
         - [Node.js](#nodejs-sdk)
         - [Android](#android-sdk)
         - [iOS](#ios-sdk)
@@ -132,6 +135,8 @@ picoLLM Inference Engine supports the following open-weight models. The models a
     - `phi2`
 - Phi-3
     - `phi3`
+- Phi-3.5
+  - `phi3.5`
 
 ## AccessKey
 
@@ -161,6 +166,20 @@ Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PAT
 downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 
 For more information about Python demos go to [demo/python](demo/python/README.md).
+
+### .NET Demos
+
+From [demo/dotnet/PicoLLMDemo](demo/dotnet/PicoLLMDemo) build and run the demo:
+
+```console
+dotnet build -c CompletionDemo.Release
+dotnet run -c CompletionDemo.Release -- --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
+downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
+
+For more information about .NET demos go to [demo/dotnet](demo/dotnet).
 
 ### Node.js Demos
 
@@ -269,6 +288,38 @@ print(res.completion)
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` to the path to a model file
 downloaded from Picovoice Console, and `${PROMPT}` to a prompt string. Finally, when done be sure to explicitly release
 the resources using `pllm.release()`.
+
+### .NET SDK
+
+Install the .NET SDK using NuGet or the dotnet CLI:
+
+```console
+dotnet add package PicoLLM
+```
+
+Create an instance of the engine and generate a prompt completion:
+
+```csharp
+using Pv;
+
+PicoLLM pllm = PicoLLM.Create("${ACCESS_KEY}", "${MODEL_PATH}");
+
+PicoLLMCompletion res = pllm.Generate('${PROMPT}');
+Console.WriteLine(res.Completion);
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` to the path to a model file
+downloaded from Picovoice Console, and `${PROMPT}` to a prompt string.
+
+`PicoLLM` will have its resources freed by the garbage collector, but to have resources freed immediately after use,
+wrap it in a using statement or call `.Dispose()` directly:
+
+```csharp
+using(PicoLLM pllm = PicoLLM.Create(accessKey, modelPath))
+{
+    // .. picoLLM usage here
+}
+```
 
 ### Node.js SDK
 

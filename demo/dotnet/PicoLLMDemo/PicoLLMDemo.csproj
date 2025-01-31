@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Configurations>ChatDemo.Debug;ChatDemo.Release;CompletionDemo.Debug;CompletionDemo.Release</Configurations>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'ChatDemo.Debug' Or '$(Configuration)' == 'ChatDemo.Release'">
+        <StartupObject>PicoLLMDemo.ChatDemo</StartupObject>
+        <TargetName>PicoLLMChatDemo</TargetName>
+        <AssemblyName>PicoLLMChatDemo</AssemblyName>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'CompletionDemo.Debug' Or '$(Configuration)' == 'CompletionDemo.Release'">
+        <StartupObject>PicoLLMDemo.CompletionDemo</StartupObject>
+        <TargetName>PicoLLMCompletionDemo</TargetName>
+        <AssemblyName>PicoLLMCompletionDemo</AssemblyName>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="PicoLLM" Version="1.2.0" />
+    </ItemGroup>
+</Project>

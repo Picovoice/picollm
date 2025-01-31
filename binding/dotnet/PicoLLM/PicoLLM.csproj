@@ -1,0 +1,110 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net6.0;netcoreapp3.0;netstandard2.0</TargetFrameworks>
+		<Version>1.2.0</Version>
+		<Authors>Picovoice</Authors>
+		<Company />
+		<Product>picoLLM Inference Engine</Product>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/Picovoice/picollm</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Picovoice/picollm.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>ai, offline, private, llm</PackageTags>
+		<PackageReleaseNotes>See https://github.com/Picovoice/picollm/ </PackageReleaseNotes>
+		<Copyright>Picovoice 2025</Copyright>
+		<Description>picoLLM Inference Engine is a highly accurate and cross-platform SDK optimized for running compressed large language models.</Description>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageIcon>pv_circle_512.png</PackageIcon>
+	</PropertyGroup>
+
+	<!--.NET Standard 2.0+ libs-->
+	<ItemGroup>
+		<Content Include="PicoLLM.netstandard2.0.targets">
+		  <PackagePath>
+				build/netstandard2.0/PicoLLM.targets;
+			</PackagePath>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="PicoLLM.targets">
+			<PackagePath>
+				build/netcoreapp3.0;
+				build/net6.0;
+				build/net8.0;
+			</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\..\..\lib\windows\amd64\*">
+			<PackagePath>
+				build/netstandard2.0;
+				build/netcoreapp3.0/lib/windows/amd64;
+				build/net6.0/lib/windows/amd64;
+				build/net8.0/lib/windows/amd64;
+			</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>lib\windows\amd64\%(Filename)%(Extension)</Link>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="..\..\..\lib\mac\x86_64\*">
+			<PackagePath>
+				build/netstandard2.0;
+				build/netcoreapp3.0/lib/mac/x86_64;
+				build/net6.0/lib/mac/x86_64;
+				build/net8.0/lib/mac/x86_64;
+			</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>lib\mac\x86_64\%(Filename)%(Extension)</Link>
+			<Visible>false</Visible>
+		</Content>
+	</ItemGroup>
+
+	<!--.NET 6.0+ libs-->
+	<ItemGroup>
+		<Content Include="..\..\..\lib\mac\arm64\*">
+			<PackagePath>
+				build/net6.0/lib/mac/arm64;
+				build/net8.0/lib/mac/arm64;
+			</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>lib\mac\arm64\%(Filename)%(Extension)</Link>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="..\..\..\lib\linux\x86_64\libpv_picollm.so">
+			<PackagePath>
+				build/net6.0/lib/linux/x86_64/libpv_picollm.so;
+				build/net8.0/lib/linux/x86_64/libpv_picollm.so;
+			</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>lib\linux\x86_64\libpv_picollm.so</Link>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="..\..\..\lib\raspberry-pi\**\*">
+			<PackagePath>
+				build/net6.0/lib/raspberry-pi;
+				build/net8.0/lib/raspberry-pi;
+			</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>lib\raspberry-pi\%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="..\..\..\lib\windows\arm64\*">
+			<PackagePath>
+				build/net6.0/lib/windows/arm64;
+				build/net8.0/lib/windows/arm64;
+			</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>lib\windows\arm64\%(Filename)%(Extension)</Link>
+			<Visible>false</Visible>
+		</Content>
+	</ItemGroup>
+
+	<!--Resources-->
+	<ItemGroup>
+		<Folder Include="Content\" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="Content\pv_circle_512.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+</Project>

@@ -1,4 +1,4 @@
-# picoLLM Inference Engine Python Demos
+# picoLLM Inference Engine .NET Demos
 
 Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
 
@@ -13,16 +13,16 @@ models. picoLLM Inference Engine is:
 - Runs on CPU and GPU
 - Free for open-weight models
 
+## Requirements
+
+- [.NET 8.0](https://dotnet.microsoft.com/download)
+
 ## Compatibility
 
-- Python 3.8+
-- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64, arm64), and Raspberry Pi (5 and 4).
-
-## Installation
-
-```console
-pip3 install picollmdemo
-```
+- Linux (x86_64)
+- macOS (x86_64, arm64)
+- Windows (x86_64, arm64)
+- Raspberry Pi (4, 5)
 
 ## Models
 
@@ -78,29 +78,27 @@ parameters and generates a single completion. It can run all models, whether ins
 run instruction-tuned (chat) models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth
 conversation with the LLM, similar to ChatGPT.
 
-### Completion Demo
-
-Run the demo by entering the following in the terminal:
+NOTE: File path arguments must be absolute paths. The working directory for the following dotnet commands is:
 
 ```console
-picollm_demo_completion --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
+picollm/demo/dotnet/PicoLLMDemo
 ```
 
-Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
-downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
-
-To get information about all the available options in the demo, run the following:
+Build with the dotnet CLI:
 
 ```console
-picollm_demo_completion --help
+dotnet build -c ChatDemo.Release
+dotnet build -c CompletionDemo.Release
 ```
+
+For both demos, you can use `--help/-h` to see the list of input arguments.
 
 ### Chat Demo
 
 To run an instruction-tuned model for chat, run the following in the terminal:
 
 ```console
-picollm_demo_chat --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH}
+dotnet run -c ChatDemo.Release -- --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH}
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console and `${MODEL_PATH}` with the path to a model file
@@ -109,5 +107,22 @@ downloaded from Picovoice Console.
 To get information about all the available options in the demo, run the following:
 
 ```console
-picollm_demo_chat --help
+dotnet run -c ChatDemo.Release -- --help
+```
+
+### Completion Demo
+
+Run the demo by entering the following in the terminal:
+
+```console
+dotnet run -c CompletionDemo.Release -- --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
+downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
+
+To get information about all the available options in the demo, run the following:
+
+```console
+dotnet run -c CompletionDemo.Release -- --help
 ```

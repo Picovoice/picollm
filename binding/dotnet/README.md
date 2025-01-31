@@ -1,4 +1,4 @@
-# picoLLM Inference Engine Python Demos
+# picoLLM Inference Engine .NET Binding
 
 Made in Vancouver, Canada by [Picovoice](https://picovoice.ai)
 
@@ -13,20 +13,40 @@ models. picoLLM Inference Engine is:
 - Runs on CPU and GPU
 - Free for open-weight models
 
+## Requirements
+
+- [.NET 8.0](https://dotnet.microsoft.com/download)
+
 ## Compatibility
 
-- Python 3.8+
-- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64, arm64), and Raspberry Pi (5 and 4).
+Platform compatible with .NET Framework 4.6.1+:
+
+- Windows (x86_64)
+
+Platforms compatible with .NET Core 2.0+:
+
+- macOS (x86_64)
+- Windows (x86_64)
+
+Platform compatible with .NET 6.0+:
+
+- Raspberry Pi (4 and 5)
+- Linux (x86_64)
+- macOS (arm64)
+- Windows (arm64)
 
 ## Installation
 
+You can install the latest version of picoLLM by getting the latest [picoLLM Nuget package](https://www.nuget.org/packages/PicoLLM/)
+in Visual Studio or using the .NET CLI.
+
 ```console
-pip3 install picollmdemo
+dotnet add package PicoLLM
 ```
 
 ## Models
 
-picoLLM Inference Engine supports the following open-weight models. The models are on
+picoLLM Inference Engine supports a selection of open-weight models. The models are available from
 [Picovoice Console](https://console.picovoice.ai/).
 
 - Gemma
@@ -73,41 +93,47 @@ offline and completely free for open-weight models. Everyone who signs up for
 
 ## Usage
 
-There are two demos available: completion and chat. The completion demo accepts a prompt and a set of optional
-parameters and generates a single completion. It can run all models, whether instruction-tuned or not. The chat demo can
-run instruction-tuned (chat) models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth
-conversation with the LLM, similar to ChatGPT.
+Create an instance of the engine and generate a prompt completion:
 
-### Completion Demo
+```csharp
+using Pv;
 
-Run the demo by entering the following in the terminal:
+PicoLLM pllm = PicoLLM.Create("${ACCESS_KEY}", "${MODEL_PATH}");
 
-```console
-picollm_demo_completion --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --prompt ${PROMPT}
+PicoLLMCompletion res = pllm.Generate('${PROMPT}');
+Console.WriteLine(res.Completion);
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
 downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
 
-To get information about all the available options in the demo, run the following:
+Instruction-tuned models (e.g., `llama-3-8b-instruct`, `llama-2-7b-chat`, and `gemma-2b-it`) have a specific chat
+template. You can either directly format the prompt or use a dialog helper:
 
-```console
-picollm_demo_completion --help
+```csharp
+dialog = pllm.GetDialog();
+dialog.AddHumanRequest(prompt);
+
+PicoLLMCompletion res = pllm.Generate(dialog.Prompt());
+dialog.AddLLMResponse(res.Completion);
+Console.WriteLine(res.Completion);
 ```
 
-### Chat Demo
-
-To run an instruction-tuned model for chat, run the following in the terminal:
-
-```console
-picollm_demo_chat --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH}
+To interrupt completion generation before it has finished:
+```csharp
+pllm.Interrupt()
 ```
 
-Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console and `${MODEL_PATH}` with the path to a model file
-downloaded from Picovoice Console.
+`PicoLLM` will have its resources freed by the garbage collector, but to have resources freed immediately after use,
+wrap it in a using statement or call `.Dispose()` directly:
 
-To get information about all the available options in the demo, run the following:
-
-```console
-picollm_demo_chat --help
+```csharp
+using(PicoLLM pllm = PicoLLM.Create(accessKey, modelPath))
+{
+    // .. picoLLM usage here
+}
 ```
+
+## Demos
+
+The [picoLLM dotnet demo project](https://github.com/Picovoice/picollm/tree/master/demo/dotnet) is a .NET application that provides command-line utilities for LLM completion and chat using picoLLM. <!-- markdown-link-check-disable-line -->

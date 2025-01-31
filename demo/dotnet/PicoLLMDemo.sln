@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoLLMDemo", "PicoLLMDemo\PicoLLMDemo.csproj", "{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		ChatDemo.Debug|AnyCPU = ChatDemo.Debug|AnyCPU
+		ChatDemo.Release|AnyCPU = ChatDemo.Release|AnyCPU
+		CompletionDemo.Debug|AnyCPU = CompletionDemo.Debug|AnyCPU
+		CompletionDemo.Release|AnyCPU = CompletionDemo.Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.ChatDemo.Debug|AnyCPU.ActiveCfg = ChatDemo.Debug|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.ChatDemo.Debug|AnyCPU.Build.0 = ChatDemo.Debug|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.ChatDemo.Release|AnyCPU.ActiveCfg = ChatDemo.Release|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.ChatDemo.Release|AnyCPU.Build.0 = ChatDemo.Release|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.CompletionDemo.Debug|AnyCPU.ActiveCfg = CompletionDemo.Debug|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.CompletionDemo.Debug|AnyCPU.Build.0 = CompletionDemo.Debug|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.CompletionDemo.Release|AnyCPU.ActiveCfg = CompletionDemo.Release|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.CompletionDemo.Release|AnyCPU.Build.0 = CompletionDemo.Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {718FE840-6F27-4751-957F-382E9780BBFC}
+	EndGlobalSection
+EndGlobal

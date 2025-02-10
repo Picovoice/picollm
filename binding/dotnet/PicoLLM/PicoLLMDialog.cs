@@ -343,7 +343,7 @@ namespace Pv
         {
             if (_humanRequests.Count == _llmResponses.Count)
             {
-                throw new InvalidOperationException("Only subclasses of IPicoLLMDialog can create prompts.");
+                throw new PicoLLMInvalidStateException("Only subclasses of IPicoLLMDialog can create prompts.");
             }
 
             List<string> humanRequests = _history == null

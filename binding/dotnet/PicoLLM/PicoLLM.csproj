@@ -15,6 +15,7 @@
 		<Description>picoLLM Inference Engine is a highly accurate and cross-platform SDK optimized for running compressed large language models.</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageIcon>pv_circle_512.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<!--.NET Standard 2.0+ libs-->
@@ -105,6 +106,10 @@
 		<None Include="Content\pv_circle_512.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>README.md</PackagePath>
 		</None>
 	</ItemGroup>
 </Project>

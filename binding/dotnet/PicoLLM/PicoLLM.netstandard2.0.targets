@@ -25,12 +25,8 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>
         </Content>
-        <Content Include="$(MSBuildThisFileDirectory)libpv_picollm.so">
-            <Link>libpv_picollm.so</Link>
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <Visible>false</Visible>
-        </Content>
         <Content Include="$(MSBuildThisFileDirectory)lib/**">
+            <PackagePath>content/picovoice/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
             <Link>lib/%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>

@@ -15,7 +15,7 @@ models. picoLLM Inference Engine is:
 
 ## Compatibility
 
-- Python 3.8+
+- Python 3.9+
 - Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64, arm64), and Raspberry Pi (5 and 4).
 
 ## Installation

@@ -1,7 +1,7 @@
 # picoLLM Completion Web Demo
 
 This is a basic demo to show how to use picoLLM on web browsers, using the IIFE version of the library (i.e. an HTML
-script tag). It instantiates a picoLLM inference engine on a web worker that accepts a prompt along with a set of 
+script tag). It instantiates a picoLLM inference engine on a web worker that accepts a prompt along with a set of
 optional parameters and generates a single completion.
 
 ## AccessKey
@@ -60,4 +60,4 @@ Hit CTRL-C to stop the server
 ```
 
 4. Enter your [access key](#accesskey), select a [model file](#models) and press `Init picoLLM`. Wait until
-loading completes and enter any text to test the demo.
+   loading completes and enter any text to test the demo.

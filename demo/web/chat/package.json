@@ -19,6 +19,7 @@
     "@picovoice/picollm-web": "~1.2.3"
   },
   "devDependencies": {
-    "http-server": "^14.0.0"
+    "http-server": "^14.0.0",
+    "prettier": "3.5.1"
   }
 }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net6.0;netcoreapp3.0;netstandard2.0</TargetFrameworks>
-		<Version>1.2.0</Version>
+		<Version>1.2.1</Version>
 		<Authors>Picovoice</Authors>
 		<Company />
 		<Product>picoLLM Inference Engine</Product>
@@ -15,30 +15,31 @@
 		<Description>picoLLM Inference Engine is a highly accurate and cross-platform SDK optimized for running compressed large language models.</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageIcon>pv_circle_512.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<!--.NET Standard 2.0+ libs-->
 	<ItemGroup>
 		<Content Include="PicoLLM.netstandard2.0.targets">
 		  <PackagePath>
-				build/netstandard2.0/PicoLLM.targets;
+				buildTransitive/netstandard2.0/PicoLLM.targets;
 			</PackagePath>
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="PicoLLM.targets">
 			<PackagePath>
-				build/netcoreapp3.0;
-				build/net6.0;
-				build/net8.0;
+				buildTransitive/netcoreapp3.0;
+				buildTransitive/net6.0;
+				buildTransitive/net8.0;
 			</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="..\..\..\lib\windows\amd64\*">
 			<PackagePath>
-				build/netstandard2.0;
-				build/netcoreapp3.0/lib/windows/amd64;
-				build/net6.0/lib/windows/amd64;
-				build/net8.0/lib/windows/amd64;
+				buildTransitive/netstandard2.0;
+				buildTransitive/netcoreapp3.0/lib/windows/amd64;
+				buildTransitive/net6.0/lib/windows/amd64;
+				buildTransitive/net8.0/lib/windows/amd64;
 			</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>lib\windows\amd64\%(Filename)%(Extension)</Link>
@@ -46,10 +47,10 @@
 		</Content>
 		<Content Include="..\..\..\lib\mac\x86_64\*">
 			<PackagePath>
-				build/netstandard2.0;
-				build/netcoreapp3.0/lib/mac/x86_64;
-				build/net6.0/lib/mac/x86_64;
-				build/net8.0/lib/mac/x86_64;
+				buildTransitive/netstandard2.0;
+				buildTransitive/netcoreapp3.0/lib/mac/x86_64;
+				buildTransitive/net6.0/lib/mac/x86_64;
+				buildTransitive/net8.0/lib/mac/x86_64;
 			</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>lib\mac\x86_64\%(Filename)%(Extension)</Link>
@@ -61,8 +62,8 @@
 	<ItemGroup>
 		<Content Include="..\..\..\lib\mac\arm64\*">
 			<PackagePath>
-				build/net6.0/lib/mac/arm64;
-				build/net8.0/lib/mac/arm64;
+				buildTransitive/net6.0/lib/mac/arm64;
+				buildTransitive/net8.0/lib/mac/arm64;
 			</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>lib\mac\arm64\%(Filename)%(Extension)</Link>
@@ -70,8 +71,8 @@
 		</Content>
 		<Content Include="..\..\..\lib\linux\x86_64\libpv_picollm.so">
 			<PackagePath>
-				build/net6.0/lib/linux/x86_64/libpv_picollm.so;
-				build/net8.0/lib/linux/x86_64/libpv_picollm.so;
+				buildTransitive/net6.0/lib/linux/x86_64/libpv_picollm.so;
+				buildTransitive/net8.0/lib/linux/x86_64/libpv_picollm.so;
 			</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>lib\linux\x86_64\libpv_picollm.so</Link>
@@ -79,8 +80,8 @@
 		</Content>
 		<Content Include="..\..\..\lib\raspberry-pi\**\*">
 			<PackagePath>
-				build/net6.0/lib/raspberry-pi;
-				build/net8.0/lib/raspberry-pi;
+				buildTransitive/net6.0/lib/raspberry-pi;
+				buildTransitive/net8.0/lib/raspberry-pi;
 			</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>lib\raspberry-pi\%(RecursiveDir)%(Filename)%(Extension)</Link>
@@ -88,8 +89,8 @@
 		</Content>
 		<Content Include="..\..\..\lib\windows\arm64\*">
 			<PackagePath>
-				build/net6.0/lib/windows/arm64;
-				build/net8.0/lib/windows/arm64;
+				buildTransitive/net6.0/lib/windows/arm64;
+				buildTransitive/net8.0/lib/windows/arm64;
 			</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>lib\windows\arm64\%(Filename)%(Extension)</Link>
@@ -105,6 +106,10 @@
 		<None Include="Content\pv_circle_512.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>README.md</PackagePath>
 		</None>
 	</ItemGroup>
 </Project>

@@ -25,9 +25,12 @@ with open(os.path.join(os.path.dirname(__file__), 'MANIFEST.in'), 'w') as f:
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
     long_description = f.read()
 
+with open(os.path.join(os.path.dirname(__file__), "requirements.txt"), "r") as f:
+    dependencies = f.read().strip().splitlines()
+
 setuptools.setup(
     name="picollmdemo",
-    version="1.2.4",
+    version="1.2.5",
     author="Picovoice",
     author_email="hello@picovoice.ai",
     description="picoLLM Inference Engine demos",
@@ -35,7 +38,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Picovoice/picollm",
     packages=["picollmdemo"],
-    install_requires=["picollm==1.2.4"],
+    install_requires=dependencies,
     include_package_data=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -51,6 +54,6 @@ setuptools.setup(
             'picollm_demo_completion=picollmdemo.picollm_demo_completion:main',
         ],
     ),
-    python_requires='>=3.8',
+    python_requires='>=3.9',
     keywords="Large Language Model, LLM, Generative AI, GenAI, Llama, Mistral, Mixtral, Gemma, Phi",
 )

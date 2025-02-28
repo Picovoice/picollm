@@ -34,7 +34,9 @@ window.onload = () => {
   const temperatureText = document.getElementById("temperatureText");
 
   const completionTokenLimit = document.getElementById("completionTokenLimit");
-  const completionTokenLimitText = document.getElementById("completionTokenLimitText");
+  const completionTokenLimitText = document.getElementById(
+    "completionTokenLimitText",
+  );
 
   const stopPhrases = document.getElementById("stopPhrases");
 
@@ -87,9 +89,9 @@ window.onload = () => {
   });
 
   const writeError = (message) => {
-    error.style.display = 'block';
+    error.style.display = "block";
     error.innerText = `Error: ${message}`;
-    status.innerText = 'Error.';
+    status.innerText = "Error.";
   };
 
   const startDot = () => {
@@ -98,27 +100,27 @@ window.onload = () => {
     }
     dotInterval = setInterval(() => {
       dotIdx = (dotIdx + 1) % 4;
-      let dotText = '';
+      let dotText = "";
       for (let i = 0; i < dotIdx; i++) {
-        dotText += '.';
+        dotText += ".";
       }
       dotdotdot.innerText = dotText;
     }, 500);
-  }
+  };
 
   const stopDot = () => {
     if (dotInterval) {
       clearInterval(dotInterval);
     }
     dotIdx = 0;
-    dotdotdot.innerText = '';
-  }
+    dotdotdot.innerText = "";
+  };
 
   accessKey.onchange = () => {
     if (accessKey.value.length > 0 && modelFile.files.length > 0) {
       initButton.disabled = false;
     }
-  }
+  };
 
   modelFile.onchange = accessKey.onchange;
 
@@ -128,7 +130,7 @@ window.onload = () => {
     }
 
     initButton.disabled = true;
-    status.innerText = "Loading model"
+    status.innerText = "Loading model";
     startDot();
 
     try {
@@ -140,9 +142,9 @@ window.onload = () => {
       completionTokenLimit.max = picoLLM.contextLength;
       numTopChoices.max = picoLLM.maxTopChoices;
 
-      initBlock.style.display = 'none';
-      completionBlock.style.display = 'flex';
-      status.innerText = "Loading complete."
+      initBlock.style.display = "none";
+      completionBlock.style.display = "flex";
+      status.innerText = "Loading complete.";
     } catch (e) {
       writeError(e.message);
     } finally {
@@ -154,7 +156,7 @@ window.onload = () => {
     if (ev.key === "Enter") {
       ev.preventDefault();
     }
-  }
+  };
 
   prompt.onkeyup = (ev) => {
     if (ev.key === "Enter") {
@@ -168,46 +170,48 @@ window.onload = () => {
       return;
     }
 
-    status.innerText = "Generating text"
+    status.innerText = "Generating text";
     startDot();
 
     numTokens = -1;
 
     prompt.disabled = true;
-    generateButton.style.display = 'none';
-    interruptButton.style.display = 'inline-block';
+    generateButton.style.display = "none";
+    interruptButton.style.display = "inline-block";
     isText = true;
-    tokensPerSec.innerText = '-';
+    tokensPerSec.innerText = "-";
 
     original.innerText = prompt.value;
     resultText.innerHTML = original.outerHTML;
 
-    resultText.style.display = 'block';
-    resultTokens.style.display = 'none';
-    codeIcon.style.display = 'none';
-    codeIcon.src = 'assets/code-no-slash.svg';
+    resultText.style.display = "block";
+    resultTokens.style.display = "none";
+    codeIcon.style.display = "none";
+    codeIcon.src = "assets/code-no-slash.svg";
 
     try {
-      const { completionTokens } = await picoLLM.generate(
-        prompt.value,
-        {
-          completionTokenLimit: Number(completionTokenLimit.value),
-          stopPhrases: (stopPhrases.value) ? stopPhrases.value.split(',').map(x => x.trim()).filter(x => x.length > 0) : [],
-          topP: Number(topP.value),
-          presencePenalty: Number(presencePenalty.value),
-          frequencyPenalty: Number(frequencyPenalty.value),
-          numTopChoices: Number(numTopChoices),
-          streamCallback: (token) => {
-            if (numTokens === -1) {
-              timeFirstToken = performance.now();
-            }
-            numTokens += 1;
-
-            resultText.innerHTML += token;
-            resultText.scrollTop = resultText.scrollHeight;
+      const { completionTokens } = await picoLLM.generate(prompt.value, {
+        completionTokenLimit: Number(completionTokenLimit.value),
+        stopPhrases: stopPhrases.value
+          ? stopPhrases.value
+              .split(",")
+              .map((x) => x.trim())
+              .filter((x) => x.length > 0)
+          : [],
+        topP: Number(topP.value),
+        presencePenalty: Number(presencePenalty.value),
+        frequencyPenalty: Number(frequencyPenalty.value),
+        numTopChoices: Number(numTopChoices),
+        streamCallback: (token) => {
+          if (numTokens === -1) {
+            timeFirstToken = performance.now();
           }
-        }
-      )
+          numTokens += 1;
+
+          resultText.innerHTML += token;
+          resultText.scrollTop = resultText.scrollHeight;
+        },
+      });
 
       const tock = performance.now();
       const elapsedSec = (tock - timeFirstToken) / 1000;
@@ -215,12 +219,12 @@ window.onload = () => {
       tokensPerSec.innerText = `${Math.round((completionTokens.length / elapsedSec) * 100) / 100}`;
 
       prompt.disabled = false;
-      generateButton.style.display = 'inline-block';
-      interruptButton.style.display = 'none';
+      generateButton.style.display = "inline-block";
+      interruptButton.style.display = "none";
       resultTokens.innerText = JSON.stringify(completionTokens, null, 2);
-      codeIcon.style.display = 'inline-block';
+      codeIcon.style.display = "inline-block";
 
-      status.innerText = "Generating complete."
+      status.innerText = "Generating complete.";
     } catch (e) {
       writeError(e.message);
     } finally {
@@ -234,17 +238,17 @@ window.onload = () => {
     }
 
     picoLLM.interrupt();
-  }
+  };
 
   codeIcon.onclick = () => {
     if (isText) {
-      resultText.style.display = 'none';
-      resultTokens.style.display = 'block';
-      codeIcon.src = 'assets/code.svg';
+      resultText.style.display = "none";
+      resultTokens.style.display = "block";
+      codeIcon.src = "assets/code.svg";
     } else {
-      resultText.style.display = 'block';
-      resultTokens.style.display = 'none';
-      codeIcon.src = 'assets/code-no-slash.svg';
+      resultText.style.display = "block";
+      resultTokens.style.display = "none";
+      codeIcon.src = "assets/code-no-slash.svg";
     }
     isText = !isText;
   };
@@ -257,26 +261,26 @@ window.onload = () => {
     await picoLLM.release();
     picoLLM = null;
 
-    completionBlock.style.display = 'none';
-    initBlock.style.display = 'block';
+    completionBlock.style.display = "none";
+    initBlock.style.display = "block";
 
-    modelFile.value = '';
+    modelFile.value = "";
 
     initButton.disabled = true;
     generateButton.disabled = false;
 
-    prompt.value = '';
+    prompt.value = "";
     prompt.disabled = false;
 
-    tokensPerSec.innerText = '-';
-    original.innerText = '';
+    tokensPerSec.innerText = "-";
+    original.innerText = "";
     resultText.innerHTML = original.outerHTML;
 
-    resultText.style.display = 'block';
-    resultTokens.style.display = 'none';
-    codeIcon.src = 'assets/code-no-slash.svg';
-    codeIcon.style.display = 'none';
+    resultText.style.display = "block";
+    resultTokens.style.display = "none";
+    codeIcon.src = "assets/code-no-slash.svg";
+    codeIcon.style.display = "none";
 
-    status.innerText = "Not loaded."
-  }
+    status.innerText = "Not loaded.";
+  };
 };

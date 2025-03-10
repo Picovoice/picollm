@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -527,10 +528,15 @@ public class PicoLLMTest {
                 Future<PicoLLMCompletion> resFuture = executor.submit(() ->
                         picollm.generate(
                                 currentTestData.get("prompt").getAsString(),
-                                new PicoLLMGenerateParams.Builder().build()));
-
-                Thread.sleep(500);
-                picollm.interrupt();
+                                new PicoLLMGenerateParams.Builder()
+                                .setStreamCallback(completion -> {
+                                    try {
+                                        picollm.interrupt();
+                                    } catch (PicoLLMException e) {
+                                        fail("Interrupt should not fail.");
+                                    }
+                                })
+                                .build()));
 
                 PicoLLMCompletion res = resFuture.get();
 

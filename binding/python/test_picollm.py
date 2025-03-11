@@ -381,11 +381,13 @@ class PicollmTestCase(unittest.TestCase):
     def test_interrupt(self) -> None:
         data = self.data["default"]
         prompt = data["prompt"]
+        def interrupt_callback(_):
+            self._picollm.interrupt()
         with concurrent.futures.ThreadPoolExecutor() as executor:
             llm_future = executor.submit(
                 self._picollm.generate,
-                prompt)
-            self._picollm.interrupt()
+                prompt,
+                stream_callback=interrupt_callback)
             res = llm_future.result()
             self.assertEqual(res.endpoint, PicoLLMEndpoints.INTERRUPTED)
 

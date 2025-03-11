@@ -357,7 +357,7 @@ class PicoLLMAppTestUITests: BaseTest {
             do {
                 res = try self.handle!.generate(
                     prompt: testCase.prompt,
-                    streamCallback: {(completion: String) in
+                    streamCallback: {(_: String) in
                         do {
                             try self.handle!.interrupt()
                         } catch {

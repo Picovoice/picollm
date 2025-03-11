@@ -384,7 +384,7 @@ class PicollmTestCase(unittest.TestCase):
 
         def interrupt_callback(_):
             self._picollm.interrupt()
-            
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             llm_future = executor.submit(
                 self._picollm.generate,

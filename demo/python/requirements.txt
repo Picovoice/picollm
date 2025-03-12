@@ -1,1 +1,1 @@
-picollm==1.2.5
+../../binding/python/dist/picollm-1.3.0-py3-none-any.whl

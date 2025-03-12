@@ -17,6 +17,6 @@
         <AssemblyName>PicoLLMCompletionDemo</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="PicoLLM" Version="1.2.1" />
+        <PackageReference Include="PicoLLM" Version="1.3.0" />
     </ItemGroup>
 </Project>

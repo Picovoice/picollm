@@ -32,7 +32,10 @@ jobs:
 
     # ************ REMOVE AFTER RELEASE ***************
     - name: build local binding
-      run: yarn install && yarn copywasm && yarn build
+      run: |
+        yarn install
+        yarn copywasm
+        yarn build
       working-directory: binding/web
     # ************ REMOVE AFTER RELEASE ***************
 
@@ -51,7 +54,10 @@ jobs:
 
     # ************ REMOVE AFTER RELEASE ***************
     - name: build local binding
-      run: yarn install && yarn copywasm && yarn build
+      run: |
+        yarn install
+        yarn copywasm
+        yarn build
       working-directory: binding/web
     # ************ REMOVE AFTER RELEASE ***************
 

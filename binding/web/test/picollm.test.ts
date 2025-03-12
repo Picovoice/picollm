@@ -44,13 +44,11 @@ type CompletionExpectation = {
   'completion': string
 };
 
-const sleep = async (ms: number) => {
-  return new Promise<void>(resolve => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  });
-};
+const sleep = async (ms: number) => new Promise<void>(resolve => {
+  setTimeout(() => {
+    resolve();
+  }, ms);
+});
 
 const runInitTest = async (
   instance: typeof PicoLLM | typeof PicoLLMWorker,

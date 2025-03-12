@@ -324,7 +324,7 @@ export class PicoLLM {
   }
 
   private static invalidUserAgent(): boolean {
-    let agent = navigator.userAgent;
+    const agent = navigator.userAgent;
     if (agent.includes('Safari')) {
       return agent.includes('Version/18.2') || agent.includes('Version/18.3');
     }

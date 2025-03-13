@@ -450,6 +450,9 @@ public class PicoLLMTest {
                             .setSeed(seed)
                             .setTemperature(temperature)
                             .setTopP(topP)
+                                .setStreamCallback(completion -> {
+                                        System.out.println(completion);
+                                })
                             .build());
             List<String> completionStrings = new Gson().fromJson(
                     currentTestData.get("expectations"),

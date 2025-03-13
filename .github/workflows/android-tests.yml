@@ -30,7 +30,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Use Java 21
-      run: sdk use java 21.0.6-tem
+      run: source ~/.bashrc && sdk use java 21.0.6-tem
 
     - name: Uninstall previous app
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp || true
@@ -84,6 +84,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Use Java 21
+      run: source ~/.bashrc && sdk use java 21.0.6-tem
 
     - name: Uninstall previous app
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp || true

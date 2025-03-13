@@ -29,8 +29,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Use Java 21
-      run: source ~/.bashrc && sdk use java 21.0.6-tem
+    - name: Set up Java 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: 21
+        distribution: 'temurin'
 
     - name: Uninstall previous app
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp || true
@@ -85,8 +88,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Use Java 21
-      run: source ~/.bashrc && sdk use java 21.0.6-tem
+    - name: Set up Java 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: 21
+        distribution: 'temurin'
 
     - name: Uninstall previous app
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp || true

@@ -28,6 +28,7 @@ if (rootProject.file("local.properties").exists()) {
 }
 
 android {
+    namespace "ai.picovoice.picollm.testapp"
     compileSdkVersion defaultTargetSdkVersion
 
     defaultConfig {

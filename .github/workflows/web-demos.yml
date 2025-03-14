@@ -30,15 +30,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # ************ REMOVE AFTER RELEASE ***************
-    - name: build local binding
-      run: |
-        yarn install
-        yarn copywasm
-        yarn build
-      working-directory: binding/web
-    # ************ REMOVE AFTER RELEASE ***************
-
     - name: Install dependencies
       run: yarn install
 
@@ -51,15 +42,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    # ************ REMOVE AFTER RELEASE ***************
-    - name: build local binding
-      run: |
-        yarn install
-        yarn copywasm
-        yarn build
-      working-directory: binding/web
-    # ************ REMOVE AFTER RELEASE ***************
 
     - name: Install dependencies
       run: yarn install

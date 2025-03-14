@@ -17,6 +17,6 @@
         <AssemblyName>PicoLLMCompletionDemo</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\..\binding\dotnet\PicoLLM\PicoLLM.csproj" />
+        <PackageReference Include="PicoLLM" Version="1.3.0" />
     </ItemGroup>
 </Project>

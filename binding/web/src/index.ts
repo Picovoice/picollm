@@ -43,12 +43,15 @@ import {
   PicoLLMWorkerResponse,
 } from './types';
 
-import picoLLMWasmSimd from '../lib/pv_picollm_simd.wasm';
+import picoLLMWasmSimd from './lib/pv_picollm_simd.wasm';
+import picoLLMWasmLib from './lib/pv_picollm_simd.txt';
 
 import * as PicoLLMErrors from './picollm_errors';
 
 PicoLLM.setWasmSimd(picoLLMWasmSimd);
 PicoLLMWorker.setWasmSimd(picoLLMWasmSimd);
+PicoLLM.setWasmLib(picoLLMWasmLib);
+PicoLLMWorker.setWasmLib(picoLLMWasmLib);
 
 export {
   Dialog,

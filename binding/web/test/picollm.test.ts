@@ -44,13 +44,11 @@ type CompletionExpectation = {
   'completion': string
 };
 
-const sleep = async (ms: number) => {
-  return new Promise<void>(resolve => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  });
-};
+const sleep = async (ms: number) => new Promise<void>(resolve => {
+  setTimeout(() => {
+    resolve();
+  }, ms);
+});
 
 const runInitTest = async (
   instance: typeof PicoLLM | typeof PicoLLMWorker,
@@ -468,12 +466,11 @@ const generateTests = () => {
       const prompt = data.prompt;
 
       const generatePromise = picoLLM.generate(prompt, {
-        completionTokenLimit: 200
+        completionTokenLimit: 200,
+        streamCallback: (_) => {
+          picoLLM.interrupt();
+        }
       });
-
-      await sleep(500);
-
-      picoLLM.interrupt();
 
       const res = await generatePromise;
       expect(res.endpoint).to.eq(PicoLLMEndpoint.INTERRUPTED);

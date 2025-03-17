@@ -27,6 +27,7 @@ export class PicoLLMWorker {
   private readonly _model: string;
 
   private static _wasmSimd: string;
+  private static _wasmLib: string;
   private static _sdk: string = "web";
 
   private constructor(worker: Worker, contextLength: number, maxTopChoices: number, model: string, version: string) {
@@ -138,6 +139,7 @@ export class PicoLLMWorker {
       },
       sdk: this._sdk,
       wasmSimd: this._wasmSimd,
+      wasmLib: this._wasmLib,
     });
 
     return returnPromise;
@@ -150,6 +152,16 @@ export class PicoLLMWorker {
   public static setWasmSimd(wasmSimd: string): void {
     if (this._wasmSimd === undefined) {
       this._wasmSimd = wasmSimd;
+    }
+  }
+
+  /**
+   * Set base64 wasm lib file in text format.
+   * @param wasmLib Base64'd wasm lib file in text format.
+   */
+  public static setWasmLib(wasmLib: string): void {
+    if (this._wasmLib === undefined) {
+      this._wasmLib = wasmLib;
     }
   }
 

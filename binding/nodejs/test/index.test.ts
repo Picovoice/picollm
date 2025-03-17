@@ -514,16 +514,11 @@ describe('PicoLLM generate tests', () => {
 
     try {
       const generatePromise = picoLLM.generate(prompt, {
-        completionTokenLimit: 200
+        completionTokenLimit: 200,
+        streamCallback: (_) => {
+          picoLLM.interrupt();
+        }
       });
-
-      if (process.platform === "win32") {
-        await sleep(10);
-      } else {
-        await sleep(500);
-      }
-
-      picoLLM.interrupt();
 
       const res = await generatePromise;
       expect(res.endpoint).toEqual(PicoLLMEndpoint.INTERRUPTED);

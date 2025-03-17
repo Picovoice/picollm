@@ -1,7 +1,7 @@
 node_modules
 dist
-lib/*
-!lib/.gitkeep
+src/lib/*
+src/!lib/.gitkeep
 test/*.bin
 .idea/
 test_data.json

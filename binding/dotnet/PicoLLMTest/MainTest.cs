@@ -344,8 +344,7 @@ namespace PicoLLMTest
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
             {
-                Task<PicoLLMCompletion> generateTask = Task.Run(() => picoLLM.Generate(prompt));
-                picoLLM.Interrupt();
+                Task<PicoLLMCompletion> generateTask = Task.Run(() => picoLLM.Generate(prompt, streamCallback: (_) => picoLLM.Interrupt()));
                 PicoLLMCompletion res = generateTask.Result;
                 Assert.AreEqual(res.Endpoint, PicoLLMEndpoint.INTERRUPTED);
             }

@@ -54,7 +54,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
 
 setuptools.setup(
     name="picollm",
-    version="1.2.4",
+    version="1.3.0",
     author="Picovoice",
     author_email="hello@picovoice.ai",
     description="picoLLM Inference Engine",
@@ -71,6 +71,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.9',
     keywords="Large Language Model, LLM, Generative AI, GenAI, Llama, Mistral, Mixtral, Gemma, Phi",
 )

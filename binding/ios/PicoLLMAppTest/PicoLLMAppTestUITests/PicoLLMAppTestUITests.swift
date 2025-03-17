@@ -355,12 +355,19 @@ class PicoLLMAppTestUITests: BaseTest {
         group.enter()
         DispatchQueue.global(qos: .background).async {
             do {
-                res = try self.handle!.generate(prompt: testCase.prompt)
+                res = try self.handle!.generate(
+                    prompt: testCase.prompt,
+                    streamCallback: {(_: String) in
+                        do {
+                            try self.handle!.interrupt()
+                        } catch {
+                            XCTFail("Interrupt should not fail")
+                        }
+                    }
+                )
             } catch { }
             group.leave()
         }
-        sleep(1)
-        try handle!.interrupt()
 
         group.wait()
         XCTAssertEqual(res!.endpoint, .interrupted)

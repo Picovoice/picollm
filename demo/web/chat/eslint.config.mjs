@@ -7,6 +7,7 @@ export default [
   {files: ["**/*.js"], languageOptions: {sourceType: "commonjs"}},
   {languageOptions: { globals: {
       ...globals.browser,
+      ...globals.node,
       "PicollmWeb": "readonly",
   } }},
   pluginJs.configs.recommended,

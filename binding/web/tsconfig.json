@@ -14,8 +14,11 @@
     "sourceMap": true,
     "strict": true,
     "target": "esnext",
-    "types": ["node"]
+    "types": ["node", "emscripten"]
   },
-  "include": ["src", "module.d.ts", "node_modules/@picovoice/pv-xpu"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src",
+    "module.d.ts",
+  ],
+  "exclude": ["node_modules", "src/lib"]
 }

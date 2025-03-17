@@ -42,7 +42,7 @@ jobs:
       run: yarn build
 
     - name: Prepare Test
-      run: yarn setup-test http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/04-d5f2aa0/phi2-290.pllm phi2-290.pllm
+      run: yarn setup-test http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-fae87bc/phi2-290.pllm phi2-290.pllm
 
     - name: Test Web Worker
       run: yarn test --env ACCESS_KEY=${{secrets.PV_VALID_ACCESS_KEY}}

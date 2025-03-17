@@ -30,7 +30,7 @@ with open(os.path.join(os.path.dirname(__file__), "requirements.txt"), "r") as f
 
 setuptools.setup(
     name="picollmdemo",
-    version="1.2.5",
+    version="1.3.0",
     author="Picovoice",
     author_email="hello@picovoice.ai",
     description="picoLLM Inference Engine demos",

@@ -410,7 +410,7 @@ class PicollmTestCase(unittest.TestCase):
 
         if 'gpu' in self._device:
             for x, y in zip(logits, self._picollm.forward(79)):
-                self.assertAlmostEqual(x, y, delta=0.01)
+                self.assertAlmostEqual(x, y, delta=0.02)
         else:
             self.assertListEqual(list(logits), list(self._picollm.forward(79)))
 

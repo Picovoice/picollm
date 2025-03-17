@@ -467,6 +467,11 @@ pv_picollm_delete(pllm);
 
 ## Releases
 
+### v1.3.0 - March 14th, 2025
+
+- Performance improvements
+- Significant performance improvements for iOS and Web
+
 ### v1.2.0 - November 26th, 2024
 
 - Performance improvements

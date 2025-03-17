@@ -24,9 +24,9 @@ window.onload = () => {
   const result = document.getElementById("result");
 
   const writeError = (errorString) => {
-    error.style.display = 'block';
+    error.style.display = "block";
     error.innerText = `Error: ${errorString}`;
-    status.innerText = 'Error.';
+    status.innerText = "Error.";
   };
 
   const startDot = () => {
@@ -35,26 +35,26 @@ window.onload = () => {
     }
     dotInterval = setInterval(() => {
       dotIdx = (dotIdx + 1) % 4;
-      let dotText = '';
+      let dotText = "";
       for (let i = 0; i < dotIdx; i++) {
-        dotText += '.';
+        dotText += ".";
       }
       dotdotdot.innerText = dotText;
     }, 500);
-  }
+  };
 
   const stopDot = () => {
     if (dotInterval) {
       clearInterval(dotInterval);
     }
     dotIdx = 0;
-    dotdotdot.innerText = '';
-  }
+    dotdotdot.innerText = "";
+  };
 
   const addHumanMessage = (messageString) => {
-    result.innerHTML += `<div class="align-end"><span class="human-border">You</span></div><div class="align-end"><span class="human-text">${messageString}</span></div>`
+    result.innerHTML += `<div class="align-end"><span class="human-border">You</span></div><div class="align-end"><span class="human-text">${messageString}</span></div>`;
     result.scrollTop = result.scrollHeight;
-  }
+  };
 
   const startLLMMessage = () => {
     result.innerHTML += `<div class="align-start"><span class="llm-border">picoLLM</span></div>`;
@@ -72,13 +72,13 @@ window.onload = () => {
     result.scrollTop = result.scrollHeight;
 
     return textElem;
-  }
+  };
 
   accessKey.onchange = () => {
     if (accessKey.value.length > 0 && modelFile.files.length > 0) {
       initButton.disabled = false;
     }
-  }
+  };
 
   modelFile.onchange = accessKey.onchange;
 
@@ -93,7 +93,7 @@ window.onload = () => {
     }
 
     initButton.disabled = true;
-    status.innerText = "Loading model"
+    status.innerText = "Loading model";
     startDot();
 
     try {
@@ -104,9 +104,9 @@ window.onload = () => {
 
       dialog = picoLLM.getDialog();
 
-      initBlock.style.display = 'none';
-      chatBlock.style.display = 'flex';
-      status.innerText = "Loading complete."
+      initBlock.style.display = "none";
+      chatBlock.style.display = "flex";
+      status.innerText = "Loading complete.";
     } catch (e) {
       writeError(e.message);
     } finally {
@@ -118,7 +118,7 @@ window.onload = () => {
     if (ev.key === "Enter") {
       ev.preventDefault();
     }
-  }
+  };
 
   message.onkeyup = (ev) => {
     if (ev.key === "Enter") {
@@ -132,38 +132,35 @@ window.onload = () => {
       return;
     }
 
-    status.innerText = "Generating response"
+    status.innerText = "Generating response";
     startDot();
 
     message.disabled = true;
-    sendButton.style.display = 'none';
-    interruptButton.style.display = 'inline-block';
+    sendButton.style.display = "none";
+    interruptButton.style.display = "inline-block";
 
     dialog.addHumanRequest(message.value);
     addHumanMessage(message.value);
-    message.value = '';
+    message.value = "";
 
     try {
       const elem = startLLMMessage();
-      const { completion } = await picoLLM.generate(
-        dialog.prompt(),
-        {
-          completionTokenLimit: 128,
-          streamCallback: (token) => {
-            addLLMMessage(elem, token);
-          }
-        }
-      )
+      const { completion } = await picoLLM.generate(dialog.prompt(), {
+        completionTokenLimit: 128,
+        streamCallback: (token) => {
+          addLLMMessage(elem, token);
+        },
+      });
 
       dialog.addLLMResponse(completion);
-      result.innerHTML += '\n';
+      result.innerHTML += "\n";
 
       message.disabled = false;
-      sendButton.style.display = 'inline-block';
-      interruptButton.style.display = 'none';
+      sendButton.style.display = "inline-block";
+      interruptButton.style.display = "none";
       message.focus();
 
-      status.innerText = "Generating complete."
+      status.innerText = "Generating complete.";
     } catch (e) {
       writeError(e.message);
     } finally {
@@ -177,11 +174,11 @@ window.onload = () => {
     }
 
     picoLLM.interrupt();
-  }
+  };
 
   resetDialogButton.onclick = () => {
-    result.innerHTML = '';
-  }
+    result.innerHTML = "";
+  };
 
   changeModelButton.onclick = async () => {
     if (!picoLLM) {
@@ -191,19 +188,19 @@ window.onload = () => {
     await picoLLM.release();
     picoLLM = null;
 
-    chatBlock.style.display = 'none';
-    initBlock.style.display = 'block';
+    chatBlock.style.display = "none";
+    initBlock.style.display = "block";
 
-    modelFile.value = '';
+    modelFile.value = "";
 
     initButton.disabled = true;
     sendButton.disabled = false;
 
-    message.value = '';
+    message.value = "";
     message.disabled = false;
 
-    result.innerHTML = '';
+    result.innerHTML = "";
 
-    status.innerText = "Not loaded."
-  }
+    status.innerText = "Not loaded.";
+  };
 };

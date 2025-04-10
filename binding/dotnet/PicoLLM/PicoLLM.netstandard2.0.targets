@@ -1,4 +1,4 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ItemGroup>
         <Content Include="$(MSBuildThisFileDirectory)libpv_picollm.dll">
             <Link>libpv_picollm.dll</Link>
@@ -25,9 +25,9 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>
         </Content>
-        <Content Include="$(MSBuildThisFileDirectory)lib/**">
-            <PackagePath>content/picovoice/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
-            <Link>lib/%(RecursiveDir)%(Filename)%(Extension)</Link>
+        <Content Include="$(MSBuildThisFileDirectory)lib\**">
+            <PackagePath>content\picovoice\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+            <Link>lib\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>
         </Content>

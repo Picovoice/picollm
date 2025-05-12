@@ -313,7 +313,7 @@ namespace Pv
             string result = "<|begin_of_text|>";
             if (_system != null)
             {
-                result += $"<|start_header_id|>system<|end_header_id|>\n\n{_system.Trim()}<|eot_id|>"
+                result += $"<|start_header_id|>system<|end_header_id|>\n\n{_system.Trim()}<|eot_id|>";
             }
             for (int i = 0; i < llmResponses.Count; i++)
             {

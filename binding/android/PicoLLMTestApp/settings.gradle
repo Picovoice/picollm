@@ -1,2 +1,4 @@
 rootProject.name = "PicoLLMTestApp"
 include ':picollm-test-app'
+include(":picollm-android")
+project(":picollm-android").projectDir = file("../PicoLLM/picollm")

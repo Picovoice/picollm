@@ -179,7 +179,7 @@ namespace Pv
             string result = "";
             if (_system != null)
             {
-                result += $"<|system|>\n{_system}<|end|>\n";
+                result += $"<|system|>\n{_system.Trim()}<|end|>\n";
             }
 
             for (int i = 0; i < llmResponses.Count; i++)
@@ -271,7 +271,7 @@ namespace Pv
                 string instruction = humanRequests[i].Trim();
                 if (_system != null && i == 0)
                 {
-                    instruction = $"<<SYS>>\n{_system}\n<</SYS>>\n\n{instruction}";
+                    instruction = $"<<SYS>>\n{_system.Trim()}\n<</SYS>>\n\n{instruction}";
                 }
 
                 result += $"<s>[INST] {instruction} [/INST] {llmResponses[i].Trim()} </s>";
@@ -280,7 +280,7 @@ namespace Pv
             string lastInstruction = humanRequests.Last().Trim();
             if (_system != null && humanRequests.Count == 1)
             {
-                lastInstruction = $"<<SYS>>\n{_system}\n<</SYS>>\n\n{lastInstruction}";
+                lastInstruction = $"<<SYS>>\n{_system.Trim()}\n<</SYS>>\n\n{lastInstruction}";
             }
 
             result += $"<s>[INST] {lastInstruction} [/INST]";
@@ -311,6 +311,10 @@ namespace Pv
                 : _llmResponses.Skip(_llmResponses.Count - (int)_history).ToList();
 
             string result = "<|begin_of_text|>";
+            if (_system != null)
+            {
+                result += $"<|start_header_id|>system<|end_header_id|>\n\n{_system.Trim()}<|eot_id|>"
+            }
             for (int i = 0; i < llmResponses.Count; i++)
             {
                 result += $"<|start_header_id|>user<|end_header_id|>\n\n{humanRequests[i].Trim()}<|eot_id|>";

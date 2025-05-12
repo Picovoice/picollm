@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2025 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is
     located in the "LICENSE" file accompanying this source.
@@ -73,8 +73,8 @@ public class Phi3ChatDialog extends PicoLLMDialog {
                                 this.llmResponses.size());
 
         StringBuilder res = new StringBuilder();
-        if (system != null) {
-            res.append(String.format("<|system|>\n%s<|end|>\n", system));
+        if (this.system != null) {
+            res.append(String.format("<|system|>\n%s<|end|>\n", this.system.trim()));
         }
 
         for (int i = 0; i < llm.size(); i++) {

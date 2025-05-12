@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Picovoice Inc.
+# Copyright 2024-2025 Picovoice Inc.
 #
 # You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 # file accompanying this source.
@@ -167,6 +167,8 @@ class Llama3ChatDialog(Dialog):
         llm = (list() if self._history == 0 else self._llm[-self._history:]) if self._history is not None else self._llm
 
         res = ["<|begin_of_text|>"]
+        if self._system is not None:
+            res.append(f"<|start_header_id|>system<|end_header_id|>\n\n{self._system.strip()}<|eot_id|>")
         for h, l in zip(human, llm):
             res.append(f"<|start_header_id|>user<|end_header_id|>\n\n{h.strip()}<|eot_id|>")
             res.append(f"<|start_header_id|>assistant<|end_header_id|>\n\n{l.strip()}<|eot_id|>")
@@ -278,7 +280,7 @@ class Phi3Dialog(Dialog):
 
         res = list()
         if self._system is not None:
-            res.append(f"<|system|>\n{self._system}<|end|>\n")
+            res.append(f"<|system|>\n{self._system.strip()}<|end|>\n")
 
         for h, l in zip(human, llm):
             res.append(f"<|user|>\n{h.strip()}<|end|>\n")

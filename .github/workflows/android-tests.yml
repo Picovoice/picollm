@@ -72,6 +72,12 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+############## REMOVE AFTER RELEASE ##########################
+    - name: Build app
+      run: ./gradlew assembleRelease --info
+      working-directory: binding/android/PicoLLM
+############## REMOVE AFTER RELEASE ##########################
+
     - name: Build app
       run: ./gradlew assembleDebug --info
 
@@ -130,6 +136,12 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
+############## REMOVE AFTER RELEASE ##########################
+    - name: Build app
+      run: ./gradlew assembleRelease --info
+      working-directory: binding/android/PicoLLM
+############## REMOVE AFTER RELEASE ##########################
 
     - name: Build app
       run: ./gradlew assembleRelease --info

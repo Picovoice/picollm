@@ -7,6 +7,11 @@ ext {
 }
 
 android {
+    def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    if (agpVersion.tokenize('.')[0].toInteger() >= 7) {
+        namespace 'ai.picovoice.picollm'
+    }
+
     compileSdkVersion defaultTargetSdkVersion
     buildToolsVersion "30.0.3"
 

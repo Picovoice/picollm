@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Picovoice Inc.
+// Copyright 2024-2025 Picovoice Inc.
 //
 // You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 // file accompanying this source.
@@ -139,6 +139,9 @@ export class Llama3ChatDialog extends Dialog {
 
     const res: string[] = [];
     res.push(`<|begin_of_text|>`);
+    if (this._system !== undefined) {
+      res.push(`<|start_header_id|>system<|end_header_id|>\n\n${this._system.trim()}<|eot_id|>`);
+    }
     for (let i = 0; i < llm.length; i++) {
       res.push(`<|start_header_id|>user<|end_header_id|>\n\n${human[i].trim()}<|eot_id|>`);
       res.push(`<|start_header_id|>assistant<|end_header_id|>\n\n${llm[i].trim()}<|eot_id|>`);
@@ -251,7 +254,7 @@ export class Phi3ChatDialog extends Dialog {
 
     const res: string[] = [];
     if (this._system !== undefined) {
-      res.push(`<|system|>\n${this._system}<|end|>\n`);
+      res.push(`<|system|>\n${this._system.trim()}<|end|>\n`);
     }
 
     for (let i = 0; i < llm.length; i++) {

@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2025 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is
     located in the "LICENSE" file accompanying this source.
@@ -74,16 +74,25 @@ public class Llama2ChatDialog extends PicoLLMDialog {
         for (int i = 0; i < llm.size(); i++) {
             String instruction = human.get(i).trim();
 
-            if (system != null && i == 0) {
-                instruction = String.format("<<SYS>>\n%s\n<</SYS>>\n\n%s", system, instruction);
+            if (this.system != null && i == 0) {
+                instruction = String.format(
+                        "<<SYS>>\n%s\n<</SYS>>\n\n%s",
+                        this.system.trim(),
+                        instruction);
             }
 
-            res.append(String.format("<s>[INST] %s [/INST] %s </s>", instruction, llm.get(i).trim()));
+            res.append(String.format(
+                    "<s>[INST] %s [/INST] %s </s>",
+                    instruction,
+                    llm.get(i).trim()));
         }
 
         String instruction = human.get(human.size() - 1).trim();
-        if (system != null && human.size() == 1) {
-            instruction = String.format("<<SYS>>\n%s\n<</SYS>>\n\n%s", system, instruction);
+        if (this.system != null && human.size() == 1) {
+            instruction = String.format(
+                    "<<SYS>>\n%s\n<</SYS>>\n\n%s",
+                    this.system.trim(),
+                    instruction);
         }
         res.append(String.format("<s>[INST] %s [/INST]", instruction));
 

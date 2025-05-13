@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2025 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is
     located in the "LICENSE" file accompanying this source.
@@ -69,6 +69,12 @@ public class Llama3ChatDialog extends PicoLLMDialog {
                                 this.llmResponses.size());
 
         StringBuilder res = new StringBuilder("<|begin_of_text|>");
+        if (this.system != null) {
+            res.append(String.format(
+                    "<|start_header_id|>system<|end_header_id|>\n\n%s<|eot_id|>",
+                    this.system.trim()));
+        }
+
         for (int i = 0; i < llm.size(); i++) {
             res.append(String.format(
                     "<|start_header_id|>user<|end_header_id|>\n\n%s<|eot_id|>",

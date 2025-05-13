@@ -1,5 +1,5 @@
 //
-//  Copyright 2024 Picovoice Inc.
+//  Copyright 2024-2025 Picovoice Inc.
 //  You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 //  file accompanying this source.
 //  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
@@ -175,8 +175,11 @@ public class Phi3ChatDialog: BasePicoLLMDialog {
             self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
 
         var res = ""
-        if system != nil {
-            res += String(format: "<|system|>\n%@<|end|>\n", system!)
+        if self.system != nil {
+            res += String(
+                format: "<|system|>\n%@<|end|>\n",
+                self.system!.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
         }
         for i in 0..<llmResponses.count {
             res += String(
@@ -260,8 +263,12 @@ public class Llama2ChatDialog: BasePicoLLMDialog {
         var res = ""
         for i in 0..<llmResponses.count {
             var instruction = humanRequests[i].trimmingCharacters(in: .whitespacesAndNewlines)
-            if system != nil && i == 0 {
-                instruction = String(format: "<<SYS>>\n%@\n<</SYS>>\n\n%@", system!, instruction)
+            if self.system != nil && i == 0 {
+                instruction = String(
+                    format: "<<SYS>>\n%@\n<</SYS>>\n\n%@",
+                    self.system!.trimmingCharacters(in: .whitespacesAndNewlines),
+                    instruction
+                )
             }
 
             res += String(
@@ -272,8 +279,12 @@ public class Llama2ChatDialog: BasePicoLLMDialog {
         }
 
         var instruction = humanRequests.last!.trimmingCharacters(in: .whitespacesAndNewlines)
-        if system != nil && humanRequests.count == 1 {
-            instruction = String(format: "<<SYS>>\n%@\n<</SYS>>\n\n%@", system!, instruction)
+        if self.system != nil && humanRequests.count == 1 {
+            instruction = String(
+                format: "<<SYS>>\n%@\n<</SYS>>\n\n%@",
+                self.system!.trimmingCharacters(in: .whitespacesAndNewlines),
+                instruction
+            )
         }
 
         res += String(
@@ -300,6 +311,11 @@ public class Llama3ChatDialog: BasePicoLLMDialog {
             self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
 
         var res = "<|begin_of_text|>"
+        if self.system != nil {
+            res += String(
+                format: "<|start_header_id|>system<|end_header_id|>\n\n%@<|eot_id|>",
+                self.system!.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
         for i in 0..<llmResponses.count {
             res += String(
                 format: "<|start_header_id|>user<|end_header_id|>\n\n%@<|eot_id|>",

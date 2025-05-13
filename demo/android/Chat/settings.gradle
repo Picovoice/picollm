@@ -1,4 +1,2 @@
 rootProject.name = "PicoLLMChatDemo"
 include ':picollm-chat-demo'
-include(":picollm-android")
-project(":picollm-android").projectDir = file("../../../binding/android/PicoLLM/picollm")

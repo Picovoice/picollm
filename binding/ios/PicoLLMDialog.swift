@@ -312,7 +312,7 @@ public class Llama3ChatDialog: BasePicoLLMDialog {
 
         var res = "<|begin_of_text|>"
         if self.system != nil {
-            res += = String(
+            res += String(
                 format: "<|start_header_id|>system<|end_header_id|>\n\n%@<|eot_id|>",
                 self.system!.trimmingCharacters(in: .whitespacesAndNewlines))
         }

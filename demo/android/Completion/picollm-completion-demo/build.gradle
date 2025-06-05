@@ -38,5 +38,5 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
     implementation 'com.google.code.gson:gson:2.8.9'
 
-    implementation 'ai.picovoice:picollm-android:1.3.1'
+    implementation 'ai.picovoice:picollm-android:1.3.2'
 }

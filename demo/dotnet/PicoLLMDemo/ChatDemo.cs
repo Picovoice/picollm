@@ -90,7 +90,6 @@ namespace PicoLLMDemo
                             }
                         });
 
-                    interruptKeyTask.Wait();
                     Console.WriteLine();
                     dialog.AddLLMResponse(response.Completion);
                 }

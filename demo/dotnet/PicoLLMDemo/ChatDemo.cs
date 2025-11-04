@@ -54,9 +54,10 @@ namespace PicoLLMDemo
                     dialog.AddHumanRequest(prompt);
 
                     bool isInterrupt = false;
+                    PicoLLMCompletion response = null;
                     Task interruptKeyTask = Task.Run(async () =>
                     {
-                        while (!isInterrupt)
+                        while (!isInterrupt && response == null)
                         {
                             if (Console.KeyAvailable)
                             {
@@ -72,7 +73,7 @@ namespace PicoLLMDemo
                         }
                     });
 
-                    PicoLLMCompletion response = picoLLM.Generate(
+                    response = picoLLM.Generate(
                         dialog.Prompt(),
                         completionTokenLimit,
                         stopPhrases.ToArray(),
@@ -90,6 +91,7 @@ namespace PicoLLMDemo
                             }
                         });
 
+                    interruptKeyTask.Wait();
                     Console.WriteLine();
                     dialog.AddLLMResponse(response.Completion);
                 }

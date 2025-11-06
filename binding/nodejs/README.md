@@ -122,4 +122,4 @@ pllm.release()
 
 ## Demos
 
-[picoLLM Node.js demo package](https://www.npmjs.com/package/@picovoice/picollm-node-demo) provides command-line utilities for processing audio using picoLLM.
+[picoLLM Node.js demo package](https://www.npmjs.com/package/@picovoice/picollm-node-demo)<!-- markdown-link-check-disable-line --> provides command-line utilities for processing audio using picoLLM.

@@ -20,7 +20,15 @@ extern "C" {
 
 #endif
 
+#ifdef _MSC_VER
+
+#define PV_API __declspec(dllexport)
+
+#else
+
 #define PV_API __attribute__((visibility("default")))
+
+#endif
 
 /**
  * Audio sample rate accepted by Picovoice.
@@ -78,6 +86,7 @@ PV_API pv_status_t pv_get_error_stack(
 PV_API void pv_free_error_stack(char **message_stack);
 
 #ifdef __cplusplus
+
 }
 
 #endif

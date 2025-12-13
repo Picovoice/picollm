@@ -126,7 +126,7 @@ static void usage(const char *program) {
     (void) fprintf(
             stderr,
             "Usage: %s -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH "
-            "[-d DEVICE] [-s STOP_PHRASES] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES] "
+            "[-y DEVICE] [-s STOP_PHRASES] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES] "
             "[-r PRESENCE_PENALTY] [-f FREQUENCY_PENALTY] "
             "[-o TOP_P] [-t TEMPERATURE] [-e SEED] [-v] [-h] -p PROMPT\n"
             "-v: enable verbose output\n"
@@ -161,7 +161,7 @@ static void progress_callback(const char *token, void *context) {
 }
 
 int picovoice_main(int argc, char **argv) {
-    const char *SHORT_OPTIONS = "a:l:m:d:c:s:e:r:f:o:t:n:c:p:vh";
+    const char *SHORT_OPTIONS = "a:l:m:y:c:s:e:r:f:o:t:n:c:p:vh";
 
     const char *access_key = NULL;
     const char *model_path = NULL;
@@ -258,7 +258,7 @@ int picovoice_main(int argc, char **argv) {
                 optind = i;
             }
                 break;
-            case 'd':
+            case 'y':
                 device_string = optarg;
                 break;
             case 'v':

@@ -85,7 +85,7 @@ Running the demo without arguments prints the usage:
 
 ```console
 Usage: ./demo/c/build/picollm_demo_completion -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH
-[-d DEVICE] [-c COMPLETION_TOKEN_LIMIT] [-s STOP_PHRASES] [-e SEED] [-r PRESENCE_PENALTY]
+[-y DEVICE] [-c COMPLETION_TOKEN_LIMIT] [-s STOP_PHRASES] [-e SEED] [-r PRESENCE_PENALTY]
 [-f FREQUENCY_PENALTY] [-o TOP_P] [-t TEMPERATURE] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES]
 [-v] [-h] -p PROMPT
 -v: enable verbose output

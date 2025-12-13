@@ -34,14 +34,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        xpu: [ "cpu" ]
+        device: [ "cpu" ]
         machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows, pv-windows-arm64 ]
         include:
-          - xpu: gpu
+          - device: gpu
             machine: pv-linux
-          - xpu: gpu
+          - device: gpu
             machine: pv-windows
-          - xpu: gpu
+          - device: gpu
             machine: pv-windows-igpu
     steps:
     - uses: actions/checkout@v3
@@ -67,4 +67,4 @@ jobs:
       run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm
 
     - name: Test
-      run: python3 -m binding.python.test_picollm ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.pllm ${{matrix.xpu}}
+      run: python3 -m binding.python.test_picollm ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.pllm ${{matrix.device}}

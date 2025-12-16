@@ -69,7 +69,7 @@ export default {
       exclude: '**/node_modules/**',
     }),
     base64({
-      include: ['./**/*.wasm', './**/*.txt'],
+      include: ['./src/lib/*.wasm', './src/lib/*.txt'],
     })
   ],
 };

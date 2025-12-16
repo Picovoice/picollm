@@ -1,3 +1,14 @@
+/*
+  Copyright 2024-2025 Picovoice Inc.
+
+  You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
+  file accompanying this source.
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+  an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+  specific language governing permissions and limitations under the License.
+*/
+
 import { pvStatusToException } from './picollm_errors';
 import { loadModel } from './utils';
 
@@ -27,7 +38,10 @@ export class PicoLLMWorker {
   private readonly _model: string;
 
   private static _wasmSimd: string;
-  private static _wasmLib: string;
+  private static _wasmSimdLib: string;
+  private static _wasmPThread: string;
+  private static _wasmPThreadLib: string;
+
   private static _sdk: string = "web";
 
   private constructor(worker: Worker, contextLength: number, maxTopChoices: number, model: string, version: string) {
@@ -137,9 +151,11 @@ export class PicoLLMWorker {
       options: {
         device: device,
       },
-      sdk: this._sdk,
       wasmSimd: this._wasmSimd,
-      wasmLib: this._wasmLib,
+      wasmSimdLib: this._wasmSimdLib,
+      wasmPThread: this._wasmPThread,
+      wasmPThreadLib: this._wasmPThreadLib,
+      sdk: this._sdk
     });
 
     return returnPromise;
@@ -147,7 +163,7 @@ export class PicoLLMWorker {
 
   /**
    * Set base64 wasm file with SIMD feature.
-   * @param wasmSimd Base64'd wasm file to use to initialize wasm.
+   * @param wasmSimd Base64'd wasm SIMD file to use to initialize wasm.
    */
   public static setWasmSimd(wasmSimd: string): void {
     if (this._wasmSimd === undefined) {
@@ -156,12 +172,32 @@ export class PicoLLMWorker {
   }
 
   /**
-   * Set base64 wasm lib file in text format.
-   * @param wasmLib Base64'd wasm lib file in text format.
+   * Set base64 wasm file with SIMD feature in text format.
+   * @param wasmSimdLib Base64'd wasm SIMD file in text format.
    */
-  public static setWasmLib(wasmLib: string): void {
-    if (this._wasmLib === undefined) {
-      this._wasmLib = wasmLib;
+  public static setWasmSimdLib(wasmSimdLib: string): void {
+    if (this._wasmSimdLib === undefined) {
+      this._wasmSimdLib = wasmSimdLib;
+    }
+  }
+
+  /**
+   * Set base64 wasm file with SIMD and pthread feature.
+   * @param wasmPThread Base64'd wasm file to use to initialize wasm.
+   */
+  public static setWasmPThread(wasmPThread: string): void {
+    if (this._wasmPThread === undefined) {
+      this._wasmPThread = wasmPThread;
+    }
+  }
+
+  /**
+   * Set base64 SIMD and thread wasm file in text format.
+   * @param wasmPThreadLib Base64'd wasm file in text format.
+   */
+  public static setWasmPThreadLib(wasmPThreadLib: string): void {
+    if (this._wasmPThreadLib === undefined) {
+      this._wasmPThreadLib = wasmPThreadLib;
     }
   }
 

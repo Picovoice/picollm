@@ -1,5 +1,5 @@
 /*
-  Copyright 2024 Picovoice Inc.
+  Copyright 2024-2025 Picovoice Inc.
 
   You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
   file accompanying this source.
@@ -67,8 +67,11 @@ const initRequest = async (request: PicoLLMWorkerInitRequest): Promise<any> => {
     };
   }
 
+
   PicoLLM.setWasmSimd(request.wasmSimd);
-  PicoLLM.setWasmLib(request.wasmLib);
+  PicoLLM.setWasmSimdLib(request.wasmSimdLib);
+  PicoLLM.setWasmPThread(request.wasmPThread);
+  PicoLLM.setWasmPThreadLib(request.wasmPThreadLib);
   PicoLLM.setSdk(request.sdk);
   picoLLM = await PicoLLM._init(
     request.accessKey,

@@ -13,26 +13,33 @@ models. picoLLM Inference Engine is:
 - Runs on CPU and GPU
 - Free for open-weight models
 
-## Requirements
-
-PicoLLM Web Binding uses [SharedArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer) to generate
-text. Modern browsers require the following response headers to allow the usage of `SharedArrayBuffers`:
-
-```
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: require-corp
-```
-
-Refer to our [Web demos](https://github.com/Picovoice/picollm/tree/master/demo/web) for example on creating a server
-with the corresponding response headers.
-
 ## Compatibility
 
 - Chrome / Edge
 - Firefox
 - Safari
 
-**NOTE**: IndexedDB, SIMD and SharedArrayBuffers are required to use `picoLLM`.
+## Requirements
+
+PicoLLM Web Binding uses [SharedArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer).
+
+Include the following headers in the response to enable the use of `SharedArrayBuffers`:
+
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+Refer to our [Web demo](../../demo/web) for an example on creating a server with the corresponding response headers.
+
+Browsers that don't support `SharedArrayBuffers` or applications that don't include the required headers will fall back to using standard `ArrayBuffers`. This will disable multithreaded processing.
+
+### Restrictions
+
+IndexedDB is required to use `PicoLLM` in a worker thread. Browsers without IndexedDB support
+(i.e. Firefox Incognito Mode) should use `PicoLLM` in the main thread.
+
+Multi-threading is only enabled for PicoLLM when using on a web worker.
 
 ## Installation
 

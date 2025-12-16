@@ -83,7 +83,9 @@ export type PicoLLMWorkerInitRequest = {
   modelPath: string;
   options: PicoLLMInitOptions;
   wasmSimd: string;
-  wasmLib: string;
+  wasmSimdLib: string;
+  wasmPThread: string;
+  wasmPThreadLib: string;
   sdk: string;
 };
 

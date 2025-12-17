@@ -227,7 +227,7 @@ namespace Pv
         private IntPtr _libraryPointer = IntPtr.Zero;
 
         private delegate void PicoLLMStreamCallbackDelegate(IntPtr token, IntPtr userData);
-        private PicoLLMStreamCallbackDelegate _streamCallbackDelegate;
+        private readonly PicoLLMStreamCallbackDelegate _streamCallbackDelegate;
         private Action<string> _streamCallback;
 
         static PicoLLM()

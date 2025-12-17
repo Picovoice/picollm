@@ -97,7 +97,7 @@ public struct PicoLLMCompletion: Codable {
 }
 
 /// Private callback for hoisting C callback into Swift callback.
-func cStreamCallback (completion: UnsafePointer<CChar>?, context: UnsafeMutableRawPointer?) {
+func cStreamCallback(completion: UnsafePointer<CChar>?, context: UnsafeMutableRawPointer?) {
     let object = Unmanaged<PicoLLM>.fromOpaque(context!).takeUnretainedValue()
 
     if object.streamCallback != nil {

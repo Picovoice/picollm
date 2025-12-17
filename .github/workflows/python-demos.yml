@@ -55,7 +55,10 @@ jobs:
    # ************** REMOVE AFTER RELEASE ********************
     - name: Build binding
       run: |
-        pip install wheel setuptools && cd ../../binding/python && python3 setup.py sdist bdist_wheel && pip install --force-reinstall dist/picollm-2.0.0-py3-none-any.whl
+        python3 -m pip install wheel setuptools
+        python3 setup.py sdist bdist_wheel
+        python3 -m pip install --force-reinstall dist/picollm-2.0.0-py3-none-any.whl
+      working-directory: binding/python
     # ********************************************************
 
     - name: Install Python dependencies

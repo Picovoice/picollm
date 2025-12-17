@@ -38,25 +38,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        xpu: [ cpu ]
-        make_file: [ "Unix Makefiles" ]
-        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios ]
+        device: [ best ]
+        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-windows-arm64 ]
         include:
-          - xpu: gpu
-            machine: pv-linux
-            make_file: "Unix Makefiles"
-          - xpu: gpu
-            machine: pv-windows
-            make_file: "MinGW Makefiles"
-          - xpu: cpu
-            machine: pv-windows
-            make_file: "MinGW Makefiles"
-          - xpu: gpu
-            machine: pv-windows-igpu
-            make_file: "MinGW Makefiles"
-          - xpu: cpu
-            machine: pv-windows-arm64
-            make_file: "MinGW Makefiles"
+        - machine: rpi4-32
+          make_file: "Unix Makefiles"
+        - machine: rpi4-64
+          make_file: "Unix Makefiles"
+        - machine: rpi5-32
+          make_file: "Unix Makefiles"
+        - machine: rpi5-64
+          make_file: "Unix Makefiles"
+        - machine: pv-windows-arm64
+          make_file: "MinGW Makefiles"
+        - device: gpu
+          machine: pv-linux
+          make_file: "Unix Makefiles"
+        - device: gpu
+          machine: pv-windows
+          make_file: "MinGW Makefiles"
+        - device: gpu
+          machine: pv-ios
+          make_file: "Unix Makefiles"
 
     steps:
       - uses: actions/checkout@v3
@@ -88,4 +91,4 @@ jobs:
         run: python3 -m pip install -r test/requirements.txt
 
       - name: Test
-        run: python test/test_picollm_c.py ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.pllm ${{matrix.xpu}}
+        run: python test/test_picollm_c.py ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.pllm ${{matrix.device}}

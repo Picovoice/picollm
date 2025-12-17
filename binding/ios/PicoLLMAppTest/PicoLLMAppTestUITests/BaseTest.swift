@@ -17,7 +17,7 @@ class BaseTest: XCTestCase {
     let accessKey: String = "{TESTING_ACCESS_KEY_HERE}"
     let modelURL = URL(string: "{TESTING_MODEL_URL_HERE}")
 
-    let cleanModel = true
+    let cleanModel = false
 
     var modelPath: String = ""
     var picollmTestData: [String: Any]?
@@ -50,8 +50,8 @@ class BaseTest: XCTestCase {
             print("Using cached file...")
             try completion(destinationUrl.path, nil)
         } else {
-            try FileManager().removeItem(at: destinationUrl)
             let session = URLSession.shared
+
             do {
                 let (downloadedURL, _) = try await session.download(from: url)
                 try FileManager().copyItem(at: downloadedURL, to: destinationUrl)

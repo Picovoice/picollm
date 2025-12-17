@@ -351,7 +351,7 @@ export class PicoLLM {
       throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
     }
 
-    let { device = DEFAULT_DEVICE } = options;
+    const { device = DEFAULT_DEVICE } = options;
 
     if (!isAccessKeyValid(accessKey)) {
       throw new PicoLLMErrors.PicoLLMInvalidArgumentError('Invalid AccessKey');

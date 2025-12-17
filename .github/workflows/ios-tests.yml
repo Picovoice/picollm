@@ -32,6 +32,10 @@ jobs:
         run: sed -i '.bak' 's:{TESTING_ACCESS_KEY_HERE}:${{secrets.PV_VALID_ACCESS_KEY}}:'
           PicoLLMAppTestUITests/BaseTest.swift
 
+      - name: Inject Device
+        run: sed -i '.bak' 's:{TESTING_DEVICE_HERE}:cpu\:1:'
+          PicoLLMAppTestUITests/BaseTest.swift
+
       - name: Inject Resource URL
         run: sed -i '.bak' 's?{TESTING_MODEL_URL_HERE}?http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm?'
           PicoLLMAppTestUITests/BaseTest.swift

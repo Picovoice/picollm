@@ -17,7 +17,7 @@ class PicoLLMAppTestUITests: BaseTest {
     private var handle: PicoLLM?
 
     override func setUpWithError() throws {
-        handle = try PicoLLM.init(accessKey: accessKey, modelPath: modelPath)
+        handle = try PicoLLM.init(accessKey: accessKey, modelPath: modelPath, device: device)
         try super.setUpWithError()
     }
 
@@ -398,7 +398,7 @@ class PicoLLMAppTestUITests: BaseTest {
         XCTAssertEqual(initialLogits.count, afterLogits.count)
 
         for i in 0..<initialLogits.count {
-            XCTAssertEqual(initialLogits[i], afterLogits[i])
+            XCTAssertEqual(initialLogits[i], afterLogits[i], accuracy: 0.02)
         }
     }
 

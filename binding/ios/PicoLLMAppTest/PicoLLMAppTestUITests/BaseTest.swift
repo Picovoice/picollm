@@ -16,6 +16,7 @@ class BaseTest: XCTestCase {
 
     let accessKey: String = "{TESTING_ACCESS_KEY_HERE}"
     let modelURL = URL(string: "{TESTING_MODEL_URL_HERE}")
+    let device: String = "{TESTING_DEVICE_HERE}"
 
     let cleanModel = false
 

@@ -137,7 +137,7 @@ public class PicoLLM {
     public init(
         accessKey: String,
         modelPath: String,
-        device: String = "best:0"
+        device: String = "best"
     ) throws {
 
         if accessKey.isEmpty {

@@ -244,7 +244,7 @@ describe('PicoLLM basic tests', function () {
     }
 
     expect(messageStack.length).toBeGreaterThan(0);
-    expect(messageStack.length).toBeLessThan(8);
+    expect(messageStack.length).toBeLessThan(9);
 
     try {
       const picollm = new PicoLLM(

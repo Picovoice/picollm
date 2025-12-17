@@ -76,7 +76,7 @@ jobs:
           echo PATH=$PATH >> $GITHUB_ENV
 
       - name: Download resource files
-        run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-fae87bc/phi2-290.pllm -o phi2-290.pllm
+        run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm
 
       - name: Create build directory
         run: cmake -G "${{ matrix.make_file }}" -B ./build

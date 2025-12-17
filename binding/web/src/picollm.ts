@@ -370,8 +370,7 @@ export class PicoLLM {
     const isWorkerScope =
       typeof WorkerGlobalScope !== 'undefined' &&
       self instanceof WorkerGlobalScope;
-    if (!isWorkerScope)
-    {
+    if (!isWorkerScope) {
       throw new PicoLLMErrors.PicoLLMRuntimeError('PicoLLM does not support running on main thread.');
     }
 

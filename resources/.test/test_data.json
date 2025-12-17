@@ -57,6 +57,13 @@
           "endpoint": "END_OF_SENTENCE",
           "num-top-choices": 0,
           "completion": " Cheese.\n<|endoftext|>"
+        },
+        {
+          "num-prompt-tokens": 10,
+          "num-completion-tokens": 7,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 0,
+          "completion": " Say cheese 5 times.\n<|endoftext|>"
         }
       ]
     },
@@ -86,6 +93,13 @@
           "endpoint": "END_OF_SENTENCE",
           "num-top-choices": 0,
           "completion": " Cheese.\n<|endoftext|>"
+        },
+        {
+          "num-prompt-tokens": 10,
+          "num-completion-tokens": 7,
+          "endpoint": "END_OF_SENTENCE",
+          "num-top-choices": 0,
+          "completion": " Say cheese 5 times.\n<|endoftext|>"
         }
       ]
     },
@@ -139,7 +153,9 @@
         " bread.\n\nThe song is called \"Banana Bread\". It is about making",
         " bread.\n\nReferences\n\nExternal links\n\nAmerican folk songs\nAmerican folk",
         " bread.\n\nBanana bread is a delicious treat. It is made with mashed",
-        "\"Banana bread is a delicious treat,"
+        "\"Banana bread is a delicious treat,",
+        " bread.\n\n\"Banana bread is a delicious treat,\n\n\n-",
+        " bread.\n\nReferences\n\nExternal links\n\nAmerican children's songs\nAmerican"
       ]
     },
     "with-top-choices": {

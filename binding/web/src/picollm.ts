@@ -22,7 +22,6 @@ import {
 
 import { simd } from 'wasm-feature-detect';
 
-import createModuleSimd from "./lib/pv_picollm_simd";
 import createModulePThread from "./lib/pv_picollm_pthread";
 
 import {
@@ -223,8 +222,6 @@ export class PicoLLM {
   private readonly _streamCallback: PicoLLMStreamCallback;
   private readonly _streamCallbackFnPointer: number;
 
-  private static _wasmSimd: string;
-  private static _wasmSimdLib: string;
   private static _wasmPThread: string;
   private static _wasmPThreadLib: string;
   private static _sdk: string = 'web';
@@ -317,26 +314,6 @@ export class PicoLLM {
   }
 
   /**
-   * Set base64 wasm file with SIMD feature.
-   * @param wasmSimd Base64'd wasm file to use to initialize wasm.
-   */
-  public static setWasmSimd(wasmSimd: string): void {
-    if (this._wasmSimd === undefined) {
-      this._wasmSimd = wasmSimd;
-    }
-  }
-
-  /**
-   * Set base64 SIMD wasm file in text format.
-   * @param wasmSimdLib Base64'd wasm file in text format.
-   */
-  public static setWasmSimdLib(wasmSimdLib: string): void {
-    if (this._wasmSimdLib === undefined) {
-      this._wasmSimdLib = wasmSimdLib;
-    }
-  }
-
-  /**
    * Set base64 wasm file with SIMD and pthread feature.
    * @param wasmPThread Base64'd wasm file to use to initialize wasm.
    */
@@ -382,23 +359,21 @@ export class PicoLLM {
 
     const isSimd = await simd();
     if (!isSimd) {
-      throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
+      throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser (SIMD required)');
+    }
+
+    const sabDefined = typeof SharedArrayBuffer !== 'undefined';
+    if (!sabDefined) {
+      throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser (SharedArrayBuffer required)');
     }
 
     const isWorkerScope =
       typeof WorkerGlobalScope !== 'undefined' &&
       self instanceof WorkerGlobalScope;
-    if (
-      !isWorkerScope &&
-      (device === 'best' || (device.startsWith('cpu') && device !== 'cpu:1'))
-    ) {
-      // eslint-disable-next-line no-console
-      console.warn('Multi-threading is not supported on main thread.');
-      device = 'cpu:1';
+    if (!isWorkerScope)
+    {
+      throw new PicoLLMErrors.PicoLLMRuntimeError('PicoLLM does not support running on main thread.');
     }
-
-    const sabDefined = typeof SharedArrayBuffer !== 'undefined'
-      && (device !== "cpu:1");
 
     return new Promise<PicoLLM>((resolve, reject) => {
       PicoLLM._picoLLMMutex
@@ -407,9 +382,9 @@ export class PicoLLM {
             accessKey,
             modelPath,
             device,
-            (sabDefined) ? this._wasmPThread : this._wasmSimd,
-            (sabDefined) ? this._wasmPThreadLib : this._wasmSimdLib,
-            (sabDefined) ? createModulePThread : createModuleSimd,
+            this._wasmPThread,
+            this._wasmPThreadLib,
+            createModulePThread,
           );
           return new PicoLLM(wasmOutput);
         })
@@ -994,16 +969,21 @@ export class PicoLLM {
         .runExclusive(async () => {
           const isSimd = await simd();
           if (!isSimd) {
-            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
+            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser (SIMD required)');
+          }
+
+          const sabDefined = typeof SharedArrayBuffer !== 'undefined';
+          if (!sabDefined) {
+            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser (SharedArrayBuffer required)');
           }
 
           const blob = new Blob(
-            [base64ToUint8Array(this._wasmSimdLib)],
+            [base64ToUint8Array(this._wasmPThreadLib)],
             { type: 'application/javascript' }
           );
-          const module: PicoLLMModule = await createModuleSimd({
+          const module: PicoLLMModule = await createModulePThread({
             mainScriptUrlOrBlob: blob,
-            wasmBinary: base64ToUint8Array(this._wasmSimd),
+            wasmBinary: base64ToUint8Array(this._wasmPThread),
           });
 
           const hardwareDevicesAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);

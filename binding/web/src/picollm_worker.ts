@@ -37,8 +37,6 @@ export class PicoLLMWorker {
   private readonly _maxTopChoices: number;
   private readonly _model: string;
 
-  private static _wasmSimd: string;
-  private static _wasmSimdLib: string;
   private static _wasmPThread: string;
   private static _wasmPThreadLib: string;
 
@@ -151,34 +149,12 @@ export class PicoLLMWorker {
       options: {
         device: device,
       },
-      wasmSimd: this._wasmSimd,
-      wasmSimdLib: this._wasmSimdLib,
       wasmPThread: this._wasmPThread,
       wasmPThreadLib: this._wasmPThreadLib,
       sdk: this._sdk
     });
 
     return returnPromise;
-  }
-
-  /**
-   * Set base64 wasm file with SIMD feature.
-   * @param wasmSimd Base64'd wasm SIMD file to use to initialize wasm.
-   */
-  public static setWasmSimd(wasmSimd: string): void {
-    if (this._wasmSimd === undefined) {
-      this._wasmSimd = wasmSimd;
-    }
-  }
-
-  /**
-   * Set base64 wasm file with SIMD feature in text format.
-   * @param wasmSimdLib Base64'd wasm SIMD file in text format.
-   */
-  public static setWasmSimdLib(wasmSimdLib: string): void {
-    if (this._wasmSimdLib === undefined) {
-      this._wasmSimdLib = wasmSimdLib;
-    }
   }
 
   /**

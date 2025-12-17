@@ -250,6 +250,14 @@ describe('PicoLLM basic tests', function () {
       });
     });
   });
+
+  it(`should refuse to run on main thread`, () => {
+    cy.loadModel().then(async chunks => {
+      await runInitTest(PicoLLM, chunks, {
+        expectFailure: true,
+      });
+    });
+  });
 });
 
 const generateTests = () => {
@@ -497,18 +505,6 @@ const generateTests = () => {
     });
   });
 };
-
-describe('PicoLLM generate tests (main)', () => {
-  before(() => {
-    cy.initPicoLLM(ACCESS_KEY, false);
-  });
-
-  after(() => {
-    cy.deletePicoLLM();
-  });
-
-  generateTests();
-});
 
 describe('PicoLLM generate tests (worker)', () => {
   before(() => {

@@ -32,14 +32,7 @@ Cross-Origin-Embedder-Policy: require-corp
 
 Refer to our [Web demo](../../demo/web) for an example on creating a server with the corresponding response headers.
 
-Browsers that don't support `SharedArrayBuffers` or applications that don't include the required headers will fall back to using standard `ArrayBuffers`. This will disable multithreaded processing.
-
-### Restrictions
-
-IndexedDB is required to use `PicoLLM` in a worker thread. Browsers without IndexedDB support
-(i.e. Firefox Incognito Mode) should use `PicoLLM` in the main thread.
-
-Multi-threading is only enabled for PicoLLM when using on a web worker.
+**NOTE**: IndexedDB, SIMD and SharedArrayBuffers are required to use `picoLLM`. `PicoLLM` only supports running in a worker thread.
 
 ## Installation
 

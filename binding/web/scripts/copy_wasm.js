@@ -2,8 +2,6 @@ const fs = require("fs");
 const { join, extname } = require("path");
 
 const wasmFiles = [
-  "pv_picollm_simd.wasm",
-  "pv_picollm_simd.js",
   "pv_picollm_pthread.wasm",
   "pv_picollm_pthread.js",
 ]

@@ -67,9 +67,6 @@ const initRequest = async (request: PicoLLMWorkerInitRequest): Promise<any> => {
     };
   }
 
-
-  PicoLLM.setWasmSimd(request.wasmSimd);
-  PicoLLM.setWasmSimdLib(request.wasmSimdLib);
   PicoLLM.setWasmPThread(request.wasmPThread);
   PicoLLM.setWasmPThreadLib(request.wasmPThreadLib);
   PicoLLM.setSdk(request.sdk);

@@ -49,7 +49,9 @@ jobs:
 
     # ************** REMOVE AFTER RELEASE ********************
     - name: Build Local Packages
-      run: yarn && yarn build
+      run: |
+        yarn install
+        yarn build
       working-directory: binding/nodejs
     # ********************************************************
 

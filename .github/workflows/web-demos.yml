@@ -15,10 +15,6 @@ on:
       - '!demo/web/README.md'
       - '.github/workflows/web-demos.yml'
 
-defaults:
-  run:
-    working-directory: demo/web
-
 jobs:
   build-completion-demo:
     runs-on: ${{ matrix.machine }}
@@ -30,14 +26,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-# ************** REMOVE AFTER RELEASE ********************
-    - name: Build Web SDK
-      run: yarn install && yarn copywasm && yarn build
-      working-directory: binding/web
-# ************** REMOVE AFTER RELEASE ********************
-
     - name: Install dependencies
       run: yarn install
+      working-directory: demo/web/completion
 
   build-chat-demo:
     runs-on: ${{ matrix.machine }}
@@ -49,11 +40,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-# ************** REMOVE AFTER RELEASE ********************
-    - name: Build Web SDK
-      run: yarn install && yarn copywasm && yarn build
-      working-directory: binding/web
-# ************** REMOVE AFTER RELEASE ********************
-
     - name: Install dependencies
       run: yarn install
+      working-directory: demo/web/chat

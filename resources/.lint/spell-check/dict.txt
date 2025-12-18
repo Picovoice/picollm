@@ -57,6 +57,7 @@ picollmoutofmemoryerror
 picovoice
 pllm
 pluginutils
+pthread
 Podfile
 podspec
 readables

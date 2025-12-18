@@ -1,5 +1,5 @@
 /*
-  Copyright 2024 Picovoice Inc.
+  Copyright 2024-2025 Picovoice Inc.
 
   You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
   file accompanying this source.
@@ -22,7 +22,7 @@ import {
 
 import { simd } from 'wasm-feature-detect';
 
-import createModule from "./lib/pv_picollm_simd";
+import createModulePThread from "./lib/pv_picollm_pthread";
 
 import {
   PicoLLMModel,
@@ -222,8 +222,8 @@ export class PicoLLM {
   private readonly _streamCallback: PicoLLMStreamCallback;
   private readonly _streamCallbackFnPointer: number;
 
-  private static _wasmSimd: string;
-  private static _wasmLib: string;
+  private static _wasmPThread: string;
+  private static _wasmPThreadLib: string;
   private static _sdk: string = 'web';
 
   private static _picoLLMMutex = new Mutex();
@@ -314,12 +314,22 @@ export class PicoLLM {
   }
 
   /**
-   * Set base64 wasm file with SIMD feature.
-   * @param wasmSimd Base64'd wasm file to use to initialize wasm.
+   * Set base64 wasm file with SIMD and pthread feature.
+   * @param wasmPThread Base64'd wasm file to use to initialize wasm.
    */
-  public static setWasmSimd(wasmSimd: string): void {
-    if (this._wasmSimd === undefined) {
-      this._wasmSimd = wasmSimd;
+  public static setWasmPThread(wasmPThread: string): void {
+    if (this._wasmPThread === undefined) {
+      this._wasmPThread = wasmPThread;
+    }
+  }
+
+  /**
+   * Set base64 SIMD and thread wasm file in text format.
+   * @param wasmPThreadLib Base64'd wasm file in text format.
+   */
+  public static setWasmPThreadLib(wasmPThreadLib: string): void {
+    if (this._wasmPThreadLib === undefined) {
+      this._wasmPThreadLib = wasmPThreadLib;
     }
   }
 
@@ -330,16 +340,6 @@ export class PicoLLM {
     }
 
     return false;
-  }
-
-  /**
-   * Set base64 wasm lib file in text format.
-   * @param wasmLib Base64'd wasm lib file in text format.
-   */
-  public static setWasmLib(wasmLib: string): void {
-    if (this._wasmLib === undefined) {
-      this._wasmLib = wasmLib;
-    }
   }
 
   public static async _init(
@@ -357,19 +357,33 @@ export class PicoLLM {
       throw new PicoLLMErrors.PicoLLMInvalidArgumentError('Invalid AccessKey');
     }
 
+    const isSimd = await simd();
+    if (!isSimd) {
+      throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser (SIMD required)');
+    }
+
+    const sabDefined = typeof SharedArrayBuffer !== 'undefined';
+    if (!sabDefined) {
+      throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser (SharedArrayBuffer required)');
+    }
+
+    const isWorkerScope =
+      typeof WorkerGlobalScope !== 'undefined' &&
+      self instanceof WorkerGlobalScope;
+    if (!isWorkerScope) {
+      throw new PicoLLMErrors.PicoLLMRuntimeError('PicoLLM does not support running on main thread.');
+    }
+
     return new Promise<PicoLLM>((resolve, reject) => {
       PicoLLM._picoLLMMutex
         .runExclusive(async () => {
-          const isSimd = await simd();
-          if (!isSimd) {
-            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
-          }
-
           const wasmOutput = await PicoLLM.initWasm(
-            this._wasmSimd,
             accessKey,
             modelPath,
             device,
+            this._wasmPThread,
+            this._wasmPThreadLib,
+            createModulePThread,
           );
           return new PicoLLM(wasmOutput);
         })
@@ -954,14 +968,21 @@ export class PicoLLM {
         .runExclusive(async () => {
           const isSimd = await simd();
           if (!isSimd) {
-            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
+            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser (SIMD required)');
           }
 
-          const blob = new Blob([base64ToUint8Array(this._wasmLib)], { type: 'application/javascript' });
+          const sabDefined = typeof SharedArrayBuffer !== 'undefined';
+          if (!sabDefined) {
+            throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser (SharedArrayBuffer required)');
+          }
 
-          const module: PicoLLMModule = await createModule({
+          const blob = new Blob(
+            [base64ToUint8Array(this._wasmPThreadLib)],
+            { type: 'application/javascript' }
+          );
+          const module: PicoLLMModule = await createModulePThread({
             mainScriptUrlOrBlob: blob,
-            wasmBinary: base64ToUint8Array(this._wasmSimd),
+            wasmBinary: base64ToUint8Array(this._wasmPThread),
           });
 
           const hardwareDevicesAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
@@ -1046,13 +1067,18 @@ export class PicoLLM {
   }
 
   private static async initWasm(
-    wasmBase64: string,
     accessKey: string,
     modelPath: string,
-    device: string
+    device: string,
+    wasmBase64: string,
+    wasmLibBase64: string,
+    createModuleFunc: any
   ): Promise<PicoLLMWasmOutput> {
-    const blob = new Blob([base64ToUint8Array(this._wasmLib)], { type: 'application/javascript' });
-    const module: PicoLLMModule = await createModule({
+    const blob = new Blob(
+      [base64ToUint8Array(wasmLibBase64)],
+      { type: 'application/javascript' }
+    );
+    const module: PicoLLMModule = await createModuleFunc({
       mainScriptUrlOrBlob: blob,
       wasmBinary: base64ToUint8Array(wasmBase64),
     });

@@ -1,6 +1,6 @@
 {
   "name": "picollm-web-completion-demo",
-  "version": "1.3.1",
+  "version": "2.0.0",
   "description": "A demo to show how to create a picoLLM inference engine on a web worker that accepts a prompt along with a set of optional parameters and generates a single completion.",
   "main": "index.js",
   "private": true,
@@ -16,7 +16,7 @@
   "author": "Picovoice Inc",
   "license": "Apache-2.0",
   "dependencies": {
-    "@picovoice/picollm-web": "~1.3.1",
+    "@picovoice/picollm-web": "file:../../binding/web",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {

@@ -31,7 +31,7 @@ class PicoLLMCTestCase(unittest.TestCase):
             "-a", self._access_key,
             "-l", pv_library_path("../../.."),
             "-m", self._model_path,
-            "-d", self._device,
+            "-y", self._device,
             "-p", "Instruct: Where is the capital city of British Columbia?\nOutput:",
         ]
         process = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)

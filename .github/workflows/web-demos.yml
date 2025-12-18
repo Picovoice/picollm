@@ -15,10 +15,6 @@ on:
       - '!demo/web/README.md'
       - '.github/workflows/web-demos.yml'
 
-defaults:
-  run:
-    working-directory: demo/web
-
 jobs:
   build-completion-demo:
     runs-on: ${{ matrix.machine }}
@@ -32,6 +28,7 @@ jobs:
 
     - name: Install dependencies
       run: yarn install
+      working-directory: demo/web/completion
 
   build-chat-demo:
     runs-on: ${{ matrix.machine }}
@@ -45,3 +42,4 @@ jobs:
 
     - name: Install dependencies
       run: yarn install
+      working-directory: demo/web/chat

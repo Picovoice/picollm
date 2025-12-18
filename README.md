@@ -467,6 +467,11 @@ pv_picollm_delete(pllm);
 
 ## Releases
 
+### v2.0.0 - December 18, 2025
+
+- Improved engine performance
+- Improved support for running on GPU or multiple CPU cores
+
 ### v1.3.0 - March 14th, 2025
 
 - Performance improvements

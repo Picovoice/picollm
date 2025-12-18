@@ -45,15 +45,6 @@ jobs:
     - name: Package restore
       run: dotnet restore
 
-    # *********** REMOVE AFTER RELEASE **********************
-    - name: Pack binding for local ref
-      run: dotnet pack -c Release
-      working-directory: binding/dotnet
-
-    - name: Add binding to demo
-      run: dotnet add package -s ../../../binding/dotnet/PicoLLM/bin/Release PicoLLM
-    # ******************************************************
-
     - name: Build completion demo
       run: dotnet build -c CompletionDemo.Release
 

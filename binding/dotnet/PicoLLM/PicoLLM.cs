@@ -227,13 +227,13 @@ namespace Pv
         private IntPtr _libraryPointer = IntPtr.Zero;
 
         private delegate void PicoLLMStreamCallbackDelegate(IntPtr token, IntPtr userData);
-        private PicoLLMStreamCallbackDelegate _streamCallbackDelegate;
+        private readonly PicoLLMStreamCallbackDelegate _streamCallbackDelegate;
         private Action<string> _streamCallback;
 
         static PicoLLM()
         {
 
-#if NETCOREAPP3_0_OR_GREATER
+#if NET6_0_OR_GREATER
 
             NativeLibrary.SetDllImportResolver(typeof(PicoLLM).Assembly, ImportResolver);
 
@@ -241,7 +241,7 @@ namespace Pv
 
         }
 
-#if NETCOREAPP3_0_OR_GREATER
+#if NET6_0_OR_GREATER
 
         private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {

@@ -35,36 +35,19 @@ jobs:
     env:
       ACCESS_KEY: ${{secrets.PV_VALID_ACCESS_KEY}}
       MODEL_PATH: ../../../../phi2-290.pllm
-      DEVICE: ${{matrix.xpu}}
+      DEVICE: ${{matrix.device}}
 
     strategy:
       fail-fast: false
       matrix:
-        xpu: [ cpu ]
-        dotnet:
-          - binding-framework: net8.0
-            test-framework: net8.0
+        device: [ cpu ]
         machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-linux, pv-ios, pv-windows, pv-windows-arm64 ]
         include:
-          - xpu: gpu
-            dotnet:
-              binding-framework: net8.0
-              test-framework: net8.0
+          - device: gpu
             machine: pv-windows
-          - dotnet:
-              binding-framework: netstandard2.0
-              test-framework: netcoreapp2.1
-            xpu: cpu
-            machine: pv-windows
-          - xpu: gpu
-            dotnet:
-              binding-framework: net8.0
-              test-framework: net8.0
+          - device: gpu
             machine: pv-linux
-          - xpu: gpu
-            dotnet:
-              binding-framework: net8.0
-              test-framework: net8.0
+          - device: gpu
             machine: pv-windows-igpu
 
 
@@ -76,7 +59,9 @@ jobs:
       working-directory: binding/dotnet
 
     - name: Build binding
-      run: dotnet build PicoLLM/PicoLLM.csproj --framework ${{ matrix.dotnet.binding-framework }}
+      run: dotnet build PicoLLM/PicoLLM.csproj
 
     - name: Test
-      run: dotnet test --framework ${{ matrix.dotnet.test-framework }} -v n
+      run: dotnet test -v n
+      env:
+        DOTNET_ROLL_FORWARD: LatestMajor

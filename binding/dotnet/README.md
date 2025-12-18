@@ -19,21 +19,19 @@ models. picoLLM Inference Engine is:
 
 ## Compatibility
 
-Platform compatible with .NET Framework 4.6.1+:
-
-- Windows (x86_64)
-
-Platforms compatible with .NET Core 2.0+:
+Platforms compatible with .NET Standard 2.0+:
 
 - macOS (x86_64)
 - Windows (x86_64)
 
-Platform compatible with .NET 6.0+:
+Platforms compatible with .NET 6.0+:
 
-- Raspberry Pi (4 and 5)
 - Linux (x86_64)
-- macOS (arm64)
-- Windows (arm64)
+- macOS (x86_64, arm64)
+- Windows (x86_64, arm64)
+- Raspberry Pi:
+    - 4 (32 and 64 bit)
+    - 5 (32 and 64 bit)
 
 ## Installation
 

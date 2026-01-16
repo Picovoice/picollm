@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -195,7 +195,7 @@
 			);
 			mainGroup = 1E7744A727CD9D7E00491D0B;
 			packageReferences = (
-				5AFE2D112F19BB4000AE0D93 /* XCLocalSwiftPackageReference "../../../../picollm" */,
+				074C41EE2EF3844900FEC19E /* XCRemoteSwiftPackageReference "picollm" */,
 			);
 			productRefGroup = 1E7744B127CD9D7E00491D0B /* Products */;
 			projectDirPath = "";
@@ -555,10 +555,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		5AFE2D112F19BB4000AE0D93 /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../../../picollm;
-		};
 		E1E013772D160CDE00DB0C2F /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../../picollm;

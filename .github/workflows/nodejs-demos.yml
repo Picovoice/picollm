@@ -42,6 +42,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+# REMOVE AFTER RELEASE
+    - name: Install binding
+      run: yarn install && yarn build
+      working-directory: binding/nodejs
+# REMOVE AFTER RELEASE
+
     - name: Install dependencies
       run: yarn install
 

@@ -52,15 +52,6 @@ jobs:
         .venv\Scripts\activate
         echo PATH=$PATH >> $GITHUB_ENV
 
-   # ************** REMOVE AFTER RELEASE ********************
-    - name: Build binding
-      run: |
-        python3 -m pip install wheel setuptools
-        python3 setup.py sdist bdist_wheel
-        python3 -m pip install --force-reinstall dist/picollm-2.0.1-py3-none-any.whl
-      working-directory: binding/python
-    # ********************************************************
-
     - name: Install Python dependencies
       run: python3 -m pip install -r requirements.txt --force-reinstall
 

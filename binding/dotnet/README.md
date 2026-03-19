@@ -13,10 +13,6 @@ models. picoLLM Inference Engine is:
 - Runs on CPU and GPU
 - Free for open-weight models
 
-## Requirements
-
-- [.NET 8.0](https://dotnet.microsoft.com/download)
-
 ## Compatibility
 
 Platforms compatible with .NET Standard 2.0+:

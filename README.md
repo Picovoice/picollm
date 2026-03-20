@@ -140,11 +140,9 @@ picoLLM Inference Engine supports the following open-weight models. The models a
 
 ## AccessKey
 
-AccessKey is your authentication and authorization token for deploying Picovoice SDKs, including picoLLM. Anyone who is
-using Picovoice needs to have a valid AccessKey. You must keep your AccessKey secret. You would need internet
-connectivity to validate your AccessKey with Picovoice license servers even though the LLM inference is running 100%
-offline and completely free for open-weight models. Everyone who signs up for
-[Picovoice Console](https://console.picovoice.ai/) receives a unique AccessKey.
+AccessKey is your authentication and authorization token for deploying Picovoice SDKs, including picoLLM. Anyone who is using Picovoice needs to have a valid AccessKey. You must keep your AccessKey secret. You would need internet connectivity to validate your AccessKey with Picovoice license servers, even though the LLM inference is running 100% offline.
+
+AccessKey also verifies that your usage is within the limits of your account. You can see your usage limits and real-time usage on your [Picovoice Console](https://console.picovoice.ai/signup) Profile. To continue using Picovoice after your trial or renew and adjust your usage limits, please reach out to our [Enterprise Sales Team](https://picovoice.ai/contact/) or your existing Picovoice contact.
 
 ## Demos
 

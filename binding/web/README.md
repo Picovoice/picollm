@@ -53,9 +53,16 @@ npm install --save @picovoice/picollm-web
 picoLLM Inference Engine on Web supports the following open-weight models. The models are on
 [Picovoice Console](https://console.picovoice.ai/).
 
+- DeepSeek-OCR-2
+  - `deepseek-ocr-2`
+- EmbeddingGemma
+  - `embeddinggemma-300m`
 - Gemma
   - `gemma-2b`
   - `gemma-2b-it`
+- Gemma3
+  - `gemma-3-270m`
+  - `gemma-3-270m-it`
 - Llama-2
   - `llama-2-7b`
   - `llama-2-7b-chat`
@@ -75,6 +82,8 @@ picoLLM Inference Engine on Web supports the following open-weight models. The m
   - `phi3`
 - Phi-3.5
   - `phi3.5`
+- Qwen3-VL
+  - `qwen3-vl-2b-it`
 
 **NOTE**: Only Gemma, Phi-2, and Phi-3 models have been tested on multiple browsers across different platforms.
 The rest of the models depend on the user's system in order to run properly.
@@ -146,7 +155,7 @@ or if the model file is too big (2GB or larger) consider using chunks:
 ```typescript
 const modelFile = [
   new Blob([new Uint8Array(/* model bytes part 1 */)]),
-  new Blob([new Uint8Array(/* model bytes part 2 */)]), 
+  new Blob([new Uint8Array(/* model bytes part 2 */)]),
   ... // add more parts if needed
 ];
 ```
@@ -154,8 +163,8 @@ const modelFile = [
 #### picoLLM Model
 
 `picoLLM` saves and caches your parameter model file (`.pllm`) in IndexedDB to be
-used by Web Assembly. Use a different `cacheFilePath` variable to hold and cache 
-multiple model values and set the `cacheFileOverwrite` value to true to force 
+used by Web Assembly. Use a different `cacheFilePath` variable to hold and cache
+multiple model values and set the `cacheFileOverwrite` value to true to force
 re-save the model file. If the model file changes, `cacheFileVersion` should be
 incremented to force the cached models to be updated. Use `numFetchRetries` to
 change the number of fetch retry attempts for the model file.
@@ -163,7 +172,7 @@ change the number of fetch retry attempts for the model file.
 ```typescript
 const picoLLMModel = {
   modelFile: modelFile, // Based on the sections before,
-  
+
   // Optional
   cacheFilePath: 'custom_model',
   cacheFileOverwrite: true,
@@ -214,7 +223,7 @@ print(res.completion)
 picoLLM.interrupt();
 ```
 
-This will stop text generation and if it was properly interrupted, it will set `res.completion.endpoint` 
+This will stop text generation and if it was properly interrupted, it will set `res.completion.endpoint`
 as an interrupted state.
 
 ### Clean Up

@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Picovoice Inc.
+# Copyright 2024-2026 Picovoice Inc.
 #
 # You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 # file accompanying this source.
@@ -12,6 +12,7 @@
 import os
 import platform
 import subprocess
+
 from typing import Tuple
 
 
@@ -60,8 +61,10 @@ def _pv_platform() -> Tuple[str, str]:
 _PV_SYSTEM, _PV_MACHINE = _pv_platform()
 
 _RASPBERRY_PI_MACHINES = {
+    "cortex-a53",
     "cortex-a72",
     "cortex-a76",
+    "cortex-a53-aarch64",
     "cortex-a72-aarch64",
     "cortex-a76-aarch64"
 }

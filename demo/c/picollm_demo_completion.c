@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
     file accompanying this source.
@@ -28,6 +28,9 @@
 #include <windows.h>
 
 #endif
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include "pv_picollm.h"
 
@@ -128,7 +131,7 @@ static void usage(const char *program) {
             "Usage: %s -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH "
             "[-y DEVICE] [-s STOP_PHRASES] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES] "
             "[-r PRESENCE_PENALTY] [-f FREQUENCY_PENALTY] "
-            "[-o TOP_P] [-t TEMPERATURE] [-e SEED] [-v] [-h] -p PROMPT\n"
+            "[-o TOP_P] [-t TEMPERATURE] [-e SEED] [-v] [-h] [-i IMAGE] -p PROMPT\n"
             "-v: enable verbose output\n"
             "-h: show available devices\n",
             program);
@@ -148,7 +151,7 @@ static const char *pv_picollm_endpoint_to_string(pv_picollm_endpoint_t x) {
 static int32_t num_tokens = -1;
 struct timeval tic;
 
-static void progress_callback(const char *token, void *context) {
+static void completion_stream_callback(const char *token, void *context) {
     (void) context;
     if (!is_interrupt) {
         fprintf(stdout, "%s", token);
@@ -160,8 +163,31 @@ static void progress_callback(const char *token, void *context) {
     }
 }
 
+static void prompt_progress_callback(float progress, void *context) {
+    (void) context;
+
+    const int32_t BAR_WIDTH = 50;
+
+    int32_t filled_len = (int32_t)((progress / 100.0f) * (float) BAR_WIDTH);
+
+    fprintf(stdout, ("\r["));
+    for (int32_t i = 0; i < BAR_WIDTH; i++) {
+        if (i < filled_len) {
+            fprintf(stdout, "#");
+        } else {
+            fprintf(stdout, " ");
+        }
+    }
+    fprintf(stdout, "] %.1f%%", progress);
+    fflush(stdout);
+
+    if (progress >= 100.0f) {
+        printf("\n");
+    }
+}
+
 int picovoice_main(int argc, char **argv) {
-    const char *SHORT_OPTIONS = "a:l:m:y:c:s:e:r:f:o:t:n:c:p:vh";
+    const char *SHORT_OPTIONS = "a:l:m:y:c:s:e:r:f:o:t:n:c:i:p:vh";
 
     const char *access_key = NULL;
     const char *model_path = NULL;
@@ -178,6 +204,7 @@ int picovoice_main(int argc, char **argv) {
     int32_t num_top_choices = 0;
     bool verbose = false;
     bool show_devices = false;
+    const char *image_path = NULL;
     char *prompt = NULL;
 
     int opt;
@@ -233,6 +260,9 @@ int picovoice_main(int argc, char **argv) {
                 break;
             case 'c':
                 num_top_choices = (int32_t) strtol(optarg, NULL, 10);
+                break;
+            case 'i':
+                image_path = optarg;
                 break;
             case 'p': {
                 size_t prompt_length = 0;
@@ -331,6 +361,35 @@ int picovoice_main(int argc, char **argv) {
             char **) = load_symbol(dl_handle, "pv_picollm_generate");
     if (!pv_picollm_generate_func) {
         print_dl_error("failed to load `pv_picollm_generate`");
+        exit(EXIT_FAILURE);
+    }
+
+    pv_status_t (*pv_picollm_generate_with_image_func)(
+            pv_picollm_t *,
+            const char *,
+            int32_t,
+            int32_t,
+            const uint8_t *,
+            int32_t,
+            const char *const *,
+            int32_t,
+            int32_t,
+            float,
+            float,
+            float,
+            float,
+            int32_t,
+            pv_picollm_stream_callback_t,
+            void *,
+            pv_picollm_progress_callback_t,
+            void *,
+            pv_picollm_usage_t *,
+            pv_picollm_endpoint_t *,
+            pv_picollm_completion_token_t **,
+            int32_t *,
+            char **) = load_symbol(dl_handle, "pv_picollm_generate_with_image");
+    if (!pv_picollm_generate_with_image_func) {
+        print_dl_error("failed to load `pv_picollm_generate_with_image`");
         exit(EXIT_FAILURE);
     }
 
@@ -447,6 +506,23 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    int32_t image_width = -1;
+    int32_t image_height = -1;
+    uint8_t *image = NULL;
+    if (image_path) {
+        int32_t original_channels = -1;
+        image = stbi_load(
+                image_path,
+                &image_width,
+                &image_height,
+                &original_channels,
+                3);
+        if (image == NULL) {
+            fprintf(stderr, "Failed to load image: %s\n", stbi_failure_reason());
+            exit(EXIT_FAILURE);
+        }
+    }
+
     const int32_t max_top_choices = pv_picollm_max_top_choices_func();
     if (num_top_choices > max_top_choices) {
         fprintf(
@@ -524,25 +600,54 @@ int picovoice_main(int argc, char **argv) {
     int32_t num_completion_tokens = 0;
     pv_picollm_completion_token_t *completion_tokens = NULL;
     char *completion = NULL;
-    status = pv_picollm_generate_func(
-            picollm,
-            prompt,
-            max_output_tokens,
-            stop_phrases,
-            num_stop_phrases,
-            seed,
-            presence_penalty,
-            frequency_penalty,
-            temperature,
-            top_p,
-            num_top_choices,
-            progress_callback,
-            NULL,
-            &usage,
-            &endpoint,
-            &completion_tokens,
-            &num_completion_tokens,
-            &completion);
+    if (image) {
+        status = pv_picollm_generate_with_image_func(
+                picollm,
+                prompt,
+                image_width,
+                image_height,
+                image,
+                max_output_tokens,
+                stop_phrases,
+                num_stop_phrases,
+                seed,
+                presence_penalty,
+                frequency_penalty,
+                temperature,
+                top_p,
+                num_top_choices,
+                completion_stream_callback,
+                NULL,
+                prompt_progress_callback,
+                NULL,
+                &usage,
+                &endpoint,
+                &completion_tokens,
+                &num_completion_tokens,
+                &completion);
+        stbi_image_free(image);
+    } else {
+        status = pv_picollm_generate_func(
+                picollm,
+                prompt,
+                max_output_tokens,
+                stop_phrases,
+                num_stop_phrases,
+                seed,
+                presence_penalty,
+                frequency_penalty,
+                temperature,
+                top_p,
+                num_top_choices,
+                completion_stream_callback,
+                NULL,
+                &usage,
+                &endpoint,
+                &completion_tokens,
+                &num_completion_tokens,
+                &completion);
+    }
+
     free(prompt);
     free(stop_phrases);
     if (status != PV_STATUS_SUCCESS) {

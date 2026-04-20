@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Picovoice Inc.
+# Copyright 2024-2026 Picovoice Inc.
 #
 # You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 # file accompanying this source.
@@ -23,9 +23,10 @@ class PicoLLMCTestCase(unittest.TestCase):
     def setUpClass(cls):
         cls._access_key = sys.argv[1]
         cls._model_path = sys.argv[2]
-        cls._device = sys.argv[3]
+        cls._vlm_model_path = sys.argv[3]
+        cls._device = sys.argv[4]
 
-    def test_picollm(self):
+    def test_picollm_generate(self):
         args = [
             os.path.join(os.path.dirname(__file__), "../build/picollm_demo_completion"),
             "-a", self._access_key,
@@ -33,6 +34,7 @@ class PicoLLMCTestCase(unittest.TestCase):
             "-m", self._model_path,
             "-y", self._device,
             "-p", "Instruct: Where is the capital city of British Columbia?\nOutput:",
+            "-e", "777"
         ]
         process = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
@@ -42,9 +44,29 @@ class PicoLLMCTestCase(unittest.TestCase):
         if self._device != "gpu":
             self.assertIn("British Columbia", completion)
 
+    def test_picollm_generate_with_image(self):
+        args = [
+            os.path.join(os.path.dirname(__file__), "../build/picollm_demo_completion"),
+            "-a", self._access_key,
+            "-l", pv_library_path("../../.."),
+            "-m", self._vlm_model_path,
+            "-y", self._device,
+            "-i", os.path.join(os.path.dirname(__file__), "../../../resources/.test/images/test_image.png"),
+            "-p", "Describe this image.",
+            "-n", "7",
+            "-e", "777"
+        ]
+        process = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        self.assertEqual(process.poll(), 0)
+        self.assertEqual(stderr.decode('utf-8'), '')
+        completion = stdout.decode('utf-8').strip()
+        if self._device != "gpu":
+            self.assertIn("This image is a screenshot", completion)
+
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print("usage: test_picollm.py ${AccessKey} ${ModelFile} ${device}")
+    if len(sys.argv) != 5:
+        print("usage: test_picollm.py ${AccessKey} ${ModelFile} ${VlmModelFile} ${Device}")
         exit(1)
     unittest.main(argv=sys.argv[:1])

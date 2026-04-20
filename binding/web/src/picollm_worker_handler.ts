@@ -17,10 +17,15 @@ import {
   PicoLLMWorkerFailureResponse,
   PicoLLMWorkerForwardRequest,
   PicoLLMWorkerGenerateRequest,
+  PicoLLMWorkerGenerateEmbeddingsRequest,
+  PicoLLMWorkerGenerateOCRRequest,
   PicoLLMWorkerInterruptRequest,
   PicoLLMWorkerInitRequest,
   PicoLLMWorkerRequest,
   PicoLLMWorkerTokenizeRequest,
+  PicoLLMImage,
+  PicoLLMGenerateWithImageOptions,
+  PicoLLMWorkerGenerateWithImageRequest,
   PvStatus,
 } from './types';
 import { PicoLLMError } from './picollm_errors';
@@ -31,6 +36,13 @@ const streamingCallback = (token: string): void => {
   self.postMessage({
     command: 'stream',
     token: token,
+  });
+};
+
+const progressCallback = (progress: number): void => {
+  self.postMessage({
+    command: 'progress',
+    progress: progress,
   });
 };
 
@@ -92,6 +104,49 @@ const generateRequest = async (
   }
   request.options.streamCallback = streamingCallback;
   const completion = await picoLLM.generate(request.prompt, request.options);
+  return {
+    command: 'ok',
+    completion,
+  };
+};
+
+const generateWithImageRequest = async (
+  request: PicoLLMWorkerGenerateWithImageRequest
+): Promise<any> => {
+  if (picoLLM === null) {
+    return notInitializedError;
+  }
+  request.options.streamCallback = streamingCallback;
+  request.options.progressCallback = progressCallback;
+  const completion = await picoLLM.generateWithImage(request.prompt, request.image, request.options);
+  return {
+    command: 'ok',
+    completion,
+  };
+};
+
+const generateEmbeddingsRequest = async (
+  request: PicoLLMWorkerGenerateEmbeddingsRequest
+): Promise<any> => {
+  if (picoLLM === null) {
+    return notInitializedError;
+  }
+  const embeddings = await picoLLM.generateEmbeddings(request.prompt);
+  return {
+    command: 'ok',
+    embeddings,
+  };
+};
+
+const generateOCRRequest = async (
+  request: PicoLLMWorkerGenerateOCRRequest
+): Promise<any> => {
+  if (picoLLM === null) {
+    return notInitializedError;
+  }
+  request.options.streamCallback = streamingCallback;
+  request.options.progressCallback = progressCallback;
+  const completion = await picoLLM.generateOCR(request.image, request.options);
   return {
     command: 'ok',
     completion,
@@ -168,6 +223,15 @@ self.onmessage = async function (
         break;
       case 'generate':
         self.postMessage(await generateRequest(event.data));
+        break;
+      case 'generateWithImage':
+        self.postMessage(await generateWithImageRequest(event.data));
+        break;
+      case 'generateEmbeddings':
+        self.postMessage(await generateEmbeddingsRequest(event.data));
+        break;
+      case 'generateOCR':
+        self.postMessage(await generateOCRRequest(event.data));
         break;
       case 'interrupt':
         await interruptRequest();

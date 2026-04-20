@@ -1,5 +1,5 @@
 // @ts-ignore
-import { modelName, modelFiles } from '../fixtures/model_data.json';
+import modelData from '../fixtures/model_data.json';
 import { PicoLLM, PicoLLMWorker } from '../../';
 
 let chunks: Blob[];
@@ -26,9 +26,9 @@ Cypress.Commands.add('readFiles', (files: string[]) => {
   cy.then(() => chunks);
 });
 
-Cypress.Commands.add('loadModel', () => {
+Cypress.Commands.add('loadModel', (modelName: string) => {
   if (!chunks) {
-    return cy.readFiles(modelFiles).then(c => {
+    return cy.readFiles(modelData[modelName].modelFiles).then(c => {
       chunks = c;
       return c;
     });
@@ -36,10 +36,10 @@ Cypress.Commands.add('loadModel', () => {
   return cy.wrap(chunks);
 });
 
-Cypress.Commands.add('initPicoLLM', (accessKey: string, worker: boolean) => {
+Cypress.Commands.add('initPicoLLM', (modelName: string, accessKey: string, worker: boolean) => {
   if (!picoLLM) {
-    cy.loadModel().then(async c => {
-      const model = { modelFile: c };
+    cy.loadModel(modelName).then(async c => {
+      const model = { cacheFilePath: modelName, modelFile: c };
       if (worker) {
         picoLLM = await PicoLLMWorker.create(accessKey, model);
       } else {
@@ -57,6 +57,9 @@ Cypress.Commands.add('deletePicoLLM', () => {
       await picoLLM.release();
       // @ts-ignore
       picoLLM = undefined;
+
+      // @ts-ignore
+      chunks = undefined
     });
   }
 });

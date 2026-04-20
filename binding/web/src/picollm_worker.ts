@@ -15,14 +15,22 @@ import { loadModel } from './utils';
 import {
   PicoLLMModel,
   PicoLLMCompletion,
+  PicoLLMEmbeddingsCompletion,
+  PicoLLMOCRCompletion,
   PicoLLMInitOptions,
   PicoLLMGenerateOptions,
   PicoLLMWorkerInitResponse,
   PicoLLMWorkerGenerateResponse,
+  PicoLLMWorkerGenerateWithImageResponse,
+  PicoLLMWorkerGenerateEmbeddingsResponse,
+  PicoLLMWorkerGenerateOCRResponse,
   PicoLLMWorkerTokenizeResponse,
   PicoLLMWorkerForwardResponse,
   PicoLLMWorkerResetResponse,
   PicoLLMWorkerReleaseResponse,
+  PicoLLMImage,
+  PicoLLMGenerateWithImageOptions,
+  PicoLLMGenerateOCROptions,
   PvStatus,
 } from './types';
 
@@ -263,6 +271,215 @@ export class PicoLLMWorker {
         temperature,
         topP,
         numTopChoices,
+      }
+    });
+
+    return returnPromise;
+  }
+
+  /**
+   * Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
+   *
+   * For use with vision models only.
+   *
+   * @param prompt Text prompt.
+   * @param image Image prompt.
+   * @param image.width Width of the image in pixels.
+   * @param image.height Height of the image in pixels.
+   * @param image.data Image pixel data in 8-bit, RGB format.
+   * @param options Optional generate configuration arguments, see PicoLLMGenerateWithImageOptions for details.
+   * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
+   * to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be
+   * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
+   * @param options.stopPhrases The generation process stops when it encounters any of these phrases in the completion. The
+   * already generated completion, including the encountered stop phrase, will be returned. The `endpoint` parameter
+   * in `PicoLLMCompletion` output will be `PicoLLMEndpoint.STOP_PHRASE_ENCOUNTERED`. Set to `undefined` to turn off this
+   * feature.
+   * @param options.seed The internal random number generator uses it as its seed if set to a positive integer value.
+   * Seeding enforces deterministic outputs.  Set to `undefined` for randomized outputs for a given prompt.
+   * @param options.presencePenalty It penalizes logits already appearing in the partial completion if set to a positive
+   * value. If set to `0` or `undefined`, it has no effect.
+   * @param options.frequencyPenalty If set to a positive floating-point value, it penalizes logits proportional to the
+   * frequency of their appearance in the partial completion. If set to `0` or `undefined`, it has no effect.
+   * @param options.temperature Sampling temperature. Temperature is a non-negative floating-point value that controls the
+   * randomness of the sampler. A higher temperature smoothens the samplers' output, increasing the randomness. In
+   * contrast, a lower temperature creates a narrower distribution and reduces variability. Setting it to `0` or
+   * `undefined` selects the maximum logit during sampling.
+   * @param options.topP A positive floating-point number within 0, and 1. It restricts the sampler's choices to
+   * high-probability logits that form the `topP` portion of the probability mass. Hence, it avoids randomly
+   * selecting unlikely logits. A value of `1` or `undefined` enables the sampler to pick any token with non-zero
+   * probability turning off the feature.
+   * @param options.numTopChoices If set to a positive value, picoLLM returns the list of the highest probability tokens
+   * for any generated token. Set to `0` to turn off the feature. The maximum number of top choices is `.maxTopChoices`.
+   * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
+   * completion string becomes available.
+   * @param options.progressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
+   * progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and
+   * completion tokens are now being generated.
+   */
+  public async generateWithImage(
+    prompt: string,
+    image: PicoLLMImage,
+    options: PicoLLMGenerateWithImageOptions = {}
+  ): Promise<PicoLLMCompletion> {
+    const {
+      completionTokenLimit = -1,
+      stopPhrases = [],
+      seed = -1,
+      presencePenalty = 0,
+      frequencyPenalty = 0,
+      temperature = 0,
+      topP = 1,
+      numTopChoices = 0,
+      streamCallback,
+      progressCallback
+    } = options;
+
+    const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
+      this._worker.onmessage = (event: MessageEvent<PicoLLMWorkerGenerateWithImageResponse>): void => {
+        switch (event.data.command) {
+          case 'ok':
+            resolve(event.data.completion);
+            break;
+          case 'stream':
+            if (streamCallback) {
+              streamCallback(event.data.token);
+            }
+            break;
+          case 'progress':
+            if (progressCallback) {
+              progressCallback(event.data.progress);
+            }
+            break;
+          case 'failed':
+          case 'error':
+            const error = pvStatusToException(event.data.status, event.data.shortMessage, event.data.messageStack);
+            reject(error);
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${event.data.command}`));
+        }
+      };
+    });
+
+    this._worker.postMessage({
+      command: 'generateWithImage',
+      prompt,
+      image,
+      options: {
+        completionTokenLimit,
+        stopPhrases,
+        seed,
+        presencePenalty,
+        frequencyPenalty,
+        temperature,
+        topP,
+        numTopChoices,
+      }
+    });
+
+    return returnPromise;
+  }
+
+  /**
+   * Generates numerical vector representations of the input text prompt.
+   *
+   * For use with embedding models only.
+   *
+   * @param prompt Text prompt.
+   */
+  public async generateEmbeddings(
+    prompt: string,
+  ): Promise<PicoLLMEmbeddingsCompletion> {
+    const returnPromise: Promise<PicoLLMEmbeddingsCompletion> = new Promise((resolve, reject) => {
+      this._worker.onmessage = (event: MessageEvent<PicoLLMWorkerGenerateEmbeddingsResponse>): void => {
+        switch (event.data.command) {
+          case 'ok':
+            resolve(event.data.embeddings);
+            break;
+          case 'failed':
+          case 'error':
+            const error = pvStatusToException(event.data.status, event.data.shortMessage, event.data.messageStack);
+            reject(error);
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${event.data.command}`));
+        }
+      };
+    });
+
+    this._worker.postMessage({
+      command: 'generateEmbeddings',
+      prompt
+    });
+
+    return returnPromise;
+  }
+
+  /**
+   * Generates a completion text representing text found in the given image.
+   *
+   * For use with OCR (Optical Character Recognition) models only.
+   *
+   * @param image Image prompt.
+   * @param image.width Width of the image in pixels.
+   * @param image.height Height of the image in pixels.
+   * @param image.data Image pixel data in 8-bit, RGB format.
+   * @param options Optional generate configuration arguments, see PicoLLMGenerateOCROptions for details.
+   * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
+   * to reaching this limit, the `.endpoint` parameter in `PicoLLMOCRCompletion` output will be
+   * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
+   * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
+   * completion string becomes available.
+   * @param options.progressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
+   * progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and
+   * completion tokens are now being generated.
+   */
+  public async generateOCR(
+    image: PicoLLMImage,
+    options: PicoLLMGenerateOCROptions = {}
+  ): Promise<PicoLLMOCRCompletion> {
+    const {
+      completionTokenLimit = -1,
+      streamCallback,
+      progressCallback
+    } = options;
+
+    const returnPromise: Promise<PicoLLMOCRCompletion> = new Promise((resolve, reject) => {
+      this._worker.onmessage = (event: MessageEvent<PicoLLMWorkerGenerateOCRResponse>): void => {
+        switch (event.data.command) {
+          case 'ok':
+            resolve(event.data.completion);
+            break;
+          case 'stream':
+            if (streamCallback) {
+              streamCallback(event.data.token);
+            }
+            break;
+          case 'progress':
+            if (progressCallback) {
+              progressCallback(event.data.progress);
+            }
+            break;
+          case 'failed':
+          case 'error':
+            const error = pvStatusToException(event.data.status, event.data.shortMessage, event.data.messageStack);
+            reject(error);
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${event.data.command}`));
+        }
+      };
+    });
+
+    this._worker.postMessage({
+      command: 'generateOCR',
+      image,
+      options: {
+        completionTokenLimit,
       }
     });
 

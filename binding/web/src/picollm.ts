@@ -1,5 +1,5 @@
 /*
-  Copyright 2024-2025 Picovoice Inc.
+  Copyright 2024-2026 Picovoice Inc.
 
   You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
   file accompanying this source.
@@ -34,6 +34,11 @@ import {
   PicoLLMEndpoint,
   PicoLLMCompletionToken,
   PicoLLMToken,
+  PicoLLMImage,
+  PicoLLMGenerateWithImageOptions,
+  PicoLLMEmbeddingsCompletion,
+  PicoLLMGenerateOCROptions,
+  PicoLLMOCRCompletion,
 } from './types';
 
 import * as PicoLLMErrors from './picollm_errors';
@@ -73,11 +78,56 @@ type pv_picollm_generate_type = (
   num_completion_tokens: number,
   completion: number
 ) => number;
+type pv_picollm_generate_with_image_type = (
+  object: number,
+  prompt: number,
+  image_width: number,
+  image_height: number,
+  image: number,
+  completionTokenLimit: number,
+  stopPhrases: number,
+  numStopPhrases: number,
+  seed: number,
+  presencePenalty: number,
+  frequencyPenalty: number,
+  temperature: number,
+  topP: number,
+  num_top_choices: number,
+  stream_callback: number,
+  stream_callback_context: number,
+  prompt_progress_callback: number,
+  prompt_progress_callback_context: number,
+  usage: number,
+  endpoint: number,
+  completion_tokens: number,
+  num_completion_tokens: number,
+  completion: number
+) => number;
+type pv_picollm_interrupt_type = (object: number) => number;
+type pv_picollm_generate_embeddings_type = (
+  object: number,
+  prompt: number,
+  num_embeddings: number,
+  embeddings: number
+) => number;
+type pv_picollm_generate_ocr_type = (
+  object: number,
+  image_width: number,
+  image_height: number,
+  image: number,
+  output_token_limit: number,
+  stream_callback: number,
+  stream_callback_context: number,
+  prompt_progress_callback: number,
+  prompt_progress_callback_context: number,
+  endpoint: number,
+  text: number
+) => number;
+type pv_picollm_delete_embeddings_type = (embeddings: number) => void;
 type pv_picollm_delete_completion_tokens_type = (
   object: number,
   numCompletionTokens: number
 ) => void;
-type pv_picollm_interrupt_type = (object: number) => number;
 type pv_picollm_delete_completion_type = (completion: number) => void;
 type pv_picollm_tokenize_type = (
   object: number,
@@ -128,6 +178,7 @@ type PicoLLMModule = EmscriptenModule & {
   _pv_picollm_init: pv_picollm_init_type;
   _pv_picollm_interrupt: pv_picollm_interrupt_type;
   _pv_picollm_delete: pv_picollm_delete_type;
+  _pv_picollm_delete_embeddings: pv_picollm_delete_embeddings_type;
   _pv_picollm_delete_completion_tokens: pv_picollm_delete_completion_tokens_type;
   _pv_picollm_delete_completion: pv_picollm_delete_completion_type;
   _pv_picollm_delete_tokens: pv_picollm_delete_tokens_type;
@@ -157,6 +208,9 @@ type PicoLLMWasmOutput = {
   module: PicoLLMModule;
 
   pv_picollm_generate: pv_picollm_generate_type,
+  pv_picollm_generate_with_image: pv_picollm_generate_with_image_type,
+  pv_picollm_generate_embeddings: pv_picollm_generate_embeddings_type,
+  pv_picollm_generate_ocr: pv_picollm_generate_ocr_type,
   pv_picollm_forward: pv_picollm_forward_type,
 
   contextLength: number;
@@ -198,6 +252,30 @@ class PicoLLMStreamCallback {
   };
 }
 
+class PicoLLMProgressCallback {
+  private readonly _module: PicoLLMModule;
+
+  private _userCallback?: (progress: number) => void;
+
+  public constructor(module: PicoLLMModule) {
+    this._module = module;
+  }
+
+  public setUserCallback(userCallback?: (progress: number) => void): void {
+    this._userCallback = userCallback;
+  }
+
+  public progressCallbackWasm = (progress: number): void => {
+    if (this._module === undefined) {
+      return;
+    }
+
+    if (this._userCallback) {
+      this._userCallback(progress);
+    }
+  };
+}
+
 
 const DEFAULT_DEVICE = 'best';
 
@@ -207,6 +285,9 @@ const DEFAULT_DEVICE = 'best';
 export class PicoLLM {
   private readonly _module: PicoLLMModule;
   private readonly _pv_picollm_generate: pv_picollm_generate_type;
+  private readonly _pv_picollm_generate_with_image: pv_picollm_generate_with_image_type;
+  private readonly _pv_picollm_generate_embeddings: pv_picollm_generate_embeddings_type;
+  private readonly _pv_picollm_generate_ocr: pv_picollm_generate_ocr_type;
   private readonly _pv_picollm_forward: pv_picollm_forward_type;
 
   private readonly _functionMutex: Mutex;
@@ -221,6 +302,8 @@ export class PicoLLM {
   private readonly _version: string;
   private readonly _streamCallback: PicoLLMStreamCallback;
   private readonly _streamCallbackFnPointer: number;
+  private readonly _progressCallback: PicoLLMProgressCallback;
+  private readonly _progressCallbackFnPointer: number;
 
   private static _wasmPThread: string;
   private static _wasmPThreadLib: string;
@@ -232,6 +315,9 @@ export class PicoLLM {
     this._module = handleWasm.module;
 
     this._pv_picollm_generate = handleWasm.pv_picollm_generate;
+    this._pv_picollm_generate_with_image = handleWasm.pv_picollm_generate_with_image;
+    this._pv_picollm_generate_embeddings = handleWasm.pv_picollm_generate_embeddings;
+    this._pv_picollm_generate_ocr = handleWasm.pv_picollm_generate_ocr;
     this._pv_picollm_forward = handleWasm.pv_picollm_forward;
 
     this._contextLength = handleWasm.contextLength;
@@ -240,6 +326,8 @@ export class PicoLLM {
     this._version = handleWasm.version;
     this._streamCallback = new PicoLLMStreamCallback(this._module);
     this._streamCallbackFnPointer = this._module.addFunction(this._streamCallback.streamCallbackWasm, 'vii');
+    this._progressCallback = new PicoLLMProgressCallback(this._module);
+    this._progressCallbackFnPointer = this._module.addFunction(this._progressCallback.progressCallbackWasm, 'vfi');
 
     this._functionMutex = new Mutex();
 
@@ -669,6 +757,536 @@ export class PicoLLM {
   }
 
   /**
+   * Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
+   *
+   * For use with vision models only.
+   *
+   * @param prompt Text prompt.
+   * @param image Image prompt.
+   * @param image.width Width of the image in pixels.
+   * @param image.height Height of the image in pixels.
+   * @param image.data Image pixel data in 8-bit, RGB format.
+   * @param options Optional generate configuration arguments, see PicoLLMGenerateWithImageOptions for details.
+   * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
+   * to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be
+   * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
+   * @param options.stopPhrases The generation process stops when it encounters any of these phrases in the completion. The
+   * already generated completion, including the encountered stop phrase, will be returned. The `endpoint` parameter
+   * in `PicoLLMCompletion` output will be `PicoLLMEndpoint.STOP_PHRASE_ENCOUNTERED`. Set to `undefined` to turn off this
+   * feature.
+   * @param options.seed The internal random number generator uses it as its seed if set to a positive integer value.
+   * Seeding enforces deterministic outputs.  Set to `undefined` for randomized outputs for a given prompt.
+   * @param options.presencePenalty It penalizes logits already appearing in the partial completion if set to a positive
+   * value. If set to `0` or `undefined`, it has no effect.
+   * @param options.frequencyPenalty If set to a positive floating-point value, it penalizes logits proportional to the
+   * frequency of their appearance in the partial completion. If set to `0` or `undefined`, it has no effect.
+   * @param options.temperature Sampling temperature. Temperature is a non-negative floating-point value that controls the
+   * randomness of the sampler. A higher temperature smoothens the samplers' output, increasing the randomness. In
+   * contrast, a lower temperature creates a narrower distribution and reduces variability. Setting it to `0` or
+   * `undefined` selects the maximum logit during sampling.
+   * @param options.topP A positive floating-point number within 0, and 1. It restricts the sampler's choices to
+   * high-probability logits that form the `topP` portion of the probability mass. Hence, it avoids randomly
+   * selecting unlikely logits. A value of `1` or `undefined` enables the sampler to pick any token with non-zero
+   * probability turning off the feature.
+   * @param options.numTopChoices If set to a positive value, picoLLM returns the list of the highest probability tokens
+   * for any generated token. Set to `0` to turn off the feature. The maximum number of top choices is `.maxTopChoices`.
+   * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
+   * completion string becomes available.
+   * @param options.progressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
+   * progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and
+   * completion tokens are now being generated.
+   */
+  public async generateWithImage(
+    prompt: string,
+    image: PicoLLMImage,
+    options: PicoLLMGenerateWithImageOptions = {}
+  ): Promise<PicoLLMCompletion> {
+    const {
+      completionTokenLimit = -1,
+      stopPhrases = [],
+      seed = -1,
+      presencePenalty = 0,
+      frequencyPenalty = 0,
+      temperature = 0,
+      topP = 1,
+      numTopChoices = 0,
+      streamCallback,
+      progressCallback
+    } = options;
+
+    return new Promise<PicoLLMCompletion>((resolve, reject) => {
+      this._functionMutex
+        .runExclusive(async () => {
+          if (this._module === undefined) {
+            throw new PicoLLMErrors.PicoLLMInvalidStateError(
+              'Attempted to call PicoLLM generate after release.'
+            );
+          }
+
+          const encoded = new TextEncoder().encode(prompt);
+
+          const promptAddress = this._module._malloc((encoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
+          if (promptAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for prompt'
+            );
+          }
+          this._module.HEAPU8.set(encoded, promptAddress);
+          this._module.HEAPU8[promptAddress + encoded.length] = 0;
+
+          const imageAddress = this._module._malloc(image.data.length * Uint8Array.BYTES_PER_ELEMENT);
+          if (imageAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for image'
+            );
+          }
+          this._module.HEAPU8.set(image.data, imageAddress);
+
+          const stopPhrasesAddressAddress =
+            stopPhrases.length === 0
+              ? 0
+              : this._module._malloc(stopPhrases.length * Int32Array.BYTES_PER_ELEMENT);
+
+          const stopPhrasesAddressList: number[] = [];
+          for (const stopPhrase of stopPhrases) {
+            const stopPhrasesEncoded = new TextEncoder().encode(stopPhrase);
+            const stopPhraseAddress = this._module._malloc((stopPhrasesEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
+            if (stopPhraseAddress === 0) {
+              throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+                'malloc failed: Cannot allocate memory for stopPhrase'
+              );
+            }
+            this._module.HEAPU8.set(stopPhrasesEncoded, stopPhraseAddress);
+            this._module.HEAPU8[stopPhraseAddress + stopPhrasesEncoded.length] = 0;
+            stopPhrasesAddressList.push(stopPhraseAddress);
+          }
+
+          if (stopPhrasesAddressAddress > 0) {
+            this._module.HEAP32.set(
+              new Int32Array(stopPhrasesAddressList),
+              stopPhrasesAddressAddress / Int32Array.BYTES_PER_ELEMENT
+            );
+          }
+
+          const usageAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT * 2);
+          if (usageAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for usage'
+            );
+          }
+
+          const endpointAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
+          if (endpointAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for endpoint'
+            );
+          }
+
+          const numCompletionTokensAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
+          if (numCompletionTokensAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for numCompletionTokens'
+            );
+          }
+
+          const completionTokensAddressAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
+          if (completionTokensAddressAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for completionTokens'
+            );
+          }
+
+          const completionAddressAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
+          if (completionAddressAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for completion'
+            );
+          }
+
+          let streamCallbackFnPointer = 0;
+          if (streamCallback !== undefined) {
+            this._streamCallback.setUserCallback(streamCallback);
+            streamCallbackFnPointer = this._streamCallbackFnPointer;
+          }
+
+          let progressCallbackFnPointer = 0;
+          if (progressCallback !== undefined) {
+            this._progressCallback.setUserCallback(progressCallback);
+            progressCallbackFnPointer = this._progressCallbackFnPointer;
+          }
+
+          const status = await this._pv_picollm_generate_with_image(
+            this._objectAddress,
+            promptAddress,
+            image.width,
+            image.height,
+            imageAddress,
+            completionTokenLimit,
+            stopPhrasesAddressAddress,
+            stopPhrasesAddressList.length,
+            seed,
+            presencePenalty,
+            frequencyPenalty,
+            temperature,
+            topP,
+            numTopChoices,
+            streamCallbackFnPointer,
+            0,
+            progressCallbackFnPointer,
+            0,
+            usageAddress,
+            endpointAddress,
+            completionTokensAddressAddress,
+            numCompletionTokensAddress,
+            completionAddressAddress
+          );
+
+          this._module._pv_free(promptAddress);
+          this._module._pv_free(imageAddress);
+          this._module._pv_free(stopPhrasesAddressAddress);
+          for (const stopPhraseAddress of stopPhrasesAddressList) {
+            this._module._pv_free(stopPhraseAddress);
+          }
+
+          if (status !== PvStatus.SUCCESS) {
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
+              this._messageStackAddressAddressAddress,
+              this._messageStackDepthAddress,
+              this._module.HEAP32,
+              this._module.HEAPU8
+            );
+
+            throw pvStatusToException(status, 'Generate failed', messageStack);
+          }
+
+          const usage: PicoLLMUsage = {
+            promptTokens: this._module.HEAP32[usageAddress / Int32Array.BYTES_PER_ELEMENT],
+            completionTokens: this._module.HEAP32[usageAddress / Int32Array.BYTES_PER_ELEMENT + 1],
+          };
+          this._module._pv_free(usageAddress);
+
+          const endpoint: PicoLLMEndpoint = this._module.HEAP32[endpointAddress / Int32Array.BYTES_PER_ELEMENT];
+          this._module._pv_free(endpointAddress);
+
+          const numCompletionTokens = this._module.HEAP32[numCompletionTokensAddress / Int32Array.BYTES_PER_ELEMENT];
+          this._module._pv_free(numCompletionTokensAddress);
+
+          const completionTokensAddress = unsignedAddress(
+            this._module.HEAP32[completionTokensAddressAddress / Int32Array.BYTES_PER_ELEMENT]
+          );
+
+          let completionTokensPtr = completionTokensAddress;
+          const completionTokens: PicoLLMCompletionToken[] = [];
+          for (let i = 0; i < numCompletionTokens; i++) {
+            const tokenAddress = unsignedAddress(this._module.HEAP32[completionTokensPtr / Int32Array.BYTES_PER_ELEMENT]);
+            const completionToken = arrayBufferToStringAtIndex(
+              this._module.HEAPU8,
+              tokenAddress
+            );
+            completionTokensPtr += Int32Array.BYTES_PER_ELEMENT;
+
+            const completionLogProb = this._module.HEAPF32[completionTokensPtr / Float32Array.BYTES_PER_ELEMENT];
+            completionTokensPtr += Float32Array.BYTES_PER_ELEMENT;
+
+            const token: PicoLLMToken = {
+              token: completionToken,
+              logProb: completionLogProb,
+            };
+
+            const numTopChoicesReturn = this._module.HEAP32[completionTokensPtr / Int32Array.BYTES_PER_ELEMENT];
+            completionTokensPtr += Int32Array.BYTES_PER_ELEMENT;
+
+            const topChoices: PicoLLMToken[] = [];
+            let topChoicesPtr = unsignedAddress(
+              this._module.HEAP32[completionTokensPtr / Int32Array.BYTES_PER_ELEMENT]
+            );
+            for (let j = 0; j < numTopChoicesReturn; j++) {
+              const topChoiceTokenAddress = unsignedAddress(
+                this._module.HEAP32[topChoicesPtr / Int32Array.BYTES_PER_ELEMENT]
+              );
+              const topChoiceToken = arrayBufferToStringAtIndex(
+                this._module.HEAPU8,
+                topChoiceTokenAddress
+              );
+              topChoicesPtr += Int32Array.BYTES_PER_ELEMENT;
+
+              const topChoiceLogProb = this._module.HEAPF32[topChoicesPtr / Float32Array.BYTES_PER_ELEMENT];
+              topChoicesPtr += Float32Array.BYTES_PER_ELEMENT;
+
+              topChoices.push({
+                token: topChoiceToken,
+                logProb: topChoiceLogProb,
+              });
+            }
+
+            completionTokensPtr += Int32Array.BYTES_PER_ELEMENT;
+            completionTokens.push({
+              token,
+              topChoices,
+            });
+          }
+
+          this._module._pv_picollm_delete_completion_tokens(
+            completionTokensAddress,
+            numCompletionTokens
+          );
+          this._module._pv_free(completionTokensAddressAddress);
+          const completionAddress = unsignedAddress(
+            this._module.HEAP32[completionAddressAddress / Int32Array.BYTES_PER_ELEMENT]
+          );
+          const completion = arrayBufferToStringAtIndex(
+            this._module.HEAPU8,
+            completionAddress
+          );
+
+          this._module._pv_picollm_delete_completion(completionAddress);
+          this._module._pv_free(completionAddressAddress);
+          return {
+            usage,
+            endpoint,
+            completionTokens,
+            completion,
+          };
+        })
+        .then((result: PicoLLMCompletion) => {
+          resolve(result);
+        })
+        .catch((error: any) => {
+          reject(error);
+        });
+    });
+  }
+
+  /**
+   * Generates numerical vector representations of the input text prompt.
+   *
+   * For use with embedding models only.
+   *
+   * @param prompt Text prompt.
+   */
+  public async generateEmbeddings(
+    prompt: string,
+  ): Promise<PicoLLMEmbeddingsCompletion> {
+
+    return new Promise<PicoLLMEmbeddingsCompletion>((resolve, reject) => {
+      this._functionMutex
+        .runExclusive(async () => {
+          if (this._module === undefined) {
+            throw new PicoLLMErrors.PicoLLMInvalidStateError(
+              'Attempted to call PicoLLM generate after release.'
+            );
+          }
+
+          const encoded = new TextEncoder().encode(prompt);
+
+          const promptAddress = this._module._malloc((encoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
+          if (promptAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for prompt'
+            );
+          }
+          this._module.HEAPU8.set(encoded, promptAddress);
+          this._module.HEAPU8[promptAddress + encoded.length] = 0;
+
+          const numEmbeddingsAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
+          if (numEmbeddingsAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for numEmbeddings'
+            );
+          }
+
+          const embeddingsAddressAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
+          if (embeddingsAddressAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for embeddings'
+            );
+          }
+
+          const status = await this._pv_picollm_generate_embeddings(
+            this._objectAddress,
+            promptAddress,
+            numEmbeddingsAddress,
+            embeddingsAddressAddress
+          );
+
+          this._module._pv_free(promptAddress);
+
+          if (status !== PvStatus.SUCCESS) {
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
+              this._messageStackAddressAddressAddress,
+              this._messageStackDepthAddress,
+              this._module.HEAP32,
+              this._module.HEAPU8
+            );
+
+            throw pvStatusToException(status, 'Generate failed', messageStack);
+          }
+
+          const numEmbeddings = this._module.HEAP32[numEmbeddingsAddress / Int32Array.BYTES_PER_ELEMENT];
+          this._module._pv_free(numEmbeddingsAddress);
+
+          const embeddingsAddress = unsignedAddress(
+            this._module.HEAP32[embeddingsAddressAddress / Int32Array.BYTES_PER_ELEMENT]
+          );
+
+          let embeddingsPtr = embeddingsAddress;
+          const embeddings: number[] = [];
+          for (let i = 0; i < numEmbeddings; i++) {
+            const embedding = this._module.HEAPF32[embeddingsPtr / Float32Array.BYTES_PER_ELEMENT];
+            embeddingsPtr += Float32Array.BYTES_PER_ELEMENT;
+
+            embeddings.push(embedding);
+          }
+
+          this._module._pv_picollm_delete_embeddings(embeddingsAddress);
+          this._module._pv_free(embeddingsAddressAddress);
+
+          return {
+            embeddings
+          };
+        })
+        .then((result: PicoLLMEmbeddingsCompletion) => {
+          resolve(result);
+        })
+        .catch((error: any) => {
+          reject(error);
+        });
+    });
+  }
+
+  /**
+   * Generates a completion text representing text found in the given image.
+   *
+   * For use with OCR (Optical Character Recognition) models only.
+   *
+   * @param image Image prompt.
+   * @param image.width Width of the image in pixels.
+   * @param image.height Height of the image in pixels.
+   * @param image.data Image pixel data in 8-bit, RGB format.
+   * @param options Optional generate configuration arguments, see PicoLLMGenerateOCROptions for details.
+   * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
+   * to reaching this limit, the `.endpoint` parameter in `PicoLLMOCRCompletion` output will be
+   * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
+   * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
+   * completion string becomes available.
+   * @param options.progressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
+   * progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and
+   * completion tokens are now being generated.
+   */
+  public async generateOCR(
+    image: PicoLLMImage,
+    options: PicoLLMGenerateOCROptions = {}
+  ): Promise<PicoLLMOCRCompletion> {
+    const {
+      completionTokenLimit = -1,
+      streamCallback,
+      progressCallback
+    } = options;
+
+    return new Promise<PicoLLMOCRCompletion>((resolve, reject) => {
+      this._functionMutex
+        .runExclusive(async () => {
+          if (this._module === undefined) {
+            throw new PicoLLMErrors.PicoLLMInvalidStateError(
+              'Attempted to call PicoLLM generate after release.'
+            );
+          }
+
+          const imageAddress = this._module._malloc(image.data.length * Uint8Array.BYTES_PER_ELEMENT);
+          if (imageAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for image'
+            );
+          }
+          this._module.HEAPU8.set(image.data, imageAddress);
+
+          const endpointAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
+          if (endpointAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for endpoint'
+            );
+          }
+
+          const completionAddressAddress = this._module._malloc(Int32Array.BYTES_PER_ELEMENT);
+          if (completionAddressAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for completion'
+            );
+          }
+
+          let streamCallbackFnPointer = 0;
+          if (streamCallback !== undefined) {
+            this._streamCallback.setUserCallback(streamCallback);
+            streamCallbackFnPointer = this._streamCallbackFnPointer;
+          }
+
+          let progressCallbackFnPointer = 0;
+          if (progressCallback !== undefined) {
+            this._progressCallback.setUserCallback(progressCallback);
+            progressCallbackFnPointer = this._progressCallbackFnPointer;
+          }
+
+          const status = await this._pv_picollm_generate_ocr(
+            this._objectAddress,
+            image.width,
+            image.height,
+            imageAddress,
+            completionTokenLimit,
+            streamCallbackFnPointer,
+            0,
+            progressCallbackFnPointer,
+            0,
+            endpointAddress,
+            completionAddressAddress
+          );
+
+          this._module._pv_free(imageAddress);
+
+          if (status !== PvStatus.SUCCESS) {
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
+              this._messageStackAddressAddressAddress,
+              this._messageStackDepthAddress,
+              this._module.HEAP32,
+              this._module.HEAPU8
+            );
+
+            throw pvStatusToException(status, 'Generate failed', messageStack);
+          }
+
+          const endpoint: PicoLLMEndpoint = this._module.HEAP32[endpointAddress / Int32Array.BYTES_PER_ELEMENT];
+          this._module._pv_free(endpointAddress);
+
+          const completionAddress = unsignedAddress(
+            this._module.HEAP32[completionAddressAddress / Int32Array.BYTES_PER_ELEMENT]
+          );
+          const completion = arrayBufferToStringAtIndex(
+            this._module.HEAPU8,
+            completionAddress
+          );
+
+          this._module._pv_picollm_delete_completion(completionAddress);
+          this._module._pv_free(completionAddressAddress);
+          return {
+            endpoint,
+            completion,
+          };
+        })
+        .then((result: PicoLLMOCRCompletion) => {
+          resolve(result);
+        })
+        .catch((error: any) => {
+          reject(error);
+        });
+    });
+  }
+
+  /**
    * Interrupts `generate()` if generation is in progress. Otherwise, it has no effect.
    */
   public async interrupt(): Promise<void> {
@@ -1086,6 +1704,9 @@ export class PicoLLM {
     // setup async functions
     const pv_picollm_init: pv_picollm_init_type = this.wrapAsyncFunction(module, "pv_picollm_init", 4);
     const pv_picollm_generate: pv_picollm_generate_type = this.wrapAsyncFunction(module, "pv_picollm_generate", 18);
+    const pv_picollm_generate_with_image: pv_picollm_generate_with_image_type = this.wrapAsyncFunction(module, "pv_picollm_generate_with_image", 23);
+    const pv_picollm_generate_embeddings: pv_picollm_generate_embeddings_type = this.wrapAsyncFunction(module, "pv_picollm_generate_embeddings", 4);
+    const pv_picollm_generate_ocr: pv_picollm_generate_ocr_type = this.wrapAsyncFunction(module, "pv_picollm_generate_ocr", 11);
     const pv_picollm_forward: pv_picollm_forward_type = this.wrapAsyncFunction(module, "pv_picollm_forward", 6);
 
     const objectAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
@@ -1255,6 +1876,9 @@ export class PicoLLM {
       module: module,
 
       pv_picollm_generate: pv_picollm_generate,
+      pv_picollm_generate_with_image: pv_picollm_generate_with_image,
+      pv_picollm_generate_embeddings: pv_picollm_generate_embeddings,
+      pv_picollm_generate_ocr: pv_picollm_generate_ocr,
       pv_picollm_forward: pv_picollm_forward,
 
       contextLength: contextLength,

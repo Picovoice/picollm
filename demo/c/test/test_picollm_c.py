@@ -25,7 +25,8 @@ class PicoLLMCTestCase(unittest.TestCase):
         cls._model_path = sys.argv[2]
         cls._vlm_model_path = sys.argv[3]
         cls._ocr_model_path = sys.argv[4]
-        cls._device = sys.argv[5]
+        cls._embedding_model_path = sys.argv[5]
+        cls._device = sys.argv[6]
 
     def test_picollm_generate(self):
         args = [
@@ -81,9 +82,28 @@ class PicoLLMCTestCase(unittest.TestCase):
         completion = stdout.decode('utf-8').strip()
         self.assertIn("# In the news", completion)
 
+    def test_picollm_generate_embeddings(self):
+        args = [
+            os.path.join(os.path.dirname(__file__), "../build/picollm_demo_similarity"),
+            "-a", self._access_key,
+            "-l", pv_library_path("../../.."),
+            "-m", self._embedding_model_path,
+            "-y", self._device,
+            "-p", "His name is Tom",
+            "-d", "I am Tom"
+        ]
+        process = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        self.assertEqual(process.poll(), 0)
+        self.assertEqual(stderr.decode('utf-8'), '')
+        similarity = stdout.decode('utf-8').strip()
+        self.assertIn("is 0.614", similarity)
+
+
 
 if __name__ == '__main__':
-    if len(sys.argv) != 6:
-        print("usage: test_picollm.py ${AccessKey} ${TextModelFile} ${VlmModelFile} ${OcrModelFile} ${Device}")
+    if len(sys.argv) != 7:
+        print("usage: test_picollm.py ${AccessKey} ${TextModelFile} " +
+              "${VlmModelFile} ${OcrModelFile} ${EmbeddingModelFile} ${Device}")
         exit(1)
     unittest.main(argv=sys.argv[:1])

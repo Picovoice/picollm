@@ -399,7 +399,7 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_delete_completion_tokens_func)(pv_picollm_completion_token_t *, int32_t) =
+    void (*pv_picollm_delete_completion_tokens_func)(pv_picollm_completion_token_t *, int32_t) =
         load_symbol(dl_handle, "pv_picollm_delete_completion_tokens");
     if (!pv_picollm_delete_completion_tokens_func) {
         print_dl_error("failed to load `pv_picollm_delete_completion_tokens`");
@@ -469,7 +469,7 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    fprintf(stdout, "picoLLM: `%s`\n", pv_picollm_version_func());
+    fprintf(stdout, "picoLLM v%s\n", pv_picollm_version_func());
 
     char **message_stack = NULL;
     int32_t message_stack_depth = 0;

@@ -219,6 +219,40 @@ namespace Pv
     }
 
     /// <summary>
+    /// Represents an RGB image.
+    /// </summary>
+    public class PicoLLMImage {
+        /// <summary>
+        /// Image width.
+        /// </summary>
+        public int Width { get; }
+
+        /// <summary>
+        /// Image height.
+        /// </summary>
+        public int Height { get; }
+
+        /// <summary>
+        /// Image pixel data in 8-bit, RGB format.
+        /// </summary>
+        public byte[] Pixels { get; }
+
+        public PicoLLMImage(int width, int height, byte[] pixels) {
+            Width = width;
+            Height = height;
+            Pixels = pixels;
+
+            if (width * height * 3 != pixels.Length) {
+                throw new ArgumentException(String.Format(
+                        "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
+                        pixels.Length,
+                        width,
+                        height));
+            }
+        }
+    }
+
+    /// <summary>
     /// .NET binding for picoLLM Inference Engine.
     /// </summary>
     public class PicoLLM : IDisposable
@@ -229,6 +263,10 @@ namespace Pv
         private delegate void PicoLLMStreamCallbackDelegate(IntPtr token, IntPtr userData);
         private readonly PicoLLMStreamCallbackDelegate _streamCallbackDelegate;
         private Action<string> _streamCallback;
+
+        private delegate void PicoLLMPromptProgressCallbackDelegate(float progress, IntPtr userData);
+        private readonly PicoLLMPromptProgressCallbackDelegate _promptProgressCallbackDelegate;
+        private Action<float> _promptProgressCallback;
 
         static PicoLLM()
         {
@@ -291,7 +329,57 @@ namespace Pv
             out IntPtr completion);
 
         [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PvStatus pv_picollm_generate_with_image(
+            IntPtr handle,
+            IntPtr prompt,
+            int imageWidth,
+            int imageHeight,
+            byte[] image,
+            int completionTokenLimit,
+            IntPtr[] stopPhrases,
+            int numStopPhrases,
+            int seed,
+            float presencePenalty,
+            float frequencyPenalty,
+            float temperature,
+            float topP,
+            int numTopChoices,
+            IntPtr streamCallback,
+            IntPtr streamCallbackContext,
+            IntPtr promptProgressCallback,
+            IntPtr promptProgressCallbackContext,
+            out CPicoLLMUsage usage,
+            out PicoLLMEndpoint endpoint,
+            out IntPtr completionTokens,
+            out int numCompletionTokens,
+            out IntPtr completion);
+
+        [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         private static extern PvStatus pv_picollm_interrupt(IntPtr handle);
+
+        [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PvStatus pv_picollm_generate_embeddings(
+            IntPtr handle,
+            IntPtr prompt,
+            out int numEmbeddings,
+            out IntPtr embeddings);
+
+        [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PvStatus pv_picollm_generate_ocr(
+            IntPtr handle,
+            int image_width,
+            int image_height,
+            byte[] image,
+            int completionTokenLimit,
+            IntPtr streamCallback,
+            IntPtr streamCallbackContext,
+            IntPtr promptProgressCallback,
+            IntPtr promptProgressCallbackContext,
+            out PicoLLMEndpoint endpoint,
+            out IntPtr completion);
+
+        [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void pv_picollm_delete_embeddings(IntPtr embeddings);
 
         [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         private static extern void pv_picollm_delete_completion_tokens(
@@ -299,7 +387,7 @@ namespace Pv
             int numCompletionTokens);
 
         [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void pv_picollm_delete_completion(IntPtr completion);
+        private static extern void pv_picollm_delete_completion(IntPtr text);
 
         [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         private static extern PvStatus pv_picollm_tokenize(
@@ -518,7 +606,9 @@ namespace Pv
 
             Version = Utils.GetUtf8StringFromPtr(pv_picollm_version());
             MaxTopChoices = pv_picollm_max_top_choices();
+
             _streamCallbackDelegate = new PicoLLMStreamCallbackDelegate(StreamCallbackWrapper);
+            _promptProgressCallbackDelegate = new PicoLLMPromptProgressCallbackDelegate(PromptProgressCallbackWrapper);
         }
 
         /// <summary>
@@ -566,7 +656,6 @@ namespace Pv
         /// </param>
         /// <returns>A `PicoLLMCompletion` object containing stats and generated tokens.</returns>
         /// <exception cref="PicoLLMException">Thrown when an error occurs during the completion generation process.</exception>
-
         public PicoLLMCompletion Generate(
             string prompt,
             int? completionTokenLimit = null,
@@ -630,6 +719,9 @@ namespace Pv
 
             if (status != PvStatus.SUCCESS)
             {
+                pv_picollm_delete_completion_tokens(completionTokensPtr, numCompletionTokens);
+                pv_picollm_delete_completion(completionPtr);
+
                 throw PvStatusToException(
                     status,
                     "picoLLM generate failed",
@@ -675,10 +767,181 @@ namespace Pv
         }
 
         /// <summary>
-        /// Interrupts `Generate()` if generation is in progress. Otherwise, it has no effect.
+        /// Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
+        /// 
+        /// For use with vision models only.
+        /// </summary>
+        /// <param name="prompt">The input text prompt.</param>
+        /// <param name="image">The input image.</param>
+        /// <param name="completionTokenLimit">
+        /// The maximum number of tokens in the completion. If the generation process stops due to reaching this limit,
+        /// the `Endpoint` result will be set to `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`.
+        /// Set to `null` to impose no limit.
+        /// </param>
+        /// <param name="stopPhrases">
+        /// A set of phrases that, when encountered in the completion, will stop the generation process.
+        /// The generated completion, including the encountered stop phrase, will be returned,
+        /// and the `Endpoint` result will be set to `PicoLLMEndpoint.STOP_PHRASE_ENCOUNTERED`.
+        /// Set to `null` to disable this feature.
+        /// </param>
+        /// <param name="seed">
+        /// A positive integer value to use as the seed for the internal random number generator, enforcing deterministic outputs.
+        /// Set to `null` for randomized outputs for the given prompt.
+        /// </param>
+        /// <param name="presencePenalty">
+        /// A positive value that penalizes logits that have already appeared in the partial completion.
+        /// If set to `0.0`, it has no effect.
+        /// </param>
+        /// <param name="frequencyPenalty">
+        /// A positive floating-point value that penalizes logits proportional to the frequency of their appearance in the partial completion.
+        /// If set to `0.0`, it has no effect.
+        /// </param>
+        /// <param name="temperature">
+        /// The sampling temperature, a non-negative floating-point value that controls the randomness of the sampler.
+        /// A higher temperature increases randomness, while a lower temperature reduces variability by creating a narrower distribution.
+        /// Setting it to `0` selects the maximum logit during sampling.
+        /// </param>
+        /// <param name="topP">
+        /// A positive floating-point number within (0, 1] that restricts the sampler's choices to high-probability logits
+        /// forming the top portion of the probability mass. A value of `1.0` allows the sampler to pick any token with non-zero probability, disabling this feature.
+        /// </param>
+        /// <param name="numTopChoices">
+        /// The number of highest probability tokens to return for any generated token. Set to `0` to disable this feature.
+        /// </param>
+        /// <param name="streamCallback">
+        /// A callback action that is executed every time a new piece of completion text becomes available.
+        /// Set to `null` to disable this feature.
+        /// </param>
+        /// <param name="promptProgressCallback">
+        /// A callback action that is used to report the prompt evaluation progress as a floating-point number within
+        /// (0, 100]. A value of 100 indicates that prompt evaluation is complete and completion tokens are now being generated.
+        /// Set to `null` to disable this feature.
+        /// </param>
+        /// <returns>A `PicoLLMCompletion` object containing stats and generated tokens.</returns>
+        /// <exception cref="PicoLLMException">Thrown when an error occurs during the completion generation process.</exception>
+        public PicoLLMCompletion GenerateWithImage(
+            string prompt,
+            PicoLLMImage image,
+            int? completionTokenLimit = null,
+            string[] stopPhrases = null,
+            int? seed = null,
+            float presencePenalty = 0,
+            float frequencyPenalty = 0,
+            float temperature = 0,
+            float topP = 1,
+            int numTopChoices = 0,
+            Action<string> streamCallback = null,
+            Action<float> promptProgressCallback = null)
+        {
+            IntPtr promptPtr = Utils.GetPtrFromUtf8String(prompt);
+
+            IntPtr[] stopPhrasesPtr = null;
+            int numStopPhrases = 0;
+            if (stopPhrases != null && stopPhrases.Length > 0)
+            {
+                numStopPhrases = stopPhrases.Length;
+                stopPhrasesPtr = new IntPtr[stopPhrases.Length];
+                for (int i = 0; i < stopPhrases.Length; i++)
+                {
+                    stopPhrasesPtr[i] = Utils.GetPtrFromUtf8String(stopPhrases[i]);
+                }
+            }
+
+            _streamCallback = streamCallback;
+            _promptProgressCallback = promptProgressCallback;
+
+            IntPtr streamCallbackPtr = Marshal.GetFunctionPointerForDelegate(_streamCallbackDelegate);
+            IntPtr promptProgressCallbackPtr = Marshal.GetFunctionPointerForDelegate(_promptProgressCallbackDelegate);
+
+            CPicoLLMUsage cUsage;
+            PicoLLMEndpoint endpoint;
+            IntPtr completionTokensPtr;
+            int numCompletionTokens;
+            IntPtr completionPtr;
+            PvStatus status = pv_picollm_generate_with_image(
+               _libraryPointer,
+               promptPtr,
+               image.Width,
+               image.Height,
+               image.Pixels,
+               completionTokenLimit ?? -1,
+               stopPhrasesPtr,
+               numStopPhrases,
+               seed ?? -1,
+               presencePenalty,
+               frequencyPenalty,
+               temperature,
+               topP,
+               numTopChoices,
+               streamCallbackPtr,
+               IntPtr.Zero,
+               promptProgressCallbackPtr,
+               IntPtr.Zero,
+               out cUsage,
+               out endpoint,
+               out completionTokensPtr,
+               out numCompletionTokens,
+               out completionPtr);
+
+            Marshal.FreeHGlobal(promptPtr);
+            for (int i = 0; i < numStopPhrases; i++)
+            {
+                Marshal.FreeHGlobal(stopPhrasesPtr[i]);
+            }
+
+            if (status != PvStatus.SUCCESS)
+            {
+                pv_picollm_delete_completion_tokens(completionTokensPtr, numCompletionTokens);
+                pv_picollm_delete_completion(completionPtr);
+
+                throw PvStatusToException(
+                    status,
+                    "picoLLM generate with image failed",
+                    GetMessageStack());
+            }
+
+            PicoLLMUsage usage = new PicoLLMUsage(cUsage.promptTokens, cUsage.completionTokens);
+
+            PicoLLMCompletionToken[] completionTokens = new PicoLLMCompletionToken[numCompletionTokens];
+            for (int i = 0; i < numCompletionTokens; i++)
+            {
+                CPicoLLMCompletionToken cCompletionToken = (CPicoLLMCompletionToken)Marshal.PtrToStructure(
+                    completionTokensPtr + (i * Marshal.SizeOf(typeof(CPicoLLMCompletionToken))),
+                    typeof(CPicoLLMCompletionToken));
+
+                PicoLLMToken[] topChoices = new PicoLLMToken[cCompletionToken.numTopChoices];
+                for (int j = 0; j < cCompletionToken.numTopChoices; j++)
+                {
+                    CPicoLLMToken cTopChoiceToken = (CPicoLLMToken)Marshal.PtrToStructure(
+                        cCompletionToken.topChoicesPtr + (j * Marshal.SizeOf(typeof(CPicoLLMToken))),
+                        typeof(CPicoLLMToken));
+                    topChoices[j] = new PicoLLMToken(
+                        Utils.GetUtf8StringFromPtr(cTopChoiceToken.tokenPtr),
+                        cTopChoiceToken.logProb);
+                }
+
+                PicoLLMToken token = new PicoLLMToken(
+                    Utils.GetUtf8StringFromPtr(cCompletionToken.token.tokenPtr),
+                    cCompletionToken.token.logProb);
+                completionTokens[i] = new PicoLLMCompletionToken(token, topChoices);
+            }
+
+            string completion = Utils.GetUtf8StringFromPtr(completionPtr);
+
+            pv_picollm_delete_completion_tokens(completionTokensPtr, numCompletionTokens);
+            pv_picollm_delete_completion(completionPtr);
+
+            return new PicoLLMCompletion(
+                usage,
+                endpoint,
+                completionTokens,
+                completion);
+        }
+
+        /// <summary>
+        /// Interrupts `Generate()` and `GenerateWithImage()` if generation is in progress. Otherwise, it has no effect.
         /// </summary>
         /// <exception cref="PicoLLMException">Thrown when an error occurs during the interrupt operation.</exception>
-
         public void Interrupt()
         {
             PvStatus status = pv_picollm_interrupt(_libraryPointer);
@@ -689,6 +952,111 @@ namespace Pv
                     "picoLLM interrupt failed",
                     GetMessageStack());
             }
+        }
+
+        /// <summary>
+        /// Generates numerical vector representations of the input text prompt.
+        /// 
+        /// For use with embedding models only.
+        /// </summary>
+        /// <param name="prompt">The input text prompt.</param>
+        /// <returns>Generated embeddings</returns>
+        /// <exception cref="PicoLLMException">Thrown when an error occurs during the embedding generation process.</exception>
+        public float[] GenerateEmbeddings(string prompt)
+        {
+            IntPtr promptPtr = Utils.GetPtrFromUtf8String(prompt);
+
+            int numEmbeddings;
+            IntPtr embeddingsPtr;
+            PvStatus status = pv_picollm_generate_embeddings(
+               _libraryPointer,
+               promptPtr,
+               out numEmbeddings,
+               out embeddingsPtr);
+
+            Marshal.FreeHGlobal(promptPtr);
+
+            if (status != PvStatus.SUCCESS)
+            {
+                pv_picollm_delete_embeddings(embeddingsPtr);
+
+                throw PvStatusToException(
+                    status,
+                    "picoLLM generate embeddings failed",
+                    GetMessageStack());
+            }
+
+            float[] embeddings = Utils.GetFloatArrayFromPtr(embeddingsPtr, numEmbeddings);
+
+            pv_picollm_delete_embeddings(embeddingsPtr);
+
+            return embeddings;
+        }
+
+        /// <summary>
+        /// Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
+        /// 
+        /// For use with vision models only.
+        /// </summary>
+        /// <param name="image">The input image.</param>
+        /// <param name="completionTokenLimit">
+        /// The maximum number of tokens in the completion. If the generation process stops due to reaching this limit,
+        /// the `Endpoint` result will be set to `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`.
+        /// Set to `null` to impose no limit.
+        /// </param>
+        /// <param name="streamCallback">
+        /// A callback action that is executed every time a new piece of completion text becomes available.
+        /// Set to `null` to disable this feature.
+        /// </param>
+        /// <param name="promptProgressCallback">
+        /// A callback action that is used to report the prompt evaluation progress as a floating-point number within
+        /// (0, 100]. A value of 100 indicates that prompt evaluation is complete and completion tokens are now being generated.
+        /// Set to `null` to disable this feature.
+        /// </param>
+        /// <returns>A pair containing a `PicoLLMEndpoint` and a completion string.</returns>
+        /// <exception cref="PicoLLMException">Thrown when an error occurs during the completion generation process.</exception>
+        public Tuple<PicoLLMEndpoint, string> GenerateOCR(
+            PicoLLMImage image,
+            int? completionTokenLimit = null,
+            Action<string> streamCallback = null,
+            Action<float> promptProgressCallback = null)
+        {
+            _streamCallback = streamCallback;
+            _promptProgressCallback = promptProgressCallback;
+
+            IntPtr streamCallbackPtr = Marshal.GetFunctionPointerForDelegate(_streamCallbackDelegate);
+            IntPtr promptProgressCallbackPtr = Marshal.GetFunctionPointerForDelegate(_promptProgressCallbackDelegate);
+
+            PicoLLMEndpoint endpoint;
+            IntPtr completionPtr;
+            PvStatus status = pv_picollm_generate_ocr(
+               _libraryPointer,
+               image.Width,
+               image.Height,
+               image.Pixels,
+               completionTokenLimit ?? -1,
+               streamCallbackPtr,
+               IntPtr.Zero,
+               promptProgressCallbackPtr,
+               IntPtr.Zero,
+               out endpoint,
+               out completionPtr);
+
+            if (status != PvStatus.SUCCESS)
+            {
+                pv_picollm_delete_completion(completionPtr);
+
+                throw PvStatusToException(
+                    status,
+                    "picoLLM generate with image failed",
+                    GetMessageStack());
+            }
+
+            string completion = Utils.GetUtf8StringFromPtr(completionPtr);
+
+            pv_picollm_delete_completion(completionPtr);
+
+            return new Tuple<PicoLLMEndpoint, string>(endpoint, completion);
         }
 
         /// <summary>
@@ -827,6 +1195,7 @@ namespace Pv
 
         private static readonly Dictionary<string, Type> dialogs = new Dictionary<string, Type>
         {
+            // TODO: add more models here?
             { "gemma-2b-it", typeof(GemmaChatDialog) },
             { "gemma-7b-it", typeof(GemmaChatDialog) },
             { "llama-2-7b-chat", typeof(Llama2ChatDialog) },
@@ -940,7 +1309,9 @@ namespace Pv
             {
                 pv_picollm_delete(_libraryPointer);
                 _libraryPointer = IntPtr.Zero;
+
                 _streamCallback = null;
+                _promptProgressCallback = null;
 
                 // ensures finalizer doesn't trigger if already manually disposed
                 GC.SuppressFinalize(this);
@@ -957,6 +1328,14 @@ namespace Pv
             if (_streamCallback != null)
             {
                 _streamCallback.Invoke(Utils.GetUtf8StringFromPtr(token));
+            }
+        }
+
+        private void PromptProgressCallbackWrapper(float progress, IntPtr userData)
+        {
+            if (_promptProgressCallback != null)
+            {
+                _promptProgressCallback.Invoke(progress);
             }
         }
 

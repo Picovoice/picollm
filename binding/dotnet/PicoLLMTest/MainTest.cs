@@ -485,6 +485,7 @@ namespace PicoLLMTest
         private static readonly Dictionary<string, Type> dialogs = new Dictionary<string, Type>
         {
             { "gemma-chat-dialog", typeof(GemmaChatDialog) },
+            { "gemma3-chat-dialog", typeof(GemmaChatDialog) },
             { "llama-2-chat-dialog", typeof(Llama2ChatDialog) },
             { "llama-3-chat-dialog", typeof(Llama3ChatDialog) },
             { "llama-3.2-chat-dialog", typeof(Llama32ChatDialog) },
@@ -567,6 +568,22 @@ namespace PicoLLMTest
         {
             PicoLLMDialog dialog = (PicoLLMDialog)Activator.CreateInstance(dialogs[dialogName], new object[] { 0, system });
             TestPromptHelper(dialog, conversation, expectedPromptWithSystemAndHistory);
+        }
+
+        [TestMethod]
+        public void TestDialogGenerateWithImage() {
+            JToken data = _testJson["generate_with_image"];
+            string imagePath = data["image"].ToObject<string>();
+            string prompt = data["prompt"].ToObject<string>();
+            int numTopChoices = data["parameters"]["num-top-choices"].ToObject<int>();
+            List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
+
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device))
+            {
+                // TODO: update the generate function
+                PicoLLMCompletion res = picoLLM.Generate(prompt, numTopChoices: numTopChoices);
+                VerifyCompletion(res, expectations);
+            }
         }
 
         private bool VerifyCompletionHelper(PicoLLMCompletion res, CompletionExpectation expectation)

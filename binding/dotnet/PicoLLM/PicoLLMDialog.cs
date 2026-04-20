@@ -337,7 +337,7 @@ namespace Pv
     }
 
     /// <summary>
-    /// Dialog helper for `gemma-2b-it` and `gemma-7b-it`.
+    /// Dialog helper for `gemma-2b-it`, `gemma-7b-it`, and `gemma-3-270m-it`
     /// </summary>
     public class GemmaChatDialog : PicoLLMDialog
     {
@@ -369,5 +369,4 @@ namespace Pv
             return result;
         }
     }
-
 }

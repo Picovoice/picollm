@@ -218,6 +218,36 @@ namespace Pv
         }
     }
 
+    public class OCRCompletion {
+        /// <summary>
+        /// Reason for ending the generation process.
+        /// </summary>
+        public PicoLLMEndpoint Endpoint { get; }
+
+        /// <summary>
+        /// Completion string.
+        /// </summary>
+        public string Completion { get; }
+
+        /// <summary>
+        /// Constructor for the OCRCompletion class.
+        /// </summary>
+        /// <param name="endpoint">Reason for ending the generation process.</param>
+        /// <param name="completion">Completion string.</param>
+        public OCRCompletion(
+            PicoLLMEndpoint endpoint,
+            string completion
+        ) {
+            Endpoint = endpoint;
+            Completion = completion;
+        }
+
+        public override string ToString()
+        {
+            return $"{{\n    endpoint: {Endpoint.ToString()},\n    completion: '{Completion}'\n}}";
+        }
+    }
+
     /// <summary>
     /// Represents an RGB image.
     /// </summary>
@@ -1015,7 +1045,7 @@ namespace Pv
         /// </param>
         /// <returns>A pair containing a `PicoLLMEndpoint` and a completion string.</returns>
         /// <exception cref="PicoLLMException">Thrown when an error occurs during the completion generation process.</exception>
-        public Tuple<PicoLLMEndpoint, string> GenerateOCR(
+        public OCRCompletion GenerateOCR(
             PicoLLMImage image,
             int? completionTokenLimit = null,
             Action<string> streamCallback = null,
@@ -1056,7 +1086,7 @@ namespace Pv
 
             pv_picollm_delete_completion(completionPtr);
 
-            return new Tuple<PicoLLMEndpoint, string>(endpoint, completion);
+            return new OCRCompletion(endpoint, completion);
         }
 
         /// <summary>

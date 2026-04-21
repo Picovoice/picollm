@@ -419,18 +419,16 @@ namespace PicoLLMTest
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
-                Tuple<PicoLLMEndpoint, string> res = picoLLM.GenerateOCR(
-                    image,
-                    completionTokenLimit: completionTokenLimit);
-                
-                Assert.IsTrue(res.Item1 == expectation.Endpoint);
-                Assert.IsTrue(res.Item2 == expectation.Completion);
+                OCRCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
+
+                Assert.AreEqual(res.Endpoint, expectation.Endpoint);
+                Assert.AreEqual(res.Completion, expectation.Completion);
             }
         }
 
         [TestMethod]
         public void TestGenerateOCRLarge() {
-            // TODO: this is going to take a while on cpu; should we run it?
+            // TODO: this is going to take a WHILE on cpu; should we run it anyways?
             return;
 
             JToken data = LoadJsonTestData()["generate_ocr_large"];
@@ -438,17 +436,16 @@ namespace PicoLLMTest
             string imagePath = data["image"].ToObject<string>();
             PicoLLMImage image = LoadImage(imagePath);
 
+            // TODO: use "expectations" everywhere
             int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
             OCRExpectation expectation = data["expectation"].ToObject<OCRExpectation>();
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
-                Tuple<PicoLLMEndpoint, string> res = picoLLM.GenerateOCR(
-                    image,
-                    completionTokenLimit: completionTokenLimit);
+                OCRCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
 
-                Assert.IsTrue(res.Item1 == expectation.Endpoint);
-                Assert.IsTrue(res.Item2 == expectation.Completion);
+                Assert.AreEqual(res.Endpoint, expectation.Endpoint);
+                Assert.AreEqual(res.Completion, expectation.Completion);
             }
         }
 
@@ -795,8 +792,8 @@ namespace PicoLLMTest
         {
             string path = Path.Combine(ROOT_DIR, String.Format("resources/.test/images/{0}", name));
             byte[] fileBytes = File.ReadAllBytes(path);
-            using (Image<Rgb24> image = Image.Load<Rgb24>(fileBytes)) {
-                // Why is this unsafe?
+            using (Image<Rgb24> image = Image.Load<Rgb24>(fileBytes))
+            {
                 byte[] imageBytes = new byte[image.Width * image.Height * Unsafe.SizeOf<Rgb24>()];
                 image.CopyPixelDataTo(imageBytes);
 

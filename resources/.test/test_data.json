@@ -256,40 +256,43 @@
   },
   "generate_with_image": {
     "image": "test_image.png",
-    "prompt": "Describe this Image.",
-      "parameters": {
+    "prompt": "Describe this image.",
+    "parameters": {
       "completion-token-limit": 7
     },
-    "expectation":
-    {
-      "num-prompt-tokens": 4,
-      "num-completion-tokens": 7,
-      "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
-      "num-top-choices": 0,
-      "completion": "This is a screenshot of a webpage"
-    }
+    "expectations": [
+      {
+        "num-prompt-tokens": 4,
+        "num-completion-tokens": 7,
+        "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+        "num-top-choices": 0,
+        "completion": "This image is a screenshot of a"
+      }
+    ]
   },
   "generate_ocr": {
     "image": "test_image.png",
     "parameters": {
       "completion-token-limit": 7
     },
-    "expectation":
-    {
-      "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
-      "completion": "# In the news\n\n- Laura"
-    }
+    "expectations": [
+      {
+        "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+        "completion": "# In the news\n\n- Laura"
+      }
+    ]
   },
   "generate_ocr_large": {
     "image": "test_image_large.png",
     "parameters": {
       "completion-token-limit": 7
     },
-    "expectation":
-    {
-      "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
-      "completion": "# Welcome to Wikipedia, the free"
-    }
+    "expectations": [
+      {
+        "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+        "completion": "# Welcome to Wikipedia, the free"
+      }
+    ]
   },
   "generate_embedding": {
     "prompt": "My name is Tom",

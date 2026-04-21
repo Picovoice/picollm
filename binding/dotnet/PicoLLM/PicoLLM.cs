@@ -257,7 +257,7 @@ namespace Pv
     /// </summary>
     public class PicoLLM : IDisposable
     {
-        private const string LIBRARY = "libpv_picollm";
+        private const string LIBRARY = "libpv_picollm_0_1_X.so";
         private IntPtr _libraryPointer = IntPtr.Zero;
 
         private delegate void PicoLLMStreamCallbackDelegate(IntPtr token, IntPtr userData);

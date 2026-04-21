@@ -37,7 +37,9 @@ def _pv_linux_machine() -> str:
     except Exception as e:
         raise RuntimeError("Failed to identify the CPU with `%s`\nCPU info: `%s`" % (e, cpu_info))
 
-    if '0xd08' == cpu_part:
+    if '0xd03' == cpu_part:
+        return 'cortex-a53' + arch_info
+    elif '0xd08' == cpu_part:
         return 'cortex-a72' + arch_info
     elif "0xd0b" == cpu_part:
         return "cortex-a76" + arch_info

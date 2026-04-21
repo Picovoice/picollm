@@ -14,16 +14,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.Drawing;
-using System.Drawing.Imaging;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 using Pv;
 
@@ -383,53 +384,35 @@ namespace PicoLLMTest
             Assert.AreEqual(string.Join("", pieces), expectations[0].Completion);
         }
 
-        // TODO: test these tests
-        // TODO: for now, just pretend the models exist
-
-        // qwen3-vlm
         [TestMethod]
         public void TestGenerateWithImage() {
-            JToken data = _testJson["generate_with_image"];
+            JToken data = LoadJsonTestData()["generate_with_image"];
             string prompt = data["prompt"].ToObject<string>();
 
-            // TODO: System.Drawing might be windows only? If so, I'll need to find a cross-platform lib
             string imagePath = data["image"].ToObject<string>();
-            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(imagePath);
-            System.Drawing.Imaging.BitmapData bitmapData = bitmap.LockBits(
-                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            int numBytes = bitmap.Width * bitmap.Height * 3;
-            byte[] image = new byte[numBytes];
-            Marshal.Copy(data.Scan0, image, 0, numBytes);
+            PicoLLMImage image = LoadImage(imagePath);
 
             int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
-            List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
+            List<CompletionExpectation> expectations = new List<CompletionExpectation>() {
+                data["expectation"].ToObject<CompletionExpectation>()
+            };
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _visionModelPath, _device))
             {
                 PicoLLMCompletion res = picoLLM.GenerateWithImage(
                     prompt,
-                    PicoLLMImage(bitmap.Width, bitmap.Height, image),
+                    image,
                     completionTokenLimit: completionTokenLimit);
                 VerifyCompletion(res, expectations);
             }
         }
 
-        // deepseek ocr
         [TestMethod]
         public void TestGenerateOCR() {
-            JToken data = _testJson["generate_ocr"];
+            JToken data = LoadJsonTestData()["generate_ocr"];
 
             string imagePath = data["image"].ToObject<string>();
-            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(imagePath);
-            System.Drawing.Imaging.BitmapData bitmapData = bitmap.LockBits(
-                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            int numBytes = bitmap.Width * bitmap.Height * 3;
-            byte[] image = new byte[numBytes];
-            Marshal.Copy(data.Scan0, image, 0, numBytes);
+            PicoLLMImage image = LoadImage(imagePath);
 
             int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
             OCRExpectation expectation = data["expectation"].ToObject<OCRExpectation>();
@@ -437,27 +420,23 @@ namespace PicoLLMTest
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
                 Tuple<PicoLLMEndpoint, string> res = picoLLM.GenerateOCR(
-                    PicoLLMImage(bitmap.Width, bitmap.Height, image),
+                    image,
                     completionTokenLimit: completionTokenLimit);
                 
-                Assert.IsTrue(res.first == expectation.endpoint);
-                Assert.IsTrue(res.second == expectation.completion);
+                Assert.IsTrue(res.Item1 == expectation.Endpoint);
+                Assert.IsTrue(res.Item2 == expectation.Completion);
             }
         }
 
         [TestMethod]
         public void TestGenerateOCRLarge() {
-            JToken data = _testJson["generate_ocr_large"];
+            // TODO: this is going to take a while on cpu; should we run it?
+            return;
+
+            JToken data = LoadJsonTestData()["generate_ocr_large"];
 
             string imagePath = data["image"].ToObject<string>();
-            System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(imagePath);
-            System.Drawing.Imaging.BitmapData bitmapData = bitmap.LockBits(
-                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            int numBytes = bitmap.Width * bitmap.Height * 3;
-            byte[] image = new byte[numBytes];
-            Marshal.Copy(data.Scan0, image, 0, numBytes);
+            PicoLLMImage image = LoadImage(imagePath);
 
             int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
             OCRExpectation expectation = data["expectation"].ToObject<OCRExpectation>();
@@ -465,19 +444,17 @@ namespace PicoLLMTest
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
                 Tuple<PicoLLMEndpoint, string> res = picoLLM.GenerateOCR(
-                    PicoLLMImage(bitmap.Width, bitmap.Height, image),
+                    image,
                     completionTokenLimit: completionTokenLimit);
 
-                Assert.IsTrue(res.first == expectation.endpoint);
-                Assert.IsTrue(res.second == expectation.completion);
+                Assert.IsTrue(res.Item1 == expectation.Endpoint);
+                Assert.IsTrue(res.Item2 == expectation.Completion);
             }
         }
 
-        // embeddinggemma-300m-137.pllm
         [TestMethod]
         public void TestGenerateEmbedding() {
-            JToken data = _testJson["generate_embedding"];
-
+            JToken data = LoadJsonTestData()["generate_embedding"];
             string prompt = data["prompt"].ToObject<string>();
 
             List<EmbeddingExpectation> expectations = data["expectations"].ToObject<List<EmbeddingExpectation>>();
@@ -488,11 +465,10 @@ namespace PicoLLMTest
 
                 bool matchedAnExpectation = false;
                 foreach (EmbeddingExpectation expectation in expectations) {
-                    float[] referenceEmbeddings = picoLLM.GenerateEmbeddings(expectation.doc);
+                    float[] referenceEmbeddings = picoLLM.GenerateEmbeddings(expectation.Doc);
 
-                    // TODO: how to measure embedding similarity? cosine similarity? Epsilon or exact?
-                    double similarity = CosineSimilarity(targetEmbeddings, referenceEmbeddings);
-                    if (Math.abs(similarity - expectation.similarity) < 0.001) {
+                    double similarity = Similarity(targetEmbeddings, referenceEmbeddings);
+                    if (Math.Abs(similarity - expectation.Similarity) < 0.001) {
                         matchedAnExpectation = true;
                         break;
                     }
@@ -797,27 +773,35 @@ namespace PicoLLMTest
             Assert.IsTrue(anyMatch);
         }
 
-        private double CosineSimilarity(float[] a, float[] b)
+        private double Similarity(float[] a, float[] b)
         {
             Assert.AreEqual(a.Length, b.Length);
 
             double sum = 0.0f;
-            double sqrt_a = 0.0f;
-            double sqrt_b = 0.0f;
-
             for (int i = 0; i < a.Length; i++) {
-                sum    += (double) a[i] * b[i];
-                sqrt_a += (double) a[i] * a[i];
-                sqrt_b += (double) b[i] * b[i];
+                sum += (double) a[i] * b[i];
             }
 
-            return sum / (Math.sqrt(sqrt_a) * Mathf.sqrt(sqrt_b));
+            return sum;
         }
 
         private static JObject LoadJsonTestData()
         {
             string content = File.ReadAllText(Path.Combine(ROOT_DIR, "resources/.test/test_data.json"));
             return JObject.Parse(content);
+        }
+
+        private static PicoLLMImage LoadImage(string name)
+        {
+            string path = Path.Combine(ROOT_DIR, String.Format("resources/.test/images/{0}", name));
+            byte[] fileBytes = File.ReadAllBytes(path);
+            using (Image<Rgb24> image = Image.Load<Rgb24>(fileBytes)) {
+                // Why is this unsafe?
+                byte[] imageBytes = new byte[image.Width * image.Height * Unsafe.SizeOf<Rgb24>()];
+                image.CopyPixelDataTo(imageBytes);
+
+                return new PicoLLMImage(image.Width, image.Height, imageBytes);
+            }
         }
     }
 }

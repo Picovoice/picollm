@@ -58,9 +58,10 @@ jobs:
 
     - name: Download resource files
       run: >
+      // TODO: find the correct models to use
         curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm &&
         curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-###.pllm/###/deepseek-ocr-2-###.pllm -o deepseek-ocr-2-###.pllm &&
-        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-###.pllm//###/qwen3-vl-2b-it-###.pllm -o qwen3-vl-2b-it-###.pllm &&
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-###.pllm/###/qwen3-vl-2b-it-###.pllm -o qwen3-vl-2b-it-###.pllm &&
         curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/embeddinggemma-300m-137.pllm/###/embeddinggemma-300m-137.pllm -o embeddinggemma-300m-137.pllm
       working-directory: binding/dotnet
 

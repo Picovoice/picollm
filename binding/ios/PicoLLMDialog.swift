@@ -378,3 +378,8 @@ public class GemmaChatDialog: BasePicoLLMDialog {
         return res
     }
 }
+
+/// Dialog helper for `gemma3`.
+public class Gemma3ChatDialog: GemmaChatDialog {
+
+}

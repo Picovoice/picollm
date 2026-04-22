@@ -428,9 +428,6 @@ namespace PicoLLMTest
 
         [TestMethod]
         public void TestGenerateOCRLarge() {
-            // TODO: this is going to take a WHILE on cpu; should we run it anyways?
-            return;
-
             JToken data = LoadJsonTestData()["generate_ocr_large"];
 
             string imagePath = data["image"].ToObject<string>();

@@ -94,6 +94,13 @@ export class GemmaChatDialog extends Dialog {
 }
 
 /**
+ * Dialog helper for `gemma-3-270m-it`.
+ */
+export class Gemma3ChatDialog extends GemmaChatDialog {
+
+}
+
+/**
  * Dialog helper for `llama-2-7b-chat`, `llama-2-13b-chat`, and `llama-2-70b-chat`.
  */
 export class Llama2ChatDialog extends Dialog {
@@ -278,6 +285,7 @@ export class Phi35ChatDialog extends Phi3ChatDialog {
 export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof Dialog } } = {
   "gemma-2b-it": GemmaChatDialog,
   "gemma-7b-it": GemmaChatDialog,
+  "gemma-3-it": Gemma3ChatDialog,
   'llama-2-7b-chat': Llama2ChatDialog,
   'llama-2-13b-chat': Llama2ChatDialog,
   'llama-2-70b-chat': Llama2ChatDialog,

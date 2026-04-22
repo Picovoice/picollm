@@ -43,6 +43,8 @@ const DEVICE = process.argv
 
 const MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
 
+// TODO: need to add gemma-3-chat dialog?
+
 const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   'gemma-chat-dialog': GemmaChatDialog,
   "llama-2-chat-dialog": Llama2ChatDialog,

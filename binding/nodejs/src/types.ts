@@ -38,6 +38,31 @@ export type PicoLLMGenerateOptions = {
   streamCallback?: (token: string) => void;
 };
 
+export type PicoLLMImage = {
+  width: number;
+  height: number;
+  data: Uint8Array;
+};
+
+export type PicoLLMGenerateWithImageOptions = {
+  completionTokenLimit?: number;
+  stopPhrases?: string[];
+  seed?: number;
+  presencePenalty?: number;
+  frequencyPenalty?: number;
+  temperature?: number;
+  topP?: number;
+  numTopChoices?: number;
+  streamCallback?: (token: string) => void;
+  promptProgressCallback?: (token: string) => void;
+};
+
+export type PicoLLMGenerateOCROptions = {
+  completionTokenLimit?: number;
+  streamCallback?: (token: string) => void;
+  promptProgressCallback?: (token: string) => void;
+};
+
 export type PicoLLMUsage = {
   promptTokens: number;
   completionTokens: number;
@@ -57,5 +82,9 @@ export type PicoLLMCompletion = {
   usage: PicoLLMUsage;
   endpoint: PicoLLMEndpoint;
   completionTokens: PicoLLMCompletionToken[];
+  completion: string;
+};
+export type PicoLLMOCRCompletion = {
+  endpoint: PicoLLMEndpoint;
   completion: string;
 };

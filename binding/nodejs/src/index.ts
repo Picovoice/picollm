@@ -30,6 +30,7 @@ import {
 import {
   Dialog,
   GemmaChatDialog,
+  Gemma3ChatDialog,
   Llama2ChatDialog,
   Llama3ChatDialog,
   Llama32ChatDialog,
@@ -46,17 +47,21 @@ import {
   PicoLLMCompletion,
   PicoLLMCompletionToken,
   PicoLLMEndpoint,
+  PicoLLMGenerateOptions,
+  PicoLLMOCRCompletion,
   PicoLLMToken,
   PicoLLMUsage,
   PicoLLMInitOptions,
   PicoLLMInputOptions,
-  PicoLLMGenerateOptions,
   PicoLLMOptions,
 } from './types';
+
+// TODO: will need to export PicoLLMImage + all the new types too
 
 export {
   Dialog,
   GemmaChatDialog,
+  Gemma3ChatDialog,
   Llama2ChatDialog,
   Llama3ChatDialog,
   Llama32ChatDialog,

@@ -59,9 +59,14 @@ type PicoLLMGenerateResult = {
   status: PvStatus;
 };
 type PicoLLMGenerateOCRResult = {
-  endpoint: number;
-  completion: string;
+  completion: {
+    endpoint: number;
+    completion: string;
+  };
   status: PvStatus;
+};
+type PicoLLMGenerateEmbeddingsResult = {
+  embeddings: Float32Array;
 };
 type PicoLLMTokenizeResult = {
   tokens: number[];
@@ -476,25 +481,23 @@ export class PicoLLM {
 
     if (prompt === undefined || prompt === null) {
       throw new PicoLLMInvalidArgumentError(
-        `prompt provided to 'PicoLLM.generateWithImage()' is undefined or null`
+        `prompt provided to 'PicoLLM.generateEmbeddings()' is undefined or null`
       );
     }
 
-    let embeddings: Float32Array | null = null;
+    let generateEmbeddingsResult: PicoLLMGenerateEmbeddingsResult | null = null;
     try {
-      embeddings = await this._pvPicoLLM.generate_embeddings(this._handle, prompt);
+      generateEmbeddingsResult = await this._pvPicoLLM.generate_embeddings(this._handle, prompt);
     } catch (err: any) {
       pvStatusToException(<PvStatus>err.code, err);
     }
 
-    if (embeddings === null) {
+    if (generateEmbeddingsResult === null) {
       throw new PicoLLMRuntimeError('PicoLLM failed to generate embeddings');
     }
 
-    return embeddings;
+    return generateEmbeddingsResult.embeddings;
   }
-
-  // TODO: fix the comments for the .NET API
 
   /**
    * Generates a completion text representing text found in the given image.
@@ -552,8 +555,8 @@ export class PicoLLM {
     }
 
     return {
-      endpoint: picollmGenerateOCRResult.endpoint,
-      completion: picollmGenerateOCRResult.completion
+      endpoint: picollmGenerateOCRResult.completion.endpoint,
+      completion: picollmGenerateOCRResult.completion.completion
     };
   }
 

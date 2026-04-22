@@ -47,16 +47,16 @@ import {
   PicoLLMCompletion,
   PicoLLMCompletionToken,
   PicoLLMEndpoint,
+  PicoLLMGenerateOCROptions,
   PicoLLMGenerateOptions,
   PicoLLMOCRCompletion,
   PicoLLMToken,
   PicoLLMUsage,
+  PicoLLMImage,
   PicoLLMInitOptions,
   PicoLLMInputOptions,
   PicoLLMOptions,
 } from './types';
-
-// TODO: will need to export PicoLLMImage + all the new types too
 
 export {
   Dialog,
@@ -77,9 +77,12 @@ export {
   PicoLLMEndpoint,
   PicoLLMToken,
   PicoLLMUsage,
+  PicoLLMImage,
   PicoLLMInitOptions,
   PicoLLMInputOptions,
+  PicoLLMGenerateOCROptions,
   PicoLLMGenerateOptions,
+  PicoLLMOCRCompletion,
   PicoLLMOptions,
   PicoLLM,
   PicoLLMActivationError,

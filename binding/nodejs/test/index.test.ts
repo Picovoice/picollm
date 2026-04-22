@@ -10,11 +10,15 @@
 //
 'use strict';
 
+import * as fs from 'fs';
 import * as path from 'path';
+
+import sharp from 'sharp';
 
 import {
   Dialog,
   GemmaChatDialog,
+  Gemma3ChatDialog,
   Llama2ChatDialog,
   Llama3ChatDialog,
   Llama32ChatDialog,
@@ -25,8 +29,12 @@ import {
   Phi35ChatDialog,
   PicoLLM,
   PicoLLMGenerateOptions,
+  PicoLLMGenerateOCROptions,
   PicoLLMCompletion,
+  PicoLLMOCRCompletion,
   PicoLLMEndpoint,
+  PicoLLMImage,
+  PicoLLMInvalidArgumentError,
 } from '../src';
 
 import * as testData from '../../../resources/.test/test_data.json';
@@ -41,12 +49,14 @@ const DEVICE = process.argv
   .filter(x => x.startsWith('--device='))[0]
   .split('--device=')[1];
 
-const MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
-
-// TODO: need to add gemma-3-chat dialog?
+const TEXT_MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
+const VISION_MODEL_PATH = path.join(__dirname, 'qwen3-vl-2b-it-329.pllm');
+const OCR_MODEL_PATH = path.join(__dirname, 'deepseek-ocr-2-561.pllm');
+const EMBEDDING_MODEL_PATH = path.join(__dirname, 'embeddinggemma-300m-137.pllm');
 
 const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   'gemma-chat-dialog': GemmaChatDialog,
+  "gemma3-chat-dialog": Gemma3ChatDialog,
   "llama-2-chat-dialog": Llama2ChatDialog,
   "llama-3-chat-dialog": Llama3ChatDialog,
   "llama-3.2-chat-dialog": Llama32ChatDialog,
@@ -65,8 +75,14 @@ type CompletionExpectation = {
   'completion': string
 };
 
+type OCRCompletionExpectation = {
+  'endpoint': string,
+  'completion': string
+};
+
 type DialogExpectations = {
   'gemma-chat-dialog': string,
+  "gemma3-chat-dialog": string,
   "llama-2-chat-dialog": string,
   "llama-3-chat-dialog": string,
   "llama-3.2-chat-dialog": string,
@@ -96,7 +112,7 @@ const runInitTest = (
 ) => {
   const {
     accessKey = ACCESS_KEY,
-    modelPath = MODEL_PATH,
+    modelPath = TEXT_MODEL_PATH,
     device = DEVICE,
     libraryPath,
     expectFailure = false,
@@ -167,10 +183,27 @@ const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpect
             res.completionTokens.reduce((acc, completionToken) => acc + completionToken.token.token, '')
           ).toEqual(expectation.completion);
         }
-
-        expect(res.completion).toEqual(expectation.completion);
       }
 
+      expect(res.completion).toEqual(expectation.completion);
+
+      return;
+    } catch (e) {
+      error = e;
+    }
+  }
+
+  if (error) {
+    throw error;
+  }
+};
+
+const verifyOCRCompletion = (res: PicoLLMOCRCompletion, expectations: OCRCompletionExpectation[]) => {
+  let error: any;
+  for (const expectation of expectations) {
+    try {
+      expect(res.endpoint).toEqual(PicoLLMEndpoint[expectation.endpoint as keyof typeof PicoLLMEndpoint]);
+      expect(res.completion).toEqual(expectation.completion);
       return;
     } catch (e) {
       error = e;
@@ -189,13 +222,35 @@ const runGenerateTest = async (
     streamCallback: () => {},
   },
 ) => {
-  const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+  const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
     device: DEVICE
   });
 
   try {
     const res = await picoLLM.generate(prompt, options);
     verifyCompletion(res, expectations);
+  } catch (e) {
+    expect(e).toBeUndefined();
+  } finally {
+    picoLLM.release();
+  }
+};
+
+const runGenerateOCRTest = async (
+  image: PicoLLMImage,
+  expectations: OCRCompletionExpectation[],
+  options: PicoLLMGenerateOCROptions = {
+    streamCallback: () => {},
+    promptProgressCallback: () => {},
+  },
+) => {
+  const picoLLM = new PicoLLM(ACCESS_KEY, OCR_MODEL_PATH, {
+    device: DEVICE
+  });
+
+  try {
+    const res = await picoLLM.generateOCR(image, options);
+    verifyOCRCompletion(res, expectations);
   } catch (e) {
     expect(e).toBeUndefined();
   } finally {
@@ -225,6 +280,37 @@ const runDialogTest = (
   }
 };
 
+const readImageFile = async (imageFilePath: string): Promise<PicoLLMImage> => {
+  const absoluteImagePath: string = path.resolve(__dirname, "../../../resources/.test/images/", imageFilePath);
+
+  if (!fs.existsSync(absoluteImagePath)) {
+    throw new PicoLLMInvalidArgumentError(`Image file not found at 'absoluteImagePath': ${absoluteImagePath}`);
+  }
+
+  const { data, info } = await sharp(absoluteImagePath)
+    .toColorspace('srgb')
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  return {
+    data: new Uint8Array(data.buffer, data.byteOffset, data.byteLength),
+    width: info.width,
+    height: info.height
+  };
+}
+
+const similarityOf = (x: Float32Array, y: Float32Array): number => {
+  expect(x.length).toBe(y.length);
+
+  let sum = 0.0;
+  for (let i = 0; i < x.length; i++) {
+    sum += x[i] * y[i];
+  }
+
+  return sum;
+}
+
 describe('PicoLLM basic tests', function () {
   test('List hardware devices', () => {
     const hardwareDevices: string[] = PicoLLM.listAvailableDevices();
@@ -237,7 +323,7 @@ describe('PicoLLM basic tests', function () {
     try {
       const picollm = new PicoLLM(
         "invalidAccessKey",
-        MODEL_PATH,
+        TEXT_MODEL_PATH,
       );
       expect(picollm).toBeUndefined();
       picollm.release();
@@ -251,7 +337,7 @@ describe('PicoLLM basic tests', function () {
     try {
       const picollm = new PicoLLM(
         "invalidAccessKey",
-        MODEL_PATH,
+        TEXT_MODEL_PATH,
       );
       expect(picollm).toBeUndefined();
       picollm.release();
@@ -344,7 +430,7 @@ describe('PicoLLM generate tests', () => {
     const seeds = data.parameters.seeds;
     const temperature = data.parameters.temperature;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -398,7 +484,7 @@ describe('PicoLLM generate tests', () => {
     const seed = data.parameters.seed;
     const temperature = data.parameters.temperature;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -454,7 +540,7 @@ describe('PicoLLM generate tests', () => {
     const topP = data.parameters['top-p'];
     const expectations = data.expectations;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -510,7 +596,7 @@ describe('PicoLLM generate tests', () => {
     const data = testData.picollm.default;
     const prompt = data.prompt;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -532,7 +618,7 @@ describe('PicoLLM generate tests', () => {
   });
 
   test(`should be able to tokenize`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -550,7 +636,7 @@ describe('PicoLLM generate tests', () => {
   });
 
   test(`should be able to forward`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -568,7 +654,7 @@ describe('PicoLLM generate tests', () => {
   });
 
   test(`should be able to reset`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, MODEL_PATH, {
+    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -584,6 +670,79 @@ describe('PicoLLM generate tests', () => {
         }
       } else {
         expect(logits).toEqual(newLogits);
+      }
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
+    }
+  });
+});
+
+describe('PicoLLM generate with image tests', () => {
+  test(`should be able to generate with image`, async () => {
+    const data = testData.generate_with_image;
+    const imagePath = data.image;
+    const image = await readImageFile(imagePath);
+    const prompt = data.prompt;
+    const completionTokenLimit = data.parameters['completion-token-limit'];
+    const expectations = data.expectations;
+
+    const picoLLM = new PicoLLM(ACCESS_KEY, VISION_MODEL_PATH, {
+      device: DEVICE
+    });
+
+    try {
+      const res = await picoLLM.generateWithImage(prompt, image, {
+        completionTokenLimit: completionTokenLimit,
+      });
+
+      verifyCompletion(res, expectations);
+    } catch (e) {
+      expect(e).toBeUndefined();
+    } finally {
+      picoLLM.release();
+    }
+  });
+});
+
+describe('PicoLLM generate OCR', () => {
+  test(`should be able to generate OCR (small)`, async () => {
+    const data = testData.generate_ocr;
+    const imagePath = data.image;
+    const image = await readImageFile(imagePath);
+    const completionTokenLimit = data.parameters['completion-token-limit'];
+    const expectations = data.expectations;
+
+    await runGenerateOCRTest(image, expectations, { completionTokenLimit: completionTokenLimit });
+  });
+
+  test(`should be able to generate OCR (large)`, async () => {
+    const data = testData.generate_ocr_large;
+    const imagePath = data.image;
+    const image = await readImageFile(imagePath);
+    const completionTokenLimit = data.parameters['completion-token-limit'];
+    const expectations = data.expectations;
+
+    await runGenerateOCRTest(image, expectations, { completionTokenLimit: completionTokenLimit });
+  });
+});
+
+describe('PicoLLM generate embeddings', () => {
+  test(`should be able to generate embeddings`, async () => {
+    const data = testData.generate_embedding;
+    const prompt = data.prompt;
+    const expectations = data.expectations;
+
+    const picoLLM = new PicoLLM(ACCESS_KEY, EMBEDDING_MODEL_PATH, {
+      device: DEVICE
+    });
+
+    try {
+      const embeddings = await picoLLM.generateEmbeddings(prompt);
+      for (let expectation of expectations) {
+        const docEmbeddings = await picoLLM.generateEmbeddings(expectation.doc);
+        expect(Math.abs(similarityOf(embeddings, docEmbeddings) - expectation.similarity)).toBeLessThan(0.000001);
       }
     } catch (e) {
       expect(e).toBeUndefined();

@@ -48,7 +48,12 @@ jobs:
       run: yarn install
 
     - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o test/phi2-290.pllm
+      run: >
+        // TODO: use the correct idents
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/###/phi2-290.pllm -o phi2-290.pllm &&
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-329.pllm/###/qwen3-vl-2b-it-329.pllm -o qwen3-vl-2b-it-329.pllm &&
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-561.pllm/###/deepseek-ocr-2-561.pllm -o deepseek-ocr-2-561.pllm &&
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/embeddinggemma-300m-137.pllm/###/embeddinggemma-300m-137.pllm -o embeddinggemma-300m-137.pllm
 
     - name: Test
       run: yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}}

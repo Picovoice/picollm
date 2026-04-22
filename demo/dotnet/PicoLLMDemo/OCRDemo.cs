@@ -42,7 +42,7 @@ namespace PicoLLMDemo
                 Console.Out.Flush();
 
                 bool isInterrupt = false;
-                OCRCompletion completion = null;
+                PicoLLMOCRCompletion completion = null;
                 Task interruptKeyTask = Task.Run(async () =>
                 {
                     while (!isInterrupt && completion == null)

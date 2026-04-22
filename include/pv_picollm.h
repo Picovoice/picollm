@@ -181,7 +181,7 @@ PV_API pv_status_t pv_picollm_generate(
  * @param prompt Text prompt.
  * @param image_width Width of the image in pixels.
  * @param image_height Height of the image in pixels.
- * @param image Image pixel data in 8-bit, RGB format.
+ * @param image Image pixel data in 24 bits-per-pixel RGB format.
  * @param completion_token_limit Maximum number of tokens in the completion. If the generation process stops due to
  * reaching this limit, the `endpoint` output argument will be `PV_PICOLLM_ENDPOINT_COMPLETION_TOKEN_LIMIT_REACHED`. Set
  * to `-1` to impose no limit.
@@ -279,7 +279,7 @@ PV_API pv_status_t pv_picollm_generate_embeddings(
  * @param object picoLLM object.
  * @param image_width Width of the image in pixels.
  * @param image_height Height of the image in pixels.
- * @param image Image pixel data in 8-bit, RGB format.
+ * @param image Image pixel data in 24 bits-per-pixel RGB format.
  * @param completion_token_limit Maximum number of tokens in the completion. If the generation process stops due to
  * reaching this limit, the `endpoint` output argument will be `PV_PICOLLM_ENDPOINT_COMPLETION_TOKEN_LIMIT_REACHED`. Set
  * to `-1` to impose no limit.

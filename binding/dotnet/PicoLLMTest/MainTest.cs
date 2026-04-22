@@ -385,7 +385,8 @@ namespace PicoLLMTest
         }
 
         [TestMethod]
-        public void TestGenerateWithImage() {
+        public void TestGenerateWithImage()
+        {
             JToken data = LoadJsonTestData()["generate_with_image"];
             string prompt = data["prompt"].ToObject<string>();
 
@@ -393,9 +394,7 @@ namespace PicoLLMTest
             PicoLLMImage image = LoadImage(imagePath);
 
             int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
-            List<CompletionExpectation> expectations = new List<CompletionExpectation>() {
-                data["expectation"].ToObject<CompletionExpectation>()
-            };
+            List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _visionModelPath, _device))
             {
@@ -408,46 +407,44 @@ namespace PicoLLMTest
         }
 
         [TestMethod]
-        public void TestGenerateOCR() {
+        public void TestGenerateOCR()
+        {
             JToken data = LoadJsonTestData()["generate_ocr"];
 
             string imagePath = data["image"].ToObject<string>();
             PicoLLMImage image = LoadImage(imagePath);
 
             int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
-            OCRExpectation expectation = data["expectation"].ToObject<OCRExpectation>();
+            List<OCRExpectation> expectations = data["expectations"].ToObject<List<OCRExpectation>>();
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
-                OCRCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
-
-                Assert.AreEqual(res.Endpoint, expectation.Endpoint);
-                Assert.AreEqual(res.Completion, expectation.Completion);
+                PicoLLMOCRCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
+                VerifyOCRCompletion(res, expectations);
             }
         }
 
         [TestMethod]
-        public void TestGenerateOCRLarge() {
+        public void TestGenerateOCRLarge()
+        {
             JToken data = LoadJsonTestData()["generate_ocr_large"];
 
             string imagePath = data["image"].ToObject<string>();
             PicoLLMImage image = LoadImage(imagePath);
 
-            // TODO: use "expectations" everywhere
             int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
-            OCRExpectation expectation = data["expectation"].ToObject<OCRExpectation>();
+            List<OCRExpectation> expectations = data["expectations"].ToObject<List<OCRExpectation>>();
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
-                OCRCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
-
-                Assert.AreEqual(res.Endpoint, expectation.Endpoint);
-                Assert.AreEqual(res.Completion, expectation.Completion);
+                PicoLLMOCRCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
+                VerifyOCRCompletion(res, expectations);
             }
         }
 
         [TestMethod]
-        public void TestGenerateEmbedding() {
+        public void TestGenerateEmbedding()
+        {
             JToken data = LoadJsonTestData()["generate_embedding"];
             string prompt = data["prompt"].ToObject<string>();
 
@@ -457,18 +454,12 @@ namespace PicoLLMTest
             {
                 float[] targetEmbeddings = picoLLM.GenerateEmbeddings(prompt);
 
-                bool matchedAnExpectation = false;
+                List<float[]> referenceEmbeddingsList = new List<float[]>();
                 foreach (EmbeddingExpectation expectation in expectations) {
-                    float[] referenceEmbeddings = picoLLM.GenerateEmbeddings(expectation.Doc);
-
-                    double similarity = Similarity(targetEmbeddings, referenceEmbeddings);
-                    if (Math.Abs(similarity - expectation.Similarity) < 0.001) {
-                        matchedAnExpectation = true;
-                        break;
-                    }
+                    referenceEmbeddingsList.Add(picoLLM.GenerateEmbeddings(expectation.Doc));
                 }
 
-                Assert.IsTrue(matchedAnExpectation);
+                VerifyEmbeddingCompletion(targetEmbeddings, referenceEmbeddingsList, expectations);
             }
         }
 
@@ -764,6 +755,40 @@ namespace PicoLLMTest
         private void VerifyCompletion(PicoLLMCompletion res, List<CompletionExpectation> expectations)
         {
             bool anyMatch = expectations.Any(expectation => VerifyCompletionHelper(res, expectation));
+            Assert.IsTrue(anyMatch);
+        }
+
+        private void VerifyOCRCompletion(PicoLLMOCRCompletion res, List<OCRExpectation> expectations)
+        {
+            bool anyMatch = false;
+            foreach (OCRExpectation expectation in expectations) {
+                if (res.Endpoint == expectation.Endpoint && res.Completion == expectation.Completion) {
+                    anyMatch = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(anyMatch);
+        }
+
+        private void VerifyEmbeddingCompletion(
+            float[] targetEmbeddings,
+            List<float[]> referenceEmbeddingsList,
+            List<EmbeddingExpectation> expectations
+        ) {
+            Assert.AreEqual(referenceEmbeddingsList.Count, expectations.Count);
+
+            bool anyMatch = false;
+            for (int i = 0; i < expectations.Count; i++) {
+                EmbeddingExpectation expectation = expectations[i];
+
+                double similarity = Similarity(targetEmbeddings, referenceEmbeddingsList[i]);
+                if (Math.Abs(similarity - expectation.Similarity) < 0.001) {
+                    anyMatch = true;
+                    break;
+                }
+            }
+
             Assert.IsTrue(anyMatch);
         }
 

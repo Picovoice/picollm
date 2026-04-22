@@ -218,7 +218,7 @@ namespace Pv
         }
     }
 
-    public class OCRCompletion {
+    public class PicoLLMOCRCompletion {
         /// <summary>
         /// Reason for ending the generation process.
         /// </summary>
@@ -230,11 +230,11 @@ namespace Pv
         public string Completion { get; }
 
         /// <summary>
-        /// Constructor for the OCRCompletion class.
+        /// Constructor for the PicoLLMOCRCompletion class.
         /// </summary>
         /// <param name="endpoint">Reason for ending the generation process.</param>
         /// <param name="completion">Completion string.</param>
-        public OCRCompletion(
+        public PicoLLMOCRCompletion(
             PicoLLMEndpoint endpoint,
             string completion
         ) {
@@ -263,7 +263,7 @@ namespace Pv
         public int Height { get; }
 
         /// <summary>
-        /// Image pixel data in 8-bit, RGB format.
+        /// Image pixel data in 24 bits-per-pixel RGB format.
         /// </summary>
         public byte[] Pixels { get; }
 
@@ -1043,9 +1043,9 @@ namespace Pv
         /// (0, 100]. A value of 100 indicates that prompt evaluation is complete and completion tokens are now being generated.
         /// Set to `null` to disable this feature.
         /// </param>
-        /// <returns>A pair containing a `PicoLLMEndpoint` and a completion string.</returns>
+        /// <returns>A `PicoLLMOCRCompletion` object containing information and generated tokens.</returns>
         /// <exception cref="PicoLLMException">Thrown when an error occurs during the completion generation process.</exception>
-        public OCRCompletion GenerateOCR(
+        public PicoLLMOCRCompletion GenerateOCR(
             PicoLLMImage image,
             int? completionTokenLimit = null,
             Action<string> streamCallback = null,
@@ -1086,7 +1086,7 @@ namespace Pv
 
             pv_picollm_delete_completion(completionPtr);
 
-            return new OCRCompletion(endpoint, completion);
+            return new PicoLLMOCRCompletion(endpoint, completion);
         }
 
         /// <summary>
@@ -1225,9 +1225,9 @@ namespace Pv
 
         private static readonly Dictionary<string, Type> dialogs = new Dictionary<string, Type>
         {
-            // TODO: add more models here?
             { "gemma-2b-it", typeof(GemmaChatDialog) },
             { "gemma-7b-it", typeof(GemmaChatDialog) },
+            { "gemma-3-it", typeof(Gemma3ChatDialog) },
             { "llama-2-7b-chat", typeof(Llama2ChatDialog) },
             { "llama-2-13b-chat", typeof(Llama2ChatDialog) },
             { "llama-2-70b-chat", typeof(Llama2ChatDialog) },

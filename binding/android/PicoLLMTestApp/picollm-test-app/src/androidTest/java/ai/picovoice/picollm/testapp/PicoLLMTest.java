@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is
     located in the "LICENSE" file accompanying this source.
@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
@@ -41,10 +43,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import ai.picovoice.picollm.GemmaChatDialog;
+import ai.picovoice.picollm.Gemma3ChatDialog;
 import ai.picovoice.picollm.Llama2ChatDialog;
 import ai.picovoice.picollm.Llama3ChatDialog;
 import ai.picovoice.picollm.Llama32ChatDialog;
@@ -58,6 +60,8 @@ import ai.picovoice.picollm.PicoLLMCompletion;
 import ai.picovoice.picollm.PicoLLMDialog;
 import ai.picovoice.picollm.PicoLLMException;
 import ai.picovoice.picollm.PicoLLMGenerateParams;
+import ai.picovoice.picollm.PicoLLMGenerateWithImageParams;
+import ai.picovoice.picollm.PicoLLMGenerateOCRParams;
 
 
 @RunWith(Enclosed.class)
@@ -176,6 +180,17 @@ public class PicoLLMTest {
         public void verifyCompletion(PicoLLMCompletion res, List<CompletionExpectation> expectations) {
             boolean anyMatch = expectations.stream().anyMatch(
                     expectation -> verifyCompletionHelper(res, expectation)
+            );
+            assertTrue(anyMatch);
+        }
+
+        private boolean verifyOCRCompletionHelper(PicoLLMCompletion res, CompletionExpectation expectation) {
+            return res.getCompletion().equals(expectation.getCompletion());
+        }
+
+        public void verifyOCRCompletion(PicoLLMCompletion res, List<CompletionExpectation> expectations) {
+            boolean anyMatch = expectations.stream().anyMatch(
+                    expectation -> verifyOCRCompletionHelper(res, expectation)
             );
             assertTrue(anyMatch);
         }
@@ -518,6 +533,116 @@ public class PicoLLMTest {
         }
 
         @Test
+        public void testGenerateWithImage() throws Exception {
+            JsonObject currentTestData = testData
+                    .getAsJsonObject("generate_with_image");
+
+            int completionTokenLimit = currentTestData
+                    .getAsJsonObject("parameters")
+                    .get("completion-token-limit").getAsInt();
+
+            List<CompletionExpectation> expectations = new Gson().fromJson(
+                    currentTestData.get("expectations"),
+                    new TypeToken<List<CompletionExpectation>>() {
+                    }.getType());
+
+            PicoLLM imagePicollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(imageModelPath)
+                    .setDevice(device)
+                    .build();
+
+            PicoLLMCompletion res = imagePicollm.generateWithImage(
+                    currentTestData.get("prompt").getAsString(),
+                    smallImage.width,
+                    smallImage.height,
+                    smallImage.data,
+                    new PicoLLMGenerateWithImageParams.Builder()
+                            .setCompletionTokenLimit(completionTokenLimit)
+                            .build());
+
+            imagePicollm.delete();
+
+            verifyCompletion(res, expectations);
+        }
+
+        @Test
+        public void testGenerateEmbedding() throws Exception {
+            JsonObject currentTestData = testData
+                    .getAsJsonObject("generate_embedding");
+
+            PicoLLM embeddingPicollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(embeddingModelPath)
+                    .setDevice(device)
+                    .build();
+
+            float[] res = embeddingPicollm.generateEmbeddings(
+                    currentTestData.get("prompt").getAsString());
+
+            JsonArray expectations = currentTestData
+                    .getAsJsonArray("expectations");
+            for (JsonElement expectation : expectations) {
+                String doc = expectation
+                        .getAsJsonObject()
+                        .get("doc").getAsString();
+                float similarity = expectation
+                        .getAsJsonObject()
+                        .get("similarity").getAsFloat();
+
+                float[] ref = embeddingPicollm.generateEmbeddings(doc);
+
+                float sim = computeSimilarity(res, ref);
+
+                assertEquals(sim, similarity, 0.01f);
+            }
+
+            embeddingPicollm.delete();
+        }
+
+        public static float computeSimilarity(float[] x, float[] y) {
+            float sum = 0.0f;
+            for (int i = 0; i < x.length; i++) {
+                sum += x[i] * y[i];
+            }
+
+            return sum;
+        }
+
+        @Test
+        public void testGenerateOCR() throws Exception {
+            JsonObject currentTestData = testData
+                    .getAsJsonObject("generate_ocr");
+
+            int completionTokenLimit = currentTestData
+                    .getAsJsonObject("parameters")
+                    .get("completion-token-limit").getAsInt();
+
+            List<CompletionExpectation> expectations = new Gson().fromJson(
+                    currentTestData.get("expectations"),
+                    new TypeToken<List<CompletionExpectation>>() {
+                    }.getType());
+
+            PicoLLM ocrPicollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(ocrModelPath)
+                    .setDevice(device)
+                    .build();
+
+            PicoLLMCompletion res = ocrPicollm.generateOCR(
+                    smallImage.width,
+                    smallImage.height,
+                    smallImage.data,
+                    new PicoLLMGenerateOCRParams.Builder()
+                            .setCompletionTokenLimit(completionTokenLimit)
+                            .build());
+
+            ocrPicollm.delete();
+
+            verifyOCRCompletion(res, expectations);
+        }
+
+        @Test
         public void testInterrupt() throws Exception {
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
@@ -675,6 +800,8 @@ public class PicoLLMTest {
             switch (dialogName) {
                 case "gemma-chat-dialog":
                     return new GemmaChatDialog.Builder();
+                case "gemma3-chat-dialog":
+                    return new Gemma3ChatDialog.Builder();
                 case "llama-2-chat-dialog":
                     return new Llama2ChatDialog.Builder();
                 case "llama-3-chat-dialog":

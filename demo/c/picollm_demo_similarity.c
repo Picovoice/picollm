@@ -123,7 +123,6 @@ static float calculate_similarity(
         similarity += x[i] * y[i];
     }
 
-
     return similarity;
 }
 

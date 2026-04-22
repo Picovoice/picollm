@@ -35,8 +35,8 @@ jobs:
     env:
       ACCESS_KEY: ${{secrets.PV_VALID_ACCESS_KEY}}
       TEXT_MODEL_PATH: ../../../../phi2-290.pllm
-      OCR_MODEL_PATH: ../../../../deepseek-ocr-2-###.pllm
-      VISION_MODEL_PATH: ../../../../qwen3-vl-2b-it-###.pllm
+      OCR_MODEL_PATH: ../../../../deepseek-ocr-2-561.pllm
+      VISION_MODEL_PATH: ../../../../qwen3-vl-2b-it-329.pllm
       EMBEDDING_MODEL_PATH: ../../../../embeddinggemma-300m-137.pllm
       DEVICE: ${{matrix.device}}
 
@@ -58,10 +58,10 @@ jobs:
 
     - name: Download resource files
       run: >
-        // TODO: use the correct models when they are ready
-        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm &&
-        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-###.pllm/###/deepseek-ocr-2-###.pllm -o deepseek-ocr-2-###.pllm &&
-        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-###.pllm/###/qwen3-vl-2b-it-###.pllm -o qwen3-vl-2b-it-###.pllm &&
+        // TODO: use the correct idents
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/###/phi2-290.pllm -o phi2-290.pllm &&
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-561.pllm/###/deepseek-ocr-2-561.pllm -o deepseek-ocr-2-561.pllm &&
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-329.pllm/###/qwen3-vl-2b-it-329.pllm -o qwen3-vl-2b-it-329.pllm &&
         curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/embeddinggemma-300m-137.pllm/###/embeddinggemma-300m-137.pllm -o embeddinggemma-300m-137.pllm
       working-directory: binding/dotnet
 

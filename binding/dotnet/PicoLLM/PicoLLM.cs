@@ -1024,9 +1024,9 @@ namespace Pv
         }
 
         /// <summary>
-        /// Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
-        /// 
-        /// For use with vision models only.
+        /// Generates a completion text representing text found in the given image.
+        ///    
+        /// For use with OCR (Optical Character Recognition) models only.
         /// </summary>
         /// <param name="image">The input image.</param>
         /// <param name="completionTokenLimit">

@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Picovoice Inc.
+# Copyright 2024-2026 Picovoice Inc.
 #
 # You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 # file accompanying this source.
@@ -16,9 +16,13 @@ import os
 import sys
 import unittest
 from dataclasses import dataclass
+from PIL import (
+    Image
+)
 from typing import (
     Any,
     Dict,
+    Optional,
     Sequence,
     Tuple,
     Type,
@@ -31,6 +35,7 @@ from ._factory import (
 from ._picollm import (
     Dialog,
     GemmaChatDialog,
+    Gemma3ChatDialog,
     Llama2ChatDialog,
     Llama3ChatDialog,
     Llama32ChatDialog,
@@ -51,10 +56,10 @@ from ._util import pv_library_path
 
 @dataclass
 class CompletionExpectation:
-    num_prompt_tokens: int
-    num_completion_tokens: int
+    num_prompt_tokens: Optional[int]
+    num_completion_tokens: Optional[int]
     endpoint: PicoLLMEndpoints
-    num_top_choices: int
+    num_top_choices: Optional[int]
     completion: str
 
 
@@ -63,18 +68,93 @@ class PicollmTestCase(unittest.TestCase):
     def setUpClass(cls):
         cls._access_key = sys.argv[1]
         cls._model_path = sys.argv[2]
-        cls._device = sys.argv[3]
+        cls._vlm_model_path = sys.argv[3]
+        cls._ocr_model_path = sys.argv[4]
+        cls._embedding_model_path = sys.argv[5]
+        cls._device = sys.argv[6]
 
         path = os.path.join(os.path.dirname(__file__), '../../resources/.test/test_data.json')
         with open(path, encoding='utf-8') as f:
-            cls.data = json.load(f)["picollm"]
+            cls.data = json.load(f)
 
+    @staticmethod
+    def _verify_completion_helper(res: PicoLLMCompletion, expectation: CompletionExpectation) -> bool:
+        if res.usage is not None:
+            if res.usage.prompt_tokens != expectation.num_prompt_tokens:
+                return False
+            if res.usage.completion_tokens != expectation.num_completion_tokens:
+                return False
+
+        if res.endpoint is not expectation.endpoint:
+            return False
+
+        if res.completion_tokens is not None:
+            for completion_token in res.completion_tokens:
+                if len(completion_token.token.token) == 0:
+                    return False
+
+                if completion_token.token.log_prob > 0.:
+                    return False
+
+                if len(completion_token.top_choices) != expectation.num_top_choices:
+                    return False
+
+                for top_choice in completion_token.top_choices:
+                    if len(top_choice.token) == 0:
+                        return False
+
+                    if top_choice.log_prob > 0.:
+                        return False
+
+                if len(completion_token.top_choices) > 0:
+                    if sum([math.exp(x.log_prob) for x in completion_token.top_choices]) > 1.:
+                        return False
+
+            if not any('\\x' in x.token.token for x in res.completion_tokens):
+                if ''.join(x.token.token for x in res.completion_tokens) != expectation.completion:
+                    return False
+
+        if res.completion != expectation.completion:
+            return False
+
+        return True
+
+    def _verify_completion(
+            self,
+            res: PicoLLMCompletion,
+            expectations: Sequence[CompletionExpectation]):
+        self.assertTrue(
+            any(self._verify_completion_helper(res, expectation) for expectation in expectations),
+            msg=str(res))
+
+    @staticmethod
+    def _parse_expectations(expectations: Sequence[Dict[str, Any]]) -> Sequence[CompletionExpectation]:
+        def _parse_endpoint(ep: str) -> PicoLLMEndpoints:
+            return {
+                "END_OF_SENTENCE": PicoLLMEndpoints.END_OF_SENTENCE,
+                "COMPLETION_TOKEN_LIMIT_REACHED": PicoLLMEndpoints.COMPLETION_TOKEN_LIMIT_REACHED,
+                "STOP_PHRASE_ENCOUNTERED": PicoLLMEndpoints.STOP_PHRASE_ENCOUNTERED,
+                "INTERRUPTED": PicoLLMEndpoints.INTERRUPTED
+            }[ep]
+
+        return [
+            CompletionExpectation(
+                num_prompt_tokens=x["num-prompt-tokens"] if "num-prompt-tokens" in x else None,
+                num_completion_tokens=x["num-completion-tokens"] if "num-completion-tokens" in x else None,
+                endpoint=_parse_endpoint(x["endpoint"]),
+                num_top_choices=x["num-top-choices"] if "num-top-choices" in x else None,
+                completion=x["completion"])
+            for x in expectations
+        ]
+
+class PicollmTextTestCase(PicollmTestCase):
     def setUp(self):
         self._picollm = PicoLLM(
             access_key=self._access_key,
             model_path=self._model_path,
             device=self._device,
             library_path=pv_library_path('../..'))
+        self.data = data['picollm']
 
     def tearDown(self):
         self._picollm.release()
@@ -114,74 +194,6 @@ class PicollmTestCase(unittest.TestCase):
                     model_path=self._model_path,
                     device=self._device,
                     library_path="/invalid.so")
-
-    @staticmethod
-    def _verify_completion_helper(res: PicoLLMCompletion, expectation: CompletionExpectation) -> bool:
-        if res.usage.prompt_tokens != expectation.num_prompt_tokens:
-            return False
-        if res.usage.completion_tokens != expectation.num_completion_tokens:
-            return False
-
-        if res.endpoint is not expectation.endpoint:
-            return False
-
-        for completion_token in res.completion_tokens:
-            if len(completion_token.token.token) == 0:
-                return False
-
-            if completion_token.token.log_prob > 0.:
-                return False
-
-            if len(completion_token.top_choices) != expectation.num_top_choices:
-                return False
-
-            for top_choice in completion_token.top_choices:
-                if len(top_choice.token) == 0:
-                    return False
-
-                if top_choice.log_prob > 0.:
-                    return False
-
-            if len(completion_token.top_choices) > 0:
-                if sum([math.exp(x.log_prob) for x in completion_token.top_choices]) > 1.:
-                    return False
-
-        if not any('\\x' in x.token.token for x in res.completion_tokens):
-            if ''.join(x.token.token for x in res.completion_tokens) != expectation.completion:
-                return False
-
-        if res.completion != expectation.completion:
-            return False
-
-        return True
-
-    def _verify_completion(
-            self,
-            res: PicoLLMCompletion,
-            expectations: Sequence[CompletionExpectation]):
-        self.assertTrue(
-            any(self._verify_completion_helper(res, expectation) for expectation in expectations),
-            msg=str(res))
-
-    @staticmethod
-    def _parse_expectations(expectations: Sequence[Dict[str, Any]]) -> Sequence[CompletionExpectation]:
-        def _parse_endpoint(ep: str) -> PicoLLMEndpoints:
-            return {
-                "END_OF_SENTENCE": PicoLLMEndpoints.END_OF_SENTENCE,
-                "COMPLETION_TOKEN_LIMIT_REACHED": PicoLLMEndpoints.COMPLETION_TOKEN_LIMIT_REACHED,
-                "STOP_PHRASE_ENCOUNTERED": PicoLLMEndpoints.STOP_PHRASE_ENCOUNTERED,
-                "INTERRUPTED": PicoLLMEndpoints.INTERRUPTED
-            }[ep]
-
-        return [
-            CompletionExpectation(
-                num_prompt_tokens=x["num-prompt-tokens"],
-                num_completion_tokens=x["num-completion-tokens"],
-                endpoint=_parse_endpoint(x["endpoint"]),
-                num_top_choices=x["num-top-choices"],
-                completion=x["completion"])
-            for x in expectations
-        ]
 
     def test_generate_default(self) -> None:
         data = self.data["default"]
@@ -464,11 +476,186 @@ class PicollmTestCase(unittest.TestCase):
             self.assertListEqual(list(error), list(e.message_stack))
 
 
+class PicollmVlmTestCase(PicollmTestCase):
+
+    def setUp(self):
+        self._picollm = PicoLLM(
+            access_key=self._access_key,
+            model_path=self._vlm_model_path,
+            device=self._device,
+            library_path=pv_library_path('../..'))
+
+    def tearDown(self):
+        self._picollm.release()
+
+    def test_generate_with_image(self) -> None:
+        data = self.data["generate_with_image"]
+        test_image = data["image"]
+        image_path = os.path.join(
+            os.path.dirname(__file__),
+            '../../resources/.test/images',
+            test_image)
+        image = Image.open(image_path).convert("RGB")
+
+        prompt = data["prompt"]
+        completion_token_limit = data["parameters"]["completion-token-limit"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        pieces = list()
+
+        progress = [0.0]
+
+        def stream_callback(x: str) -> None:
+            pieces.append(x)
+
+        def progress_callback(x: float) -> None:
+            progress[0] = x
+
+        res = self._picollm.generate_with_image(
+            prompt=prompt,
+            image_width=image.width,
+            image_height=image.height,
+            image=image.tobytes(),
+            completion_token_limit=completion_token_limit,
+            temperature=0.0,
+            top_p=0.9,
+            num_top_choices=0,
+            stream_callback=stream_callback,
+            prompt_progress_callback=progress_callback)
+        self._verify_completion(
+            res=res,
+            expectations=expectations)
+
+        self.assertEqual(''.join(pieces), expectations[0].completion)
+        self.assertGreaterEqual(progress[0], 100.0)
+
+
+class PicollmOcrTestCase(PicollmTestCase):
+
+    def setUp(self):
+        self._picollm = PicoLLM(
+            access_key=self._access_key,
+            model_path=self._ocr_model_path,
+            device=self._device,
+            library_path=pv_library_path('../..'))
+
+    def tearDown(self):
+        self._picollm.release()
+
+    def test_generate_ocr(self) -> None:
+        data = self.data["generate_ocr"]
+        test_image = data["image"]
+        image_path = os.path.join(
+            os.path.dirname(__file__),
+            '../../resources/.test/images',
+            test_image)
+        image = Image.open(image_path).convert("RGB")
+
+        completion_token_limit = data["parameters"]["completion-token-limit"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        pieces = list()
+
+        progress = [0.0]
+
+        def stream_callback(x: str) -> None:
+            pieces.append(x)
+
+        def progress_callback(x: float) -> None:
+            progress[0] = x
+
+        res = self._picollm.generate_ocr(
+            image_width=image.width,
+            image_height=image.height,
+            image=image.tobytes(),
+            completion_token_limit=completion_token_limit,
+            stream_callback=stream_callback,
+            prompt_progress_callback=progress_callback)
+        self._verify_completion(
+            res=res,
+            expectations=expectations)
+
+        self.assertEqual(''.join(pieces), expectations[0].completion)
+        self.assertGreaterEqual(progress[0], 100.0)
+
+    def test_generate_ocr_large(self) -> None:
+        if 'raspberry-pi' not in pv_library_path('../..'):
+            data = self.data["generate_ocr_large"]
+            test_image = data["image"]
+            image_path = os.path.join(
+                os.path.dirname(__file__),
+                '../../resources/.test/images',
+                test_image)
+            image = Image.open(image_path).convert("RGB")
+
+            completion_token_limit = data["parameters"]["completion-token-limit"]
+            expectations = self._parse_expectations(data["expectations"])
+
+            pieces = list()
+
+            progress = [0.0]
+
+            def stream_callback(x: str) -> None:
+                pieces.append(x)
+
+            def progress_callback(x: float) -> None:
+                progress[0] = x
+
+            res = self._picollm.generate_ocr(
+                image_width=image.width,
+                image_height=image.height,
+                image=image.tobytes(),
+                completion_token_limit=completion_token_limit,
+                stream_callback=stream_callback,
+                prompt_progress_callback=progress_callback)
+            self._verify_completion(
+                res=res,
+                expectations=expectations)
+
+            self.assertEqual(''.join(pieces), expectations[0].completion)
+            self.assertGreaterEqual(progress[0], 100.0)
+
+
+class PicollmEmbeddingTestCase(PicollmTestCase):
+
+    def setUp(self):
+        self._picollm = PicoLLM(
+            access_key=self._access_key,
+            model_path=self._embedding_model_path,
+            device=self._device,
+            library_path=pv_library_path('../..'))
+
+    def tearDown(self):
+        self._picollm.release()
+
+    @staticmethod
+    def _calculate_similarity(
+            x: Sequence[float],
+            y: Sequence[float]) -> float:
+        similarity = 0.0
+        for i in range(len(x)):
+            similarity += x[i] * y[i]
+        return similarity
+
+    def test_generate_embeddings(self) -> None:
+        data = self.data["generate_embedding"]
+        prompt = data["prompt"]
+
+        res_prompt = self._picollm.generate_embeddings(prompt)
+
+        for x in data["expectations"]:
+            res_doc = self._picollm.generate_embeddings(x["doc"])
+            self.assertEqual(len(res_prompt), len(res_doc))
+            similarity = self._calculate_similarity(res_prompt, res_doc)
+            self.assertAlmostEqual(similarity, x["similarity"], 3)
+
+
 class DialogTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         dialog_classes = {
             "gemma-chat-dialog": GemmaChatDialog,
+            "gemma3-chat-dialog": Gemma3ChatDialog,
             "llama-2-chat-dialog": Llama2ChatDialog,
             "llama-3-chat-dialog": Llama3ChatDialog,
             "llama-3.2-chat-dialog": Llama32ChatDialog,
@@ -539,8 +726,9 @@ class AvailableDevicesTestCase(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print("usage: test_picollm.py ${AccessKey} ${ModelFile} ${device}")
+    if len(sys.argv) != 7:
+        print("usage: test_picollm.py ${AccessKey} ${TextModelFile} "
+              "${VlmModelFile} ${OcrModelFile} ${EmbeddingModelFile} ${Device}")
         exit(1)
 
     unittest.main(argv=sys.argv[:1], verbosity=2)

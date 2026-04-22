@@ -1,5 +1,5 @@
 #
-# Copyright 2024-2025 Picovoice Inc.
+# Copyright 2024-2026 Picovoice Inc.
 #
 # You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 # file accompanying this source.
@@ -22,7 +22,9 @@ from ctypes import (
     c_char_p,
     c_float,
     c_int32,
+    c_uint8,
     c_void_p,
+    cast
 )
 from dataclasses import dataclass
 from enum import Enum
@@ -118,6 +120,15 @@ class GemmaChatDialog(Dialog):
         res.append(f"<start_of_turn>user\n{human[-1]}<end_of_turn>\n<start_of_turn>model")
 
         return ''.join(res)
+
+
+class Gemma3ChatDialog(GemmaChatDialog):
+    """
+    Dialog helper for `gemma-3-270m-it`.
+    """
+
+    def __init__(self, history: Optional[int] = None, system: Optional[str] = None) -> None:
+        super().__init__(history=history, system=system)
 
 
 class Llama2ChatDialog(Dialog):
@@ -463,10 +474,13 @@ class PicoLLMCompletion:
             space = ' ' * n
             return '\n'.join(f'{space}{x}' for x in s.split('\n'))
 
-        cts = ',\n'.join('\n'.join(f"        {x}" for x in str(ct).split('\n')) for ct in self.completion_tokens)
+        if self.completion_tokens is not None:
+            cts = ',\n'.join('\n'.join(f"        {x}" for x in str(ct).split('\n')) for ct in self.completion_tokens)
+        else:
+            cts = ''
 
         return f"""{{
-{shift_right(str(self.usage), 4)},
+{shift_right(str(self.usage), 4) if self.usage is not None else ''},
     endpoint: {str(self.endpoint)},
     completion-tokens: [
 {cts}
@@ -624,6 +638,59 @@ class PicoLLM(object):
         ]
         self._generate_func.restype = self.PicovoiceStatuses
 
+        self._generate_with_image_func = library.pv_picollm_generate_with_image
+        self._generate_with_image_func.argtypes = [
+            POINTER(self.CPicoLLM),
+            c_char_p,
+            c_int32,
+            c_int32,
+            POINTER(c_uint8),
+            c_int32,
+            POINTER(c_char_p),
+            c_int32,
+            c_int32,
+            c_float,
+            c_float,
+            c_float,
+            c_float,
+            c_int32,
+            CFUNCTYPE(None, c_char_p, c_void_p),
+            c_void_p,
+            CFUNCTYPE(None, c_float, c_void_p),
+            c_void_p,
+            POINTER(self.CPicoLLMUsage),
+            POINTER(c_int32),
+            POINTER(POINTER(self.CPicoLLMCompletionToken)),
+            POINTER(c_int32),
+            POINTER(c_char_p),
+        ]
+        self._generate_with_image_func.restype = self.PicovoiceStatuses
+
+        self._generate_ocr_func = library.pv_picollm_generate_ocr
+        self._generate_ocr_func.argtypes = [
+            POINTER(self.CPicoLLM),
+            c_int32,
+            c_int32,
+            POINTER(c_uint8),
+            c_int32,
+            CFUNCTYPE(None, c_char_p, c_void_p),
+            c_void_p,
+            CFUNCTYPE(None, c_float, c_void_p),
+            c_void_p,
+            POINTER(c_int32),
+            POINTER(c_char_p),
+        ]
+        self._generate_ocr_func.restype = self.PicovoiceStatuses
+
+        self._generate_embeddings_func = library.pv_picollm_generate_embeddings
+        self._generate_embeddings_func.argtypes = [
+            POINTER(self.CPicoLLM),
+            c_char_p,
+            POINTER(c_int32),
+            POINTER(POINTER(c_float)),
+        ]
+        self._generate_embeddings_func.restype = self.PicovoiceStatuses
+
         self._interrupt_func = library.pv_picollm_interrupt
         self._interrupt_func.argtypes = [
             POINTER(self.CPicoLLM),
@@ -642,6 +709,12 @@ class PicoLLM(object):
             c_char_p,
         ]
         self._delete_completion_func.restype = None
+
+        self._delete_embeddings_func = library.pv_picollm_delete_embeddings
+        self._delete_embeddings_func.argtypes = [
+            POINTER(c_float),
+        ]
+        self._delete_embeddings_func.restype = None
 
         self._tokenize_func = library.pv_picollm_tokenize
         self._tokenize_func.argtypes = [
@@ -669,11 +742,11 @@ class PicoLLM(object):
         ]
         self._forward_func.restype = self.PicovoiceStatuses
 
-        self._delete_logits = library.pv_picollm_delete_logits
-        self._delete_logits.argtypes = [
+        self._delete_logits_func = library.pv_picollm_delete_logits
+        self._delete_logits_func.argtypes = [
             POINTER(c_float),
         ]
-        self._delete_logits.restype = None
+        self._delete_logits_func.restype = None
 
         self._reset_func = library.pv_picollm_reset
         self._reset_func.argtypes = [
@@ -721,6 +794,60 @@ class PicoLLM(object):
         max_top_choices_func.argtypes = []
         max_top_choices_func.restype = c_int32
         self._max_top_choices = max_top_choices_func()
+
+    def _create_completion(
+            self,
+            c_usage,
+            c_endpoint,
+            c_num_completion_tokens,
+            c_completion_tokens,
+            c_completion) -> PicoLLMCompletion:
+
+        usage = None
+        if c_usage is not None:
+            usage = PicoLLMUsage(prompt_tokens=c_usage.prompt_tokens, completion_tokens=c_usage.completion_tokens)
+
+        endpoint = PicoLLMEndpoints(c_endpoint.value)
+
+        completion_tokens = None
+        if c_num_completion_tokens > 0 and c_completion_tokens is not None:
+            completion_tokens = list()
+            for i in range(c_num_completion_tokens):
+                c_token = c_completion_tokens[i].token
+
+                try:
+                    tt = c_token.token.decode('utf-8')
+                except UnicodeDecodeError:
+                    tt_hex = c_token.token.hex().upper()
+                    tt = ''.join(f"\\x{tt_hex[j:(j + 2)]}" for j in range(0, len(tt_hex), 2))
+
+                token = PicoLLMToken(token=tt, log_prob=c_token.log_prob)
+
+                top_choices = list()
+                for j in range(c_completion_tokens[i].num_top_choices):
+                    c_top_choice = c_completion_tokens[i].top_choices[j]
+
+                    try:
+                        tt = c_top_choice.token.decode('utf-8')
+                    except UnicodeDecodeError:
+                        tt_hex = c_top_choice.token.hex().upper()
+                        tt = ''.join(f"\\x{tt_hex[j:(j + 2)]}" for j in range(0, len(tt_hex), 2))
+
+                    top_choice = PicoLLMToken(token=tt, log_prob=c_top_choice.log_prob)
+                    top_choices.append(top_choice)
+                completion_token = PicoLLMCompletionToken(token=token, top_choices=top_choices)
+                completion_tokens.append(completion_token)
+
+            self._delete_completion_tokens_func(c_completion_tokens, c_num_completion_tokens)
+
+        completion = c_completion.value.decode('utf-8')
+        self._delete_completion_func(c_completion)
+
+        return PicoLLMCompletion(
+            usage=usage,
+            endpoint=endpoint,
+            completion_tokens=completion_tokens,
+            completion=completion)
 
     def generate(
             self,
@@ -809,45 +936,226 @@ class PicoLLM(object):
                 message_stack=self.get_error_stack()
             )
 
-        usage = PicoLLMUsage(prompt_tokens=c_usage.prompt_tokens, completion_tokens=c_usage.completion_tokens)
-        endpoint = PicoLLMEndpoints(c_endpoint.value)
-        completion_tokens = list()
-        for i in range(c_num_completion_tokens.value):
-            c_token = c_completion_tokens[i].token
-
-            try:
-                tt = c_token.token.decode('utf-8')
-            except UnicodeDecodeError:
-                tt_hex = c_token.token.hex().upper()
-                tt = ''.join(f"\\x{tt_hex[j:(j + 2)]}" for j in range(0, len(tt_hex), 2))
-
-            token = PicoLLMToken(token=tt, log_prob=c_token.log_prob)
-
-            top_choices = list()
-            for j in range(c_completion_tokens[i].num_top_choices):
-                c_top_choice = c_completion_tokens[i].top_choices[j]
-
-                try:
-                    tt = c_top_choice.token.decode('utf-8')
-                except UnicodeDecodeError:
-                    tt_hex = c_top_choice.token.hex().upper()
-                    tt = ''.join(f"\\x{tt_hex[j:(j + 2)]}" for j in range(0, len(tt_hex), 2))
-
-                top_choice = PicoLLMToken(token=tt, log_prob=c_top_choice.log_prob)
-                top_choices.append(top_choice)
-            completion_token = PicoLLMCompletionToken(token=token, top_choices=top_choices)
-            completion_tokens.append(completion_token)
-        completion = c_completion.value.decode('utf-8')
-
-        self._delete_completion_tokens_func(c_completion_tokens, c_num_completion_tokens.value)
-        self._delete_completion_func(c_completion)
-
-        return PicoLLMCompletion(
-            usage=usage,
-            endpoint=endpoint,
-            completion_tokens=completion_tokens,
-            completion=completion
+        return self._create_completion(
+            c_usage,
+            c_endpoint,
+            c_num_completion_tokens.value,
+            c_completion_tokens,
+            c_completion
         )
+
+    def generate_with_image(
+            self,
+            prompt: str,
+            image_width: int,
+            image_height: int,
+            image: bytes,
+            completion_token_limit: Optional[int] = None,
+            stop_phrases: Optional[Set[str]] = None,
+            seed: Optional[int] = None,
+            presence_penalty: float = 0.,
+            frequency_penalty: float = 0.,
+            temperature: float = 0.,
+            top_p: float = 1.,
+            num_top_choices: int = 0,
+            stream_callback: Callable[[str], None] = None,
+            prompt_progress_callback: Callable[[float], None] = None) -> PicoLLMCompletion:
+        """
+        Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
+
+        For use with vision models only.
+
+        :param prompt: Text prompt.
+        :param image_width: Width of the image in pixels.
+        :param image_height: Height of the image in pixels.
+        :param image: Image pixel data in 8-bit, RGB format.
+        :param completion_token_limit: Maximum number of tokens in the completion. If the generation process stops due
+        to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be
+        `PicoLLMEndpoints.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `None` to impose no limit.
+        :param stop_phrases: The generation process stops when it encounters any of these phrases in the completion. The
+        already generated completion, including the encountered stop phrase, will be returned. The `endpoint` parameter
+        in `PicoLLMCompletion` output will be `PicoLLMEndpoints.STOP_PHRASE_ENCOUNTERED`. Set to `None` to turn off this
+        feature.
+        :param seed: The internal random number generator uses it as its seed if set to a positive integer value.
+        Seeding enforces deterministic outputs. Set to `None` for randomized outputs for a given prompt.
+        :param presence_penalty: It penalizes logits already appearing in the partial completion if set to a positive
+        value. If set to `0.0`, it has no effect.
+        :param frequency_penalty: If set to a positive floating-point value, it penalizes logits proportional to the
+        frequency of their appearance in the partial completion. If set to `0.0`, it has no effect.
+        :param temperature: Sampling temperature. Temperature is a non-negative floating-point value that controls the
+        randomness of the sampler. A higher temperature smoothens the samplers' output, increasing the randomness. In
+        contrast, a lower temperature creates a narrower distribution and reduces variability. Setting it to `0` selects
+        the maximum logit during sampling.
+        :param top_p: A positive floating-point number within 0, and 1. It restricts the sampler's choices to
+        high-probability logits that form the `top_p` portion of the probability mass. Hence, it avoids randomly
+        selecting unlikely logits. A value of `1.` enables the sampler to pick any token with non-zero probability,
+        turning off the feature.
+        :param num_top_choices: If set to a positive value, picoLLM returns the list of the highest probability tokens
+        for any generated token. Set to `0` to turn off the feature. The maximum number of top choices is
+        `.max_top_choices`.
+        :param stream_callback: If not set to `None`, picoLLM executes this callback every time a new piece of
+        completion string becomes available.
+        :param prompt_progress_callback: If not set to `None`, picoLLM uses this callback to report the prompt evaluation
+        progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete
+        and completion tokens are now being generated
+
+        :return: Completion result.
+        """
+
+        completion_token_limit = -1 if completion_token_limit is None else completion_token_limit
+        stop_phrases = list() if stop_phrases is None else stop_phrases
+        seed = -1 if seed is None else seed
+
+        def callback(x: bytes, _: Any) -> None:
+            if stream_callback is not None:
+                stream_callback(x.decode())
+
+        def progress_callback(x: float, _: Any) -> None:
+            if prompt_progress_callback is not None:
+                prompt_progress_callback(x)
+
+        c_usage = self.CPicoLLMUsage()
+        c_endpoint = c_int32()
+        c_num_completion_tokens = c_int32()
+        c_completion_tokens = POINTER(self.CPicoLLMCompletionToken)()
+        c_completion = c_char_p()
+
+        # noinspection PyCallingNonCallable,PyTypeChecker
+        status = self._generate_with_image_func(
+            self._handle,
+            prompt.encode(),
+            image_width,
+            image_height,
+            cast(image, POINTER(c_uint8)),
+            completion_token_limit,
+            (c_char_p * len(stop_phrases))(*[x.encode() for x in stop_phrases]) if len(stop_phrases) > 0 else None,
+            len(stop_phrases),
+            seed,
+            presence_penalty,
+            frequency_penalty,
+            temperature,
+            top_p,
+            num_top_choices,
+            CFUNCTYPE(None, c_char_p, c_void_p)(callback),
+            None,
+            CFUNCTYPE(None, c_float, c_void_p)(progress_callback),
+            None,
+            byref(c_usage),
+            byref(c_endpoint),
+            byref(c_completion_tokens),
+            byref(c_num_completion_tokens),
+            byref(c_completion),
+        )
+        if status is not self.PicovoiceStatuses.SUCCESS:
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message='`pv_picollm_generate_with_image` failed.',
+                message_stack=self.get_error_stack()
+            )
+
+        return self._create_completion(
+            c_usage,
+            c_endpoint,
+            c_num_completion_tokens.value,
+            c_completion_tokens,
+            c_completion
+        )
+
+    def generate_ocr(
+            self,
+            image_width: int,
+            image_height: int,
+            image: bytes,
+            completion_token_limit: Optional[int] = None,
+            stream_callback: Callable[[str], None] = None,
+            prompt_progress_callback: Callable[[float], None] = None) -> PicoLLMCompletion:
+        """
+        Generates a completion text representing text found in the given image.
+
+        For use with OCR (Optical Character Recognition) models only.
+
+        :param image_width: Width of the image in pixels.
+        :param image_height: Height of the image in pixels.
+        :param image: Image pixel data in 8-bit, RGB format.
+        :param completion_token_limit: Maximum number of tokens in the completion. If the generation process stops due
+        to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be
+        `PicoLLMEndpoints.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `None` to impose no limit.
+        :param stream_callback: If not set to `None`, picoLLM executes this callback every time a new piece of
+        completion string becomes available.
+        :param prompt_progress_callback: If not set to `None`, picoLLM uses this callback to report the prompt evaluation
+        progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete
+        and completion tokens are now being generated
+
+        :return: Completion result.
+        """
+
+        completion_token_limit = -1 if completion_token_limit is None else completion_token_limit
+
+        def callback(x: bytes, _: Any) -> None:
+            if stream_callback is not None:
+                stream_callback(x.decode())
+
+        def progress_callback(x: float, _: Any) -> None:
+            if prompt_progress_callback is not None:
+                prompt_progress_callback(x)
+
+        c_endpoint = c_int32()
+        c_completion = c_char_p()
+
+        # noinspection PyCallingNonCallable,PyTypeChecker
+        status = self._generate_ocr_func(
+            self._handle,
+            image_width,
+            image_height,
+            cast(image, POINTER(c_uint8)),
+            completion_token_limit,
+            CFUNCTYPE(None, c_char_p, c_void_p)(callback),
+            None,
+            CFUNCTYPE(None, c_float, c_void_p)(progress_callback),
+            None,
+            byref(c_endpoint),
+            byref(c_completion),
+        )
+        if status is not self.PicovoiceStatuses.SUCCESS:
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message='`pv_picollm_generate_ocr` failed.',
+                message_stack=self.get_error_stack()
+            )
+
+        return self._create_completion(
+            None,
+            c_endpoint,
+            0,
+            None,
+            c_completion
+        )
+
+    def generate_embeddings(self, prompt: str) -> Sequence[float]:
+        """
+        Generates numerical vector representations of the input text prompt.
+
+        For use with embedding models only.
+
+        :param prompt: Text prompt.
+        :return: Generated embeddings.
+        """
+
+        c_embeddings = POINTER(c_float)()
+        c_num_embeddings = c_int32()
+        status = self._generate_embeddings_func(
+            self._handle,
+            prompt.encode(),
+            byref(c_num_embeddings),
+            byref(c_embeddings))
+        if status is not self.PicovoiceStatuses.SUCCESS:
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message="`pv_picollm_generate_embeddings` failed.",
+                message_stack=self.get_error_stack()
+            )
+
+        embeddings = [c_embeddings[i] for i in range(c_num_embeddings.value)]
+        self._delete_embeddings_func(c_embeddings)
+
+        return embeddings
 
     def interrupt(self) -> None:
         """
@@ -916,7 +1224,7 @@ class PicoLLM(object):
             )
 
         logits = [c_logits[i] for i in range(c_num_logits.value)]
-        self._delete_logits(c_logits)
+        self._delete_logits_func(c_logits)
 
         return logits
 
@@ -981,6 +1289,7 @@ class PicoLLM(object):
     _DIALOGS: Dict[str, Union[Type[Dialog], Dict[str, Type[Dialog]]]] = {
         'gemma-2b-it': GemmaChatDialog,
         'gemma-7b-it': GemmaChatDialog,
+        'gemma-3-270m-it': Gemma3ChatDialog,
         'llama-2-7b-chat': Llama2ChatDialog,
         'llama-2-13b-chat': Llama2ChatDialog,
         'llama-2-70b-chat': Llama2ChatDialog,
@@ -1045,6 +1354,7 @@ class PicoLLM(object):
 __all__ = [
     'Dialog',
     'GemmaChatDialog',
+    'Gemma3ChatDialog',
     'Llama2ChatDialog',
     'Llama3ChatDialog',
     'Llama32ChatDialog',

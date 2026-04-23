@@ -218,36 +218,6 @@ namespace Pv
         }
     }
 
-    public class PicoLLMOCRCompletion {
-        /// <summary>
-        /// Reason for ending the generation process.
-        /// </summary>
-        public PicoLLMEndpoint Endpoint { get; }
-
-        /// <summary>
-        /// Completion string.
-        /// </summary>
-        public string Completion { get; }
-
-        /// <summary>
-        /// Constructor for the PicoLLMOCRCompletion class.
-        /// </summary>
-        /// <param name="endpoint">Reason for ending the generation process.</param>
-        /// <param name="completion">Completion string.</param>
-        public PicoLLMOCRCompletion(
-            PicoLLMEndpoint endpoint,
-            string completion
-        ) {
-            Endpoint = endpoint;
-            Completion = completion;
-        }
-
-        public override string ToString()
-        {
-            return $"{{\n    endpoint: {Endpoint.ToString()},\n    completion: '{Completion}'\n}}";
-        }
-    }
-
     /// <summary>
     /// Represents an RGB image.
     /// </summary>
@@ -1043,9 +1013,9 @@ namespace Pv
         /// (0, 100]. A value of 100 indicates that prompt evaluation is complete and completion tokens are now being generated.
         /// Set to `null` to disable this feature.
         /// </param>
-        /// <returns>A `PicoLLMOCRCompletion` object containing information and generated tokens.</returns>
+        /// <returns>A `PicoLLMCompletion` object containing information and generated tokens.</returns>
         /// <exception cref="PicoLLMException">Thrown when an error occurs during the completion generation process.</exception>
-        public PicoLLMOCRCompletion GenerateOCR(
+        public PicoLLMCompletion GenerateOCR(
             PicoLLMImage image,
             int? completionTokenLimit = null,
             Action<string> streamCallback = null,
@@ -1086,7 +1056,7 @@ namespace Pv
 
             pv_picollm_delete_completion(completionPtr);
 
-            return new PicoLLMOCRCompletion(endpoint, completion);
+            return new PicoLLMCompletion(null, endpoint, null, completion);
         }
 
         /// <summary>

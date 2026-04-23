@@ -116,7 +116,7 @@ namespace Pv
 
             return Encoding.UTF8.GetString(data.ToArray());
         }
-        
+
         public static float[] GetFloatArrayFromPtr(IntPtr floatArray, int numElements)
         {
             float[] destArray = new float[numElements];

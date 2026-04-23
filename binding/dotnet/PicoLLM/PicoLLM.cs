@@ -221,7 +221,8 @@ namespace Pv
     /// <summary>
     /// Represents an RGB image.
     /// </summary>
-    public class PicoLLMImage {
+    public class PicoLLMImage
+    {
         /// <summary>
         /// Image width.
         /// </summary>
@@ -237,12 +238,14 @@ namespace Pv
         /// </summary>
         public byte[] Pixels { get; }
 
-        public PicoLLMImage(int width, int height, byte[] pixels) {
+        public PicoLLMImage(int width, int height, byte[] pixels)
+        {
             Width = width;
             Height = height;
             Pixels = pixels;
 
-            if (width * height * 3 != pixels.Length) {
+            if (width * height * 3 != pixels.Length)
+            {
                 throw new ArgumentException(String.Format(
                         "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
                         pixels.Length,

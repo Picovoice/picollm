@@ -23,10 +23,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Pv;
+
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-
-using Pv;
 
 namespace PicoLLMTest
 {
@@ -455,7 +455,8 @@ namespace PicoLLMTest
                 float[] targetEmbeddings = picoLLM.GenerateEmbeddings(prompt);
 
                 List<float[]> referenceEmbeddingsList = new List<float[]>();
-                foreach (EmbeddingExpectation expectation in expectations) {
+                foreach (EmbeddingExpectation expectation in expectations)
+                {
                     referenceEmbeddingsList.Add(picoLLM.GenerateEmbeddings(expectation.Doc));
                 }
 
@@ -761,8 +762,10 @@ namespace PicoLLMTest
         private void VerifyOCRCompletion(PicoLLMOCRCompletion res, List<OCRExpectation> expectations)
         {
             bool anyMatch = false;
-            foreach (OCRExpectation expectation in expectations) {
-                if (res.Endpoint == expectation.Endpoint && res.Completion == expectation.Completion) {
+            foreach (OCRExpectation expectation in expectations)
+            {
+                if (res.Endpoint == expectation.Endpoint && res.Completion == expectation.Completion)
+                {
                     anyMatch = true;
                     break;
                 }
@@ -774,16 +777,18 @@ namespace PicoLLMTest
         private void VerifyEmbeddingCompletion(
             float[] targetEmbeddings,
             List<float[]> referenceEmbeddingsList,
-            List<EmbeddingExpectation> expectations
-        ) {
+            List<EmbeddingExpectation> expectations)
+        {
             Assert.AreEqual(referenceEmbeddingsList.Count, expectations.Count);
 
             bool anyMatch = false;
-            for (int i = 0; i < expectations.Count; i++) {
+            for (int i = 0; i < expectations.Count; i++)
+            {
                 EmbeddingExpectation expectation = expectations[i];
 
                 double similarity = Similarity(targetEmbeddings, referenceEmbeddingsList[i]);
-                if (Math.Abs(similarity - expectation.Similarity) < 0.001) {
+                if (Math.Abs(similarity - expectation.Similarity) < 0.001)
+                {
                     anyMatch = true;
                     break;
                 }
@@ -797,8 +802,9 @@ namespace PicoLLMTest
             Assert.AreEqual(a.Length, b.Length);
 
             double sum = 0.0f;
-            for (int i = 0; i < a.Length; i++) {
-                sum += (double) a[i] * b[i];
+            for (int i = 0; i < a.Length; i++)
+            {
+                sum += (double)a[i] * b[i];
             }
 
             return sum;

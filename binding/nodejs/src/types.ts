@@ -54,13 +54,13 @@ export type PicoLLMGenerateWithImageOptions = {
   topP?: number;
   numTopChoices?: number;
   streamCallback?: (token: string) => void;
-  promptProgressCallback?: (token: string) => void;
+  promptProgressCallback?: (progress: number) => void;
 };
 
 export type PicoLLMGenerateOCROptions = {
   completionTokenLimit?: number;
   streamCallback?: (token: string) => void;
-  promptProgressCallback?: (token: string) => void;
+  promptProgressCallback?: (progress: number) => void;
 };
 
 export type PicoLLMUsage = {

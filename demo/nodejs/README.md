@@ -90,10 +90,11 @@ offline and completely free for open-weight models. Everyone who signs up for
 
 ## Usage
 
-There are two demos available: completion and chat. The completion demo accepts a prompt and a set of optional
-parameters and generates a single completion. It can run all models, whether instruction-tuned or not. The chat demo can
-run instruction-tuned (chat) models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth
-conversation with the LLM, similar to ChatGPT.
+There are three demos available: **completion**, **chat**, and **ocr**. The **completion** demo accepts a prompt, an optional
+image, and a set of optional parameters and generates a single completion. It can run all models (including non-instruction-tuned),
+unless an image is provided, in which case only vision models can be used. The **chat** demo can run instruction-tuned (chat)
+models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth conversation with the LLM, similar
+to ChatGPT. The **optical character recognition** (ocr) demo extracts text from a provided image.
 
 ### Completion Demo
 
@@ -127,4 +128,22 @@ To get information about all the available options in the demo, run the followin
 
 ```console
 picollm-chat-demo --help
+```
+
+### OCR Demo
+
+To extract text from an image, run the following in the terminal:
+
+```console
+picollm-ocr-demo --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --image_path ${IMAGE_PATH}
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to an OCR model file
+downloaded from Picovoice Console, and `${IMAGE_PATH}` with the absolute path to an image file you wish to extract text from. See
+`resources/.test/images` for some sample images.
+
+To get information about all the available options in the demo, run the following:
+
+```console
+picollm-ocr-demo --help
 ```

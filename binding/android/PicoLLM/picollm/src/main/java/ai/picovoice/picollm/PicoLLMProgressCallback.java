@@ -18,7 +18,7 @@ package ai.picovoice.picollm;
 public interface PicoLLMProgressCallback {
 
     /**
-     * Callback method invoked with current progress
+     * Callback method invoked with current progress.
      *
      * @param progress The current progress
      */

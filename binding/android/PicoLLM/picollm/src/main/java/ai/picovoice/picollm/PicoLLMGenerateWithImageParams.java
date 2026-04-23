@@ -76,15 +76,15 @@ public class PicoLLMGenerateWithImageParams extends PicoLLMGenerateParams {
             PicoLLMStreamCallback streamCallback,
             PicoLLMProgressCallback progressCallback) {
         super(
-            completionTokenLimit,
-            stopPhrases,
-            seed,
-            presencePenalty,
-            frequencyPenalty,
-            temperature,
-            topP,
-            numTopChoices,
-            streamCallback);
+                completionTokenLimit,
+                stopPhrases,
+                seed,
+                presencePenalty,
+                frequencyPenalty,
+                temperature,
+                topP,
+                numTopChoices,
+                streamCallback);
         this.progressCallback = progressCallback;
     }
 

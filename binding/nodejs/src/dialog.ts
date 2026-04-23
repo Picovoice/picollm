@@ -285,7 +285,6 @@ export class Phi35ChatDialog extends Phi3ChatDialog {
 export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof Dialog } } = {
   "gemma-2b-it": GemmaChatDialog,
   "gemma-7b-it": GemmaChatDialog,
-  // TODO: fix the name of this dialog in dotnet
   "gemma-3-270m-it": Gemma3ChatDialog,
   'llama-2-7b-chat': Llama2ChatDialog,
   'llama-2-13b-chat': Llama2ChatDialog,

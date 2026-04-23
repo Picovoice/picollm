@@ -207,10 +207,54 @@ public class PicoLLM {
         }
     }
 
+    private func createCompletion(
+        cUsage: pv_picollm_usage_t,
+        cEndpoint: pv_picollm_endpoint_t,
+        numCompletionTokens: Int32,
+        cCompletionTokens: UnsafeMutablePointer<pv_picollm_completion_token_t>?,
+        cCompletion: UnsafeMutablePointer<Int8>?
+    ) -> PicoLLMCompletion {
+        let usage = PicoLLMUsage(
+            promptTokens: Int(cUsage.prompt_tokens),
+            completionTokens: Int(cUsage.completion_tokens))
+
+        let endpoint = PicoLLMEndpoint.fromC(cEndpoint: cEndpoint)!
+
+        var completionTokens = [PicoLLMCompletionToken]()
+        for cCompletionToken in UnsafeBufferPointer(start: cCompletionTokens, count: Int(numCompletionTokens)) {
+            let token = PicoLLMToken(
+                token: String(cString: cCompletionToken.token.token),
+                logProb: cCompletionToken.token.log_prob)
+            var topChoices = [PicoLLMToken]()
+            for cTopChoice in UnsafeBufferPointer(
+                    start: cCompletionToken.top_choices,
+                    count: Int(cCompletionToken.num_top_choices)) {
+                let topChoice = PicoLLMToken(
+                    token: String(cString: cTopChoice.token),
+                    logProb: cTopChoice.log_prob)
+                topChoices.append(topChoice)
+            }
+
+            let completionToken = PicoLLMCompletionToken(token: token, topChoices: topChoices)
+            completionTokens.append(completionToken)
+        }
+
+        let completion = String(cString: cCompletion!)
+
+        pv_picollm_delete_completion_tokens(cCompletionTokens, numCompletionTokens)
+        pv_picollm_delete_completion(cCompletion)
+
+        return PicoLLMCompletion(
+            usage: usage,
+            endpoint: endpoint,
+            completionTokens: completionTokens,
+            completion: completion)
+    }
+    
     /// Given a text prompt and a set of generation parameters, creates a completion text and relevant metadata.
     ///
     /// - Parameters:
-    ///   - prompt: Prompt.
+    ///   - prompt: Text Prompt.
     ///   - completionTokenLimit: Maximum number of tokens in the completion. If the generation process stops due to
     ///         reaching this limit, the `endpoint` output argument will be
     ///         `PicoLLMEndpoint.completionTokenLimitReached`. Set to `nil` to impose no limit.
@@ -250,7 +294,7 @@ public class PicoLLM {
         streamCallback: ((String) -> Void)? = nil
     ) throws -> PicoLLMCompletion {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized calling generate")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling generate")
         }
 
         let stopPhrasesArg = (stopPhrases != nil) ? stopPhrases!.map { UnsafePointer(strdup($0)) } : nil
@@ -288,41 +332,12 @@ public class PicoLLM {
             throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generate failed", messageStack)
         }
 
-        let usage = PicoLLMUsage(
-            promptTokens: Int(cUsage.prompt_tokens),
-            completionTokens: Int(cUsage.completion_tokens))
-
-        let endpoint = PicoLLMEndpoint.fromC(cEndpoint: cEndpoint)!
-
-        var completionTokens = [PicoLLMCompletionToken]()
-        for cCompletionToken in UnsafeBufferPointer(start: cCompletionTokens, count: Int(numCompletionTokens)) {
-            let token = PicoLLMToken(
-                token: String(cString: cCompletionToken.token.token),
-                logProb: cCompletionToken.token.log_prob)
-            var topChoices = [PicoLLMToken]()
-            for cTopChoice in UnsafeBufferPointer(
-                    start: cCompletionToken.top_choices,
-                    count: Int(cCompletionToken.num_top_choices)) {
-                let topChoice = PicoLLMToken(
-                    token: String(cString: cTopChoice.token),
-                    logProb: cTopChoice.log_prob)
-                topChoices.append(topChoice)
-            }
-
-            let completionToken = PicoLLMCompletionToken(token: token, topChoices: topChoices)
-            completionTokens.append(completionToken)
-        }
-
-        let completion = String(cString: cCompletion!)
-
-        pv_picollm_delete_completion_tokens(cCompletionTokens, numCompletionTokens)
-        pv_picollm_delete_completion(cCompletion)
-
-        return PicoLLMCompletion(
-            usage: usage,
-            endpoint: endpoint,
-            completionTokens: completionTokens,
-            completion: completion)
+        return createCompletion(
+            cUsage: cUsage,
+            cEndpoint: cEndpoint,
+            numCompletionTokens: numCompletionTokens,
+            cCompletionTokens: cCompletionTokens,
+            cCompletion: cCompletion)
     }
 
     /// Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
@@ -330,7 +345,7 @@ public class PicoLLM {
     /// For use with vision models only.
     ///
     /// - Parameters:
-    ///   - prompt: Prompt.
+    ///   - prompt: Text Prompt.
     ///   - imageWidth: Width of the image in pixels.
     ///   - imageHeight: Height of the image in pixels.
     ///   - image: Image pixel data in 8-bit, RGB format.
@@ -358,7 +373,7 @@ public class PicoLLM {
     ///         any generated token. Set to `0` to turn off the feature. The maximum number of top choices is
     ///   - streamCallback: If not set to `nil`, picoLLM executes this callback every time a new piece of completion
     ///         string becomes available.
-    ///   - progressCallback: If not set to `nil`, picoLLM uses this callback to report the prompt evaluation progress
+    ///   - promptProgressCallback: If not set to `nil`, picoLLM uses this callback to report the prompt evaluation progress
     ///         as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete
     ///         and completion tokens are now being generated.
     /// - Throws: PicoLLMError
@@ -377,17 +392,17 @@ public class PicoLLM {
         topP: Float = 1.0,
         numTopChoices: Int32 = 0,
         streamCallback: ((String) -> Void)? = nil,
-        progressCallback: ((Float) -> Void)? = nil
+        promptProgressCallback: ((Float) -> Void)? = nil
     ) throws -> PicoLLMCompletion {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized calling generateWithImage")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling generateWithImage")
         }
 
         let stopPhrasesArg = (stopPhrases != nil) ? stopPhrases!.map { UnsafePointer(strdup($0)) } : nil
         let numStopPhrasesArg = (stopPhrases != nil) ? Int32(stopPhrases!.count) : 0
 
         self.streamCallback = streamCallback
-        self.progressCallback = progressCallback
+        self.progressCallback = promptProgressCallback
 
         var cUsage: pv_picollm_usage_t = pv_picollm_usage_t()
         var cEndpoint: pv_picollm_endpoint_t = pv_picollm_endpoint_t(0)
@@ -426,41 +441,12 @@ public class PicoLLM {
             throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM generateWithImage failed", messageStack)
         }
 
-        let usage = PicoLLMUsage(
-            promptTokens: Int(cUsage.prompt_tokens),
-            completionTokens: Int(cUsage.completion_tokens))
-
-        let endpoint = PicoLLMEndpoint.fromC(cEndpoint: cEndpoint)!
-
-        var completionTokens = [PicoLLMCompletionToken]()
-        for cCompletionToken in UnsafeBufferPointer(start: cCompletionTokens, count: Int(numCompletionTokens)) {
-            let token = PicoLLMToken(
-                token: String(cString: cCompletionToken.token.token),
-                logProb: cCompletionToken.token.log_prob)
-            var topChoices = [PicoLLMToken]()
-            for cTopChoice in UnsafeBufferPointer(
-                    start: cCompletionToken.top_choices,
-                    count: Int(cCompletionToken.num_top_choices)) {
-                let topChoice = PicoLLMToken(
-                    token: String(cString: cTopChoice.token),
-                    logProb: cTopChoice.log_prob)
-                topChoices.append(topChoice)
-            }
-
-            let completionToken = PicoLLMCompletionToken(token: token, topChoices: topChoices)
-            completionTokens.append(completionToken)
-        }
-
-        let completion = String(cString: cCompletion!)
-
-        pv_picollm_delete_completion_tokens(cCompletionTokens, numCompletionTokens)
-        pv_picollm_delete_completion(cCompletion)
-
-        return PicoLLMCompletion(
-            usage: usage,
-            endpoint: endpoint,
-            completionTokens: completionTokens,
-            completion: completion)
+        return createCompletion(
+            cUsage: cUsage,
+            cEndpoint: cEndpoint,
+            numCompletionTokens: numCompletionTokens,
+            cCompletionTokens: cCompletionTokens,
+            cCompletion: cCompletion)
     }
 
     /// Generates numerical vector representations of the input text prompt.
@@ -468,14 +454,14 @@ public class PicoLLM {
     /// For use with embedding models only.
     ///
     /// - Parameters:
-    ///   - prompt: Text prompt.
+    ///   - prompt: Text Prompt.
     /// - Throws: PicoLLMError
     /// - Returns: Generated Embedding
     public func generateEmbeddings(
         prompt: String
     ) throws -> [Float] {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized calling generateEmbeddings")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling generateEmbeddings")
         }
 
         var cNumEmbeddings: Int32 = 0
@@ -515,7 +501,7 @@ public class PicoLLM {
     ///         `PicoLLMEndpoint.completionTokenLimitReached`. Set to `nil` to impose no limit.
     ///   - streamCallback: If not set to `nil`, picoLLM executes this callback every time a new piece of completion
     ///         string becomes available.
-    ///   - progressCallback: If not set to `nil`, picoLLM uses this callback to report the prompt evaluation progress
+    ///   - promptProgressCallback: If not set to `nil`, picoLLM uses this callback to report the prompt evaluation progress
     ///         as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete
     ///         and completion tokens are now being generated.
     /// - Throws: PicoLLMError
@@ -526,14 +512,14 @@ public class PicoLLM {
         image: [UInt8],
         completionTokenLimit: Int32? = nil,
         streamCallback: ((String) -> Void)? = nil,
-        progressCallback: ((Float) -> Void)? = nil
+        promptProgressCallback: ((Float) -> Void)? = nil
     ) throws -> PicoLLMCompletion {
         if handle == nil {
-            throw PicoLLMInvalidStateError("PicoLLM must be initialized calling generateOCR")
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling generateOCR")
         }
 
         self.streamCallback = streamCallback
-        self.progressCallback = progressCallback
+        self.progressCallback = promptProgressCallback
 
         var cEndpoint: pv_picollm_endpoint_t = pv_picollm_endpoint_t(0)
         var cCompletion: UnsafeMutablePointer<Int8>?

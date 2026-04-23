@@ -63,6 +63,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Setup Python virtualenv (*nix)
         if: ${{ matrix.machine != 'pv-windows' && matrix.machine != 'pv-windows-igpu' && matrix.machine != 'pv-windows-arm64' }}
@@ -80,9 +82,10 @@ jobs:
 
       - name: Download resource files
         run: |
-          curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm
-          curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm # qwen
-          curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm # deepseek
+          curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/06-5842035/phi2-290.pllm -o phi2-290.pllm
+          curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-329.pllm/00-5842035/qwen3-vl-2b-it-329.pllm -o qwen3-vl-2b-it-329.pllm
+          curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-310.pllm/00-5842035/deepseek-ocr-2-310.pllm -o deepseek-ocr-2-310.pllm
+          curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/embeddinggemma-300m-137.pllm/00-5842035/embeddinggemma-300m-137.pllm -o embeddinggemma-300m-137.pllm
 
       - name: Create build directory
         run: cmake -G "${{ matrix.make_file }}" -B ./build
@@ -91,4 +94,4 @@ jobs:
         run: cmake --build ./build
 
       - name: Test
-        run: python test/test_picollm_c.py ${{secrets.PV_VALID_ACCESS_KEY}} ./phi2-290.pllm ./qwen.pllm ./deepseek.pllm ${{matrix.device}}
+        run: python test/test_picollm_c.py ${{secrets.PV_VALID_ACCESS_KEY}} phi2-290.pllm qwen3-vl-2b-it-329.pllm deepseek-ocr-2-310.pllm embeddinggemma-300m-137.pllm ${{matrix.device}}

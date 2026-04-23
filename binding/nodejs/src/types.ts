@@ -79,12 +79,8 @@ export type PicoLLMCompletionToken = {
 };
 
 export type PicoLLMCompletion = {
-  usage: PicoLLMUsage;
+  usage: PicoLLMUsage | null;
   endpoint: PicoLLMEndpoint;
-  completionTokens: PicoLLMCompletionToken[];
-  completion: string;
-};
-export type PicoLLMOCRCompletion = {
-  endpoint: PicoLLMEndpoint;
+  completionTokens: PicoLLMCompletionToken[] | null;
   completion: string;
 };

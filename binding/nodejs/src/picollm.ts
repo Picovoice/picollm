@@ -27,7 +27,6 @@ import {
   PicoLLMGenerateWithImageOptions,
   PicoLLMImage,
   PicoLLMInputOptions,
-  PicoLLMOCRCompletion,
   PicoLLMOptions,
 } from './types';
 
@@ -53,7 +52,7 @@ type PicoLLMGenerateResult = {
         token: string;
         log_prob: number;
       }[];
-    }[];
+    }[] | null;
     completion: string;
   };
   status: PvStatus;
@@ -81,7 +80,7 @@ type PicoLLMModelResult = {
   status: PvStatus;
 };
 type PicoLLMContextLengthResult = {
-  contextLength: number;
+  context_length: number;
   status: PvStatus;
 };
 type PicoLLMHardwareDevicesResult = {
@@ -288,11 +287,11 @@ export class PicoLLM {
 
     const status = picollmGenerateResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to generate');
+      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate');
     }
 
     const completion = picollmGenerateResult!.completion;
-    const completionTokens = completion.completion_tokens.map(x => ({
+    const completionTokens = completion.completion_tokens!.map(x => ({
       token: {
         token: x.token.token,
         logProb: x.token.log_prob
@@ -306,7 +305,7 @@ export class PicoLLM {
     return {
       usage: {
         promptTokens: completion.usage.prompt_tokens,
-        completionTokens: completion.usage.completion_tokens,
+        completionTokens: completion.usage.completion_tokens!,
       },
       endpoint: completion.endpoint,
       completionTokens: completionTokens,
@@ -411,11 +410,11 @@ export class PicoLLM {
 
     const status = picollmGenerateResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to generate with image');
+      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate with image');
     }
 
     const completion = picollmGenerateResult!.completion;
-    const completionTokens = completion.completion_tokens.map(x => ({
+    const completionTokens = completion.completion_tokens!.map(x => ({
       token: {
         token: x.token.token,
         logProb: x.token.log_prob
@@ -493,10 +492,10 @@ export class PicoLLM {
     }
 
     if (generateEmbeddingsResult === null) {
-      throw new PicoLLMRuntimeError('PicoLLM failed to generate embeddings');
+      this.handlePvStatusOptionalStack(PvStatus.RUNTIME_ERROR, 'PicoLLM failed to generate embeddings');
     }
 
-    return generateEmbeddingsResult.embeddings;
+    return generateEmbeddingsResult!.embeddings;
   }
 
   /**
@@ -520,7 +519,7 @@ export class PicoLLM {
   async generateOCR(
       image: PicoLLMImage,
       options: PicoLLMGenerateOCROptions = {}
-  ): Promise<PicoLLMOCRCompletion> {
+  ): Promise<PicoLLMCompletion> {
     if (
       this._handle === 0 ||
       this._handle === null ||
@@ -549,14 +548,16 @@ export class PicoLLM {
       pvStatusToException(<PvStatus>err.code, err);
     }
 
-    // TODO: how to handle nullity from NAPI? It can never be null?
-    if (picollmGenerateOCRResult === null || picollmGenerateOCRResult.status !== PvStatus.SUCCESS) {
-      throw new PicoLLMRuntimeError('PicoLLM failed to generate with image');
+    const status = picollmGenerateOCRResult!.status;
+    if (status !== PvStatus.SUCCESS) {
+      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate OCR');
     }
 
     return {
-      endpoint: picollmGenerateOCRResult.completion.endpoint,
-      completion: picollmGenerateOCRResult.completion.completion
+      usage: null,
+      endpoint: picollmGenerateOCRResult!.completion.endpoint,
+      completionTokens: null,
+      completion: picollmGenerateOCRResult!.completion.completion
     };
   }
 
@@ -789,7 +790,7 @@ export class PicoLLM {
       this.handlePvStatus(status, 'PicoLLM failed to get model');
     }
 
-    return picollmContextLengthResult!.contextLength;
+    return picollmContextLengthResult!.context_length;
   }
 
   private getModel(): string {
@@ -822,6 +823,15 @@ export class PicoLLM {
       pvStatusToException(status, message, errorObject.message_stack);
     } else {
       pvStatusToException(status, 'Unable to get PicoLLM error state');
+    }
+  }
+
+  private handlePvStatusOptionalStack(status: PvStatus, message: string): void {
+    const errorObject = this._pvPicoLLM.get_error_stack();
+    if (errorObject.status === PvStatus.SUCCESS) {
+      pvStatusToException(status, message, errorObject.message_stack);
+    } else {
+      pvStatusToException(status, message, []);
     }
   }
 }

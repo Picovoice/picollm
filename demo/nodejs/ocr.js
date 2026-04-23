@@ -54,7 +54,7 @@ if (process.argv.length < 1) {
 }
 program.parse(process.argv);
 
-const readAbsoluteImageFile = async (absoluteImagePath) => {
+async function readAbsoluteImageFile(absoluteImagePath) {
   if (!fs.existsSync(absoluteImagePath)) {
     throw new PicoLLMInvalidArgumentError(`Image file not found at 'absoluteImagePath': ${absoluteImagePath}`);
   }
@@ -81,7 +81,7 @@ async function ocrDemo() {
   const device = program["device"];
   const completionTokenLimit = program["completion_token_limit"];
   const showAvailableDevices = program["show_available_devices"];
-  const verbose = program["verbose"];
+  const verbose = program["verbose"]; // TODO: impl verbose?
 
   if (showAvailableDevices) {
     console.log(PicoLLM.listAvailableDevices().join('\n'));
@@ -178,13 +178,17 @@ async function ocrDemo() {
     );
     console.log();
 
+    if (verbose) {
+      console.log(res.completionTokens);
+    }
+
     const generateElapsedSec = (performance.now() - generateStartSec) / 1000;
     const totalElapsedSec = (performance.now() - startSec) / 1000;
     const imageElapsedSec = totalElapsedSec - generateElapsedSec;
 
     const generateTPS = picoLLM.tokenize(res.completion, true, false).length / generateElapsedSec;
 
-    console.log(`Processed Image in ${(imageElapsedSec).toFixed(2)} seconds`);
+    console.log(`Processed image in ${(imageElapsedSec).toFixed(2)} seconds`);
     console.log(`Generated result in ${(generateElapsedSec).toFixed(2)} seconds (${generateTPS.toFixed(2)} tokens per second)`);
     console.log(`Total time elapsed is ${(totalElapsedSec).toFixed(2)} seconds`);
   } catch (e) {

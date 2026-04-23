@@ -19,29 +19,29 @@ public class PicoLLMGenerateOCRParams {
 
     private int completionTokenLimit;
     private PicoLLMStreamCallback streamCallback;
-    private PicoLLMProgressCallback progressCallback;
+    private PicoLLMProgressCallback promptProgressCallback;
 
     /**
      * Constructor.
      *
-     * @param completionTokenLimit The maximum number of tokens allowed in the completion.
-     *                             If the generation process stops due to reaching this limit,
-     *                             the endpoint output argument will indicate a completion token
-     *                             limit reached condition. Set to `-1` to impose no limit.
-     * @param streamCallback       If not set to `null`, picoLLM executes this callback every time
-     *                             a new piece of completion string becomes available.
-     * @param progressCallback     If not set to `null`, picoLLM uses this callback to report the
-     *                             prompt evaluation progress as a floating-point number within (0, 100].
-     *                             A value of 100 indicates that prompt evaluation is complete and
-     *                             completion tokens are now being generated
+     * @param completionTokenLimit   The maximum number of tokens allowed in the completion.
+     *                               If the generation process stops due to reaching this limit,
+     *                               the endpoint output argument will indicate a completion token
+     *                               limit reached condition. Set to `-1` to impose no limit.
+     * @param streamCallback         If not set to `null`, picoLLM executes this callback every time
+     *                               a new piece of completion string becomes available.
+     * @param promptProgressCallback If not set to `null`, picoLLM uses this callback to report the
+     *                               prompt evaluation progress as a floating-point number within (0, 100].
+     *                               A value of 100 indicates that prompt evaluation is complete and
+     *                               completion tokens are now being generated
      */
     public PicoLLMGenerateOCRParams(
             int completionTokenLimit,
             PicoLLMStreamCallback streamCallback,
-            PicoLLMProgressCallback progressCallback) {
+            PicoLLMProgressCallback promptProgressCallback) {
         this.completionTokenLimit = completionTokenLimit;
         this.streamCallback = streamCallback;
-        this.progressCallback = progressCallback;
+        this.promptProgressCallback = promptProgressCallback;
     }
 
     /**
@@ -91,29 +91,35 @@ public class PicoLLMGenerateOCRParams {
      * Gets the progress callback.
      *
      * @return The progress callback.
-     *     If not set to null, TODO
+     *         If not set to `null`, picoLLM uses this callback to report the
+     *         prompt evaluation progress as a floating-point number within (0, 100].
+     *         A value of 100 indicates that prompt evaluation is complete and
+     *         completion tokens are now being generated
      */
-    public PicoLLMProgressCallback getProgressCallback() {
-        return progressCallback;
+    public PicoLLMProgressCallback getPromptProgressCallback() {
+        return promptProgressCallback;
     }
 
     /**
-     * Sets the progress callback.
+     * Sets the prompt progress callback.
      *
-     * @param progressCallback The progress callback.
-     *                       If not set to null, TODO
+     * @param promptProgressCallback The prompt progress callback.
+     *                               If not set to `null`, picoLLM uses this callback to report the
+     *                               prompt evaluation progress as a floating-point number within (0, 100].
+     *                               A value of 100 indicates that prompt evaluation is complete and
+     *                               completion tokens are now being generated
      */
-    public void setProgressCallback(PicoLLMProgressCallback progressCallback) {
-        this.progressCallback = progressCallback;
+    public void setPromptProgressCallback(PicoLLMProgressCallback promptProgressCallback) {
+        this.promptProgressCallback = promptProgressCallback;
     }
 
     /**
-     * Builder class for creating a `PicoLLMGenerateParams` instance.
+     * Builder class for creating a `PicoLLMGenerateOCRParams` instance.
      */
     public static class Builder {
         private Integer completionTokenLimit = null;
         private PicoLLMStreamCallback streamCallback = null;
-        private PicoLLMProgressCallback progressCallback = null;
+        private PicoLLMProgressCallback promptProgressCallback = null;
 
         /**
          * Sets the maximum number of tokens allowed in the completion.
@@ -146,14 +152,14 @@ public class PicoLLMGenerateOCRParams {
         /**
          * Sets the progress callback.
          *
-         * @param progressCallback     If not set to `null`, picoLLM uses this callback to report the
-         *                             prompt evaluation progress as a floating-point number within (0, 100].
-         *                             A value of 100 indicates that prompt evaluation is complete and
-         *                             completion tokens are now being generated
+         * @param promptProgressCallback If not set to `null`, picoLLM uses this callback to report the
+         *                               prompt evaluation progress as a floating-point number within (0, 100].
+         *                               A value of 100 indicates that prompt evaluation is complete and
+         *                               completion tokens are now being generated
          * @return {@code Builder} instance.
          */
-        public Builder setProgressCallback(PicoLLMProgressCallback progressCallback) {
-            this.progressCallback = progressCallback;
+        public Builder setProgressCallback(PicoLLMProgressCallback promptProgressCallback) {
+            this.promptProgressCallback = promptProgressCallback;
             return this;
         }
 
@@ -166,7 +172,7 @@ public class PicoLLMGenerateOCRParams {
             return new PicoLLMGenerateOCRParams(
                     completionTokenLimit == null ? -1 : completionTokenLimit,
                     streamCallback,
-                    progressCallback);
+                    promptProgressCallback);
         }
     }
 }

@@ -159,7 +159,6 @@ public class PicoLLM {
     /**
      * Given a text prompt, an image, and a set of generation parameters,
      * creates a completion text and relevant metadata.
-     * 
      * For use with vision models only.
      *
      * @param prompt         Text prompt.
@@ -191,12 +190,11 @@ public class PicoLLM {
                 generateParams.getTopP(),
                 generateParams.getNumTopChoices(),
                 generateParams.getStreamCallback(),
-                generateParams.getProgressCallback());
+                generateParams.getPromptProgressCallback());
     }
 
     /**
      * Generates numerical vector representations of the input text prompt.
-     * 
      * For use with embedding models only.
      *
      * @param prompt         Text prompt.
@@ -212,7 +210,6 @@ public class PicoLLM {
 
     /**
      * Generates a completion text representing text found in the given image.
-     * 
      * For use with OCR (Optical Character Recognition) models only.
      *
      * @param imageWidth     Width of input image
@@ -234,7 +231,7 @@ public class PicoLLM {
                 image,
                 generateParams.getCompletionTokenLimit(),
                 generateParams.getStreamCallback(),
-                generateParams.getProgressCallback());
+                generateParams.getPromptProgressCallback());
     }
 
     /**

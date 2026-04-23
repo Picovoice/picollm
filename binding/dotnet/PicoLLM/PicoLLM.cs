@@ -1227,7 +1227,7 @@ namespace Pv
         {
             { "gemma-2b-it", typeof(GemmaChatDialog) },
             { "gemma-7b-it", typeof(GemmaChatDialog) },
-            { "gemma-3-it", typeof(Gemma3ChatDialog) },
+            { "gemma-3-270m-it", typeof(Gemma3ChatDialog) },
             { "llama-2-7b-chat", typeof(Llama2ChatDialog) },
             { "llama-2-13b-chat", typeof(Llama2ChatDialog) },
             { "llama-2-70b-chat", typeof(Llama2ChatDialog) },

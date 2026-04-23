@@ -20,7 +20,6 @@ import {
 import {
   PicoLLMCompletion,
   PicoLLMEmbeddingsCompletion,
-  PicoLLMOCRCompletion,
   PicoLLMCompletionToken,
   PicoLLMEndpoint,
   PicoLLMToken,
@@ -82,7 +81,6 @@ export {
   PicoLLM,
   PicoLLMCompletion,
   PicoLLMEmbeddingsCompletion,
-  PicoLLMOCRCompletion,
   PicoLLMCompletionToken,
   PicoLLMEndpoint,
   PicoLLMToken,

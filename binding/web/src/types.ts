@@ -87,19 +87,14 @@ export type PicoLLMCompletionToken = {
 };
 
 export type PicoLLMCompletion = {
-  usage: PicoLLMUsage;
+  usage?: PicoLLMUsage;
   endpoint: PicoLLMEndpoint;
-  completionTokens: PicoLLMCompletionToken[];
+  completionTokens?: PicoLLMCompletionToken[];
   completion: string;
 };
 
 export type PicoLLMEmbeddingsCompletion = {
   embeddings: number[];
-};
-
-export type PicoLLMOCRCompletion = {
-  endpoint: PicoLLMEndpoint;
-  completion: string;
 };
 
 export type PicoLLMWorkerInitRequest = {
@@ -215,15 +210,7 @@ export type PicoLLMWorkerGenerateEmbeddingsResponse =
     }
 
 export type PicoLLMWorkerGenerateOCRResponse =
-  | PicoLLMWorkerFailureResponse
-  | {
-      command: 'ok';
-      completion: PicoLLMOCRCompletion;
-    }
-  | {
-      command: 'stream',
-      token: string
-    }
+  | PicoLLMWorkerGenerateResponse
   | {
       command: 'progress',
       progress: number

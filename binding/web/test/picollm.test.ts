@@ -153,7 +153,7 @@ const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpect
   }
 };
 
-const verifyOCRCompletion = (res: PicoLLMOCRCompletion, expectations: CompletionExpectation[]) => {
+const verifyOCRCompletion = (res: PicoLLMCompletion, expectations: CompletionExpectation[]) => {
   let error: any;
   for (const expectation of expectations) {
     try {

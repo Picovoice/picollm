@@ -16,7 +16,6 @@ import {
   PicoLLMModel,
   PicoLLMCompletion,
   PicoLLMEmbeddingsCompletion,
-  PicoLLMOCRCompletion,
   PicoLLMInitOptions,
   PicoLLMGenerateOptions,
   PicoLLMWorkerInitResponse,
@@ -429,7 +428,7 @@ export class PicoLLMWorker {
    * @param image.data Image pixel data in 8-bit, RGB format.
    * @param options Optional generate configuration arguments, see PicoLLMGenerateOCROptions for details.
    * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
-   * to reaching this limit, the `.endpoint` parameter in `PicoLLMOCRCompletion` output will be
+   * to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be
    * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
    * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
    * completion string becomes available.
@@ -440,14 +439,14 @@ export class PicoLLMWorker {
   public async generateOCR(
     image: PicoLLMImage,
     options: PicoLLMGenerateOCROptions = {}
-  ): Promise<PicoLLMOCRCompletion> {
+  ): Promise<PicoLLMCompletion> {
     const {
       completionTokenLimit = -1,
       streamCallback,
       progressCallback
     } = options;
 
-    const returnPromise: Promise<PicoLLMOCRCompletion> = new Promise((resolve, reject) => {
+    const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
       this._worker.onmessage = (event: MessageEvent<PicoLLMWorkerGenerateOCRResponse>): void => {
         switch (event.data.command) {
           case 'ok':

@@ -278,7 +278,7 @@
     "expectations": [
       {
         "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
-        "completion": "# In the news\n\n- Laura"
+        "completion": "# In the news\n\n- **"
       }
     ]
   },
@@ -290,7 +290,7 @@
     "expectations": [
       {
         "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
-        "completion": "# Welcome to Wikipedia, the free"
+        "completion": "# Welcome to Wikipedia\n\n## The"
       }
     ]
   },

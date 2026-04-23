@@ -16,10 +16,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Pv;
+
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-
-using Pv;
 
 namespace PicoLLMDemo
 {
@@ -31,8 +31,8 @@ namespace PicoLLMDemo
             PicoLLMImage image,
             string device,
             int completionTokenLimit,
-            bool verbose
-        ) {
+            bool verbose)
+        {
             using (PicoLLM picoLLM = PicoLLM.Create(accessKey, modelPath, device))
             {
                 Console.WriteLine($"picoLLM `{picoLLM.Version}`");
@@ -86,26 +86,30 @@ namespace PicoLLMDemo
 
                     int currentRow = Console.CursorTop;
 
-                    int filled_len = (int)((progress / 100.0f) * (float) bar_width);
+                    int filled_len = (int)((progress / 100.0f) * (float)bar_width);
 
                     Console.SetCursorPosition(0, currentRow);
                     Console.Write(new string(' ', Console.BufferWidth));
                     Console.SetCursorPosition(0, currentRow);
 
                     Console.Write("Processing Image [");
-                    for (int i = 0; i < bar_width; i++) {
+                    for (int i = 0; i < bar_width; i++)
+                    {
                         Console.Write(i < filled_len ? "#" : " ");
                     }
 
-                    if (progress >= 100.0f) {
+                    if (progress >= 100.0f)
+                    {
                         Console.Write($"] {progress:F1}% Complete");
                         Console.Write("\n\n");
                         Console.Write("Generating... (press `Space` to interrupt)\n\n");
                         return;
-                    } else {
+                    }
+                    else
+                    {
                         Console.Write($"] {progress:F1}%");
                     }
-                    
+
                     Console.Out.Flush();
                 };
 

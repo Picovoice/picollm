@@ -16,10 +16,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Pv;
+
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-
-using Pv;
 
 namespace PicoLLMDemo
 {
@@ -86,7 +86,8 @@ namespace PicoLLMDemo
                 };
 
                 double startSec = DateTime.Now.TimeOfDay.TotalSeconds;
-                if (image == null) {
+                if (image == null)
+                {
                     completion = picoLLM.Generate(
                         prompt,
                         completionTokenLimit,
@@ -98,7 +99,9 @@ namespace PicoLLMDemo
                         topP,
                         numTopChoices,
                         streamCallback);
-                } else {
+                }
+                else
+                {
                     Action<float> promptProgressCallback = (float progress) =>
                     {
                         int bar_width = Math.Max(10,
@@ -109,26 +112,30 @@ namespace PicoLLMDemo
 
                         int currentRow = Console.CursorTop;
 
-                        int filled_len = (int) ((progress / 100.0f) * (float) bar_width);
+                        int filled_len = (int)((progress / 100.0f) * (float)bar_width);
 
                         Console.SetCursorPosition(0, currentRow);
                         Console.Write(new string(' ', Console.BufferWidth));
                         Console.SetCursorPosition(0, currentRow);
 
                         Console.Write("Processing Prompt [");
-                        for (int i = 0; i < bar_width; i++) {
+                        for (int i = 0; i < bar_width; i++)
+                        {
                             Console.Write(i < filled_len ? "#" : " ");
                         }
 
-                        if (progress >= 100.0f) {
+                        if (progress >= 100.0f)
+                        {
                             Console.Write($"] {progress:F1}% Complete");
                             Console.Write("\n\n");
                             Console.Write("Generating... (press `Space` to interrupt)\n\n");
                             return;
-                        } else {
+                        }
+                        else
+                        {
                             Console.Write($"] {progress:F1}%");
                         }
-                        
+
                         Console.Out.Flush();
                     };
 
@@ -154,7 +161,7 @@ namespace PicoLLMDemo
                     Console.WriteLine($"\n\n{completion}");
                 }
 
-                double totalElapsedSec = DateTime.Now.TimeOfDay.TotalSeconds - startSec; 
+                double totalElapsedSec = DateTime.Now.TimeOfDay.TotalSeconds - startSec;
                 double generateElapsedSec = DateTime.Now.TimeOfDay.TotalSeconds - generateStartSec;
                 double promptElapsedSec = totalElapsedSec - generateElapsedSec;
 

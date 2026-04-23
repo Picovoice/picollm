@@ -317,7 +317,7 @@ export class PicoLLM {
    * Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
    *
    * For use with vision models only.
-   * 
+   *
    * @param prompt Text prompt.
    * @param image Input image.
    * @param options Optional generate configuration arguments, see PicoLLMGenerateWithImageOptions for details.
@@ -352,9 +352,9 @@ export class PicoLLM {
    * @returns Completion result.
    */
   async generateWithImage(
-      prompt: string,
-      image: PicoLLMImage,
-      options: PicoLLMGenerateWithImageOptions = {}
+    prompt: string,
+    image: PicoLLMImage,
+    options: PicoLLMGenerateWithImageOptions = {}
   ): Promise<PicoLLMCompletion> {
     if (
       this._handle === 0 ||
@@ -465,7 +465,7 @@ export class PicoLLM {
    * Generates numerical vector representations of the input text prompt.
    *
    * For use with embedding models only.
-   * 
+   *
    * @param prompt Text prompt.
    * @returns Generated embeddings.
    */
@@ -503,7 +503,7 @@ export class PicoLLM {
    * The caller is responsible for freeing the completion text using `pv_picollm_delete_completion()`.
    *
    * For use with OCR (Optical Character Recognition) models only.
-   * 
+   *
    * @param image Input image.
    * @param options Optional generate configuration arguments, see PicoLLMGenerateOCROptions for details.
    * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
@@ -517,8 +517,8 @@ export class PicoLLM {
    * @returns Completion result.
    */
   async generateOCR(
-      image: PicoLLMImage,
-      options: PicoLLMGenerateOCROptions = {}
+    image: PicoLLMImage,
+    options: PicoLLMGenerateOCROptions = {}
   ): Promise<PicoLLMCompletion> {
     if (
       this._handle === 0 ||

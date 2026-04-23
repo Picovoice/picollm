@@ -81,7 +81,7 @@ async function ocrDemo() {
   const device = program["device"];
   const completionTokenLimit = program["completion_token_limit"];
   const showAvailableDevices = program["show_available_devices"];
-  const verbose = program["verbose"]; // TODO: impl verbose?
+  const verbose = program["verbose"];
 
   if (showAvailableDevices) {
     console.log(PicoLLM.listAvailableDevices().join('\n'));

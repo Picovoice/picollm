@@ -93,13 +93,11 @@ type DialogExpectations = {
   'phi3.5-chat-dialog': string,
 }
 
-const sleep = async (ms: number) => {
-  return new Promise<void>(resolve => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  });
-};
+const sleep = async (ms: number) => new Promise<void>(resolve => {
+  setTimeout(() => {
+    resolve();
+  }, ms);
+});
 
 const runInitTest = (
   params: {
@@ -298,7 +296,7 @@ const readImageFile = async (imageFilePath: string): Promise<PicoLLMImage> => {
     width: info.width,
     height: info.height
   };
-}
+};
 
 const similarityOf = (x: Float32Array, y: Float32Array): number => {
   expect(x.length).toBe(y.length);
@@ -309,7 +307,7 @@ const similarityOf = (x: Float32Array, y: Float32Array): number => {
   }
 
   return sum;
-}
+};
 
 describe('PicoLLM basic tests', function () {
   test('List hardware devices', () => {
@@ -603,7 +601,7 @@ describe('PicoLLM generate tests', () => {
     try {
       const generatePromise = picoLLM.generate(prompt, {
         completionTokenLimit: 200,
-        streamCallback: (_) => {
+        streamCallback: _ => {
           picoLLM.interrupt();
         }
       });

@@ -68,6 +68,12 @@ jobs:
       run: dotnet build PicoLLM/PicoLLM.csproj
 
     - name: Test
-      run: dotnet test -v n
+      run: dotnet test -v n --filter "Name!=TestGenerateOCRLarge"
+      env:
+        DOTNET_ROLL_FORWARD: LatestMajor
+
+    - name: Test OCR Large
+      if: ${{ matrix.machine == 'pv-linux' && matrix.device == 'cpu' }}
+      run: dotnet test -v n --filter "Name=TestGenerateOCRLarge"
       env:
         DOTNET_ROLL_FORWARD: LatestMajor

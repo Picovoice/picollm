@@ -71,6 +71,7 @@ signup
 SIMD
 Spacebar
 Spannable
+stbi
 strdup
 testapp
 tobytes

@@ -8,7 +8,7 @@ picoLLM Inference Engine is a highly accurate and cross-platform SDK optimized f
 models. picoLLM Inference Engine is:
 
 - Accurate; picoLLM Compression improves GPTQ by [significant margins](https://picovoice.ai/blog/picollm-towards-optimal-llm-quantization/)
-- Private; LLM inference runs 100% locally.
+- Private; LLM inference runs 100% locally
 - Cross-Platform
 - Runs on CPU and GPU
 - Free for open-weight models

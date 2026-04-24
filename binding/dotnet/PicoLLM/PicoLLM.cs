@@ -219,43 +219,6 @@ namespace Pv
     }
 
     /// <summary>
-    /// Represents an RGB image.
-    /// </summary>
-    public class PicoLLMImage
-    {
-        /// <summary>
-        /// Image width.
-        /// </summary>
-        public int Width { get; }
-
-        /// <summary>
-        /// Image height.
-        /// </summary>
-        public int Height { get; }
-
-        /// <summary>
-        /// Image pixel data in 24 bits-per-pixel RGB format.
-        /// </summary>
-        public byte[] Pixels { get; }
-
-        public PicoLLMImage(int width, int height, byte[] pixels)
-        {
-            Width = width;
-            Height = height;
-            Pixels = pixels;
-
-            if (width * height * 3 != pixels.Length)
-            {
-                throw new ArgumentException(String.Format(
-                        "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
-                        pixels.Length,
-                        width,
-                        height));
-            }
-        }
-    }
-
-    /// <summary>
     /// .NET binding for picoLLM Inference Engine.
     /// </summary>
     public class PicoLLM : IDisposable
@@ -370,8 +333,8 @@ namespace Pv
         [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         private static extern PvStatus pv_picollm_generate_ocr(
             IntPtr handle,
-            int image_width,
-            int image_height,
+            int imageWidth,
+            int imageHeight,
             byte[] image,
             int completionTokenLimit,
             IntPtr streamCallback,
@@ -775,7 +738,9 @@ namespace Pv
         /// For use with vision models only.
         /// </summary>
         /// <param name="prompt">The input text prompt.</param>
-        /// <param name="image">The input image.</param>
+        /// <param name="imageWidth">Width of the image in pixels.</param>
+        /// <param name="imageHeight">Height of the image in pixels.</param>
+        /// <param name="image">Image pixel data in 8-bit, RGB format.</param>
         /// <param name="completionTokenLimit">
         /// The maximum number of tokens in the completion. If the generation process stops due to reaching this limit,
         /// the `Endpoint` result will be set to `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`.
@@ -824,7 +789,9 @@ namespace Pv
         /// <exception cref="PicoLLMException">Thrown when an error occurs during the completion generation process.</exception>
         public PicoLLMCompletion GenerateWithImage(
             string prompt,
-            PicoLLMImage image,
+            int imageWidth,
+            int imageHeight,
+            byte[] image,
             int? completionTokenLimit = null,
             string[] stopPhrases = null,
             int? seed = null,
@@ -837,6 +804,15 @@ namespace Pv
             Action<float> promptProgressCallback = null)
         {
             IntPtr promptPtr = Utils.GetPtrFromUtf8String(prompt);
+
+            if (imageWidth * imageHeight * 3 != image.Length)
+            {
+                throw new PicoLLMInvalidArgumentException(String.Format(
+                        "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
+                        image.Length,
+                        imageWidth,
+                        imageHeight));
+            }
 
             IntPtr[] stopPhrasesPtr = null;
             int numStopPhrases = 0;
@@ -864,9 +840,9 @@ namespace Pv
             PvStatus status = pv_picollm_generate_with_image(
                _libraryPointer,
                promptPtr,
-               image.Width,
-               image.Height,
-               image.Pixels,
+               imageWidth,
+               imageHeight,
+               image,
                completionTokenLimit ?? -1,
                stopPhrasesPtr,
                numStopPhrases,
@@ -1001,7 +977,9 @@ namespace Pv
         ///    
         /// For use with OCR (Optical Character Recognition) models only.
         /// </summary>
-        /// <param name="image">The input image.</param>
+        /// <param name="imageWidth">Width of the image in pixels.</param>
+        /// <param name="imageHeight">Height of the image in pixels.</param>
+        /// <param name="image">Image pixel data in 8-bit, RGB format.</param>
         /// <param name="completionTokenLimit">
         /// The maximum number of tokens in the completion. If the generation process stops due to reaching this limit,
         /// the `Endpoint` result will be set to `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`.
@@ -1019,11 +997,22 @@ namespace Pv
         /// <returns>A `PicoLLMCompletion` object containing information and generated tokens.</returns>
         /// <exception cref="PicoLLMException">Thrown when an error occurs during the completion generation process.</exception>
         public PicoLLMCompletion GenerateOCR(
-            PicoLLMImage image,
+            int imageWidth,
+            int imageHeight,
+            byte[] image,
             int? completionTokenLimit = null,
             Action<string> streamCallback = null,
             Action<float> promptProgressCallback = null)
         {
+            if (imageWidth * imageHeight * 3 != image.Length)
+            {
+                throw new PicoLLMInvalidArgumentException(String.Format(
+                        "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
+                        image.Length,
+                        imageWidth,
+                        imageHeight));
+            }
+
             _streamCallback = streamCallback;
             _promptProgressCallback = promptProgressCallback;
 
@@ -1034,9 +1023,9 @@ namespace Pv
             IntPtr completionPtr;
             PvStatus status = pv_picollm_generate_ocr(
                _libraryPointer,
-               image.Width,
-               image.Height,
-               image.Pixels,
+               imageWidth,
+               imageHeight,
+               image,
                completionTokenLimit ?? -1,
                streamCallbackPtr,
                IntPtr.Zero,
@@ -1051,7 +1040,7 @@ namespace Pv
 
                 throw PvStatusToException(
                     status,
-                    "picoLLM generate with image failed",
+                    "picoLLM generate ocr failed",
                     GetMessageStack());
             }
 

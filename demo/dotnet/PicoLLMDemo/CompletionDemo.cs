@@ -141,7 +141,9 @@ namespace PicoLLMDemo
 
                     completion = picoLLM.GenerateWithImage(
                         prompt,
-                        image,
+                        image.Width,
+                        image.Height,
+                        image.Pixels,
                         completionTokenLimit,
                         stopPhrases.ToArray(),
                         seed,
@@ -382,6 +384,43 @@ namespace PicoLLMDemo
                 numTopChoices,
                 verbose
             );
+        }
+
+        /// <summary>
+        /// Represents an RGB image.
+        /// </summary>
+        public class PicoLLMImage
+        {
+            /// <summary>
+            /// Image width.
+            /// </summary>
+            public int Width { get; }
+
+            /// <summary>
+            /// Image height.
+            /// </summary>
+            public int Height { get; }
+
+            /// <summary>
+            /// Image pixel data in 24 bits-per-pixel RGB format.
+            /// </summary>
+            public byte[] Pixels { get; }
+
+            public PicoLLMImage(int width, int height, byte[] pixels)
+            {
+                Width = width;
+                Height = height;
+                Pixels = pixels;
+
+                if (width * height * 3 != pixels.Length)
+                {
+                    throw new PicoLLMInvalidArgumentException(String.Format(
+                            "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
+                            pixels.Length,
+                            width,
+                            height));
+                }
+            }
         }
 
         private static PicoLLMImage LoadImageAbsolutePath(string absolutePath)

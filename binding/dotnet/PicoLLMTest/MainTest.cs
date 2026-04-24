@@ -400,7 +400,9 @@ namespace PicoLLMTest
             {
                 PicoLLMCompletion res = picoLLM.GenerateWithImage(
                     prompt,
-                    image,
+                    image.Width,
+                    image.Height,
+                    image.Pixels,
                     completionTokenLimit: completionTokenLimit);
                 VerifyCompletion(res, expectations);
             }
@@ -419,7 +421,11 @@ namespace PicoLLMTest
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
-                PicoLLMCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
+                PicoLLMCompletion res = picoLLM.GenerateOCR(
+                    image.Width,
+                    image.Height,
+                    image.Pixels,
+                    completionTokenLimit: completionTokenLimit);
                 VerifyOCRCompletion(res, expectations);
             }
         }
@@ -437,7 +443,11 @@ namespace PicoLLMTest
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
-                PicoLLMCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
+                PicoLLMCompletion res = picoLLM.GenerateOCR(
+                    image.Width,
+                    image.Height,
+                    image.Pixels,
+                    completionTokenLimit: completionTokenLimit);
                 VerifyOCRCompletion(res, expectations);
             }
         }
@@ -814,6 +824,43 @@ namespace PicoLLMTest
         {
             string content = File.ReadAllText(Path.Combine(ROOT_DIR, "resources/.test/test_data.json"));
             return JObject.Parse(content);
+        }
+
+        /// <summary>
+        /// Represents an RGB image.
+        /// </summary>
+        private class PicoLLMImage
+        {
+            /// <summary>
+            /// Image width.
+            /// </summary>
+            public int Width { get; }
+
+            /// <summary>
+            /// Image height.
+            /// </summary>
+            public int Height { get; }
+
+            /// <summary>
+            /// Image pixel data in 24 bits-per-pixel RGB format.
+            /// </summary>
+            public byte[] Pixels { get; }
+
+            public PicoLLMImage(int width, int height, byte[] pixels)
+            {
+                Width = width;
+                Height = height;
+                Pixels = pixels;
+
+                if (width * height * 3 != pixels.Length)
+                {
+                    throw new PicoLLMInvalidArgumentException(String.Format(
+                            "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
+                            pixels.Length,
+                            width,
+                            height));
+                }
+            }
         }
 
         private static PicoLLMImage LoadImage(string name)

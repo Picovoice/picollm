@@ -1,6 +1,7 @@
 aarch64
 androidx
 appcompat
+argb
 armv7l
 back-and-forths
 camelcase

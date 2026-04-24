@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is
     located in the "LICENSE" file accompanying this source.
@@ -14,6 +14,8 @@ package ai.picovoice.picollm.testapp;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -51,10 +53,14 @@ public class BaseTest {
     static String testResourcesPath;
     static String accessKey;
     static String modelPath;
+    static String imageModelPath;
+    static String embeddingModelPath;
+    static String ocrModelPath;
     static String device;
 
     static JsonObject testData;
 
+    static TestImage smallImage;
 
     protected static class CompletionExpectation {
 
@@ -127,8 +133,18 @@ public class BaseTest {
         modelPath = new File(
                 externalFilesDir,
                 appContext.getString(R.string.pvTestingModelName)).getAbsolutePath();
+        imageModelPath = new File(
+                externalFilesDir,
+                appContext.getString(R.string.pvTestingImageModelName)).getAbsolutePath();
+        embeddingModelPath = new File(
+                externalFilesDir,
+                appContext.getString(R.string.pvTestingEmbeddingModelName)).getAbsolutePath();
+        ocrModelPath = new File(
+                externalFilesDir,
+                appContext.getString(R.string.pvTestingOcrModelName)).getAbsolutePath();
         device = appContext.getString(R.string.pvTestingDevice);
         testData = getTestData();
+        smallImage = readImage("test_resources/test_image.png");
     }
 
     public static JsonObject getTestData() throws IOException {
@@ -173,5 +189,43 @@ public class BaseTest {
                 os.write(buffer, 0, bytesRead);
             }
         }
+    }
+
+    public static class TestImage {
+        public final byte[] data;
+        public final int width;
+        public final int height;
+
+        public TestImage(byte[] data, int width, int height) {
+            this.data = data;
+            this.width = width;
+            this.height = height;
+        }
+    }
+
+    public static TestImage readImage(String imagePath) throws IOException {
+        Context testContext = InstrumentationRegistry.getInstrumentation().getContext();
+        AssetManager assetManager = testContext.getAssets();
+
+        InputStream is = assetManager.open(imagePath);
+        Bitmap image = BitmapFactory.decodeStream(is);
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int imageDataSize = width * height;
+
+        int[] imageDataARGB = new int[imageDataSize];
+        image.getPixels(imageDataARGB, 0, width, 0, 0, width, height);
+
+        byte[] imageDataRGB = new byte[imageDataSize * 3];
+
+        int byteIndex = 0;
+        for (int i = 0; i < imageDataSize; i++) {
+            imageDataRGB[byteIndex++] = (byte) ((imageDataARGB[i] >> 16) & 0xFF);
+            imageDataRGB[byteIndex++] = (byte) ((imageDataARGB[i] >> 8) & 0xFF);
+            imageDataRGB[byteIndex++] = (byte) (imageDataARGB[i] & 0xFF);
+        }
+
+        return new TestImage(imageDataRGB, width, height);
     }
 }

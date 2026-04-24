@@ -29,6 +29,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    ############## REMOVE AFTER RELEASE ##########################
+    - name: Set up Java 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: 'temurin'
+
+    - name: Build binding
+      run: ./gradlew assembleRelease --info
+      working-directory: binding/android/PicoLLM
+    ############## REMOVE AFTER RELEASE ##########################
+
     - name: Set up Java 21
       uses: actions/setup-java@v3
       with:
@@ -41,20 +53,47 @@ jobs:
     - name: Uninstall previous tests
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp.test || true
 
-    - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm
+    - name: Download model file
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/06-5842035/phi2-290.pllm -o phi2-290.pllm
+
+    - name: Download image model file
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-329.pllm/00-5842035/qwen3-vl-2b-it-329.pllm -o qwen3-vl-2b-it-329.pllm
+
+    - name: Download embedding model file
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/embeddinggemma-300m-137.pllm/00-5842035/embeddinggemma-300m-137.pllm -o embeddinggemma-300m-137.pllm
+
+    - name: Download ocr model file
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-310.pllm/00-5842035/deepseek-ocr-2-310.pllm -o deepseek-ocr-2-310.pllm
 
     - name: Make Android dir
       run: ~/Android/Sdk/platform-tools/adb shell mkdir -p /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external
 
-    - name: Copy resource files
+    - name: Copy model file
       run: ~/Android/Sdk/platform-tools/adb push --sync phi2-290.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/phi2-290.pllm
+
+    - name: Copy image model file
+      run: ~/Android/Sdk/platform-tools/adb push --sync qwen3-vl-2b-it-329.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/qwen3-vl-2b-it-329.pllm
+
+    - name: Copy embedding model file
+      run: ~/Android/Sdk/platform-tools/adb push --sync embeddinggemma-300m-137.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/embeddinggemma-300m-137.pllm
+
+    - name: Copy ocr model file
+      run: ~/Android/Sdk/platform-tools/adb push --sync deepseek-ocr-2-310.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/deepseek-ocr-2-310.pllm
 
     - name: Inject AccessKey
       run: echo pvTestingAccessKey="${{secrets.PV_VALID_ACCESS_KEY}}" >> local.properties
 
     - name: Inject model name
       run: echo pvTestingModelName="phi2-290.pllm" >> local.properties
+
+    - name: Inject image model name
+      run: echo pvTestingImageModelName="qwen3-vl-2b-it-329.pllm" >> local.properties
+
+    - name: Inject embedding model name
+      run: echo pvTestingEmbeddingModelName="embeddinggemma-300m-137.pllm" >> local.properties
+
+    - name: Inject ocr model name
+      run: echo pvTestingOcrModelName="deepseek-ocr-2-310.pllm" >> local.properties
 
     - name: Inject device string
       run: echo pvTestingDevice="cpu" >> local.properties
@@ -88,6 +127,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    ############## REMOVE AFTER RELEASE ##########################
+    - name: Set up Java 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: 'temurin'
+
+    - name: Build binding
+      run: ./gradlew assembleRelease --info
+      working-directory: binding/android/PicoLLM
+    ############## REMOVE AFTER RELEASE ##########################
+
     - name: Set up Java 21
       uses: actions/setup-java@v3
       with:
@@ -100,20 +151,47 @@ jobs:
     - name: Uninstall previous tests
       run: ~/Android/Sdk/platform-tools/adb shell pm uninstall ai.picovoice.picollm.testapp.test || true
 
-    - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/05-f5a103d/phi2-290.pllm -o phi2-290.pllm
+    - name: Download model file
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/06-5842035/phi2-290.pllm -o phi2-290.pllm
+
+    - name: Download image model file
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-329.pllm/00-5842035/qwen3-vl-2b-it-329.pllm -o qwen3-vl-2b-it-329.pllm
+
+    - name: Download embedding model file
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/embeddinggemma-300m-137.pllm/00-5842035/embeddinggemma-300m-137.pllm -o embeddinggemma-300m-137.pllm
+
+    - name: Download ocr model file
+      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-310.pllm/00-5842035/deepseek-ocr-2-310.pllm -o deepseek-ocr-2-310.pllm
 
     - name: Make Android dir
       run: ~/Android/Sdk/platform-tools/adb shell mkdir -p /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external
 
-    - name: Copy resource files
+    - name: Copy model file
       run: ~/Android/Sdk/platform-tools/adb push --sync phi2-290.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/phi2-290.pllm
+
+    - name: Copy image model file
+      run: ~/Android/Sdk/platform-tools/adb push --sync qwen3-vl-2b-it-329.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/qwen3-vl-2b-it-329.pllm
+
+    - name: Copy embedding model file
+      run: ~/Android/Sdk/platform-tools/adb push --sync embeddinggemma-300m-137.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/embeddinggemma-300m-137.pllm
+
+    - name: Copy ocr model file
+      run: ~/Android/Sdk/platform-tools/adb push --sync deepseek-ocr-2-310.pllm /sdcard/Android/data/ai.picovoice.picollm.testapp/files/external/deepseek-ocr-2-310.pllm
 
     - name: Inject AccessKey
       run: echo pvTestingAccessKey="${{secrets.PV_VALID_ACCESS_KEY}}" >> local.properties
 
     - name: Inject model name
       run: echo pvTestingModelName="phi2-290.pllm" >> local.properties
+
+    - name: Inject image model name
+      run: echo pvTestingImageModelName="qwen3-vl-2b-it-329.pllm" >> local.properties
+
+    - name: Inject embedding model name
+      run: echo pvTestingEmbeddingModelName="embeddinggemma-300m-137.pllm" >> local.properties
+
+    - name: Inject ocr model name
+      run: echo pvTestingOcrModelName="deepseek-ocr-2-310.pllm" >> local.properties
 
     - name: Inject device string
       run: echo pvTestingDevice="cpu" >> local.properties

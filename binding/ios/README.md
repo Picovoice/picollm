@@ -140,6 +140,38 @@ dialog.addLLMResponse(content: res.completion)
 print(res.completion)
 ```
 
+If you have a vision model you can generate a prompt completion with an image:
+
+```swift
+let res = pllm.generateWithImage(
+  prompt: "${PROMPT}",
+  imageWidth: imageWidth,
+  imageHeight: imageHeight,
+  image: image)
+print(res.completion)
+```
+
+Replace `${PROMPT}` with a prompt string.
+
+If you have an embedding model you can generate a prompt embedding:
+
+```swift
+let res = pllm.generateEmbeddings(prompt: "${PROMPT}")
+print(res)
+```
+
+Replace `${PROMPT}` with a prompt string.
+
+If you have an OCR model you can generate an OCR completion with an image:
+
+```swift
+let res = pllm.generateOCR(
+  imageWidth: imageWidth,
+  imageHeight: imageHeight,
+  image: image)
+print(res.completion)
+```
+
 ## Demos
 
 For example usage, refer to our [iOS demo applications](../../demo/ios).

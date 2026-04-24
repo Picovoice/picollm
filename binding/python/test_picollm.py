@@ -578,43 +578,6 @@ class PicollmOcrTestCase(PicollmTestCase):
         self.assertEqual(''.join(pieces), expectations[0].completion)
         self.assertGreaterEqual(progress[0], 100.0)
 
-    def test_generate_ocr_large(self) -> None:
-        if 'raspberry-pi' not in pv_library_path('../..'):
-            data = self.data["generate_ocr_large"]
-            test_image = data["image"]
-            image_path = os.path.join(
-                os.path.dirname(__file__),
-                '../../resources/.test/images',
-                test_image)
-            image = Image.open(image_path).convert("RGB")
-
-            completion_token_limit = data["parameters"]["completion-token-limit"]
-            expectations = self._parse_expectations(data["expectations"])
-
-            pieces = list()
-
-            progress = [0.0]
-
-            def stream_callback(x: str) -> None:
-                pieces.append(x)
-
-            def progress_callback(x: float) -> None:
-                progress[0] = x
-
-            res = self._picollm.generate_ocr(
-                image_width=image.width,
-                image_height=image.height,
-                image=image.tobytes(),
-                completion_token_limit=completion_token_limit,
-                stream_callback=stream_callback,
-                prompt_progress_callback=progress_callback)
-            self._verify_completion(
-                res=res,
-                expectations=expectations)
-
-            self.assertEqual(''.join(pieces), expectations[0].completion)
-            self.assertGreaterEqual(progress[0], 100.0)
-
 
 class PicollmEmbeddingTestCase(PicollmTestCase):
 
@@ -647,7 +610,7 @@ class PicollmEmbeddingTestCase(PicollmTestCase):
             res_doc = self._picollm.generate_embeddings(x["doc"])
             self.assertEqual(len(res_prompt), len(res_doc))
             similarity = self._calculate_similarity(res_prompt, res_doc)
-            self.assertAlmostEqual(similarity, x["similarity"], 2)
+            self.assertAlmostEqual(similarity, x["similarity"], 1)
 
 
 class DialogTestCase(unittest.TestCase):

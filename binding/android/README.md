@@ -154,6 +154,40 @@ try {
 } catch (PicoLLMException e) { }
 ```
 
+If you are using a vision model you can generate a prompt completion with an image:
+```java
+try {
+    PicoLLMCompletion res = picollm.generateWithImage(
+        "${PROMPT}",
+        imageWidth,
+        imageHeight,
+        image,
+        new PicoLLMGenerateWithImageParams.Builder().build());
+} catch (PicoLLMException e) { }
+```
+
+Replace `${PROMPT}` with a text prompt.
+
+If you are using an embedding model you can generate a prompt embedding:
+```java
+try {
+    float[] res = picollm.generateEmbeddings("${PROMPT}");
+} catch (PicoLLMException e) { }
+```
+
+Replace `${PROMPT}` with a text prompt.
+
+If you are using an OCR model you can generate an OCR completion with an image:
+```java
+try {
+    PicoLLMCompletion res = picollm.generateOCR(
+        imageWidth,
+        imageHeight,
+        image,
+        new PicoLLMGenerateOCRParams.Builder().build());
+} catch (PicoLLMException e) { }
+```
+
 Finally, when done, be sure to release the resources explicitly:
 
 ```java

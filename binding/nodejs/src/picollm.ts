@@ -320,6 +320,9 @@ export class PicoLLM {
    *
    * @param prompt Text prompt.
    * @param image Input image.
+   * @param image.width Width of the image in pixels.
+   * @param image.height Height of the image in pixels.
+   * @param image.data Image pixel data in 8-bit, RGB format.
    * @param options Optional generate configuration arguments, see PicoLLMGenerateWithImageOptions for details.
    * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
    * to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be
@@ -504,7 +507,10 @@ export class PicoLLM {
    *
    * For use with OCR (Optical Character Recognition) models only.
    *
-   * @param image Input image.
+   * @param image Prompt image.
+   * @param image.width Width of the image in pixels.
+   * @param image.height Height of the image in pixels.
+   * @param image.data Image pixel data in 8-bit, RGB format.
    * @param options Optional generate configuration arguments, see PicoLLMGenerateOCROptions for details.
    * @param options.completionTokenLimit Maximum number of tokens in the completion. If the generation process stops due
    * to reaching this limit, the `.endpoint` parameter in `PicoLLMCompletion` output will be

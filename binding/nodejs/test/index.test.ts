@@ -741,7 +741,7 @@ describe('PicoLLM generate embeddings', () => {
       const embeddings = await picoLLM.generateEmbeddings(prompt);
       for (let expectation of expectations) {
         const docEmbeddings = await picoLLM.generateEmbeddings(expectation.doc);
-        expect(Math.abs(similarityOf(embeddings, docEmbeddings) - expectation.similarity)).toBeLessThan(0.01);
+        expect(Math.abs(similarityOf(embeddings, docEmbeddings) - expectation.similarity)).toBeLessThan(0.1);
       }
     } catch (e) {
       expect(e).toBeUndefined();

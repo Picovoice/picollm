@@ -40,7 +40,9 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Download resource files
-      run: curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/06-5842035/phi2-290.pllm -o phi2-290.pllm
+      run: >
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/06-5842035/phi2-290.pllm -o phi2-290.pllm &&
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-310.pllm/00-5842035/deepseek-ocr-2-310.pllm -o deepseek-ocr-2-310.pllm
 
     - name: Package restore
       run: dotnet restore
@@ -52,7 +54,6 @@ jobs:
 
     - name: Add binding to demo
       run: dotnet add package -s ../../../binding/dotnet/PicoLLM/bin/Release PicoLLM
-      working-directory: demo/dotnet/PicoLLMDemo
     # ******************************************************
 
     - name: Build completion demo
@@ -60,3 +61,9 @@ jobs:
 
     - name: Run completion demo
       run: dotnet run -c CompletionDemo.Release -- --access_key ${{secrets.PV_VALID_ACCESS_KEY}} --model_path phi2-290.pllm --completion_token_limit 10 --prompt "Hello my name is" --device ${{matrix.device}}
+
+    - name: Build ocr demo
+      run: dotnet build -c OCRDemo.Release
+
+    - name: Run ocr demo
+      run: dotnet run -c OCRDemo.Release -- --access_key ${{secrets.PV_VALID_ACCESS_KEY}} --model_path deepseek-ocr-2-310.pllm --completion_token_limit 10 --image_path ../../../resources/.test/images/test_image.png --device ${{matrix.device}}

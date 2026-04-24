@@ -146,6 +146,7 @@ class PicollmTestCase(unittest.TestCase):
             for x in expectations
         ]
 
+
 class PicollmTextTestCase(PicollmTestCase):
     def setUp(self):
         self._picollm = PicoLLM(
@@ -153,7 +154,7 @@ class PicollmTextTestCase(PicollmTestCase):
             model_path=self._model_path,
             device=self._device,
             library_path=pv_library_path('../..'))
-        self.data = data['picollm']
+        self.data = self.data['picollm']
 
     def tearDown(self):
         self._picollm.release()

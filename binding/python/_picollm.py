@@ -961,7 +961,8 @@ class PicoLLM(object):
             stream_callback: Callable[[str], None] = None,
             prompt_progress_callback: Callable[[float], None] = None) -> PicoLLMCompletion:
         """
-        Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
+        Given a text prompt, an image, and a set of generation parameters, creates a completion text
+        and relevant metadata.
 
         For use with vision models only.
 
@@ -995,9 +996,9 @@ class PicoLLM(object):
         `.max_top_choices`.
         :param stream_callback: If not set to `None`, picoLLM executes this callback every time a new piece of
         completion string becomes available.
-        :param prompt_progress_callback: If not set to `None`, picoLLM uses this callback to report the prompt evaluation
-        progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete
-        and completion tokens are now being generated
+        :param prompt_progress_callback: If not set to `None`, picoLLM uses this callback to report the prompt
+        evaluation progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt
+        evaluation is complete and completion tokens are now being generated
 
         :return: Completion result.
         """
@@ -1081,9 +1082,9 @@ class PicoLLM(object):
         `PicoLLMEndpoints.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `None` to impose no limit.
         :param stream_callback: If not set to `None`, picoLLM executes this callback every time a new piece of
         completion string becomes available.
-        :param prompt_progress_callback: If not set to `None`, picoLLM uses this callback to report the prompt evaluation
-        progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete
-        and completion tokens are now being generated
+        :param prompt_progress_callback: If not set to `None`, picoLLM uses this callback to report the prompt
+        evaluation progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt
+        evaluation is complete and completion tokens are now being generated
 
         :return: Completion result.
         """

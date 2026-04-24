@@ -52,6 +52,7 @@ jobs:
 
     - name: Add binding to demo
       run: dotnet add package -s ../../../binding/dotnet/PicoLLM/bin/Release PicoLLM
+      working-directory: demo/dotnet/PicoLLMDemo
     # ******************************************************
 
     - name: Build completion demo

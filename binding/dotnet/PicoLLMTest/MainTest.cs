@@ -796,7 +796,7 @@ namespace PicoLLMTest
             {
                 EmbeddingExpectation expectation = expectations[i];
 
-                double similarity = Similarity(targetEmbeddings, referenceEmbeddingsList[i]);
+                float similarity = Similarity(targetEmbeddings, referenceEmbeddingsList[i]);
                 if (Math.Abs(similarity - expectation.Similarity) < 0.001)
                 {
                     anyMatch = true;
@@ -807,14 +807,14 @@ namespace PicoLLMTest
             Assert.IsTrue(anyMatch);
         }
 
-        private double Similarity(float[] a, float[] b)
+        private float Similarity(float[] a, float[] b)
         {
             Assert.AreEqual(a.Length, b.Length);
 
-            double sum = 0.0f;
+            float sum = 0.0f;
             for (int i = 0; i < a.Length; i++)
             {
-                sum += (double)a[i] * b[i];
+                sum += a[i] * b[i];
             }
 
             return sum;

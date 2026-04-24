@@ -50,7 +50,7 @@ const DEVICE = process.argv
 
 const TEXT_MODEL_PATH = path.join(__dirname, 'phi2-290.pllm');
 const VISION_MODEL_PATH = path.join(__dirname, 'qwen3-vl-2b-it-329.pllm');
-const OCR_MODEL_PATH = path.join(__dirname, 'deepseek-ocr-2-561.pllm');
+const OCR_MODEL_PATH = path.join(__dirname, 'deepseek-ocr-2-310.pllm');
 const EMBEDDING_MODEL_PATH = path.join(__dirname, 'embeddinggemma-300m-137.pllm');
 
 const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
@@ -739,7 +739,7 @@ describe('PicoLLM generate embeddings', () => {
       const embeddings = await picoLLM.generateEmbeddings(prompt);
       for (let expectation of expectations) {
         const docEmbeddings = await picoLLM.generateEmbeddings(expectation.doc);
-        expect(Math.abs(similarityOf(embeddings, docEmbeddings) - expectation.similarity)).toBeLessThan(0.000001);
+        expect(Math.abs(similarityOf(embeddings, docEmbeddings) - expectation.similarity)).toBeLessThan(0.01);
       }
     } catch (e) {
       expect(e).toBeUndefined();

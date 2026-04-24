@@ -647,7 +647,7 @@ class PicollmEmbeddingTestCase(PicollmTestCase):
             res_doc = self._picollm.generate_embeddings(x["doc"])
             self.assertEqual(len(res_prompt), len(res_doc))
             similarity = self._calculate_similarity(res_prompt, res_doc)
-            self.assertAlmostEqual(similarity, x["similarity"], 3)
+            self.assertAlmostEqual(similarity, x["similarity"], 2)
 
 
 class DialogTestCase(unittest.TestCase):

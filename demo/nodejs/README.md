@@ -140,8 +140,7 @@ picollm-ocr-demo --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --image_p
 ```
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to an ocr model file
-downloaded from Picovoice Console, and `${IMAGE_PATH}` with the absolute path to an image file you wish to extract text from. See
-`resources/.test/images` for some sample images.
+downloaded from Picovoice Console, and `${IMAGE_PATH}` with the absolute path to an image file you wish to extract text from.
 
 To get information about all the available options in the demo, run the following:
 

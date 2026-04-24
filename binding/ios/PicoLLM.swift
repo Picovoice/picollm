@@ -250,7 +250,7 @@ public class PicoLLM {
             completionTokens: completionTokens,
             completion: completion)
     }
-    
+
     /// Given a text prompt and a set of generation parameters, creates a completion text and relevant metadata.
     ///
     /// - Parameters:
@@ -340,7 +340,8 @@ public class PicoLLM {
             cCompletion: cCompletion)
     }
 
-    /// Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
+    /// Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant
+    /// metadata.
     ///
     /// For use with vision models only.
     ///
@@ -373,9 +374,9 @@ public class PicoLLM {
     ///         any generated token. Set to `0` to turn off the feature. The maximum number of top choices is
     ///   - streamCallback: If not set to `nil`, picoLLM executes this callback every time a new piece of completion
     ///         string becomes available.
-    ///   - promptProgressCallback: If not set to `nil`, picoLLM uses this callback to report the prompt evaluation progress
-    ///         as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete
-    ///         and completion tokens are now being generated.
+    ///   - promptProgressCallback: If not set to `nil`, picoLLM uses this callback to report the prompt evaluation
+    ///         progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is
+    ///         complete and completion tokens are now being generated.
     /// - Throws: PicoLLMError
     /// - Returns: PicoLLMCompletion containing stats and generated tokens.
     public func generateWithImage(
@@ -501,9 +502,9 @@ public class PicoLLM {
     ///         `PicoLLMEndpoint.completionTokenLimitReached`. Set to `nil` to impose no limit.
     ///   - streamCallback: If not set to `nil`, picoLLM executes this callback every time a new piece of completion
     ///         string becomes available.
-    ///   - promptProgressCallback: If not set to `nil`, picoLLM uses this callback to report the prompt evaluation progress
-    ///         as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete
-    ///         and completion tokens are now being generated.
+    ///   - promptProgressCallback: If not set to `nil`, picoLLM uses this callback to report the prompt evaluation
+    ///         progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is
+    ///         complete and completion tokens are now being generated.
     /// - Throws: PicoLLMError
     /// - Returns: PicoLLMCompletion containing endpoint and generated completion.
     public func generateOCR(

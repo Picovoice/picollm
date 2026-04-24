@@ -129,7 +129,7 @@ static void usage(const char *program) {
     (void) fprintf(
             stderr,
             "Usage: %s -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH "
-            "[-y DEVICE] [-n MAX_OUTPUT_TOKENS] [-h] -i IMAGE\n"
+            "[-y DEVICE] [-n MAX_OUTPUT_TOKENS] [-h] -i IMAGE_PATH\n"
             "-h: show available devices\n",
             program);
 }

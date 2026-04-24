@@ -131,7 +131,7 @@ static void usage(const char *program) {
             "Usage: %s -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH "
             "[-y DEVICE] [-s STOP_PHRASES] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES] "
             "[-r PRESENCE_PENALTY] [-f FREQUENCY_PENALTY] "
-            "[-o TOP_P] [-t TEMPERATURE] [-e SEED] [-v] [-h] [-i IMAGE] -p PROMPT\n"
+            "[-o TOP_P] [-t TEMPERATURE] [-e SEED] [-v] [-h] [-i IMAGE_PATH] -p PROMPT\n"
             "-v: enable verbose output\n"
             "-h: show available devices\n",
             program);

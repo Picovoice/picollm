@@ -503,7 +503,6 @@ export class PicoLLM {
 
   /**
    * Generates a completion text representing text found in the given image.
-   * The caller is responsible for freeing the completion text using `pv_picollm_delete_completion()`.
    *
    * For use with OCR (Optical Character Recognition) models only.
    *

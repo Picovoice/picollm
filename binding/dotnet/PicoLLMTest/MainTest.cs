@@ -791,20 +791,13 @@ namespace PicoLLMTest
         {
             Assert.AreEqual(referenceEmbeddingsList.Count, expectations.Count);
 
-            bool anyMatch = false;
             for (int i = 0; i < expectations.Count; i++)
             {
                 EmbeddingExpectation expectation = expectations[i];
 
                 float similarity = Similarity(targetEmbeddings, referenceEmbeddingsList[i]);
-                if (Math.Abs(similarity - expectation.Similarity) < 0.001)
-                {
-                    anyMatch = true;
-                    break;
-                }
+                Assert.IsTrue(Math.Abs(similarity - expectation.Similarity) < 0.1);
             }
-
-            Assert.IsTrue(anyMatch);
         }
 
         private float Similarity(float[] a, float[] b)

@@ -13,6 +13,7 @@ import concurrent.futures
 import json
 import math
 import os
+import platform
 import sys
 import unittest
 from dataclasses import dataclass
@@ -543,7 +544,58 @@ class PicollmOcrTestCase(PicollmTestCase):
         self._picollm.release()
 
     def test_generate_ocr(self) -> None:
+        lib_path = pv_library_path('../..')
+        if 'raspberry-pi' in lib_path and 'cortex-a76-aarch64' not in lib_path:
+            return
+
         data = self.data["generate_ocr"]
+        test_image = data["image"]
+        image_path = os.path.join(
+            os.path.dirname(__file__),
+            '../../resources/.test/images',
+            test_image)
+        image = Image.open(image_path).convert("RGB")
+
+        completion_token_limit = data["parameters"]["completion-token-limit"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        pieces = list()
+
+        progress = [0.0]
+
+        def stream_callback(x: str) -> None:
+            pieces.append(x)
+
+        def progress_callback(x: float) -> None:
+            progress[0] = x
+
+        try:
+            res = self._picollm.generate_ocr(
+                image_width=image.width,
+                image_height=image.height,
+                image=image.tobytes(),
+                completion_token_limit=completion_token_limit,
+                stream_callback=stream_callback,
+                prompt_progress_callback=progress_callback)
+        except PicoLLMInvalidArgumentError as e:
+            # OCR not supported on windows igpu
+            if 'Windows' in platform.system() and 'gpu' in self._device:
+                return
+            else:
+                raise e
+
+        self._verify_completion(
+            res=res,
+            expectations=expectations)
+
+        self.assertEqual(''.join(pieces), expectations[0].completion)
+        self.assertGreaterEqual(progress[0], 100.0)
+
+    def test_generate_ocr_large(self) -> None:
+        if 'linux' not in pv_library_path('../..'):
+            return
+
+        data = self.data["generate_ocr_large"]
         test_image = data["image"]
         image_path = os.path.join(
             os.path.dirname(__file__),

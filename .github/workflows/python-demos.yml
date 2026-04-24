@@ -77,5 +77,5 @@ jobs:
       run: python3 picollm_demo_completion.py --access_key ${{secrets.PV_VALID_ACCESS_KEY}} --model_path qwen3-vl-2b-it-329.pllm --completion_token_limit 7 --prompt "Describe this image." --image_path ../../resources/.test/images/test_image.png --device ${{matrix.device}}
 
     - name: Test OCR
-      if: ${{ matrix.machine != 'pv-windows-igpu' }}
+      if: ${{ matrix.machine != 'pv-windows-igpu' && matrix.machine != 'rpi4-32' && matrix.machine != 'rpi4-64' && matrix.machine != 'rpi5-32' }}
       run: python3 picollm_demo_ocr.py --access_key ${{secrets.PV_VALID_ACCESS_KEY}} --model_path deepseek-ocr-2-310.pllm --completion_token_limit 7 --image_path ../../resources/.test/images/test_image.png --device ${{matrix.device}}

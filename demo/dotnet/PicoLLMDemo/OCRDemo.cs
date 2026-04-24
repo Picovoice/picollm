@@ -83,7 +83,8 @@ namespace PicoLLMDemo
                 Action<float> promptProgressCallback = (float progress) =>
                 {
                     int bufferWidth = 40;
-                    if (Environment.UserInteractive && !Console.IsOutputRedirected) {
+                    if (Environment.UserInteractive && !Console.IsOutputRedirected)
+                    {
                         bufferWidth = Console.BufferWidth;
                     }
 

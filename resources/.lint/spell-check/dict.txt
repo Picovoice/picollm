@@ -12,10 +12,12 @@ constraintlayout
 copywasm
 cuda
 cwrap
+deepseek
 dotdotdot
 drawerlayout
 dylib
 embedder
+embeddinggemma
 emscripten
 endoftext
 finalizer
@@ -60,6 +62,7 @@ pluginutils
 pthread
 Podfile
 podspec
+qwen
 readables
 rtld
 salut
@@ -70,6 +73,7 @@ Spacebar
 Spannable
 strdup
 testapp
+tobytes
 tock
 uddin
 Unmanaged

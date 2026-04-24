@@ -62,13 +62,13 @@ export type PicoLLMImage = {
 };
 
 export type PicoLLMGenerateWithImageOptions = PicoLLMGenerateOptions & {
-  progressCallback?: (progress: number) => void;
+  promptProgressCallback?: (progress: number) => void;
 };
 
 export type PicoLLMGenerateOCROptions = {
   completionTokenLimit?: number;
   streamCallback?: (token: string) => void;
-  progressCallback?: (progress: number) => void;
+  promptProgressCallback?: (progress: number) => void;
 }
 
 export type PicoLLMUsage = {

@@ -1,5 +1,5 @@
 /*
-  Copyright 2024-2025 Picovoice Inc.
+  Copyright 2024-2026 Picovoice Inc.
 
   You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
   file accompanying this source.
@@ -39,7 +39,7 @@ const streamingCallback = (token: string): void => {
   });
 };
 
-const progressCallback = (progress: number): void => {
+const promptProgressCallback = (progress: number): void => {
   self.postMessage({
     command: 'progress',
     progress: progress,
@@ -117,7 +117,7 @@ const generateWithImageRequest = async (
     return notInitializedError;
   }
   request.options.streamCallback = streamingCallback;
-  request.options.progressCallback = progressCallback;
+  request.options.promptProgressCallback = promptProgressCallback;
   const completion = await picoLLM.generateWithImage(request.prompt, request.image, request.options);
   return {
     command: 'ok',
@@ -145,7 +145,7 @@ const generateOCRRequest = async (
     return notInitializedError;
   }
   request.options.streamCallback = streamingCallback;
-  request.options.progressCallback = progressCallback;
+  request.options.promptProgressCallback = promptProgressCallback;
   const completion = await picoLLM.generateOCR(request.image, request.options);
   return {
     command: 'ok',

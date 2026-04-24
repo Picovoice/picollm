@@ -1,5 +1,5 @@
 /*
-  Copyright 2024-2025 Picovoice Inc.
+  Copyright 2024-2026 Picovoice Inc.
 
   You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
   file accompanying this source.
@@ -312,7 +312,7 @@ export class PicoLLMWorker {
    * for any generated token. Set to `0` to turn off the feature. The maximum number of top choices is `.maxTopChoices`.
    * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
    * completion string becomes available.
-   * @param options.progressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
+   * @param options.promptProgressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
    * progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and
    * completion tokens are now being generated.
    */
@@ -331,7 +331,7 @@ export class PicoLLMWorker {
       topP = 1,
       numTopChoices = 0,
       streamCallback,
-      progressCallback
+      promptProgressCallback
     } = options;
 
     const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
@@ -346,8 +346,8 @@ export class PicoLLMWorker {
             }
             break;
           case 'progress':
-            if (progressCallback) {
-              progressCallback(event.data.progress);
+            if (promptProgressCallback) {
+              promptProgressCallback(event.data.progress);
             }
             break;
           case 'failed':
@@ -432,7 +432,7 @@ export class PicoLLMWorker {
    * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
    * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
    * completion string becomes available.
-   * @param options.progressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
+   * @param options.promptProgressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
    * progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and
    * completion tokens are now being generated.
    */
@@ -443,7 +443,7 @@ export class PicoLLMWorker {
     const {
       completionTokenLimit = -1,
       streamCallback,
-      progressCallback
+      promptProgressCallback
     } = options;
 
     const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
@@ -458,8 +458,8 @@ export class PicoLLMWorker {
             }
             break;
           case 'progress':
-            if (progressCallback) {
-              progressCallback(event.data.progress);
+            if (promptProgressCallback) {
+              promptProgressCallback(event.data.progress);
             }
             break;
           case 'failed':

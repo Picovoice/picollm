@@ -264,7 +264,7 @@ class PicoLLMProgressCallback {
     this._userCallback = userCallback;
   }
 
-  public progressCallbackWasm = (progress: number): void => {
+  public promptProgressCallbackWasm = (progress: number): void => {
     if (this._module === undefined) {
       return;
     }
@@ -301,8 +301,8 @@ export class PicoLLM {
   private readonly _version: string;
   private readonly _streamCallback: PicoLLMStreamCallback;
   private readonly _streamCallbackFnPointer: number;
-  private readonly _progressCallback: PicoLLMProgressCallback;
-  private readonly _progressCallbackFnPointer: number;
+  private readonly _promptProgressCallback: PicoLLMProgressCallback;
+  private readonly _promptProgressCallbackFnPointer: number;
 
   private static _wasmPThread: string;
   private static _wasmPThreadLib: string;
@@ -325,8 +325,8 @@ export class PicoLLM {
     this._version = handleWasm.version;
     this._streamCallback = new PicoLLMStreamCallback(this._module);
     this._streamCallbackFnPointer = this._module.addFunction(this._streamCallback.streamCallbackWasm, 'vii');
-    this._progressCallback = new PicoLLMProgressCallback(this._module);
-    this._progressCallbackFnPointer = this._module.addFunction(this._progressCallback.progressCallbackWasm, 'vfi');
+    this._promptProgressCallback = new PicoLLMProgressCallback(this._module);
+    this._promptProgressCallbackFnPointer = this._module.addFunction(this._promptProgressCallback.promptProgressCallbackWasm, 'vfi');
 
     this._functionMutex = new Mutex();
 
@@ -791,7 +791,7 @@ export class PicoLLM {
    * for any generated token. Set to `0` to turn off the feature. The maximum number of top choices is `.maxTopChoices`.
    * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
    * completion string becomes available.
-   * @param options.progressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
+   * @param options.promptProgressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
    * progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and
    * completion tokens are now being generated.
    */
@@ -810,7 +810,7 @@ export class PicoLLM {
       topP = 1,
       numTopChoices = 0,
       streamCallback,
-      progressCallback
+      promptProgressCallback
     } = options;
 
     return new Promise<PicoLLMCompletion>((resolve, reject) => {
@@ -908,10 +908,10 @@ export class PicoLLM {
             streamCallbackFnPointer = this._streamCallbackFnPointer;
           }
 
-          let progressCallbackFnPointer = 0;
-          if (progressCallback !== undefined) {
-            this._progressCallback.setUserCallback(progressCallback);
-            progressCallbackFnPointer = this._progressCallbackFnPointer;
+          let promptProgressCallbackFnPointer = 0;
+          if (promptProgressCallback !== undefined) {
+            this._promptProgressCallback.setUserCallback(promptProgressCallback);
+            promptProgressCallbackFnPointer = this._promptProgressCallbackFnPointer;
           }
 
           const status = await this._pv_picollm_generate_with_image(
@@ -931,7 +931,7 @@ export class PicoLLM {
             numTopChoices,
             streamCallbackFnPointer,
             0,
-            progressCallbackFnPointer,
+            promptProgressCallbackFnPointer,
             0,
             usageAddress,
             endpointAddress,
@@ -1172,7 +1172,7 @@ export class PicoLLM {
    * `PicoLLMEndpoint.COMPLETION_TOKEN_LIMIT_REACHED`. Set to `undefined` to impose no limit.
    * @param options.streamCallback If not set to `undefined`, picoLLM executes this callback every time a new piece of
    * completion string becomes available.
-   * @param options.progressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
+   * @param options.promptProgressCallback If not set to `undefined`, picoLLM uses this callback to report the prompt evaluation
    * progress as a floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and
    * completion tokens are now being generated.
    */
@@ -1183,7 +1183,7 @@ export class PicoLLM {
     const {
       completionTokenLimit = -1,
       streamCallback,
-      progressCallback
+      promptProgressCallback
     } = options;
 
     return new Promise<PicoLLMCompletion>((resolve, reject) => {
@@ -1223,10 +1223,10 @@ export class PicoLLM {
             streamCallbackFnPointer = this._streamCallbackFnPointer;
           }
 
-          let progressCallbackFnPointer = 0;
-          if (progressCallback !== undefined) {
-            this._progressCallback.setUserCallback(progressCallback);
-            progressCallbackFnPointer = this._progressCallbackFnPointer;
+          let promptProgressCallbackFnPointer = 0;
+          if (promptProgressCallback !== undefined) {
+            this._promptProgressCallback.setUserCallback(promptProgressCallback);
+            promptProgressCallbackFnPointer = this._promptProgressCallbackFnPointer;
           }
 
           const status = await this._pv_picollm_generate_ocr(
@@ -1237,7 +1237,7 @@ export class PicoLLM {
             completionTokenLimit,
             streamCallbackFnPointer,
             0,
-            progressCallbackFnPointer,
+            promptProgressCallbackFnPointer,
             0,
             endpointAddress,
             completionAddressAddress

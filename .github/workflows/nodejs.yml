@@ -60,7 +60,7 @@ jobs:
 
     - name: Test (windows)
       if: ${{ matrix.machine == 'pv-windows' || matrix.machine == 'pv-windows-arm64' || matrix.machine == 'pv-windows-igpu' }}
-      run: set SKIP_OCR_LARGE=true yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}}
+      run: $env:SKIP_OCR_LARGE="true"; yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}}
 
     - name: Test OCR Large
       if: ${{ matrix.machine == 'pv-linux' && matrix.device == 'cpu' }}

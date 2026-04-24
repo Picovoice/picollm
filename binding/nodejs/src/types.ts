@@ -44,16 +44,7 @@ export type PicoLLMImage = {
   data: Uint8Array;
 };
 
-export type PicoLLMGenerateWithImageOptions = {
-  completionTokenLimit?: number;
-  stopPhrases?: string[];
-  seed?: number;
-  presencePenalty?: number;
-  frequencyPenalty?: number;
-  temperature?: number;
-  topP?: number;
-  numTopChoices?: number;
-  streamCallback?: (token: string) => void;
+export type PicoLLMGenerateWithImageOptions = PicoLLMGenerateOptions & {
   promptProgressCallback?: (progress: number) => void;
 };
 

@@ -1,6 +1,7 @@
 import {
   Dialog,
   GemmaChatDialog,
+  Gemma3ChatDialog,
   Llama2ChatDialog,
   Llama3ChatDialog,
   Llama32ChatDialog,
@@ -18,14 +19,20 @@ import {
 } from '../';
 
 // @ts-ignore
-import { modelName } from '../cypress/fixtures/model_data.json';
+import modelData from '../cypress/fixtures/model_data.json';
 // @ts-ignore
 import testData from './test_data.json';
+
+const defaultGenerateModel = "phi2-290";
+const defaultGenerateWithImageModel = "qwen3-vl-2b-it-329";
+const defaultGenerateEmbeddingModel = "embeddinggemma-300m-137";
+const defaultGenerateOCRModel = "deepseek-ocr-2-310"
 
 const ACCESS_KEY = Cypress.env('ACCESS_KEY');
 
 const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   'gemma-chat-dialog': GemmaChatDialog,
+  'gemma3-chat-dialog': Gemma3ChatDialog,
   "llama-2-chat-dialog": Llama2ChatDialog,
   "llama-3-chat-dialog": Llama3ChatDialog,
   "llama-3.2-chat-dialog": Llama32ChatDialog,
@@ -63,7 +70,7 @@ const runInitTest = async (
 ) => {
   const {
     accessKey = ACCESS_KEY,
-    modelPath = modelName,
+    modelPath = modelData[defaultGenerateModel].modelName,
     forceWrite = true,
     device = 'best',
     expectFailure = false,
@@ -146,6 +153,24 @@ const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpect
   }
 };
 
+const verifyOCRCompletion = (res: PicoLLMCompletion, expectations: CompletionExpectation[]) => {
+  let error: any;
+  for (const expectation of expectations) {
+    try {
+      expect(res.endpoint).to.eq(PicoLLMEndpoint[expectation.endpoint as keyof typeof PicoLLMEndpoint], 'Endpoint');
+      expect(res.completion).to.eq(expectation.completion, 'Completion');
+
+      return;
+    } catch (e) {
+      error = e;
+    }
+  }
+
+  if (error) {
+    throw error;
+  }
+};
+
 const runGenerateTest = async (
   picoLLM: PicoLLM | PicoLLMWorker,
   prompt: string,
@@ -190,7 +215,7 @@ describe('PicoLLM basic tests', function () {
   });
 
   it(`should return correct error message stack`, () => {
-    cy.loadModel().then(async chunks => {
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
       const model: PicoLLMModel = { modelFile: chunks };
 
       let messageStack = [];
@@ -220,13 +245,13 @@ describe('PicoLLM basic tests', function () {
   });
 
   it(`should be able to init with public path`, () => {
-    cy.loadModel().then(async chunks => {
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
       await runInitTest(PicoLLMWorker, chunks);
     });
   });
 
   it(`should be able to handle invalid access key`, () => {
-    cy.loadModel().then(async chunks => {
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
       await runInitTest(PicoLLMWorker, chunks, {
         accessKey: 'invalid',
         expectFailure: true,
@@ -235,7 +260,7 @@ describe('PicoLLM basic tests', function () {
   });
 
   it(`should be able to handle UTF-8 model path`, () => {
-    cy.loadModel().then(async chunks => {
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
       await runInitTest(PicoLLMWorker, chunks, {
         modelPath: '테스트',
       });
@@ -243,7 +268,7 @@ describe('PicoLLM basic tests', function () {
   });
 
   it(`should be able to handle invalid device string`, () => {
-    cy.loadModel().then(async chunks => {
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
       await runInitTest(PicoLLMWorker, chunks, {
         device: "nan",
         expectFailure: true,
@@ -252,7 +277,7 @@ describe('PicoLLM basic tests', function () {
   });
 
   it(`should refuse to run on main thread`, () => {
-    cy.loadModel().then(async chunks => {
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
       await runInitTest(PicoLLM, chunks, {
         expectFailure: true,
       });
@@ -508,7 +533,7 @@ const generateTests = () => {
 
 describe('PicoLLM generate tests (worker)', () => {
   before(() => {
-    cy.initPicoLLM(ACCESS_KEY, true);
+    cy.initPicoLLM(defaultGenerateModel, ACCESS_KEY, true);
   });
 
   after(() => {
@@ -570,4 +595,138 @@ describe('PicoLLM Dialog tests', () => {
       });
     });
   });
+});
+
+const getImage = async (uri: str): any => {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  const image = new Image();
+  image.src = `/test/${uri}`;
+  await image.decode();
+
+  canvas.width = image.width;
+  canvas.height = image.height;
+
+  context.drawImage(image, 0, 0);
+  const imageBuffer = context.getImageData(
+    0, 0,
+    canvas.width, canvas.height
+  );
+
+  const rgbImageData = imageBuffer.data.filter((element, index, array) => {
+    return (index + 1) % 4 !== 0;
+  });
+
+  return {
+        height: imageBuffer.height,
+        width: imageBuffer.width,
+        data: rgbImageData
+      };
+}
+
+const generateWithImageTests = () => {
+  it(`should be able to generate default`, () => {
+    cy.loadPicoLLM().then(async picoLLM => {
+      const data = testData.generate_with_image;
+      const prompt = data.prompt;
+
+      const completionTokenLimit = data.parameters['completion-token-limit'];
+
+      const image = await getImage(data.image);
+
+      try {
+        const res = await picoLLM.generateWithImage(prompt, image, { completionTokenLimit });
+        verifyCompletion(res, data.expectations);
+      } catch (e) {
+        expect(e).to.be.undefined;
+      }
+    });
+  });
+};
+
+describe('PicoLLM generate with image tests (worker)', () => {
+  before(() => {
+    cy.initPicoLLM(defaultGenerateWithImageModel, ACCESS_KEY, true);
+  });
+
+  after(() => {
+    cy.deletePicoLLM();
+  });
+
+  generateWithImageTests();
+});
+
+const calculateSimilarity = (x: number[], y: number[]): number => {
+  let similarity = 0.0
+  for (let i = 0; i < x.length; i++) {
+    similarity = similarity + (x[i] * y[i]);
+  }
+  return similarity;
+}
+
+const generateEmbeddingTests = () => {
+  it(`should be able to generate default`, () => {
+    cy.loadPicoLLM().then(async picoLLM => {
+      const data = testData.generate_embedding;
+      const prompt = data.prompt;
+
+      try {
+        const res_prompt = await picoLLM.generateEmbeddings(prompt);
+        for (let i = 0; i < data.expectations.length; i++) {
+          const res_doc = await picoLLM.generateEmbeddings(data.expectations[i].doc);
+
+          expect(res_prompt.embeddings.length).to.equal(res_doc.embeddings.length);
+
+          const similarity = calculateSimilarity(res_prompt.embeddings, res_doc.embeddings);
+          expect(Math.abs(similarity - data.expectations[i].similarity)).to.be.lte(0.01);
+        }
+      } catch (e) {
+        expect(e).to.be.undefined;
+      }
+    });
+  });
+};
+
+describe('PicoLLM generate embedding tests (worker)', () => {
+  before(() => {
+    cy.initPicoLLM(defaultGenerateEmbeddingModel, ACCESS_KEY, true);
+  });
+
+  after(() => {
+    cy.deletePicoLLM();
+  });
+
+  generateEmbeddingTests();
+});
+
+const generateOCRTests = () => {
+  it(`should be able to generate default`, () => {
+    cy.loadPicoLLM().then(async picoLLM => {
+      const data = testData.generate_ocr;
+
+      const completionTokenLimit = data.parameters['completion-token-limit'];
+
+      const image = await getImage(data.image);
+
+      try {
+        const res = await picoLLM.generateOCR(image, { completionTokenLimit });
+        verifyOCRCompletion(res, data.expectations);
+      } catch (e) {
+        expect(e).to.be.undefined;
+      }
+    });
+  });
+};
+
+describe('PicoLLM generate ocr tests (worker)', () => {
+  before(() => {
+    cy.initPicoLLM(defaultGenerateOCRModel, ACCESS_KEY, true);
+  });
+
+  after(() => {
+    cy.deletePicoLLM();
+  });
+
+  generateOCRTests();
 });

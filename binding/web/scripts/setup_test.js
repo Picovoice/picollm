@@ -1,13 +1,24 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const url = require('url')
 
 const chunkSize = 1024 * 1024 * 128; // 128MB
 
-const url = process.argv[2];
-const fileName = process.argv[3];
-const splitFile = path.parse(fileName);
-const outputFile = path.join(__dirname, '..', 'cypress', 'fixtures', splitFile.name);
+let models = []
+for (let i = 2; i < process.argv.length; i++) {
+  const url = process.argv[i];
+  const urlParsed = new URL(url);
+
+  const splitFile = path.parse(urlParsed.pathname);
+  const outputFile = path.join(__dirname, '..', 'cypress', 'fixtures', splitFile.name);
+
+  models.push({
+    url,
+    splitFile,
+    outputFile,
+  });
+}
 
 const testDirectory = path.join(__dirname, '..', 'test');
 
@@ -20,51 +31,76 @@ const testDataSource = path.join(
   '.test',
   'test_data.json'
 );
-
 fs.copyFileSync(testDataSource, path.join(testDirectory, 'test_data.json'));
 
-console.log(`Downloading file...`);
+const testImageSource = path.join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'resources',
+  '.test',
+  'images',
+  'test_image.png'
+);
+fs.copyFileSync(testImageSource, path.join(testDirectory, 'test_image.png'));
 
-http.get(url, res => {
-  let currentChunkSize = 0;
-  let currentChunk = 0;
+const modelData = Promise.all(models.map(m => new Promise((resolve, reject) => {
+  const {url, splitFile, outputFile} = m;
 
-  const testData = {
-    modelName: splitFile.name,
-    modelFiles: [],
-  };
+  console.log(`Downloading file '${splitFile.base}'...`);
 
-  let modelFileName = `${outputFile}-${currentChunk}${splitFile.ext}`;
-  let modelFile = fs.createWriteStream(modelFileName);
-  testData.modelFiles.push(modelFileName);
+  http.get(url, res => {
+    let currentChunkSize = 0;
+    let currentChunk = 0;
 
-  res.on('data', chunk => {
-    if (currentChunkSize + chunk.length > chunkSize) {
-      modelFile.close();
-      currentChunk += 1;
-      currentChunkSize = 0;
+    const testData = {
+      modelName: splitFile.name,
+      modelFiles: [],
+    };
 
-      modelFileName = `${outputFile}-${currentChunk}${splitFile.ext}`;
-      modelFile = fs.createWriteStream(modelFileName);
-      testData.modelFiles.push(modelFileName);
-    }
+    let modelFileName = `${outputFile}-${currentChunk}${splitFile.ext}`;
+    let modelFile = fs.createWriteStream(modelFileName);
+    testData.modelFiles.push(modelFileName);
 
-    modelFile.write(chunk);
-    currentChunkSize += chunk.length;
-  });
+    res.on('data', chunk => {
+      if (currentChunkSize + chunk.length > chunkSize) {
+        modelFile.close();
+        currentChunk += 1;
+        currentChunkSize = 0;
 
-  res.on('end', () => {
-    modelFile.close();
-    console.log('Download Complete!');
-
-    const jsonTestData = JSON.stringify(testData);
-    const jsonTestFile = path.join(__dirname, '..', 'cypress', 'fixtures', 'model_data.json');
-    fs.writeFile(jsonTestFile, jsonTestData, err => {
-      if (err) {
-        console.error('Error writing test JSON file:', err);
-        return;
+        modelFileName = `${outputFile}-${currentChunk}${splitFile.ext}`;
+        modelFile = fs.createWriteStream(modelFileName);
+        testData.modelFiles.push(modelFileName);
       }
-      console.log('Test JSON file has been saved successfully!');
+
+      modelFile.write(chunk);
+      currentChunkSize += chunk.length;
+    });
+
+    res.on('end', () => {
+      modelFile.close();
+      console.log(`Download '${splitFile.base}' Complete!`);
+      resolve(testData);
     });
   });
-});
+})));
+
+modelData.then(modelData => {
+  let modelDataObject = {};
+  modelData.forEach(
+    m => {
+      modelDataObject[m.modelName] = m;
+    }
+  );
+
+  const jsonTestData = JSON.stringify(modelDataObject);
+  const jsonTestFile = path.join(__dirname, '..', 'cypress', 'fixtures', 'model_data.json');
+  fs.writeFile(jsonTestFile, jsonTestData, err => {
+    if (err) {
+      console.error('Error writing test JSON file:', err);
+      return;
+    }
+    console.log('Test JSON file has been saved successfully!');
+  });
+})

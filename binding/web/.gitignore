@@ -3,6 +3,8 @@ dist
 src/lib/*
 src/!lib/.gitkeep
 test/*.bin
+test/*.png
+cypress/fixtures/*.png
 .idea/
 test_data.json
 model_data.json

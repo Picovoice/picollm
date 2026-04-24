@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 //
-// Copyright 2026 Picovoice Inc.
+// Copyright 2024-2026 Picovoice Inc.
 //
 // You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 // file accompanying this source.

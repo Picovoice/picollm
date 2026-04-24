@@ -1,5 +1,5 @@
 /*
-    Copyright 2024-2026 Picovoice Inc.
+    Copyright 2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
     file accompanying this source.
@@ -28,9 +28,6 @@
 #include <windows.h>
 
 #endif
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 #include "pv_picollm.h"
 
@@ -86,16 +83,7 @@ static void print_dl_error(const char *message) {
 #endif
 }
 
-static void (*pv_picollm_interrupt_func)(pv_picollm_t *) = NULL;
 static pv_picollm_t *picollm = NULL;
-static volatile bool is_interrupt = false;
-
-void interrupt_handler(int _) {
-    (void) _;
-    is_interrupt = true;
-    fprintf(stdout, "\n\nInterrupting generation...\n");
-    pv_picollm_interrupt_func(picollm);
-}
 
 void print_error_message(
     char **message_stack,
@@ -125,87 +113,41 @@ void print_error_message(
     exit(EXIT_FAILURE);
 }
 
+static float calculate_similarity(
+        int32_t length,
+        const float *x,
+        const float *y) {
+
+    float similarity = 0.0f;
+    for (int32_t i = 0; i < length; i++) {
+        similarity += x[i] * y[i];
+    }
+
+    return similarity;
+}
+
 static void usage(const char *program) {
     (void) fprintf(
             stderr,
             "Usage: %s -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH "
-            "[-y DEVICE] [-s STOP_PHRASES] [-n MAX_OUTPUT_TOKENS] [-c NUM_TOP_CHOICES] "
-            "[-r PRESENCE_PENALTY] [-f FREQUENCY_PENALTY] "
-            "[-o TOP_P] [-t TEMPERATURE] [-e SEED] [-v] [-h] [-i IMAGE_PATH] -p PROMPT\n"
-            "-v: enable verbose output\n"
+            "[-y DEVICE] [-h] -p PROMPT -d DOCUMENT\n"
             "-h: show available devices\n",
             program);
-}
-
-static const char *pv_picollm_endpoint_to_string(pv_picollm_endpoint_t x) {
-    static const char *STRINGS[] = {
-            "END_OF_SENTENCE",
-            "COMPLETION_TOKEN_LIMIT_REACHED",
-            "STOP_PHRASE_ENCOUNTERED",
-            "INTERRUPTED"
-    };
-
-    return STRINGS[x];
 }
 
 static int32_t num_tokens = -1;
 struct timeval tic;
 
-static void completion_stream_callback(const char *token, void *context) {
-    (void) context;
-    if (!is_interrupt) {
-        fprintf(stdout, "%s", token);
-        fflush(stdout);
-        if (num_tokens == -1) {
-            gettimeofday(&tic, NULL);
-        }
-        num_tokens += 1;
-    }
-}
-
-static void prompt_progress_callback(float progress, void *context) {
-    (void) context;
-
-    const int32_t BAR_WIDTH = 50;
-
-    int32_t filled_len = (int32_t)((progress / 100.0f) * (float) BAR_WIDTH);
-
-    fprintf(stdout, ("\r["));
-    for (int32_t i = 0; i < BAR_WIDTH; i++) {
-        if (i < filled_len) {
-            fprintf(stdout, "#");
-        } else {
-            fprintf(stdout, " ");
-        }
-    }
-    fprintf(stdout, "] %.1f%%", progress);
-    fflush(stdout);
-
-    if (progress >= 100.0f) {
-        printf("\n");
-    }
-}
-
 int picovoice_main(int argc, char **argv) {
-    const char *SHORT_OPTIONS = "a:l:m:y:c:s:e:r:f:o:t:n:c:i:p:vh";
+    const char *SHORT_OPTIONS = "a:l:m:y:p:d:h";
 
     const char *access_key = NULL;
     const char *model_path = NULL;
     const char *library_path = NULL;
     const char *device_string = "best";
-    float presence_penalty = 0.f;
-    float frequency_penalty = 0.f;
-    int32_t seed = -1;
-    float top_p = .9f;
-    float temperature = .6f;
-    int32_t max_output_tokens = -1;
-    int32_t num_stop_phrases = 0;
-    const char **stop_phrases = NULL;
-    int32_t num_top_choices = 0;
-    bool verbose = false;
     bool show_devices = false;
-    const char *image_path = NULL;
     char *prompt = NULL;
+    char *document = NULL;
 
     int opt;
     while ((opt = getopt(argc, argv, SHORT_OPTIONS)) != -1) {
@@ -218,51 +160,6 @@ int picovoice_main(int argc, char **argv) {
                 break;
             case 'l':
                 library_path = optarg;
-                break;
-            case 'r':
-                presence_penalty = (float) strtod(optarg, NULL);
-                break;
-            case 'f':
-                frequency_penalty = (float) strtod(optarg, NULL);
-                break;
-            case 'e':
-                seed = (int32_t) strtol(optarg, NULL, 10);
-                break;
-            case 'o':
-                top_p = (float) strtod(optarg, NULL);
-                break;
-            case 't':
-                temperature = (float) strtod(optarg, NULL);
-                break;
-            case 'n':
-                max_output_tokens = (int32_t) strtol(optarg, NULL, 10);
-                break;
-            case 's': {
-                int32_t i = optind - 1;
-                while ((i < argc) && (argv[i][0] != '-')) {
-                    i++;
-                }
-                num_stop_phrases = i - (optind - 1);
-
-                stop_phrases = calloc(num_stop_phrases, sizeof(char *));
-                if (!stop_phrases) {
-                    exit(EXIT_FAILURE);
-                }
-
-                i = optind - 1;
-                while ((i < argc) && (argv[i][0] != '-')) {
-                    stop_phrases[i - (optind - 1)] = argv[i];
-                    i++;
-                }
-
-                optind = i;
-            }
-                break;
-            case 'c':
-                num_top_choices = (int32_t) strtol(optarg, NULL, 10);
-                break;
-            case 'i':
-                image_path = optarg;
                 break;
             case 'p': {
                 size_t prompt_length = 0;
@@ -288,11 +185,32 @@ int picovoice_main(int argc, char **argv) {
                 optind = i;
             }
                 break;
+            case 'd': {
+                size_t document_length = 0;
+                int32_t i = optind - 1;
+                while ((i < argc) && (argv[i][0] != '-')) {
+                    document_length += strlen(argv[i]) + 1;
+                    i++;
+                }
+
+                document = calloc(document_length + 1, sizeof(char));
+                if (!document) {
+                    exit(EXIT_FAILURE);
+                }
+
+                i = optind - 1;
+                while ((i < argc) && (argv[i][0] != '-')) {
+                    strcat(document, argv[i]);
+                    strcat(document, " ");
+                    i++;
+                }
+                document[document_length - 1] = '\0';
+
+                optind = i;
+            }
+                break;
             case 'y':
                 device_string = optarg;
-                break;
-            case 'v':
-                verbose = true;
                 break;
             case 'h':
                 show_devices = true;
@@ -340,83 +258,20 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_generate_func)(
+    pv_status_t (*pv_picollm_generate_embeddings_func)(
             pv_picollm_t *,
             const char *,
-            int32_t,
-            const char *const *,
-            int32_t,
-            int32_t,
-            float,
-            float,
-            float,
-            float,
-            int32_t,
-            pv_picollm_stream_callback_t,
-            void *,
-            pv_picollm_usage_t *,
-            pv_picollm_endpoint_t *,
-            pv_picollm_completion_token_t **,
             int32_t *,
-            char **) = load_symbol(dl_handle, "pv_picollm_generate");
-    if (!pv_picollm_generate_func) {
-        print_dl_error("failed to load `pv_picollm_generate`");
+            float **) = load_symbol(dl_handle, "pv_picollm_generate_embeddings");
+    if (!pv_picollm_generate_embeddings_func) {
+        print_dl_error("failed to load `pv_picollm_generate_embeddings`");
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_generate_with_image_func)(
-            pv_picollm_t *,
-            const char *,
-            int32_t,
-            int32_t,
-            const uint8_t *,
-            int32_t,
-            const char *const *,
-            int32_t,
-            int32_t,
-            float,
-            float,
-            float,
-            float,
-            int32_t,
-            pv_picollm_stream_callback_t,
-            void *,
-            pv_picollm_progress_callback_t,
-            void *,
-            pv_picollm_usage_t *,
-            pv_picollm_endpoint_t *,
-            pv_picollm_completion_token_t **,
-            int32_t *,
-            char **) = load_symbol(dl_handle, "pv_picollm_generate_with_image");
-    if (!pv_picollm_generate_with_image_func) {
-        print_dl_error("failed to load `pv_picollm_generate_with_image`");
-        exit(EXIT_FAILURE);
-    }
-
-    pv_picollm_interrupt_func = load_symbol(dl_handle, "pv_picollm_interrupt");
-    if (!pv_picollm_interrupt_func) {
-        print_dl_error("failed to load `pv_picollm_interrupt`");
-        exit(EXIT_FAILURE);
-    }
-
-    void (*pv_picollm_delete_completion_tokens_func)(pv_picollm_completion_token_t *, int32_t) =
-        load_symbol(dl_handle, "pv_picollm_delete_completion_tokens");
-    if (!pv_picollm_delete_completion_tokens_func) {
-        print_dl_error("failed to load `pv_picollm_delete_completion_tokens`");
-        exit(EXIT_FAILURE);
-    }
-
-    pv_status_t (*pv_picollm_delete_completion_func)(char *) =
-        load_symbol(dl_handle, "pv_picollm_delete_completion");
-    if (!pv_picollm_delete_completion_func) {
-        print_dl_error("failed to load `pv_picollm_delete_completion`");
-        exit(EXIT_FAILURE);
-    }
-
-    pv_status_t (*pv_picollm_context_length_func)(const pv_picollm_t *, int32_t *) =
-        load_symbol(dl_handle, "pv_picollm_context_length");
-    if (!pv_picollm_context_length_func) {
-        print_dl_error("failed to load `pv_picollm_context_length`");
+    void (*pv_picollm_delete_embeddings_func)(float *) =
+        load_symbol(dl_handle, "pv_picollm_delete_embeddings");
+    if (!pv_picollm_delete_embeddings_func) {
+        print_dl_error("failed to load `pv_picollm_delete_embeddings`");
         exit(EXIT_FAILURE);
     }
 
@@ -431,13 +286,6 @@ int picovoice_main(int argc, char **argv) {
         load_symbol(dl_handle, "pv_picollm_model");
     if (!pv_picollm_model_func) {
         print_dl_error("failed to load `pv_picollm_model`");
-        exit(EXIT_FAILURE);
-    }
-
-    int32_t (*pv_picollm_max_top_choices_func)(void) =
-        load_symbol(dl_handle, "pv_picollm_max_top_choices");
-    if (!pv_picollm_max_top_choices_func) {
-        print_dl_error("failed to load `pv_picollm_max_top_choices`");
         exit(EXIT_FAILURE);
     }
 
@@ -501,34 +349,8 @@ int picovoice_main(int argc, char **argv) {
         return EXIT_SUCCESS;
     }
 
-    if (!(access_key && model_path && prompt)) {
+    if (!(access_key && model_path && prompt && document)) {
         usage(argv[0]);
-        exit(EXIT_FAILURE);
-    }
-
-    int32_t image_width = -1;
-    int32_t image_height = -1;
-    uint8_t *image = NULL;
-    if (image_path) {
-        int32_t original_channels = -1;
-        image = stbi_load(
-                image_path,
-                &image_width,
-                &image_height,
-                &original_channels,
-                3);
-        if (image == NULL) {
-            fprintf(stderr, "Failed to load image: %s\n", stbi_failure_reason());
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    const int32_t max_top_choices = pv_picollm_max_top_choices_func();
-    if (num_top_choices > max_top_choices) {
-        fprintf(
-                stderr,
-                "Number of top choices must be less than or equal to %d.\n",
-                max_top_choices);
         exit(EXIT_FAILURE);
     }
 
@@ -551,30 +373,6 @@ int picovoice_main(int argc, char **argv) {
         );
     }
 
-    int32_t context_length = 0;
-    status = pv_picollm_context_length_func(picollm, &context_length);
-    if (status != PV_STATUS_SUCCESS) {
-        fprintf(
-                stderr,
-                "Failed to get context length with `%s`.\n",
-                pv_status_to_string_func(status));
-        print_error_message(
-            message_stack,
-            message_stack_depth,
-            pv_get_error_stack_func,
-            pv_free_error_stack_func,
-            pv_status_to_string_func
-        );
-    }
-
-    if (max_output_tokens > context_length) {
-        fprintf(
-                stderr,
-                "Max output tokens must be less than or equal to %d.\n",
-                context_length);
-        exit(EXIT_FAILURE);
-    }
-
     char *model = NULL;
     status = pv_picollm_model_func(picollm, &model);
     if (status != PV_STATUS_SUCCESS) {
@@ -591,69 +389,20 @@ int picovoice_main(int argc, char **argv) {
         );
     }
 
-    signal(SIGINT, interrupt_handler);
     fprintf(stdout, "Loaded model: `%s`\n", model);
-    fprintf(stdout, "Generating... (press Ctrl+C to interrupt)\n");
 
-    pv_picollm_usage_t usage;
-    pv_picollm_endpoint_t endpoint;
-    int32_t num_completion_tokens = 0;
-    pv_picollm_completion_token_t *completion_tokens = NULL;
-    char *completion = NULL;
-    if (image) {
-        status = pv_picollm_generate_with_image_func(
-                picollm,
-                prompt,
-                image_width,
-                image_height,
-                image,
-                max_output_tokens,
-                stop_phrases,
-                num_stop_phrases,
-                seed,
-                presence_penalty,
-                frequency_penalty,
-                temperature,
-                top_p,
-                num_top_choices,
-                completion_stream_callback,
-                NULL,
-                prompt_progress_callback,
-                NULL,
-                &usage,
-                &endpoint,
-                &completion_tokens,
-                &num_completion_tokens,
-                &completion);
-        stbi_image_free(image);
-    } else {
-        status = pv_picollm_generate_func(
-                picollm,
-                prompt,
-                max_output_tokens,
-                stop_phrases,
-                num_stop_phrases,
-                seed,
-                presence_penalty,
-                frequency_penalty,
-                temperature,
-                top_p,
-                num_top_choices,
-                completion_stream_callback,
-                NULL,
-                &usage,
-                &endpoint,
-                &completion_tokens,
-                &num_completion_tokens,
-                &completion);
-    }
-
+    float *prompt_embeddings = NULL;
+    int32_t num_prompt_embeddings = 0;
+    status = pv_picollm_generate_embeddings_func(
+            picollm,
+            prompt,
+            &num_prompt_embeddings,
+            &prompt_embeddings);
     free(prompt);
-    free(stop_phrases);
     if (status != PV_STATUS_SUCCESS) {
         fprintf(
                 stderr,
-                "Failed to generate with `%s`.\n",
+                "Failed to generate prompt embeddings with `%s`.\n",
                 pv_status_to_string_func(status));
         print_error_message(
             message_stack,
@@ -663,48 +412,53 @@ int picovoice_main(int argc, char **argv) {
             pv_status_to_string_func
         );
     }
+
+    float *document_embeddings = NULL;
+    int32_t num_document_embeddings = 0;
+    status = pv_picollm_generate_embeddings_func(
+            picollm,
+            document,
+            &num_document_embeddings,
+            &document_embeddings);
+    free(document);
+    if (status != PV_STATUS_SUCCESS) {
+        fprintf(
+                stderr,
+                "Failed to generate document embeddings with `%s`.\n",
+                pv_status_to_string_func(status));
+        print_error_message(
+            message_stack,
+            message_stack_depth,
+            pv_get_error_stack_func,
+            pv_free_error_stack_func,
+            pv_status_to_string_func
+        );
+    }
+
+    if (num_prompt_embeddings != num_document_embeddings) {
+        fprintf(stderr,
+                "`pv_picollm_generate_embeddings` failed due to output embeddings length mismatch,"
+                "num_prompt_embeddings is `%d` but num_document_embeddings is `%d` \n",
+                num_prompt_embeddings,
+                num_document_embeddings);
+        free(prompt_embeddings);
+        free(document_embeddings);
+        exit(EXIT_FAILURE);
+    }
+
+    float similarity = calculate_similarity(
+            num_prompt_embeddings,
+            prompt_embeddings,
+            document_embeddings);
+
+    fprintf(stdout, "Similarity between prompt and document is %f\n", similarity);
     fprintf(stdout, "\n");
 
     struct timeval toc;
     gettimeofday(&toc, NULL);
 
-    fprintf(
-            stdout,
-            "Generated %.2f tokens per sec\n",
-            (double) (usage.completion_tokens - 1) /
-            ((double) (toc.tv_sec - tic.tv_sec) + (double) (toc.tv_usec - tic.tv_usec) / 1e6));
-
-    if (verbose) {
-        fprintf(stdout, "\nUsage:\n");
-        fprintf(stdout, "  prompt tokens: %d\n", usage.prompt_tokens);
-        fprintf(stdout, "  completion tokens: %d\n", usage.completion_tokens);
-
-        fprintf(stdout, "endpoint: %s\n", pv_picollm_endpoint_to_string(endpoint));
-        fprintf(stdout, "completion-tokes:\n");
-        for (int32_t i = 0; i < num_completion_tokens; i++) {
-            fprintf(stdout, "token: %-10s - log_prob: %3.1f\n", completion_tokens[i].token.token,
-                    completion_tokens[i].token.log_prob);
-            if (num_top_choices > 0) {
-                for (int32_t j = 0; j < (num_top_choices - 1); j++) {
-                    fprintf(
-                            stdout,
-                            "  top-choice: %-10s - log_prob: %3.1f\n",
-                            completion_tokens[i].top_choices[j].token,
-                            completion_tokens[i].top_choices[j].log_prob);
-                }
-                fprintf(
-                        stdout,
-                        "  top-choice: %-10s - log_prob: %3.1f\n",
-                        completion_tokens[i].top_choices[num_top_choices - 1].token,
-                        completion_tokens[i].top_choices[num_top_choices - 1].log_prob);
-
-            }
-        }
-        fprintf(stdout, "completion: %s\n", completion);
-    }
-
-    pv_picollm_delete_completion_func(completion);
-    pv_picollm_delete_completion_tokens_func(completion_tokens, num_completion_tokens);
+    pv_picollm_delete_embeddings_func(prompt_embeddings);
+    pv_picollm_delete_embeddings_func(document_embeddings);
     pv_picollm_delete_func(picollm);
     close_dl(dl_handle);
 

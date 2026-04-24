@@ -48,10 +48,10 @@ jobs:
       run: yarn install
 
     - name: Download resource files
-      run: >
-        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/06-5842035/phi2-290.pllm -o test/phi2-290.pllm &&
-        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-329.pllm/00-5842035/qwen3-vl-2b-it-329.pllm -o test/qwen3-vl-2b-it-329.pllm &&
-        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-310.pllm/00-5842035/deepseek-ocr-2-310.pllm -o test/deepseek-ocr-2-310.pllm &&
+      run: |
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/phi2-290.pllm/06-5842035/phi2-290.pllm -o test/phi2-290.pllm
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/qwen3-vl-2b-it-329.pllm/00-5842035/qwen3-vl-2b-it-329.pllm -o test/qwen3-vl-2b-it-329.pllm
+        curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/deepseek-ocr-2-310.pllm/00-5842035/deepseek-ocr-2-310.pllm -o test/deepseek-ocr-2-310.pllm
         curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/embeddinggemma-300m-137.pllm/00-5842035/embeddinggemma-300m-137.pllm -o test/embeddinggemma-300m-137.pllm
 
     - name: Test

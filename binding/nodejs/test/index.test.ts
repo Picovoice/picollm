@@ -703,8 +703,8 @@ describe('PicoLLM generate with image tests', () => {
   });
 });
 
-describe('PicoLLM generate OCR', () => {
-  test(`should be able to generate OCR (small)`, async () => {
+describe('PicoLLM generate OCR small', () => {
+  test(`should be able to generate OCR small`, async () => {
     const data = testData.generate_ocr;
     const imagePath = data.image;
     const image = await readImageFile(imagePath);
@@ -713,8 +713,10 @@ describe('PicoLLM generate OCR', () => {
 
     await runGenerateOCRTest(image, expectations, { completionTokenLimit: completionTokenLimit });
   });
+});
 
-  test(`should be able to generate OCR (large)`, async () => {
+describe('PicoLLM generate OCR large', () => {
+  test(`generate_ocr_large`, async () => {
     const data = testData.generate_ocr_large;
     const imagePath = data.image;
     const image = await readImageFile(imagePath);

@@ -554,9 +554,7 @@ export class PicoLLM {
     }
 
     return {
-      usage: null,
       endpoint: picollmGenerateOCRResult!.completion.endpoint,
-      completionTokens: null,
       completion: picollmGenerateOCRResult!.completion.completion
     };
   }

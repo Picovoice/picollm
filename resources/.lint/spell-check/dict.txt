@@ -6,6 +6,10 @@ back-and-forths
 camelcase
 ccall
 Cdecl
+cgcontext
+cgimg
+cgprovider
+cgspace
 cleartext
 Colour
 constraintlayout

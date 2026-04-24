@@ -57,11 +57,11 @@ class PicoLLMAppTestUITests: BaseTest {
     }
 
     func verifyCompletionHelper(res: PicoLLMCompletion, expectation: PicoLLMExpectation) throws -> Bool {
-        if res.usage.promptTokens != expectation.numPromptTokens {
+        if res.usage!.promptTokens != expectation.numPromptTokens {
             return false
         }
 
-        if res.usage.completionTokens != expectation.numCompletionTokens {
+        if res.usage!.completionTokens != expectation.numCompletionTokens {
             return false
         }
 
@@ -69,8 +69,8 @@ class PicoLLMAppTestUITests: BaseTest {
             return false
         }
 
-        for i in 0..<res.completionTokens.count {
-            let completionToken = res.completionTokens[i]
+        for i in 0..<res.completionTokens!.count {
+            let completionToken = res.completionTokens![i]
 
             if completionToken.token.token.isEmpty {
                 return false
@@ -104,8 +104,8 @@ class PicoLLMAppTestUITests: BaseTest {
             }
         }
 
-        if res.completionTokens.allSatisfy({(completionToken) in !completionToken.token.token.contains("\\x")}) {
-            let tokenCompletion = res.completionTokens.reduce("", {(res, completionToken) in
+        if res.completionTokens!.allSatisfy({(completionToken) in !completionToken.token.token.contains("\\x")}) {
+            let tokenCompletion = res.completionTokens!.reduce("", {(res, completionToken) in
                     res + completionToken.token.token })
             if tokenCompletion != expectation.completion {
                 return false
@@ -126,8 +126,8 @@ class PicoLLMAppTestUITests: BaseTest {
                 return try verifyCompletionHelper(res: res, expectation: expectation)
             case .str(let expectation):
                 let expectationObj = PicoLLMExpectation(
-                    numPromptTokens: res.usage.promptTokens,
-                    numCompletionTokens: res.usage.completionTokens,
+                    numPromptTokens: res.usage!.promptTokens,
+                    numCompletionTokens: res.usage!.completionTokens,
                     endpoint: res.endpoint,
                     numTopChoices: 0,
                     completion: expectation)
@@ -215,7 +215,7 @@ class PicoLLMAppTestUITests: BaseTest {
                 TestExpectation.obj(
                     PicoLLMExpectation(
                         numPromptTokens: numPromptTokens,
-                        numCompletionTokens: result1.usage.completionTokens,
+                        numCompletionTokens: result1.usage!.completionTokens,
                         endpoint: result1.endpoint,
                         numTopChoices: 0,
                         completion: result1.completion
@@ -228,7 +228,7 @@ class PicoLLMAppTestUITests: BaseTest {
                 TestExpectation.obj(
                     PicoLLMExpectation(
                         numPromptTokens: numPromptTokens,
-                        numCompletionTokens: result2.usage.completionTokens,
+                        numCompletionTokens: result2.usage!.completionTokens,
                         endpoint: result2.endpoint,
                         numTopChoices: 0,
                         completion: result2.completion
@@ -265,7 +265,7 @@ class PicoLLMAppTestUITests: BaseTest {
                 TestExpectation.obj(
                     PicoLLMExpectation(
                         numPromptTokens: numPromptTokens,
-                        numCompletionTokens: result1.usage.completionTokens,
+                        numCompletionTokens: result1.usage!.completionTokens,
                         endpoint: result1.endpoint,
                         numTopChoices: 0,
                         completion: result1.completion
@@ -278,7 +278,7 @@ class PicoLLMAppTestUITests: BaseTest {
                 TestExpectation.obj(
                     PicoLLMExpectation(
                         numPromptTokens: numPromptTokens,
-                        numCompletionTokens: result2.usage.completionTokens,
+                        numCompletionTokens: result2.usage!.completionTokens,
                         endpoint: result2.endpoint,
                         numTopChoices: 0,
                         completion: result2.completion
@@ -343,6 +343,82 @@ class PicoLLMAppTestUITests: BaseTest {
         }()
 
         XCTAssertEqual(pieces, expected)
+    }
+
+    func testGenerateWithImage() throws {
+        let testCase = PicollmTestCase(name: "with-image", data: self.withImageTestData!)
+
+        let completionTokenLimit = testCase.parameters["completion-token-limit"] as! Int32
+
+        let imageHandle = try PicoLLM.init(
+            accessKey: accessKey,
+            modelPath: imageModelPath,
+            device: device)
+
+        let result = try imageHandle.generateWithImage(
+            prompt: testCase.prompt,
+            imageWidth: Int32(self.smallImage!.width),
+            imageHeight: Int32(self.smallImage!.height),
+            image: self.smallImage!.data,
+            completionTokenLimit: completionTokenLimit)
+
+        imageHandle.delete()
+
+        try verifyCompletion(res: result, expectations: testCase.expectations)
+    }
+
+    func testGenerateOCR() throws {
+        let testCase = PicollmOCRTestCase(name: "default", data: self.ocrTestData!)
+
+        let completionTokenLimit = testCase.parameters["completion-token-limit"] as! Int32
+
+        let imageHandle = try PicoLLM.init(
+            accessKey: accessKey,
+            modelPath: ocrModelPath,
+            device: device)
+
+        let result = try imageHandle.generateOCR(
+            imageWidth: Int32(self.smallImage!.width),
+            imageHeight: Int32(self.smallImage!.height),
+            image: self.smallImage!.data,
+            completionTokenLimit: completionTokenLimit)
+
+        imageHandle.delete()
+
+        XCTAssertEqual(result.endpoint, testCase.endpoint)
+        XCTAssertEqual(result.completion, testCase.completion)
+    }
+
+    func testGenerateEmbeddings() throws {
+        let testCase = PicollmEmbeddingTestCase(testData: self.embeddingTestData!)
+
+        let embeddingHandle = try PicoLLM.init(
+                    accessKey: accessKey,
+                    modelPath: embeddingModelPath,
+                    device: device)
+
+        let embedding = try embeddingHandle.generateEmbeddings(
+            prompt: testCase.prompt)
+
+        for expectation in testCase.expectations {
+            let reference = try embeddingHandle.generateEmbeddings(
+                prompt: expectation.doc)
+            let similarity = computeSimilarity(x: embedding, y: reference)
+
+            XCTAssertEqual(similarity, expectation.similarity, accuracy: 0.01)
+        }
+
+        embeddingHandle.delete()
+    }
+
+    func computeSimilarity(x: [Float], y: [Float]) -> Float {
+        var sum: Float = 0.0
+
+        for (xx, yy) in zip(x, y) {
+            sum += xx * yy
+        }
+
+        return sum
     }
 
     func testInterrupt() throws {
@@ -425,6 +501,7 @@ class PicoLLMAppTestUITests: BaseTest {
     func verifyDialogPrompt(testName: String, history: Int32? = nil, system: String? = nil) throws {
         let dialogClasses: [String: PicoLLMDialog.Type] = [
             "gemma-chat-dialog": GemmaChatDialog.self,
+            "gemma3-chat-dialog": Gemma3ChatDialog.self,
             "llama-2-chat-dialog": Llama2ChatDialog.self,
             "llama-3-chat-dialog": Llama3ChatDialog.self,
             "llama-3.2-chat-dialog": Llama32ChatDialog.self,
@@ -543,9 +620,81 @@ struct PicollmTestCase {
     }
 }
 
+struct PicollmOCRTestCase {
+    var image: String
+    var parameters: [String: Any]
+    var endpoint: PicoLLMEndpoint
+    var completion: String
+
+    init(name: String, data: [String: Any]) {
+        let testData = data[name] as! [String: Any]
+
+        self.image = testData["image"] as! String
+
+        self.parameters = [:]
+        let parameterData = testData["parameters"] as? [String: Any]
+        let parameterNames = [
+            "completion-token-limit",
+            "stop-phrases",
+            "presence-penalty",
+            "frequency-penalty",
+            "seeds",
+            "seed",
+            "temperature",
+            "top-p",
+            "num-top-choices"
+        ]
+        for name in parameterNames {
+            let value = parameterData?[name] as? Any
+            if value != nil {
+                self.parameters[name] = value!
+            }
+        }
+
+        let expectationsData = testData["expectations"] as! [Any]
+        let expectationData = expectationsData[0] as! [String: Any]
+        let endpoint = expectationData["endpoint"] as! String
+        self.endpoint = {
+            switch endpoint {
+            case "END_OF_SENTENCE":
+                return PicoLLMEndpoint.endOfSentence
+            case "COMPLETION_TOKEN_LIMIT_REACHED":
+                return PicoLLMEndpoint.completionTokenLimitReached
+            case "STOP_PHRASE_ENCOUNTERED":
+                return PicoLLMEndpoint.stopPhraseEncountered
+            default:
+                return PicoLLMEndpoint.completionTokenLimitReached
+            }
+        }()
+        self.completion = expectationData["completion"] as! String
+    }
+}
+
+struct PicollmEmbeddingTestCase {
+    var prompt: String
+    var expectations: [EmbeddingTestExpectation]
+
+    init(testData: [String: Any]) {
+        self.prompt = testData["prompt"] as! String
+
+        self.expectations = []
+        let expectationData = testData["expectations"] as? [[String: Any]]
+        for expectation in expectationData ?? [] {
+            self.expectations.append(EmbeddingTestExpectation(
+                doc: expectation["doc"] as! String,
+                similarity: (expectation["similarity"] as! NSNumber).floatValue))
+        }
+    }
+}
+
 enum TestExpectation {
     case str (String)
     case obj (PicoLLMExpectation)
+}
+
+struct EmbeddingTestExpectation {
+    var doc: String
+    var similarity: Float
 }
 
 struct PicoLLMExpectation {
@@ -587,6 +736,5 @@ struct PicoLLMExpectation {
         self.endpoint = endpoint
         self.numTopChoices = numTopChoices
         self.completion = completion
-
     }
 }

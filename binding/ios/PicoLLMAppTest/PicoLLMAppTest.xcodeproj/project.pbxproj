@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,6 +15,8 @@
 		1E7744BD27CD9D7F00491D0B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E7744BC27CD9D7F00491D0B /* Assets.xcassets */; };
 		1E7744C027CD9D7F00491D0B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1E7744BE27CD9D7F00491D0B /* LaunchScreen.storyboard */; };
 		1E7744D527CD9D7F00491D0B /* PicoLLMAppTestUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7744D427CD9D7F00491D0B /* PicoLLMAppTestUITests.swift */; };
+		34BC7A502F9A930100A8ADDD /* test_image_large.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BC7A4E2F9A930100A8ADDD /* test_image_large.png */; };
+		34BC7A512F9A930100A8ADDD /* test_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BC7A4F2F9A930100A8ADDD /* test_image.png */; };
 		A52A78ED18AA4EDB33D95C4D /* BaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52A7583A49E7ACAA9C7A0C5 /* BaseTest.swift */; };
 		C795C0F42BED5A5200BA9BD2 /* test_data.json in Resources */ = {isa = PBXBuildFile; fileRef = C795C0F32BED5A5200BA9BD2 /* test_data.json */; };
 		E1E013792D160CE600DB0C2F /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = E1E013782D160CE600DB0C2F /* PicoLLM */; };
@@ -42,6 +44,8 @@
 		1E7744D027CD9D7F00491D0B /* PicoLLMAppTestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PicoLLMAppTestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E7744D427CD9D7F00491D0B /* PicoLLMAppTestUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PicoLLMAppTestUITests.swift; sourceTree = "<group>"; };
 		1E7744E327CDA13600491D0B /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = info.plist; sourceTree = "<group>"; };
+		34BC7A4E2F9A930100A8ADDD /* test_image_large.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = test_image_large.png; path = ../../../resources/.test/images/test_image_large.png; sourceTree = "<group>"; };
+		34BC7A4F2F9A930100A8ADDD /* test_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = test_image.png; path = ../../../resources/.test/images/test_image.png; sourceTree = "<group>"; };
 		A52A7583A49E7ACAA9C7A0C5 /* BaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseTest.swift; sourceTree = "<group>"; };
 		C795C0F32BED5A5200BA9BD2 /* test_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = test_data.json; path = ../../../../../resources/.test/test_data.json; sourceTree = "<group>"; };
 		C7FA703F2B6B145800F480F3 /* libPicoLLM-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libPicoLLM-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -72,6 +76,8 @@
 		1E7744A727CD9D7E00491D0B = {
 			isa = PBXGroup;
 			children = (
+				34BC7A4F2F9A930100A8ADDD /* test_image.png */,
+				34BC7A4E2F9A930100A8ADDD /* test_image_large.png */,
 				1E7744B227CD9D7E00491D0B /* PicoLLMAppTest */,
 				1E7744D327CD9D7F00491D0B /* PicoLLMAppTestUITests */,
 				1E7744B127CD9D7E00491D0B /* Products */,
@@ -195,7 +201,7 @@
 			);
 			mainGroup = 1E7744A727CD9D7E00491D0B;
 			packageReferences = (
-				074C41EE2EF3844900FEC19E /* XCRemoteSwiftPackageReference "picollm" */,
+				34BC7A522F9A943E00A8ADDD /* XCLocalSwiftPackageReference "../../../../picollm" */,
 			);
 			productRefGroup = 1E7744B127CD9D7E00491D0B /* Products */;
 			projectDirPath = "";
@@ -222,6 +228,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34BC7A502F9A930100A8ADDD /* test_image_large.png in Resources */,
+				34BC7A512F9A930100A8ADDD /* test_image.png in Resources */,
 				C795C0F42BED5A5200BA9BD2 /* test_data.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -555,6 +563,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		34BC7A522F9A943E00A8ADDD /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../../picollm;
+		};
 		E1E013772D160CDE00DB0C2F /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../../picollm;

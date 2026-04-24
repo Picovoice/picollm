@@ -419,7 +419,7 @@ namespace PicoLLMTest
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
-                PicoLLMOCRCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
+                PicoLLMCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
                 VerifyOCRCompletion(res, expectations);
             }
         }
@@ -437,7 +437,7 @@ namespace PicoLLMTest
 
             using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
             {
-                PicoLLMOCRCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
+                PicoLLMCompletion res = picoLLM.GenerateOCR(image, completionTokenLimit: completionTokenLimit);
                 VerifyOCRCompletion(res, expectations);
             }
         }
@@ -759,7 +759,7 @@ namespace PicoLLMTest
             Assert.IsTrue(anyMatch);
         }
 
-        private void VerifyOCRCompletion(PicoLLMOCRCompletion res, List<OCRExpectation> expectations)
+        private void VerifyOCRCompletion(PicoLLMCompletion res, List<OCRExpectation> expectations)
         {
             bool anyMatch = false;
             foreach (OCRExpectation expectation in expectations)

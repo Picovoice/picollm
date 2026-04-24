@@ -194,7 +194,7 @@ const picoLLM = await PicoLLMWorker.create(
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console.
 
-### Generate Completion
+### Generate Completion (Text Models)
 
 ```typescript
 const res = await picoLLM.generate(`${PROMPT}`);
@@ -233,6 +233,53 @@ Clean up used resources by `picoLLM` or `picoLLMWorker`:
 ```typescript
 await picoLLM.release()
 ```
+
+### Vision models
+
+To run a VLM such as `qwen3-vl-2b-it`:
+
+```typescript
+const image: PicoLLMImage = {
+  width: ${IMAGE_NUM_PIXELS_WIDTH},
+  height: ${IMAGE_NUM_PIXELS_HEIGHT},
+  data: ${IMAGE_DATA},
+};
+
+const res = await picoLLM.generateWithImage(`${PROMPT}`, image);
+console.log(res.completion);
+```
+
+Replace `${PROMPT}` with a text prompt. For the image, you will need to get image height and width in number of pixels and the raw pixel values of the image in 8-bit, RGB format.
+
+### OCR models
+
+To run an OCR model such as `deepseek-ocr-2`:
+
+```typescript
+const image: PicoLLMImage = {
+  width: ${IMAGE_NUM_PIXELS_WIDTH},
+  height: ${IMAGE_NUM_PIXELS_HEIGHT},
+  data: ${IMAGE_DATA},
+};
+
+const res = await picoLLM.generateOCR(image);
+console.log(res.completion);
+```
+
+For the image, you will need to get image height and width in number of pixels and the raw pixel values of the image in 8-bit, RGB format.
+
+### Embedding models
+
+To run an embedding model such as `embeddinggemma-300m`:
+
+```typescript
+const res = await picoLLM.generateEmbeddings(`${PROMPT}`, image);
+res.embeddings.forEach(embedding => {
+  console.log(embedding);
+});
+```
+
+Replace `${PROMPT}` with a text prompt that you want to generate embeddings for.
 
 ## Demos
 

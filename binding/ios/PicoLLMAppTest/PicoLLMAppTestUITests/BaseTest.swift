@@ -21,7 +21,7 @@ class BaseTest: XCTestCase {
     let ocrModelURL = URL(string: "{TESTING_OCR_MODEL_URL_HERE}")
     let device: String = "{TESTING_DEVICE_HERE}"
 
-    let cleanModel = true
+    let cleanModel = false
 
     var modelPath: String = ""
     var imageModelPath: String = ""

@@ -415,7 +415,7 @@ class PicoLLMAppTestUITests: BaseTest {
         var sum: Float = 0.0
 
         for (xx, yy) in zip(x, y) {
-            sum += xx * yy;
+            sum += xx * yy
         }
 
         return sum

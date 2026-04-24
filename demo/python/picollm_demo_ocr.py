@@ -74,7 +74,7 @@ def main():
             print("`--model_path` is a required argument")
             exit(1)
         if image_path is None:
-            print("`--prompt` is a required argument")
+            print("`--image_path` is a required argument")
             exit(1)
 
     if not os.path.exists(image_path):

@@ -27,6 +27,7 @@ heapf
 heapu
 hola
 holo
+igpu
 libgomp
 libomp
 libpv

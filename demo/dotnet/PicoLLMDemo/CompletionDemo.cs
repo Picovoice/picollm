@@ -104,24 +104,29 @@ namespace PicoLLMDemo
                 {
                     Action<float> promptProgressCallback = (float progress) =>
                     {
-                        int bar_width = Math.Max(10,
-                                            Console.BufferWidth
-                                            - new string("Processing Prompt [").Length
-                                            - new string("] 100.0%").Length
-                                            - 1);
+                        int bufferWidth = 40;
+                        if (Environment.UserInteractive && !Console.IsOutputRedirected) {
+                            bufferWidth = Console.BufferWidth;
+                        }
+
+                        int barWidth = Math.Max(10,
+                                                bufferWidth
+                                                - new string("Processing Image [").Length
+                                                - new string("] 100.0%").Length
+                                                - 1);
 
                         int currentRow = Console.CursorTop;
 
-                        int filled_len = (int)((progress / 100.0f) * (float)bar_width);
+                        int filledLen = (int)((progress / 100.0f) * (float)barWidth);
 
                         Console.SetCursorPosition(0, currentRow);
-                        Console.Write(new string(' ', Console.BufferWidth));
+                        Console.Write(new string(' ', bufferWidth));
                         Console.SetCursorPosition(0, currentRow);
 
                         Console.Write("Processing Prompt [");
-                        for (int i = 0; i < bar_width; i++)
+                        for (int i = 0; i < barWidth; i++)
                         {
-                            Console.Write(i < filled_len ? "#" : " ");
+                            Console.Write(i < filledLen ? "#" : " ");
                         }
 
                         if (progress >= 100.0f)

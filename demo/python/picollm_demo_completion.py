@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Picovoice Inc.
+# Copyright 2024-2026 Picovoice Inc.
 #
 # You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 # file accompanying this source.
@@ -9,9 +9,12 @@
 # specific language governing permissions and limitations under the License.
 #
 
+import os
 import signal
 import time
+
 from argparse import ArgumentParser
+from PIL import Image
 
 import picollm
 
@@ -25,6 +28,7 @@ def main():
         '--model_path',
         help='Absolute path to the file containing LLM parameters.')
     parser.add_argument('--prompt', help="Prompt string.")
+    parser.add_argument('--image_path', help="Image to attach to prompt. For use with vision models only.")
     parser.add_argument(
         '--device',
         help="String representation of the device (e.g., CPU or GPU) to use for inference. If set to `best`, picoLLM "
@@ -97,6 +101,7 @@ def main():
     args = parser.parse_args()
     access_key = args.access_key
     prompt = args.prompt
+    image_path = args.image_path
     model_path = args.model_path
     device = args.device
     completion_token_limit = args.completion_token_limit
@@ -125,6 +130,12 @@ def main():
             print("`--prompt` is a required argument")
             exit(1)
 
+    image = None
+    if image_path is not None:
+        if not os.path.exists(image_path):
+            raise IOError(f"No image file found at given path `{image_path}`")
+        image = Image.open(image_path).convert("RGB")
+
     o = picollm.create(
         access_key=access_key,
         model_path=model_path,
@@ -152,17 +163,46 @@ def main():
     signal.signal(signal.SIGINT, interrupt_generate)
 
     try:
-        completion = o.generate(
-            prompt=prompt,
-            completion_token_limit=completion_token_limit,
-            stop_phrases=stop_phrases,
-            seed=seed,
-            presence_penalty=presence_penalty,
-            frequency_penalty=frequency_penalty,
-            temperature=temperature,
-            top_p=top_p,
-            num_top_choices=num_top_choices,
-            stream_callback=stream_callback)
+        if image:
+            def progress_callback(progress: float):
+                if not is_interrupt[0]:
+                    bar_width = 50
+                    filled_len = int((progress / 100.0) * bar_width)
+
+                    if progress < 100.0:
+                        bar = '#' * filled_len + ' ' * (bar_width - filled_len)
+                        print(f"\rProcessing prompt [{bar}] {progress:.1f}%", end="", flush=True)
+                    else:
+                        print("\r" + " " * (bar_width + 30), end="\r", flush=True)
+
+            completion = o.generate_with_image(
+                prompt=prompt,
+                image_width=image.width,
+                image_height=image.height,
+                image=image.tobytes(),
+                completion_token_limit=completion_token_limit,
+                stop_phrases=stop_phrases,
+                seed=seed,
+                presence_penalty=presence_penalty,
+                frequency_penalty=frequency_penalty,
+                temperature=temperature,
+                top_p=top_p,
+                num_top_choices=num_top_choices,
+                stream_callback=stream_callback,
+                prompt_progress_callback=progress_callback)
+        else:
+            completion = o.generate(
+                prompt=prompt,
+                completion_token_limit=completion_token_limit,
+                stop_phrases=stop_phrases,
+                seed=seed,
+                presence_penalty=presence_penalty,
+                frequency_penalty=frequency_penalty,
+                temperature=temperature,
+                top_p=top_p,
+                num_top_choices=num_top_choices,
+                stream_callback=stream_callback)
+
         print('\n')
 
         if verbose:

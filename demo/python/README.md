@@ -82,10 +82,11 @@ offline and completely free for open-weight models. Everyone who signs up for
 
 ## Usage
 
-There are two demos available: completion and chat. The completion demo accepts a prompt and a set of optional
-parameters and generates a single completion. It can run all models, whether instruction-tuned or not. The chat demo can
-run instruction-tuned (chat) models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth
-conversation with the LLM, similar to ChatGPT.
+There are three demos available: completion, chat and OCR (Optical Character Recognition). The completion demo accepts a prompt and a set of optional
+parameters and generates a single completion. It can run all text-based models, whether instruction-tuned or not, and vision models such as `qwen3-vl-2b-it`.
+The chat demo can run instruction-tuned (chat) models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth
+conversation with the LLM, similar to ChatGPT. The OCR demo runs OCR models only (such as `deepseek-ocr-2`), and will generate a completion which
+represents the text in a given image.
 
 ### Completion Demo
 
@@ -97,6 +98,12 @@ picollm_demo_completion --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to a model file
 downloaded from Picovoice Console, and `${PROMPT}` with a prompt string.
+
+If you are using an vision model such as `qwen3-vl-2b-it`, you can add an image to the prompt:
+
+```console
+picollm_demo_completion --access_key ${ACCESS_KEY} --model_path ${VISION_MODEL_PATH} --prompt ${PROMPT} --image_path ${IMAGE_PATH}
+```
 
 To get information about all the available options in the demo, run the following:
 
@@ -119,4 +126,21 @@ To get information about all the available options in the demo, run the followin
 
 ```console
 picollm_demo_chat --help
+```
+
+### OCR Demo
+
+To run an OCR model (such as `deepseek-ocr-2`), run the following in the terminal:
+
+```console
+picollm_demo_ocr --access_key ${ACCESS_KEY} --model_path ${OCR_MODEL_PATH} --image_path ${IMAGE_PATH}
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${OCR_MODEL_PATH}` with the path to a model file
+downloaded from Picovoice Console and `${IMAGE_PATH}` with the path to an image that you'd like to perform OCR on.
+
+To get information about all the available options in the demo, run the following:
+
+```console
+picollm_demo_ocr --help
 ```

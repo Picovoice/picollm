@@ -16,9 +16,8 @@ import os
 import sys
 import unittest
 from dataclasses import dataclass
-from PIL import (
-    Image
-)
+from PIL import Image
+
 from typing import (
     Any,
     Dict,

@@ -82,6 +82,8 @@ offline and completely free for open-weight models. Everyone who signs up for
 
 ## Usage
 
+### Text models
+
 Create an instance of the engine and generate a prompt completion:
 
 ```python
@@ -120,6 +122,47 @@ Finally, when done, be sure to release the resources explicitly:
 ```python
 pllm.release()
 ```
+
+### Vision models
+
+To run a VLM such as `qwen3-vl-2b-it`:
+
+```python
+res = pllm.generate_with_image(
+    prompt='${PROMPT}',
+    image_width=${IMAGE_NUM_PIXELS_WIDTH},
+    image_height=${IMAGE_NUM_PIXELS_HEIGHT},
+    image=${IMAGE_DATA});
+print(res.completion)
+```
+
+Replace `${PROMPT}` with a text prompt. For the image, you will need to get image height and width in number of pixels and the raw pixel values of the image in 8-bit, RGB format.
+
+### OCR models
+
+To run an OCR model such as `deepseek-ocr-2`:
+
+```python
+res = pllm.generate_ocr(
+    image_width=${IMAGE_NUM_PIXELS_WIDTH},
+    image_height=${IMAGE_NUM_PIXELS_HEIGHT},
+    image=${IMAGE_DATA});
+print(res.completion)
+```
+
+For the image, you will need to get image height and width in number of pixels and the raw pixel values of the image in 8-bit, RGB format.
+
+### Embedding models
+
+To run an embedding model such as `embeddinggemma-300m`:
+
+```python
+res = pllm.generate_embeddings(prompt='${PROMPT}');
+for embedding in range(len(res)):
+  print(embedding)
+```
+
+Replace `${PROMPT}` with a text prompt that you want to generate embeddings for.
 
 ## Demos
 

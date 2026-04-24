@@ -56,11 +56,15 @@ jobs:
 
     - name: Test
       if: ${{ matrix.machine != 'pv-windows' && matrix.machine != 'pv-windows-arm64' && matrix.machine != 'pv-windows-igpu' }}
-      run: SKIP_OCR_LARGE=true yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}}
+      run: SKIP_OCR_LARGE=true SKIP_OCR_SMALL=true yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}}
 
     - name: Test (windows)
       if: ${{ matrix.machine == 'pv-windows' || matrix.machine == 'pv-windows-arm64' || matrix.machine == 'pv-windows-igpu' }}
-      run: $env:SKIP_OCR_LARGE="true"; yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}}
+      run: $env:SKIP_OCR_LARGE="true"; $env:SKIP_OCR_SMALL="true"; yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}}
+
+    - name: Test OCR Small
+      if: ${{ matrix.machine != 'pv-windows-igpu' && matrix.machine != 'rpi4-32' && matrix.machine != 'rpi4-64' && matrix.machine != 'rpi5-32' }}
+      run: yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t 'should be able to generate OCR small'
 
     - name: Test OCR Large
       if: ${{ matrix.machine == 'pv-linux' && matrix.device == 'cpu' }}

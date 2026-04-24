@@ -704,7 +704,8 @@ describe('PicoLLM generate with image tests', () => {
 });
 
 describe('PicoLLM generate OCR small', () => {
-  test(`should be able to generate OCR small`, async () => {
+  const conditionalTest = process.env.SKIP_OCR_SMALL === "true" ? test.skip : test; // eslint-disable-line no-process-env
+  conditionalTest(`should be able to generate OCR small`, async () => {
     const data = testData.generate_ocr;
     const imagePath = data.image;
     const image = await readImageFile(imagePath);

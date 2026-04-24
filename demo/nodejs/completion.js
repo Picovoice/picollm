@@ -239,7 +239,7 @@ async function completionDemo() {
         }
       };
   
-      process.stdout.write("Processing Prompt ...");
+      process.stdout.write("\nProcessing Prompt ...");
 
       res = await picoLLM.generateWithImage(
         prompt,

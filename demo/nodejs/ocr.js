@@ -128,12 +128,15 @@ async function ocrDemo() {
     }
   });
 
+  let numTokensGenerated = 0;
+
   const streamCallback = (token) => {
     if (generateStartSec[0] === 0) {
       generateStartSec[0] = performance.now();
     }
 
     process.stdout.write(token);
+    numTokensGenerated += 1;
   };
 
   const promptProgressCallback = (progress) => {
@@ -165,7 +168,7 @@ async function ocrDemo() {
 
   try {
     console.log(picoLLM);
-    process.stdout.write("Processing Image ...");
+    process.stdout.write("\nProcessing Image ...");
 
     const startSec = performance.now();
     const res = await picoLLM.generateOCR(
@@ -178,11 +181,15 @@ async function ocrDemo() {
     );
     console.log();
 
+    if (verbose) {
+        console.log(res);
+    }
+
     const generateElapsedSec = (performance.now() - generateStartSec) / 1000;
     const totalElapsedSec = (performance.now() - startSec) / 1000;
     const imageElapsedSec = totalElapsedSec - generateElapsedSec;
 
-    const generateTPS = picoLLM.tokenize(res.completion, true, false).length / generateElapsedSec;
+    const generateTPS = numTokensGenerated / generateElapsedSec;
 
     console.log(`Processed image in ${(imageElapsedSec).toFixed(2)} seconds`);
     console.log(`Generated result in ${(generateElapsedSec).toFixed(2)} seconds (${generateTPS.toFixed(2)} tokens per second)`);

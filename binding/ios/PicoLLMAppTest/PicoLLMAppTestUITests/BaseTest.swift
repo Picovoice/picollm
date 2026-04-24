@@ -21,7 +21,7 @@ class BaseTest: XCTestCase {
     let ocrModelURL = URL(string: "{TESTING_OCR_MODEL_URL_HERE}")
     let device: String = "{TESTING_DEVICE_HERE}"
 
-    let cleanModel = false
+    let cleanModel = true
 
     var modelPath: String = ""
     var imageModelPath: String = ""
@@ -33,7 +33,7 @@ class BaseTest: XCTestCase {
     var embeddingTestData: [String: Any]?
     var withImageTestData: [String: Any]?
     var ocrTestData: [String: Any]?
-    
+
     var smallImage: PicollmImage?
     var largeImage: PicollmImage?
 
@@ -45,7 +45,7 @@ class BaseTest: XCTestCase {
         } catch {
             print("Failed to fetch initial model file")
         }
-        
+
         do {
             try await downloadFileAsync(url: imageModelURL!) { (path, _) in
                 self.imageModelPath = path!
@@ -53,7 +53,7 @@ class BaseTest: XCTestCase {
         } catch {
             print("Failed to fetch initial image model file")
         }
-        
+
         do {
             try await downloadFileAsync(url: embeddingModelURL!) { (path, _) in
                 self.embeddingModelPath = path!
@@ -75,7 +75,7 @@ class BaseTest: XCTestCase {
         } catch {
             print("Failed to get test data file")
         }
-        
+
         do {
             try getTestImage()
         } catch {
@@ -126,7 +126,7 @@ class BaseTest: XCTestCase {
             "large": testData["generate_ocr_large"]!
         ]
     }
-    
+
     func getTestImage() throws {
         let bundle = Bundle(for: type(of: self))
         let smallImageURL = bundle.url(
@@ -135,7 +135,7 @@ class BaseTest: XCTestCase {
         let largeImageURL = bundle.url(
             forResource: "test_image_large",
             withExtension: "png")!
-        
+
         self.smallImage = try PicollmImage(url: smallImageURL)
         self.largeImage = try PicollmImage(url: largeImageURL)
     }
@@ -145,7 +145,7 @@ public struct PicollmImage {
     let width: Int
     let height: Int
     let data: [UInt8]
-    
+
     init(url: URL) throws {
         let testImageData = try Data(contentsOf: url)
         let cgprovider = CGDataProvider(data: testImageData as CFData)!
@@ -175,15 +175,15 @@ public struct PicollmImage {
                 y: 0.0,
                 width: CGFloat(iw),
                 height: CGFloat(ih)))
-        
+
         var imageData = [UInt8](repeating: 0, count: iw * ih * 3)
-        
+
         for i in 0..<iw*ih {
             imageData[i * 3 + 0] = im[i * 4 + 0]
             imageData[i * 3 + 1] = im[i * 4 + 1]
             imageData[i * 3 + 2] = im[i * 4 + 2]
         }
-        
+
         self.width = iw
         self.height = ih
         self.data = imageData

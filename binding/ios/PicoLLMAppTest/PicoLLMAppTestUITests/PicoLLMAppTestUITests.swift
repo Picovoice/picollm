@@ -347,14 +347,14 @@ class PicoLLMAppTestUITests: BaseTest {
 
     func testGenerateWithImage() throws {
         let testCase = PicollmTestCase(name: "with-image", data: self.withImageTestData!)
-        
+
         let completionTokenLimit = testCase.parameters["completion-token-limit"] as! Int32
-        
+
         let imageHandle = try PicoLLM.init(
             accessKey: accessKey,
             modelPath: imageModelPath,
             device: device)
-        
+
         let result = try imageHandle.generateWithImage(
             prompt: testCase.prompt,
             imageWidth: Int32(self.smallImage!.width),
@@ -391,36 +391,36 @@ class PicoLLMAppTestUITests: BaseTest {
 
     func testGenerateEmbeddings() throws {
         let testCase = PicollmEmbeddingTestCase(testData: self.embeddingTestData!)
-        
+
         let embeddingHandle = try PicoLLM.init(
                     accessKey: accessKey,
                     modelPath: embeddingModelPath,
                     device: device)
-        
+
         let embedding = try embeddingHandle.generateEmbeddings(
             prompt: testCase.prompt)
-        
+
         for expectation in testCase.expectations {
             let reference = try embeddingHandle.generateEmbeddings(
                 prompt: expectation.doc)
             let similarity = computeSimilarity(x: embedding, y: reference)
-            
+
             XCTAssertEqual(similarity, expectation.similarity, accuracy: 0.01)
         }
-        
+
         embeddingHandle.delete()
     }
 
     func computeSimilarity(x: [Float], y: [Float]) -> Float {
         var sum: Float = 0.0
-        
+
         for (xx, yy) in zip(x, y) {
             sum += xx * yy;
         }
-        
+
         return sum
     }
-    
+
     func testInterrupt() throws {
         let testCase = PicollmTestCase(name: "default", data: self.picollmTestData!)
 
@@ -673,7 +673,7 @@ struct PicollmOCRTestCase {
 struct PicollmEmbeddingTestCase {
     var prompt: String
     var expectations: [EmbeddingTestExpectation]
-    
+
     init(testData: [String: Any]) {
         self.prompt = testData["prompt"] as! String
 

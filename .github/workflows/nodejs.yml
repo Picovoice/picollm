@@ -57,14 +57,6 @@ jobs:
     - name: Test
       run: yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t '^(?!generate_ocr_large$).*'
 
-
-    - name: Test
-      run: dotnet test -v n --filter "Name!=TestGenerateOCRLarge"
-      env:
-        DOTNET_ROLL_FORWARD: LatestMajor
-
     - name: Test OCR Large
       if: ${{ matrix.machine == 'pv-linux' && matrix.device == 'cpu' }}
       run: yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t 'generate_ocr_large'
-      env:
-        DOTNET_ROLL_FORWARD: LatestMajor

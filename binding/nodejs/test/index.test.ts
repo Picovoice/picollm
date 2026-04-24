@@ -716,7 +716,7 @@ describe('PicoLLM generate OCR small', () => {
 });
 
 describe('PicoLLM generate OCR large', () => {
-  test(`generate_ocr_large`, async () => {
+  (process.env.SKIP_OCR_LARGE === "true" ? test.skip : test)(`should be able to generate OCR large`, async () => {
     const data = testData.generate_ocr_large;
     const imagePath = data.image;
     const image = await readImageFile(imagePath);

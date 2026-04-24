@@ -55,8 +55,8 @@ jobs:
         curl http://${{secrets.PV_CICD_RES_SERVER_AUTHORITY}}/github/picollm/res/embeddinggemma-300m-137.pllm/00-5842035/embeddinggemma-300m-137.pllm -o test/embeddinggemma-300m-137.pllm
 
     - name: Test
-      run: yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t '^(?!generate_ocr_large$).*'
+      run: SKIP_OCR_LARGE=true yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}}
 
     - name: Test OCR Large
       if: ${{ matrix.machine == 'pv-linux' && matrix.device == 'cpu' }}
-      run: yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t 'generate_ocr_large'
+      run: yarn test test/index.test.ts --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t 'should be able to generate OCR large'

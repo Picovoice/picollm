@@ -116,13 +116,15 @@ namespace PicoLLMDemo
                                                 - new string("] 100.0%").Length
                                                 - 1);
 
-                        int currentRow = Console.CursorTop;
-
                         int filledLen = (int)((progress / 100.0f) * (float)barWidth);
 
-                        Console.SetCursorPosition(0, currentRow);
-                        Console.Write(new string(' ', bufferWidth));
-                        Console.SetCursorPosition(0, currentRow);
+                        if (Environment.UserInteractive && !Console.IsOutputRedirected)
+                        {
+                            int currentRow = Console.CursorTop;
+                            Console.SetCursorPosition(0, currentRow);
+                            Console.Write(new string(' ', bufferWidth));
+                            Console.SetCursorPosition(0, currentRow);
+                        }
 
                         Console.Write("Processing Prompt [");
                         for (int i = 0; i < barWidth; i++)

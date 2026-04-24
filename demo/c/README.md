@@ -149,7 +149,7 @@ Running the OCR demo without arguments prints the usage:
 
 ```console
 Usage: ./demo/c/build/picollm_demo_ocr -a ACCESS_KEY -l LIBRARY_PATH -m MODEL_PATH
-[-y DEVICE] [-c COMPLETION_TOKEN_LIMIT] [-n MAX_OUTPUT_TOKENS] [-h] -i IMAGE_PATH
+[-y DEVICE] [-n MAX_OUTPUT_TOKENS] [-h] -i IMAGE_PATH
 -h: show available devices
 ```
 

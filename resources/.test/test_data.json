@@ -297,9 +297,9 @@
   "generate_embedding": {
     "prompt": "My name is Tom",
     "expectations": [
-      {"doc": "I am Tom", "similarity": 0.560242},
-      {"doc": "Her name is Lily", "similarity": 0.436439},
-      {"doc": "This is an experiment", "similarity": 0.281374}
+      {"doc": "I am Tom", "similarity": 0.543474},
+      {"doc": "Her name is Lily", "similarity": 0.449408},
+      {"doc": "This is an experiment", "similarity": 0.275385}
     ]
   }
 }

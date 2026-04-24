@@ -61,7 +61,9 @@ namespace PicoLLMDemo
                     }
                 });
 
+                int numTokensGenerated = 0;
                 double generateStartSec = 0.0;
+
                 Action<string> streamCallback = (string token) =>
                 {
                     if (generateStartSec == 0.0)
@@ -74,6 +76,8 @@ namespace PicoLLMDemo
                         Console.Write(token);
                         Console.Out.Flush();
                     }
+
+                    numTokensGenerated += 1;
                 };
 
                 Action<float> promptProgressCallback = (float progress) =>
@@ -132,9 +136,12 @@ namespace PicoLLMDemo
                 double generateElapsedSec = DateTime.Now.TimeOfDay.TotalSeconds - generateStartSec;
                 double totalElapsedSec = DateTime.Now.TimeOfDay.TotalSeconds - startSec;
                 double imageElapsedSec = totalElapsedSec - generateElapsedSec;
+
+                double generateTPS = numTokensGenerated / generateElapsedSec;
+
                 Console.WriteLine("\n");
                 Console.WriteLine($"Processed Image in {imageElapsedSec:F2} seconds");
-                Console.WriteLine($"Generated result in {generateElapsedSec:F2} seconds");
+                Console.WriteLine($"Generated result in {generateElapsedSec:F2} seconds ({generateTPS:F2} tokens per second)");
                 Console.WriteLine($"Total time elapsed is {totalElapsedSec:F2} seconds");
             }
         }

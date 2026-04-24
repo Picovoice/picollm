@@ -50,7 +50,6 @@ jobs:
           - device: gpu
             machine: pv-windows-igpu
 
-
     steps:
     - uses: actions/checkout@v3
 

@@ -60,5 +60,5 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
 
     // implementation 'ai.picovoice:picollm-android:2.1.0'
-    implementation files("../../../binding/android/PicoLLM/picollm/build/outputs/aar/picollm-release.aar")
+    implementation files("../../../../binding/android/PicoLLM/picollm/build/outputs/aar/picollm-release.aar")
 }

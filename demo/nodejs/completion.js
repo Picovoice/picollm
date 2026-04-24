@@ -269,7 +269,7 @@ async function completionDemo() {
     const totalElapsedSec = (performance.now() - startSec) / 1000;
     const imageElapsedSec = totalElapsedSec - generateElapsedSec;
 
-    const generateTPS = picoLLM.tokenize(res.completion, true, false).length / generateElapsedSec;
+    const generateTPS = (res.usage.completionTokens - 1) / generateElapsedSec;
 
     console.log(`Processed prompt in ${(imageElapsedSec).toFixed(2)} seconds`);
     console.log(`Generated result in ${(generateElapsedSec).toFixed(2)} seconds (${generateTPS.toFixed(2)} tokens per second)`);

@@ -68,12 +68,18 @@ jobs:
       run: dotnet build PicoLLM/PicoLLM.csproj
 
     - name: Test
-      run: dotnet test -v n --filter "Name!=TestGenerateOCRLarge"
+      run: dotnet test -v n --filter "Name!=TestGenerateOCRLarge&Name!=TestGenerateOCRSmall"
+      env:
+        DOTNET_ROLL_FORWARD: LatestMajor
+
+    - name: Test OCR Small
+      if: ${{ matrix.machine != 'pv-windows-igpu' && matrix.machine != 'rpi4-32' && matrix.machine != 'rpi4-64' && matrix.machine != 'rpi5-32' }}
+      run: dotnet test -v n --filter "Name=TestGenerateOCRSmall"
       env:
         DOTNET_ROLL_FORWARD: LatestMajor
 
     - name: Test OCR Large
-      if: ${{ matrix.machine == 'pv-linux' && matrix.device == 'cpu' }}
+      if: ${{ matrix.machine == 'pv-linux' && matrix.device == 'cpu' && matrix.machine != 'pv-windows-igpu' && matrix.machine != 'rpi4-32' && matrix.machine != 'rpi4-64' && matrix.machine != 'rpi5-32' }}
       run: dotnet test -v n --filter "Name=TestGenerateOCRLarge"
       env:
         DOTNET_ROLL_FORWARD: LatestMajor

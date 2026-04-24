@@ -262,7 +262,7 @@ async function completionDemo() {
     console.log();
 
     if (verbose) {
-      console.log(res.completionTokens);
+      console.log(res?.completionTokens);
     }
 
     const generateElapsedSec = (performance.now() - generateStartSec) / 1000;

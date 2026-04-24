@@ -155,11 +155,11 @@ const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpect
   let error: any;
   for (const expectation of expectations) {
     try {
-      expect(res.usage!.promptTokens).toEqual(expectation['num-prompt-tokens']);
-      expect(res.usage!.completionTokens).toEqual(expectation['num-completion-tokens']);
+      expect(res?.usage!.promptTokens).toEqual(expectation['num-prompt-tokens']);
+      expect(res?.usage!.completionTokens).toEqual(expectation['num-completion-tokens']);
       expect(res.endpoint).toEqual(PicoLLMEndpoint[expectation.endpoint as keyof typeof PicoLLMEndpoint]);
 
-      for (const completionToken of res.completionTokens!) {
+      for (const completionToken of res?.completionTokens!) {
         expect(completionToken.token.token.length).toBeGreaterThan(0);
         expect(completionToken.token.logProb).toBeLessThanOrEqual(0);
         expect(completionToken.topChoices.length).toEqual(expectation['num-top-choices']);
@@ -175,9 +175,9 @@ const verifyCompletion = (res: PicoLLMCompletion, expectations: CompletionExpect
           ).toBeLessThanOrEqual(1);
         }
 
-        if (!res.completionTokens!.some(x => x.token.token.includes('\\x'))) {
+        if (!res?.completionTokens!.some(x => x.token.token.includes('\\x'))) {
           expect(
-            res.completionTokens!.reduce((acc, completionToken) => acc + completionToken.token.token, '')
+            res?.completionTokens!.reduce((acc, completionToken) => acc + completionToken.token.token, '')
           ).toEqual(expectation.completion);
         }
       }
@@ -448,7 +448,7 @@ describe('PicoLLM generate tests', () => {
 
       verifyCompletion(res, [{
         'num-prompt-tokens': numPromptTokens,
-        'num-completion-tokens': res.usage!.completionTokens,
+        'num-completion-tokens': res?.usage!.completionTokens,
         'endpoint': PicoLLMEndpoint[res.endpoint],
         'num-top-choices': 0,
         'completion': res.completion
@@ -456,7 +456,7 @@ describe('PicoLLM generate tests', () => {
 
       verifyCompletion(res2, [{
         'num-prompt-tokens': numPromptTokens,
-        'num-completion-tokens': res2.usage!.completionTokens,
+        'num-completion-tokens': res2?.usage!.completionTokens,
         'endpoint': PicoLLMEndpoint[res2.endpoint],
         'num-top-choices': 0,
         'completion': res2.completion
@@ -502,7 +502,7 @@ describe('PicoLLM generate tests', () => {
 
       verifyCompletion(res, [{
         'num-prompt-tokens': numPromptTokens,
-        'num-completion-tokens': res.usage!.completionTokens,
+        'num-completion-tokens': res?.usage!.completionTokens,
         'endpoint': PicoLLMEndpoint[res.endpoint],
         'num-top-choices': 0,
         'completion': res.completion
@@ -510,7 +510,7 @@ describe('PicoLLM generate tests', () => {
 
       verifyCompletion(res2, [{
         'num-prompt-tokens': numPromptTokens,
-        'num-completion-tokens': res2.usage!.completionTokens,
+        'num-completion-tokens': res2?.usage!.completionTokens,
         'endpoint': PicoLLMEndpoint[res2.endpoint],
         'num-top-choices': 0,
         'completion': res2.completion
@@ -553,7 +553,7 @@ describe('PicoLLM generate tests', () => {
 
       verifyCompletion(res, expectations.map(x => ({
         'num-prompt-tokens': numPromptTokens,
-        'num-completion-tokens': res.usage!.completionTokens,
+        'num-completion-tokens': res?.usage!.completionTokens,
         'endpoint': PicoLLMEndpoint[res.endpoint],
         'num-top-choices': 0,
         'completion': x

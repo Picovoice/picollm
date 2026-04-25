@@ -31,16 +31,6 @@ jobs:
       run: dotnet format --verify-no-changes
       working-directory: binding/dotnet
 
-    # *********** REMOVE AFTER RELEASE **********************
-    - name: Pack binding for local ref
-      run: dotnet pack -c Release
-      working-directory: binding/dotnet
-
-    - name: Add binding to demo
-      run: dotnet add package -s ../../../binding/dotnet/PicoLLM/bin/Release PicoLLM
-      working-directory: demo/dotnet/PicoLLMDemo
-    # ******************************************************
-
     - name: Run Demo Codestyle
       run: dotnet format --verify-no-changes
       working-directory: demo/dotnet

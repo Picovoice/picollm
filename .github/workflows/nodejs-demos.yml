@@ -42,14 +42,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # ************** REMOVE AFTER RELEASE ********************
-    - name: Build Local Packages
-      run: |
-        yarn install
-        yarn build
-      working-directory: binding/nodejs
-    # ********************************************************
-
     - name: Install dependencies
       run: yarn install
 

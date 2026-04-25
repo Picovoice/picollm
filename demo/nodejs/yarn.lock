@@ -2,8 +2,10 @@
 # yarn lockfile v1
 
 
-"@picovoice/picollm-node@file:../../binding/nodejs":
+"@picovoice/picollm-node@^2.1.0":
   version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@picovoice/picollm-node/-/picollm-node-2.1.0.tgz#2f09e7c129ec60bb746f8fc66af58c912ef2aeec"
+  integrity sha512-DKkf4BUgK9LdaQGc5HWQcSH8P3pBwi/Wg/vX29pSml+judv8frCFjUChYzXTb1blctRXEyASl/ra8jK7Uh8l4g==
 
 b4a@^1.6.4:
   version "1.8.0"

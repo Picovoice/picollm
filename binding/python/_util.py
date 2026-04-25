@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Picovoice Inc.
+# Copyright 2024-2026 Picovoice Inc.
 #
 # You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 # file accompanying this source.
@@ -12,6 +12,7 @@
 import os
 import platform
 import subprocess
+
 from typing import Tuple
 
 
@@ -36,7 +37,9 @@ def _pv_linux_machine() -> str:
     except Exception as e:
         raise RuntimeError("Failed to identify the CPU with `%s`\nCPU info: `%s`" % (e, cpu_info))
 
-    if '0xd08' == cpu_part:
+    if '0xd03' == cpu_part:
+        return 'cortex-a53' + arch_info
+    elif '0xd08' == cpu_part:
         return 'cortex-a72' + arch_info
     elif "0xd0b" == cpu_part:
         return "cortex-a76" + arch_info
@@ -60,14 +63,16 @@ def _pv_platform() -> Tuple[str, str]:
 _PV_SYSTEM, _PV_MACHINE = _pv_platform()
 
 _RASPBERRY_PI_MACHINES = {
+    "cortex-a53",
     "cortex-a72",
     "cortex-a76",
+    "cortex-a53-aarch64",
     "cortex-a72-aarch64",
     "cortex-a76-aarch64"
 }
 
 
-def pv_library_path(relative: str) -> str:
+def pv_library_path(relative: str = '') -> str:
     if _PV_SYSTEM == 'Darwin':
         if _PV_MACHINE == 'x86_64':
             return os.path.join(os.path.dirname(__file__), relative, 'lib/mac/x86_64/libpv_picollm.dylib')

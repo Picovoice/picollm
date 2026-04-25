@@ -1,5 +1,5 @@
 #
-# Copyright 2024 Picovoice Inc.
+# Copyright 2024-2026 Picovoice Inc.
 #
 # You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 # file accompanying this source.
@@ -53,7 +53,7 @@ def create(
         device = 'best'
 
     if library_path is None:
-        library_path = pv_library_path('')
+        library_path = pv_library_path()
 
     return PicoLLM(
         access_key=access_key,
@@ -73,7 +73,7 @@ def available_devices(library_path: Optional[str] = None) -> Sequence[str]:
     """
 
     if library_path is None:
-        library_path = pv_library_path('')
+        library_path = pv_library_path()
 
     dll_dir_obj = None
     if hasattr(os, "add_dll_directory"):

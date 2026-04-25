@@ -30,7 +30,7 @@ with open(os.path.join(os.path.dirname(__file__), "requirements.txt"), "r") as f
 
 setuptools.setup(
     name="picollmdemo",
-    version="2.0.1",
+    version="2.1.0",
     author="Picovoice",
     author_email="hello@picovoice.ai",
     description="picoLLM Inference Engine demos",
@@ -52,8 +52,9 @@ setuptools.setup(
         console_scripts=[
             'picollm_demo_chat=picollmdemo.picollm_demo_chat:main',
             'picollm_demo_completion=picollmdemo.picollm_demo_completion:main',
+            'picollm_demo_ocr=picollmdemo.picollm_demo_ocr:main',
         ],
     ),
     python_requires='>=3.9',
-    keywords="Large Language Model, LLM, Generative AI, GenAI, Llama, Mistral, Mixtral, Gemma, Phi",
+    keywords="Large Language Model, LLM, Generative AI, GenAI, Llama, Mistral, Mixtral, Gemma, Phi, Qwen, Deepseek",
 )

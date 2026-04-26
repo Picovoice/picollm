@@ -8,7 +8,7 @@ picoLLM Inference Engine is a highly accurate and cross-platform SDK optimized f
 models. picoLLM Inference Engine is:
 
 - Accurate; picoLLM Compression improves GPTQ by [significant margins](https://picovoice.ai/blog/picollm-towards-optimal-llm-quantization/)
-- Private; LLM inference runs 100% locally.
+- Private; LLM inference runs 100% locally
 - Cross-Platform
 - Runs on CPU and GPU
 - Free for open-weight models
@@ -90,10 +90,12 @@ offline and completely free for open-weight models. Everyone who signs up for
 
 ## Usage
 
-There are two demos available: completion and chat. The completion demo accepts a prompt and a set of optional
-parameters and generates a single completion. It can run all models, whether instruction-tuned or not. The chat demo can
-run instruction-tuned (chat) models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth
-conversation with the LLM, similar to ChatGPT.
+There are three demos available: **completion**, **chat**, and **ocr**. The **completion** demo accepts a prompt, an optional
+image, and a set of optional parameters and generates a single completion. It can run all models (including non-instruction-tuned),
+unless an image is provided, in which case only vision models can be used. The **chat** demo can run instruction-tuned (chat)
+models such as `llama-3-8b-instruct`, `phi2`, etc. The chat demo enables a back-and-forth conversation with the LLM, similar
+to ChatGPT. The **optical character recognition** (ocr) demo can be run on ocr models, such as `deepseek-ocr-2`. This demo
+extracts text from a provided image.
 
 ### Completion Demo
 
@@ -127,4 +129,21 @@ To get information about all the available options in the demo, run the followin
 
 ```console
 picollm-chat-demo --help
+```
+
+### OCR Demo
+
+To extract text from an image, run the following in the terminal:
+
+```console
+picollm-ocr-demo --access_key ${ACCESS_KEY} --model_path ${MODEL_PATH} --image_path ${IMAGE_PATH}
+```
+
+Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console, `${MODEL_PATH}` with the path to an ocr model file
+downloaded from Picovoice Console, and `${IMAGE_PATH}` with the absolute path to an image file you wish to extract text from.
+
+To get information about all the available options in the demo, run the following:
+
+```console
+picollm-ocr-demo --help
 ```

@@ -92,3 +92,8 @@ xcframework
 xcodeproj
 xcworkspace
 xlink
+deepseek
+embeddinggemma
+Qwen
+qwen
+LLMOCR

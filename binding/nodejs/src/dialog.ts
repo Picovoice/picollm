@@ -1,5 +1,5 @@
 //
-// Copyright 2024-2025 Picovoice Inc.
+// Copyright 2024-2026 Picovoice Inc.
 //
 // You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 // file accompanying this source.
@@ -91,6 +91,13 @@ export class GemmaChatDialog extends Dialog {
 
     return res.join('');
   }
+}
+
+/**
+ * Dialog helper for `gemma-3-270m-it`.
+ */
+export class Gemma3ChatDialog extends GemmaChatDialog {
+
 }
 
 /**
@@ -278,6 +285,7 @@ export class Phi35ChatDialog extends Phi3ChatDialog {
 export const DIALOGS: { [key: string]: typeof Dialog | { [key: string]: typeof Dialog } } = {
   "gemma-2b-it": GemmaChatDialog,
   "gemma-7b-it": GemmaChatDialog,
+  "gemma-3-270m-it": Gemma3ChatDialog,
   'llama-2-7b-chat': Llama2ChatDialog,
   'llama-2-13b-chat': Llama2ChatDialog,
   'llama-2-70b-chat': Llama2ChatDialog,

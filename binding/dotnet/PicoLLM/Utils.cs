@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright 2025 Picovoice Inc.
+    Copyright 2025-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
     file accompanying this source.
@@ -115,6 +115,13 @@ namespace Pv
             }
 
             return Encoding.UTF8.GetString(data.ToArray());
+        }
+
+        public static float[] GetFloatArrayFromPtr(IntPtr floatArray, int numElements)
+        {
+            float[] destArray = new float[numElements];
+            Marshal.Copy(floatArray, destArray, 0, numElements);
+            return destArray;
         }
 
         private static string GetCpuPart()

@@ -11,6 +11,8 @@ Global
 		ChatDemo.Release|AnyCPU = ChatDemo.Release|AnyCPU
 		CompletionDemo.Debug|AnyCPU = CompletionDemo.Debug|AnyCPU
 		CompletionDemo.Release|AnyCPU = CompletionDemo.Release|AnyCPU
+        OCRDemo.Debug|AnyCPU = OCRDemo.Debug|AnyCPU
+		OCRDemo.Release|AnyCPU = OCRDemo.Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.ChatDemo.Debug|AnyCPU.ActiveCfg = ChatDemo.Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.CompletionDemo.Debug|AnyCPU.Build.0 = CompletionDemo.Debug|Any CPU
 		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.CompletionDemo.Release|AnyCPU.ActiveCfg = CompletionDemo.Release|Any CPU
 		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.CompletionDemo.Release|AnyCPU.Build.0 = CompletionDemo.Release|Any CPU
+        {5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.OCRDemo.Debug|AnyCPU.ActiveCfg = OCRDemo.Debug|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.OCRDemo.Debug|AnyCPU.Build.0 = OCRDemo.Debug|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.OCRDemo.Release|AnyCPU.ActiveCfg = OCRDemo.Release|Any CPU
+		{5AE5D341-BE0B-4E35-A4F0-CBCD339C844E}.OCRDemo.Release|AnyCPU.Build.0 = OCRDemo.Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

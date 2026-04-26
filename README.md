@@ -474,6 +474,10 @@ pv_picollm_delete(pllm);
 
 ## Releases
 
+### v2.1.0 - April 27, 2025
+
+- Added support for embedding, vision, and OCR models
+
 ### v2.0.0 - December 18, 2025
 
 - Improved engine performance

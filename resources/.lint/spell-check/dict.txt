@@ -39,6 +39,7 @@ libpv
 libpv_picollm
 llm's
 LLMC
+LLMOCR
 logit
 logits
 LPWSTR
@@ -92,8 +93,3 @@ xcframework
 xcodeproj
 xcworkspace
 xlink
-deepseek
-embeddinggemma
-Qwen
-qwen
-LLMOCR

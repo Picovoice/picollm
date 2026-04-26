@@ -685,9 +685,6 @@ namespace Pv
 
             if (status != PvStatus.SUCCESS)
             {
-                pv_picollm_delete_completion_tokens(completionTokensPtr, numCompletionTokens);
-                pv_picollm_delete_completion(completionPtr);
-
                 throw PvStatusToException(
                     status,
                     "picoLLM generate failed",
@@ -734,7 +731,7 @@ namespace Pv
 
         /// <summary>
         /// Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata.
-        /// 
+        ///
         /// For use with vision models only.
         /// </summary>
         /// <param name="prompt">The input text prompt.</param>
@@ -870,9 +867,6 @@ namespace Pv
 
             if (status != PvStatus.SUCCESS)
             {
-                pv_picollm_delete_completion_tokens(completionTokensPtr, numCompletionTokens);
-                pv_picollm_delete_completion(completionPtr);
-
                 throw PvStatusToException(
                     status,
                     "picoLLM generate with image failed",
@@ -935,7 +929,7 @@ namespace Pv
 
         /// <summary>
         /// Generates numerical vector representations of the input text prompt.
-        /// 
+        ///
         /// For use with embedding models only.
         /// </summary>
         /// <param name="prompt">The input text prompt.</param>
@@ -957,8 +951,6 @@ namespace Pv
 
             if (status != PvStatus.SUCCESS)
             {
-                pv_picollm_delete_embeddings(embeddingsPtr);
-
                 throw PvStatusToException(
                     status,
                     "picoLLM generate embeddings failed",
@@ -974,7 +966,7 @@ namespace Pv
 
         /// <summary>
         /// Generates a completion text representing text found in the given image.
-        ///    
+        ///
         /// For use with OCR (Optical Character Recognition) models only.
         /// </summary>
         /// <param name="imageWidth">Width of the image in pixels.</param>
@@ -1036,8 +1028,6 @@ namespace Pv
 
             if (status != PvStatus.SUCCESS)
             {
-                pv_picollm_delete_completion(completionPtr);
-
                 throw PvStatusToException(
                     status,
                     "picoLLM generate ocr failed",

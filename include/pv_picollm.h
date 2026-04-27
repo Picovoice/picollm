@@ -256,6 +256,7 @@ PV_API pv_status_t pv_picollm_interrupt(pv_picollm_t *object);
 
 /**
  * Generates numerical vector representations of the input text prompt.
+ * The caller is responsible for freeing the embeddings using `pv_picollm_delete_embeddings()`.
  *
  * For use with embedding models only.
  *

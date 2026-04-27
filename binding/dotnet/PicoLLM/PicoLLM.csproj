@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
-		<Version>2.0.1</Version>
+		<Version>2.1.0</Version>
 		<Authors>Picovoice</Authors>
 		<Company />
 		<Product>picoLLM Inference Engine</Product>
@@ -11,7 +11,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>ai, offline, private, llm</PackageTags>
 		<PackageReleaseNotes>See https://github.com/Picovoice/picollm/ </PackageReleaseNotes>
-		<Copyright>Picovoice 2025</Copyright>
+		<Copyright>Picovoice 2025-2026</Copyright>
 		<Description>picoLLM Inference Engine is a highly accurate and cross-platform SDK optimized for running compressed large language models.</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageIcon>pv_circle_512.png</PackageIcon>

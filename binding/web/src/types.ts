@@ -1,5 +1,5 @@
 /*
-  Copyright 2024 Picovoice Inc.
+  Copyright 2024-2026 Picovoice Inc.
 
   You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
   file accompanying this source.
@@ -55,6 +55,22 @@ export type PicoLLMGenerateOptions = {
   streamCallback?: (token: string) => void;
 };
 
+export type PicoLLMImage = {
+  data: Uint8Array;
+  width: number;
+  height: number;
+};
+
+export type PicoLLMGenerateWithImageOptions = PicoLLMGenerateOptions & {
+  promptProgressCallback?: (progress: number) => void;
+};
+
+export type PicoLLMGenerateOCROptions = {
+  completionTokenLimit?: number;
+  streamCallback?: (token: string) => void;
+  promptProgressCallback?: (progress: number) => void;
+}
+
 export type PicoLLMUsage = {
   promptTokens: number;
   completionTokens: number;
@@ -71,10 +87,14 @@ export type PicoLLMCompletionToken = {
 };
 
 export type PicoLLMCompletion = {
-  usage: PicoLLMUsage;
+  usage?: PicoLLMUsage;
   endpoint: PicoLLMEndpoint;
-  completionTokens: PicoLLMCompletionToken[];
+  completionTokens?: PicoLLMCompletionToken[];
   completion: string;
+};
+
+export type PicoLLMEmbeddingsCompletion = {
+  embeddings: number[];
 };
 
 export type PicoLLMWorkerInitRequest = {
@@ -91,6 +111,24 @@ export type PicoLLMWorkerGenerateRequest = {
   command: 'generate';
   prompt: string;
   options: PicoLLMGenerateOptions;
+};
+
+export type PicoLLMWorkerGenerateWithImageRequest = {
+  command: 'generateWithImage';
+  prompt: string;
+  image: PicoLLMImage;
+  options: PicoLLMGenerateWithImageOptions;
+};
+
+export type PicoLLMWorkerGenerateEmbeddingsRequest = {
+  command: 'generateEmbeddings';
+  prompt: string;
+};
+
+export type PicoLLMWorkerGenerateOCRRequest = {
+  command: 'generateOCR';
+  image: PicoLLMImage;
+  options: PicoLLMGenerateOCROptions;
 };
 
 export type PicoLLMWorkerInterruptRequest = {
@@ -120,6 +158,9 @@ export type PicoLLMWorkerReleaseRequest = {
 export type PicoLLMWorkerRequest =
   | PicoLLMWorkerInitRequest
   | PicoLLMWorkerGenerateRequest
+  | PicoLLMWorkerGenerateWithImageRequest
+  | PicoLLMWorkerGenerateEmbeddingsRequest
+  | PicoLLMWorkerGenerateOCRRequest
   | PicoLLMWorkerInterruptRequest
   | PicoLLMWorkerTokenizeRequest
   | PicoLLMWorkerForwardRequest
@@ -154,6 +195,27 @@ export type PicoLLMWorkerGenerateResponse =
       token: string
     };
 
+export type PicoLLMWorkerGenerateWithImageResponse =
+  | PicoLLMWorkerGenerateResponse
+  | {
+      command: 'progress',
+      progress: number
+    };
+
+export type PicoLLMWorkerGenerateEmbeddingsResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+      embeddings: PicoLLMEmbeddingsCompletion;
+    }
+
+export type PicoLLMWorkerGenerateOCRResponse =
+  | PicoLLMWorkerGenerateResponse
+  | {
+      command: 'progress',
+      progress: number
+    };
+
 export type PicoLLMWorkerTokenizeResponse =
   | PicoLLMWorkerFailureResponse
   | {
@@ -183,6 +245,9 @@ export type PicoLLMWorkerReleaseResponse =
 export type PicoLLMWorkerResponse =
   | PicoLLMWorkerInitResponse
   | PicoLLMWorkerGenerateResponse
+  | PicoLLMWorkerGenerateWithImageResponse
+  | PicoLLMWorkerGenerateEmbeddingsResponse
+  | PicoLLMWorkerGenerateOCRResponse
   | PicoLLMWorkerTokenizeResponse
   | PicoLLMWorkerForwardResponse
   | PicoLLMWorkerResetResponse

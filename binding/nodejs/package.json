@@ -1,6 +1,6 @@
 {
   "name": "@picovoice/picollm-node",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Picovoice picoLLM Node.js binding",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -42,6 +42,7 @@
     "ncp": "^2.0.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.6.2",
+    "sharp": "^0.32.6",
     "ts-jest": "^27.1.3",
     "typescript": "^4.6.2"
   },

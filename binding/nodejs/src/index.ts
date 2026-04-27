@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Picovoice Inc.
+// Copyright 2024-2026 Picovoice Inc.
 //
 // You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 // file accompanying this source.
@@ -30,6 +30,7 @@ import {
 import {
   Dialog,
   GemmaChatDialog,
+  Gemma3ChatDialog,
   Llama2ChatDialog,
   Llama3ChatDialog,
   Llama32ChatDialog,
@@ -46,17 +47,20 @@ import {
   PicoLLMCompletion,
   PicoLLMCompletionToken,
   PicoLLMEndpoint,
+  PicoLLMGenerateOCROptions,
+  PicoLLMGenerateOptions,
   PicoLLMToken,
   PicoLLMUsage,
+  PicoLLMImage,
   PicoLLMInitOptions,
   PicoLLMInputOptions,
-  PicoLLMGenerateOptions,
   PicoLLMOptions,
 } from './types';
 
 export {
   Dialog,
   GemmaChatDialog,
+  Gemma3ChatDialog,
   Llama2ChatDialog,
   Llama3ChatDialog,
   Llama32ChatDialog,
@@ -72,8 +76,10 @@ export {
   PicoLLMEndpoint,
   PicoLLMToken,
   PicoLLMUsage,
+  PicoLLMImage,
   PicoLLMInitOptions,
   PicoLLMInputOptions,
+  PicoLLMGenerateOCROptions,
   PicoLLMGenerateOptions,
   PicoLLMOptions,
   PicoLLM,

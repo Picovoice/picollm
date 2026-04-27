@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Picovoice Inc.
+// Copyright 2024-2026 Picovoice Inc.
 //
 // You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 // file accompanying this source.
@@ -38,6 +38,22 @@ export type PicoLLMGenerateOptions = {
   streamCallback?: (token: string) => void;
 };
 
+export type PicoLLMImage = {
+  width: number;
+  height: number;
+  data: Uint8Array;
+};
+
+export type PicoLLMGenerateWithImageOptions = PicoLLMGenerateOptions & {
+  promptProgressCallback?: (progress: number) => void;
+};
+
+export type PicoLLMGenerateOCROptions = {
+  completionTokenLimit?: number;
+  streamCallback?: (token: string) => void;
+  promptProgressCallback?: (progress: number) => void;
+};
+
 export type PicoLLMUsage = {
   promptTokens: number;
   completionTokens: number;
@@ -54,8 +70,8 @@ export type PicoLLMCompletionToken = {
 };
 
 export type PicoLLMCompletion = {
-  usage: PicoLLMUsage;
+  usage?: PicoLLMUsage;
   endpoint: PicoLLMEndpoint;
-  completionTokens: PicoLLMCompletionToken[];
+  completionTokens?: PicoLLMCompletionToken[];
   completion: string;
 };

@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright 2025 Picovoice Inc.
+    Copyright 2025-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
     file accompanying this source.
@@ -12,10 +12,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Pv;
+
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace PicoLLMDemo
 {
@@ -25,6 +29,7 @@ namespace PicoLLMDemo
             string accessKey,
             string modelPath,
             string prompt,
+            PicoLLMImage image,
             string device,
             int completionTokenLimit,
             List<string> stopPhrases,
@@ -40,7 +45,10 @@ namespace PicoLLMDemo
             {
                 Console.WriteLine($"picoLLM `{picoLLM.Version}`");
                 Console.WriteLine($"Loaded `{picoLLM.Model}`\n");
-                Console.WriteLine("Generating... (press `Space` to interrupt)\n");
+                Console.WriteLine($"Prompt: `{prompt}`\n");
+
+                Console.Write("Processing Prompt ...");
+                Console.Out.Flush();
 
                 bool isInterrupt = false;
                 PicoLLMCompletion completion = null;
@@ -62,12 +70,12 @@ namespace PicoLLMDemo
                     }
                 });
 
-                double startSec = 0.0;
+                double generateStartSec = 0.0;
                 Action<string> streamCallback = (string token) =>
                 {
-                    if (startSec == 0.0)
+                    if (generateStartSec == 0.0)
                     {
-                        startSec = DateTime.Now.TimeOfDay.TotalSeconds;
+                        generateStartSec = DateTime.Now.TimeOfDay.TotalSeconds;
                     }
 
                     if (!isInterrupt)
@@ -77,17 +85,84 @@ namespace PicoLLMDemo
                     }
                 };
 
-                completion = picoLLM.Generate(
-                    prompt,
-                    completionTokenLimit,
-                    stopPhrases.ToArray(),
-                    seed,
-                    presencePenalty,
-                    frequencyPenalty,
-                    temperature,
-                    topP,
-                    numTopChoices,
-                    streamCallback);
+                double startSec = DateTime.Now.TimeOfDay.TotalSeconds;
+                if (image == null)
+                {
+                    completion = picoLLM.Generate(
+                        prompt,
+                        completionTokenLimit,
+                        stopPhrases.ToArray(),
+                        seed,
+                        presencePenalty,
+                        frequencyPenalty,
+                        temperature,
+                        topP,
+                        numTopChoices,
+                        streamCallback);
+                }
+                else
+                {
+                    Action<float> promptProgressCallback = (float progress) =>
+                    {
+                        int bufferWidth = 40;
+                        if (Environment.UserInteractive && !Console.IsOutputRedirected)
+                        {
+                            bufferWidth = Console.BufferWidth;
+                        }
+
+                        int barWidth = Math.Max(10,
+                                                bufferWidth
+                                                - new string("Processing Image [").Length
+                                                - new string("] 100.0%").Length
+                                                - 1);
+
+                        int filledLen = (int)((progress / 100.0f) * (float)barWidth);
+
+                        if (Environment.UserInteractive && !Console.IsOutputRedirected)
+                        {
+                            int currentRow = Console.CursorTop;
+                            Console.SetCursorPosition(0, currentRow);
+                            Console.Write(new string(' ', bufferWidth));
+                            Console.SetCursorPosition(0, currentRow);
+                        }
+
+                        Console.Write("Processing Prompt [");
+                        for (int i = 0; i < barWidth; i++)
+                        {
+                            Console.Write(i < filledLen ? "#" : " ");
+                        }
+
+                        if (progress >= 100.0f)
+                        {
+                            Console.Write($"] {progress:F1}% Complete");
+                            Console.Write("\n\n");
+                            Console.Write("Generating... (press `Space` to interrupt)\n\n");
+                            return;
+                        }
+                        else
+                        {
+                            Console.Write($"] {progress:F1}%");
+                        }
+
+                        Console.Out.Flush();
+                    };
+
+                    completion = picoLLM.GenerateWithImage(
+                        prompt,
+                        image.Width,
+                        image.Height,
+                        image.Pixels,
+                        completionTokenLimit,
+                        stopPhrases.ToArray(),
+                        seed,
+                        presencePenalty,
+                        frequencyPenalty,
+                        temperature,
+                        topP,
+                        numTopChoices,
+                        streamCallback,
+                        promptProgressCallback);
+                }
 
                 interruptKeyTask.Wait();
 
@@ -96,9 +171,15 @@ namespace PicoLLMDemo
                     Console.WriteLine($"\n\n{completion}");
                 }
 
-                double elapsedSec = DateTime.Now.TimeOfDay.TotalSeconds - startSec;
-                double tokensPerSecond = (completion.Usage.CompletionTokens - 1) / elapsedSec;
-                Console.WriteLine($"\n\nGenerated {tokensPerSecond:F2} tokens per second");
+                double totalElapsedSec = DateTime.Now.TimeOfDay.TotalSeconds - startSec;
+                double generateElapsedSec = DateTime.Now.TimeOfDay.TotalSeconds - generateStartSec;
+                double promptElapsedSec = totalElapsedSec - generateElapsedSec;
+
+                double generateTPS = (completion.Usage.CompletionTokens - 1) / generateElapsedSec;
+
+                Console.WriteLine($"\n\nProcessed prompt in {promptElapsedSec:F2} seconds");
+                Console.WriteLine($"Generated {generateTPS:F2} tokens per second ({generateElapsedSec:F2}s elapsed)");
+                Console.WriteLine($"Total time elapsed is {totalElapsedSec:F2} seconds");
             }
         }
 
@@ -114,6 +195,7 @@ namespace PicoLLMDemo
             string accessKey = null;
             string modelPath = null;
             string prompt = null;
+            string imagePath = null;
             string device = null;
             int completionTokenLimit = 128;
             List<string> stopPhrases = new List<string>();
@@ -149,6 +231,13 @@ namespace PicoLLMDemo
                     if (++argIndex < args.Length)
                     {
                         prompt = args[argIndex++];
+                    }
+                }
+                else if (args[argIndex] == "--image_path")
+                {
+                    if (++argIndex < args.Length)
+                    {
+                        imagePath = args[argIndex++];
                     }
                 }
                 else if (args[argIndex] == "--device")
@@ -266,6 +355,17 @@ namespace PicoLLMDemo
                 throw new ArgumentNullException("modelPath");
             }
 
+            PicoLLMImage image = null;
+            if (!string.IsNullOrEmpty(imagePath))
+            {
+                if (!File.Exists(imagePath))
+                {
+                    throw new ArgumentException($"Unable to find image at {imagePath}");
+                }
+
+                image = LoadImageAbsolutePath(imagePath);
+            }
+
             if (!File.Exists(modelPath))
             {
                 throw new ArgumentException($"Unable to find picoLLM model at {modelPath}");
@@ -280,6 +380,7 @@ namespace PicoLLMDemo
                 accessKey,
                 modelPath,
                 prompt,
+                image,
                 device,
                 completionTokenLimit,
                 stopPhrases,
@@ -291,6 +392,55 @@ namespace PicoLLMDemo
                 numTopChoices,
                 verbose
             );
+        }
+
+        /// <summary>
+        /// Represents an RGB image.
+        /// </summary>
+        public class PicoLLMImage
+        {
+            /// <summary>
+            /// Image width.
+            /// </summary>
+            public int Width { get; }
+
+            /// <summary>
+            /// Image height.
+            /// </summary>
+            public int Height { get; }
+
+            /// <summary>
+            /// Image pixel data in 24 bits-per-pixel RGB format.
+            /// </summary>
+            public byte[] Pixels { get; }
+
+            public PicoLLMImage(int width, int height, byte[] pixels)
+            {
+                Width = width;
+                Height = height;
+                Pixels = pixels;
+
+                if (width * height * 3 != pixels.Length)
+                {
+                    throw new PicoLLMInvalidArgumentException(String.Format(
+                            "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
+                            pixels.Length,
+                            width,
+                            height));
+                }
+            }
+        }
+
+        private static PicoLLMImage LoadImageAbsolutePath(string absolutePath)
+        {
+            byte[] fileBytes = File.ReadAllBytes(absolutePath);
+            using (Image<Rgb24> image = Image.Load<Rgb24>(fileBytes))
+            {
+                byte[] imageBytes = new byte[image.Width * image.Height * Unsafe.SizeOf<Rgb24>()];
+                image.CopyPixelDataTo(imageBytes);
+
+                return new PicoLLMImage(image.Width, image.Height, imageBytes);
+            }
         }
 
         private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -305,6 +455,7 @@ namespace PicoLLMDemo
             Console.WriteLine("--access_key                 AccessKey obtained from Picovoice Console (https://console.picovoice.ai/).");
             Console.WriteLine("--model_path                 Absolute path to the file containing LLM parameters (.pllm).");
             Console.WriteLine("--prompt                     Prompt string.");
+            Console.WriteLine("--image_path                 Absolute path to the image file to include in the prompt.");
             Console.WriteLine("--device                     String representation of the device (e.g., CPU or GPU) to use for inference. " +
                               "If set to `best`, picoLLM picks the most suitable device. If set to `gpu`, the engine uses " +
                               "the first available GPU device. To select a specific GPU device, set this argument to `gpu:${GPU_INDEX}`, " +

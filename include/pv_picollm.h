@@ -1,5 +1,5 @@
 /*
-    Copyright 2023-2024 Picovoice Inc.
+    Copyright 2023-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
     file accompanying this source.
@@ -99,17 +99,22 @@ typedef struct {
 } pv_picollm_completion_token_t;
 
 /**
- * Stream callback function type used in `pv_picollm_generate()`.
+ * Stream callback function type used in `pv_picollm_generate()`, `pv_picollm_generate_with_image()` and `pv_picollm_generate_ocr()`.
  */
 typedef void (*pv_picollm_stream_callback_t)(const char *, void *);
 
 /**
+ * Prompt progress function type used in `pv_picollm_generate_with_image()` and `pv_picollm_generate_ocr()`.
+ */
+typedef void (*pv_picollm_progress_callback_t)(float, void *);
+
+/**
  * Given a text prompt and a set of generation parameters, creates a completion text and relevant metadata. The caller
- * is responsible for freeing completion and metadata objects using `pv_picollm_delete_completion()` and
+ * is responsible for freeing the completion text and metadata objects using `pv_picollm_delete_completion()` and
  * `pv_picollm_delete_completion_tokens()`.
  *
  * @param object picoLLM object.
- * @param prompt Prompt.
+ * @param prompt Text prompt.
  * @param completion_token_limit Maximum number of tokens in the completion. If the generation process stops due to
  * reaching this limit, the `endpoint` output argument will be `PV_PICOLLM_ENDPOINT_COMPLETION_TOKEN_LIMIT_REACHED`. Set
  * to `-1` to impose no limit.
@@ -134,13 +139,13 @@ typedef void (*pv_picollm_stream_callback_t)(const char *, void *);
  * generated token. Set to `0` to turn off the feature. The maximum number of top choices is
  * `pv_picollm_max_top_choices()`.
  * @param stream_callback If not set to `NULL`, picoLLM executes this callback every time a new piece of completion
- * string becomes available.
+ * text becomes available.
  * @param stream_callback_context Pointer containing user-defined data that is passed to `stream_callback` on every invocation.
  * @param[out] usage Number of tokens in the prompt and completion.
  * @param[out] endpoint Indicates the reason for termination of generation process.
  * @param[out] completion_tokens Token-level information about the generated completion.
  * @param[out] num_completion_tokens Number of tokens in the completion.
- * @param[out] completion Completion.
+ * @param[out] completion Completion text.
  * @return Status code. Returns `PV_STATUS_OUT_OF_MEMORY`, `PV_STATUS_IO_ERROR`, `PV_STATUS_INVALID_ARGUMENT`,
  * `PV_STATUS_RUNTIME_ERROR`, `PV_STATUS_ACTIVATION_ERROR`, `PV_STATUS_ACTIVATION_LIMIT_REACHED`,
  * `PV_STATUS_ACTIVATION_THROTTLED`, or `PV_STATUS_ACTIVATION_REFUSED` on failure.
@@ -166,11 +171,149 @@ PV_API pv_status_t pv_picollm_generate(
         char **completion);
 
 /**
- * Interrupts `pv_picollm_generate()` if generation is in progress. Otherwise, it has no effect.
+ * Given a text prompt, an image, and a set of generation parameters, creates a completion text and relevant metadata. The caller
+ * is responsible for freeing the completion text and metadata objects using `pv_picollm_delete_completion()` and
+ * `pv_picollm_delete_completion_tokens()`.
+ *
+ * For use with vision models only.
+ *
+ * @param object picoLLM object.
+ * @param prompt Text prompt.
+ * @param image_width Width of the image in pixels.
+ * @param image_height Height of the image in pixels.
+ * @param image Image pixel data in 8-bit, RGB format.
+ * @param completion_token_limit Maximum number of tokens in the completion. If the generation process stops due to
+ * reaching this limit, the `endpoint` output argument will be `PV_PICOLLM_ENDPOINT_COMPLETION_TOKEN_LIMIT_REACHED`. Set
+ * to `-1` to impose no limit.
+ * @param stop_phrases The generation process stops when it encounters any of these phrases in the completion. The
+ * already generated completion, including the encountered stop phrase, will be returned. The `endpoint` output argument
+ * will be `PV_PICOLLM_ENDPOINT_STOP_PHRASE_ENCOUNTERED`. Set to `NULL` to turn off this feature.
+ * @param num_stop_phrases Number of stop phrases. Set to `0` to turn off this feature.
+ * @param seed The internal random number generator uses it as its seed if set to a positive integer value. Seeding
+ * enforces deterministic outputs. Set to `-1` for randomized outputs for a given prompt.
+ * @param presence_penalty It penalizes logits already appearing in the partial completion if set to a positive value.
+ * If set to `0.0`, it has no effect.
+ * @param frequency_penalty If set to a positive floating-point value, it penalizes logits proportional to the frequency
+ * of their appearance in the partial completion. If set to `0.0`, it has no effect.
+ * @param temperature Sampling temperature. Temperature is a non-negative floating-point value that controls the
+ * randomness of the sampler. A higher temperature smoothens the samplers' output, increasing the randomness. In
+ * contrast, a lower temperature creates a narrower distribution and reduces variability. Setting it to `0` selects the
+ * maximum logit during sampling.
+ * @param top_p A positive floating-point number within (0, 1]. It restricts the sampler's choices to high-probability
+ * logits that form the `top_p` portion of the probability mass. Hence, it avoids randomly selecting unlikely logits.
+ * A value of `1.` enables the sampler to pick any token with non-zero probability, turning off the feature.
+ * @param num_top_choices If set to a positive value, picoLLM returns the list of the highest probability tokens for any
+ * generated token. Set to `0` to turn off the feature. The maximum number of top choices is
+ * `pv_picollm_max_top_choices()`.
+ * @param stream_callback If not set to `NULL`, picoLLM executes this callback every time a new piece of completion
+ * text becomes available.
+ * @param stream_callback_context Pointer containing user-defined data that is passed to `stream_callback` on every invocation.
+ * @param prompt_progress_callback If not set to `NULL`, picoLLM uses this callback to report the prompt evaluation progress as a
+ * floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and completion tokens are now being generated.
+ * @param prompt_progress_callback_context Pointer containing user-defined data that is passed to `prompt_progress_callback` on every invocation.
+ * @param[out] usage Number of tokens in the prompt and completion.
+ * @param[out] endpoint Indicates the reason for termination of generation process.
+ * @param[out] completion_tokens Token-level information about the generated completion.
+ * @param[out] num_completion_tokens Number of tokens in the completion.
+ * @param[out] completion Completion text.
+ * @return Status code. Returns `PV_STATUS_OUT_OF_MEMORY`, `PV_STATUS_IO_ERROR`, `PV_STATUS_INVALID_ARGUMENT`,
+ * `PV_STATUS_RUNTIME_ERROR`, `PV_STATUS_ACTIVATION_ERROR`, `PV_STATUS_ACTIVATION_LIMIT_REACHED`,
+ * `PV_STATUS_ACTIVATION_THROTTLED`, or `PV_STATUS_ACTIVATION_REFUSED` on failure.
+ */
+PV_API pv_status_t pv_picollm_generate_with_image(
+        pv_picollm_t *object,
+        const char *prompt,
+        int32_t image_width,
+        int32_t image_height,
+        const uint8_t *image,
+        int32_t completion_token_limit,
+        const char *const *stop_phrases,
+        int32_t num_stop_phrases,
+        int32_t seed,
+        float presence_penalty,
+        float frequency_penalty,
+        float temperature,
+        float top_p,
+        int32_t num_top_choices,
+        pv_picollm_stream_callback_t stream_callback,
+        void *stream_callback_context,
+        pv_picollm_progress_callback_t prompt_progress_callback,
+        void *prompt_progress_callback_context,
+        pv_picollm_usage_t *usage,
+        pv_picollm_endpoint_t *endpoint,
+        pv_picollm_completion_token_t **completion_tokens,
+        int32_t *num_completion_tokens,
+        char **completion);
+
+/**
+ * Interrupts `pv_picollm_generate()` and `pv_picollm_generate_with_image()` if generation is in progress.
+ * Otherwise, it has no effect.
+ *
  * @param object picoLLM object.
  * @return Status code. Returns `PV_STATUS_INVALID_ARGUMENT` on failure.
  */
 PV_API pv_status_t pv_picollm_interrupt(pv_picollm_t *object);
+
+/**
+ * Generates numerical vector representations of the input text prompt.
+ *
+ * For use with embedding models only.
+ *
+ * @param object picoLLM object.
+ * @param prompt Text prompt.
+ * @param num_embeddings Number of generated embeddings
+ * @param embeddings Generated embeddings.
+ */
+PV_API pv_status_t pv_picollm_generate_embeddings(
+        pv_picollm_t *object,
+        const char *prompt,
+        int32_t *num_embeddings,
+        float **embeddings);
+
+/**
+ * Generates a completion text representing text found in the given image.
+ * The caller is responsible for freeing the completion text using `pv_picollm_delete_completion()`.
+ *
+ * For use with OCR (Optical Character Recognition) models only.
+ *
+ * @param object picoLLM object.
+ * @param image_width Width of the image in pixels.
+ * @param image_height Height of the image in pixels.
+ * @param image Image pixel data in 8-bit, RGB format.
+ * @param completion_token_limit Maximum number of tokens in the completion. If the generation process stops due to
+ * reaching this limit, the `endpoint` output argument will be `PV_PICOLLM_ENDPOINT_COMPLETION_TOKEN_LIMIT_REACHED`. Set
+ * to `-1` to impose no limit.
+ * @param stream_callback If not set to `NULL`, picoLLM executes this callback every time a new piece of completion
+ * text becomes available.
+ * @param stream_callback_context Pointer containing user-defined data that is passed to `stream_callback` on every invocation.
+ * @param prompt_progress_callback If not set to `NULL`, picoLLM uses this callback to report the prompt evaluation progress as a
+ * floating-point number within (0, 100]. A value of 100 indicates that prompt evaluation is complete and completion tokens are now being generated.
+ * @param prompt_progress_callback_context Pointer containing user-defined data that is passed to `prompt_progress_callback` on every invocation.
+ * @param[out] endpoint Indicates the reason for termination of generation process.
+ * @param[out] completion Completion text.
+ * @return Status code. Returns `PV_STATUS_OUT_OF_MEMORY`, `PV_STATUS_IO_ERROR`, `PV_STATUS_INVALID_ARGUMENT`,
+ * `PV_STATUS_RUNTIME_ERROR`, `PV_STATUS_ACTIVATION_ERROR`, `PV_STATUS_ACTIVATION_LIMIT_REACHED`,
+ * `PV_STATUS_ACTIVATION_THROTTLED`, or `PV_STATUS_ACTIVATION_REFUSED` on failure.
+ */
+PV_API pv_status_t pv_picollm_generate_ocr(
+        pv_picollm_t *object,
+        int32_t image_width,
+        int32_t image_height,
+        const uint8_t *image,
+        int32_t completion_token_limit,
+        pv_picollm_stream_callback_t stream_callback,
+        void *stream_callback_context,
+        pv_picollm_progress_callback_t prompt_progress_callback,
+        void *prompt_progress_callback_context,
+        pv_picollm_endpoint_t *endpoint,
+        char **completion);
+
+/**
+ * Deletes embeddings returned by `pv_picollm_generate_embeddings()`.
+ *
+ * @param embeddings Embeddings returned by `pv_picollm_generate_embeddings()`.
+ */
+PV_API void pv_picollm_delete_embeddings(float *embeddings);
 
 /**
  * Deletes completion tokens returned by `pv_picollm_generate()`.
@@ -183,11 +326,12 @@ PV_API void pv_picollm_delete_completion_tokens(
         int32_t num_completion_tokens);
 
 /**
- * Deletes the completion text returned by `pv_picollm_generate()`.
+ * Deletes the completion text returned by `pv_picollm_generate()` or
+ * the extracted text returned by `pv_picollm_generate_ocr()`.
  *
- * @param completion Completion.
+ * @param text Text returned by `pv_picollm_generate()` or `pv_picollm_generate_ocr()`.
  */
-PV_API void pv_picollm_delete_completion(char *completion);
+PV_API void pv_picollm_delete_completion(char *text);
 
 /**
  * Tokenizes a given text using the model's tokenizer. The caller is responsible for freeing the returned tokens buffer

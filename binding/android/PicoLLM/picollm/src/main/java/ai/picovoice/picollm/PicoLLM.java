@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is
     located in the "LICENSE" file accompanying this source.
@@ -33,6 +33,7 @@ public class PicoLLM {
     static {
         DIALOGS.put("gemma-2b-it", GemmaChatDialog.class);
         DIALOGS.put("gemma-7b-it", GemmaChatDialog.class);
+        DIALOGS.put("gemma-3-270m-it", Gemma3ChatDialog.class);
         DIALOGS.put("llama-2-7b-chat", Llama2ChatDialog.class);
         DIALOGS.put("llama-2-13b-chat", Llama2ChatDialog.class);
         DIALOGS.put("llama-2-70b-chat", Llama2ChatDialog.class);
@@ -130,8 +131,8 @@ public class PicoLLM {
     }
 
     /**
-     * Generates completion text and relevant metadata given a text prompt and a
-     * set of generation parameters.
+     * Given a text prompt and a set of generation parameters, creates a
+     * completion text and relevant metadata.
      *
      * @param prompt         Text prompt.
      * @param generateParams Generation parameters.
@@ -153,6 +154,84 @@ public class PicoLLM {
                 generateParams.getTopP(),
                 generateParams.getNumTopChoices(),
                 generateParams.getStreamCallback());
+    }
+
+    /**
+     * Given a text prompt, an image, and a set of generation parameters,
+     * creates a completion text and relevant metadata.
+     * For use with vision models only.
+     *
+     * @param prompt         Text prompt.
+     * @param imageWidth     Width of input image
+     * @param imageHeight    Height of input image
+     * @param image          pixels of input image
+     * @param generateParams Generation parameters.
+     * @return Completion result.
+     * @throws PicoLLMException if generation fails.
+     */
+    public PicoLLMCompletion generateWithImage(
+            String prompt,
+            int imageWidth,
+            int imageHeight,
+            byte[] image,
+            PicoLLMGenerateWithImageParams generateParams) throws PicoLLMException {
+        return PicoLLMNative.generateWithImage(
+                handle,
+                prompt,
+                imageWidth,
+                imageHeight,
+                image,
+                generateParams.getCompletionTokenLimit(),
+                generateParams.getStopPhrases(),
+                generateParams.getSeed(),
+                generateParams.getPresencePenalty(),
+                generateParams.getFrequencyPenalty(),
+                generateParams.getTemperature(),
+                generateParams.getTopP(),
+                generateParams.getNumTopChoices(),
+                generateParams.getStreamCallback(),
+                generateParams.getPromptProgressCallback());
+    }
+
+    /**
+     * Generates numerical vector representations of the input text prompt.
+     * For use with embedding models only.
+     *
+     * @param prompt         Text prompt.
+     * @return Generated embeddings.
+     * @throws PicoLLMException if generation fails.
+     */
+    public float[] generateEmbeddings(
+            String prompt) throws PicoLLMException {
+        return PicoLLMNative.generateEmbeddings(
+                handle,
+                prompt);
+    }
+
+    /**
+     * Generates a completion text representing text found in the given image.
+     * For use with OCR (Optical Character Recognition) models only.
+     *
+     * @param imageWidth     Width of input image
+     * @param imageHeight    Height of input image
+     * @param image          pixels of input image
+     * @param generateParams Generation parameters.
+     * @return Completion result.
+     * @throws PicoLLMException if generation fails.
+     */
+    public PicoLLMCompletion generateOCR(
+            int imageWidth,
+            int imageHeight,
+            byte[] image,
+            PicoLLMGenerateOCRParams generateParams) throws PicoLLMException {
+        return PicoLLMNative.generateOCR(
+                handle,
+                imageWidth,
+                imageHeight,
+                image,
+                generateParams.getCompletionTokenLimit(),
+                generateParams.getStreamCallback(),
+                generateParams.getPromptProgressCallback());
     }
 
     /**

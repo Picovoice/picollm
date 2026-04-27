@@ -1,5 +1,5 @@
 /*
-    Copyright 2025 Picovoice Inc.
+    Copyright 2025-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
     file accompanying this source.
@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Pv;
+
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace PicoLLMTest
 {
@@ -35,6 +39,9 @@ namespace PicoLLMTest
 
         private string _accessKey;
         private string _modelPath;
+        private string _ocrModelPath;
+        private string _visionModelPath;
+        private string _embeddingModelPath;
         private string _device;
 
         private JToken _testJson;
@@ -81,11 +88,52 @@ namespace PicoLLMTest
             public string Completion => completion;
         }
 
+        private class OCRExpectation
+        {
+            [JsonProperty("endpoint")]
+            private readonly PicoLLMEndpoint endpoint;
+
+            [JsonProperty("completion")]
+            private readonly string completion;
+
+            public OCRExpectation(PicoLLMEndpoint endpoint, string completion)
+            {
+                this.endpoint = endpoint;
+                this.completion = completion;
+            }
+
+            public PicoLLMEndpoint Endpoint => endpoint;
+
+            public string Completion => completion;
+        }
+
+        private class EmbeddingExpectation
+        {
+            [JsonProperty("doc")]
+            private readonly string doc;
+
+            [JsonProperty("similarity")]
+            private readonly float similarity;
+
+            public EmbeddingExpectation(string doc, float similarity)
+            {
+                this.doc = doc;
+                this.similarity = similarity;
+            }
+
+            public string Doc => doc;
+
+            public float Similarity => similarity;
+        }
+
         [TestInitialize]
         public void Setup()
         {
             _accessKey = Environment.GetEnvironmentVariable("ACCESS_KEY");
-            _modelPath = Environment.GetEnvironmentVariable("MODEL_PATH");
+            _modelPath = Environment.GetEnvironmentVariable("TEXT_MODEL_PATH");
+            _ocrModelPath = Environment.GetEnvironmentVariable("OCR_MODEL_PATH");
+            _visionModelPath = Environment.GetEnvironmentVariable("VISION_MODEL_PATH");
+            _embeddingModelPath = Environment.GetEnvironmentVariable("EMBEDDING_MODEL_PATH");
             _device = Environment.GetEnvironmentVariable("DEVICE");
             _testJson = LoadJsonTestData()["picollm"];
         }
@@ -337,6 +385,96 @@ namespace PicoLLMTest
         }
 
         [TestMethod]
+        public void TestGenerateWithImage()
+        {
+            JToken data = LoadJsonTestData()["generate_with_image"];
+            string prompt = data["prompt"].ToObject<string>();
+
+            string imagePath = data["image"].ToObject<string>();
+            PicoLLMImage image = LoadImage(imagePath);
+
+            int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
+            List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
+
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _visionModelPath, _device))
+            {
+                PicoLLMCompletion res = picoLLM.GenerateWithImage(
+                    prompt,
+                    image.Width,
+                    image.Height,
+                    image.Pixels,
+                    completionTokenLimit: completionTokenLimit);
+                VerifyCompletion(res, expectations);
+            }
+        }
+
+        [TestMethod]
+        public void TestGenerateOCR()
+        {
+            JToken data = LoadJsonTestData()["generate_ocr"];
+
+            string imagePath = data["image"].ToObject<string>();
+            PicoLLMImage image = LoadImage(imagePath);
+
+            int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
+            List<OCRExpectation> expectations = data["expectations"].ToObject<List<OCRExpectation>>();
+
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
+            {
+                PicoLLMCompletion res = picoLLM.GenerateOCR(
+                    image.Width,
+                    image.Height,
+                    image.Pixels,
+                    completionTokenLimit: completionTokenLimit);
+                VerifyOCRCompletion(res, expectations);
+            }
+        }
+
+        [TestMethod]
+        public void TestGenerateOCRLarge()
+        {
+            JToken data = LoadJsonTestData()["generate_ocr_large"];
+
+            string imagePath = data["image"].ToObject<string>();
+            PicoLLMImage image = LoadImage(imagePath);
+
+            int completionTokenLimit = data["parameters"]["completion-token-limit"].ToObject<int>();
+            List<OCRExpectation> expectations = data["expectations"].ToObject<List<OCRExpectation>>();
+
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _ocrModelPath, _device))
+            {
+                PicoLLMCompletion res = picoLLM.GenerateOCR(
+                    image.Width,
+                    image.Height,
+                    image.Pixels,
+                    completionTokenLimit: completionTokenLimit);
+                VerifyOCRCompletion(res, expectations);
+            }
+        }
+
+        [TestMethod]
+        public void TestGenerateEmbedding()
+        {
+            JToken data = LoadJsonTestData()["generate_embedding"];
+            string prompt = data["prompt"].ToObject<string>();
+
+            List<EmbeddingExpectation> expectations = data["expectations"].ToObject<List<EmbeddingExpectation>>();
+
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _embeddingModelPath, _device))
+            {
+                float[] targetEmbeddings = picoLLM.GenerateEmbeddings(prompt);
+
+                List<float[]> referenceEmbeddingsList = new List<float[]>();
+                foreach (EmbeddingExpectation expectation in expectations)
+                {
+                    referenceEmbeddingsList.Add(picoLLM.GenerateEmbeddings(expectation.Doc));
+                }
+
+                VerifyEmbeddingCompletion(targetEmbeddings, referenceEmbeddingsList, expectations);
+            }
+        }
+
+        [TestMethod]
         public void TestInterrupt()
         {
             JToken data = _testJson["default"];
@@ -485,6 +623,7 @@ namespace PicoLLMTest
         private static readonly Dictionary<string, Type> dialogs = new Dictionary<string, Type>
         {
             { "gemma-chat-dialog", typeof(GemmaChatDialog) },
+            { "gemma3-chat-dialog", typeof(GemmaChatDialog) },
             { "llama-2-chat-dialog", typeof(Llama2ChatDialog) },
             { "llama-3-chat-dialog", typeof(Llama3ChatDialog) },
             { "llama-3.2-chat-dialog", typeof(Llama32ChatDialog) },
@@ -630,10 +769,104 @@ namespace PicoLLMTest
             Assert.IsTrue(anyMatch);
         }
 
+        private void VerifyOCRCompletion(PicoLLMCompletion res, List<OCRExpectation> expectations)
+        {
+            bool anyMatch = false;
+            foreach (OCRExpectation expectation in expectations)
+            {
+                if (res.Endpoint == expectation.Endpoint && res.Completion == expectation.Completion)
+                {
+                    anyMatch = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(anyMatch);
+        }
+
+        private void VerifyEmbeddingCompletion(
+            float[] targetEmbeddings,
+            List<float[]> referenceEmbeddingsList,
+            List<EmbeddingExpectation> expectations)
+        {
+            Assert.AreEqual(referenceEmbeddingsList.Count, expectations.Count);
+
+            for (int i = 0; i < expectations.Count; i++)
+            {
+                EmbeddingExpectation expectation = expectations[i];
+
+                float similarity = Similarity(targetEmbeddings, referenceEmbeddingsList[i]);
+                Assert.IsTrue(Math.Abs(similarity - expectation.Similarity) < 0.1);
+            }
+        }
+
+        private float Similarity(float[] a, float[] b)
+        {
+            Assert.AreEqual(a.Length, b.Length);
+
+            float sum = 0.0f;
+            for (int i = 0; i < a.Length; i++)
+            {
+                sum += a[i] * b[i];
+            }
+
+            return sum;
+        }
+
         private static JObject LoadJsonTestData()
         {
             string content = File.ReadAllText(Path.Combine(ROOT_DIR, "resources/.test/test_data.json"));
             return JObject.Parse(content);
+        }
+
+        /// <summary>
+        /// Represents an RGB image.
+        /// </summary>
+        private class PicoLLMImage
+        {
+            /// <summary>
+            /// Image width.
+            /// </summary>
+            public int Width { get; }
+
+            /// <summary>
+            /// Image height.
+            /// </summary>
+            public int Height { get; }
+
+            /// <summary>
+            /// Image pixel data in 24 bits-per-pixel RGB format.
+            /// </summary>
+            public byte[] Pixels { get; }
+
+            public PicoLLMImage(int width, int height, byte[] pixels)
+            {
+                Width = width;
+                Height = height;
+                Pixels = pixels;
+
+                if (width * height * 3 != pixels.Length)
+                {
+                    throw new PicoLLMInvalidArgumentException(String.Format(
+                            "Unexpected number of bytes ({0}) for RGB image of size {1} x {2}",
+                            pixels.Length,
+                            width,
+                            height));
+                }
+            }
+        }
+
+        private static PicoLLMImage LoadImage(string name)
+        {
+            string path = Path.Combine(ROOT_DIR, String.Format("resources/.test/images/{0}", name));
+            byte[] fileBytes = File.ReadAllBytes(path);
+            using (Image<Rgb24> image = Image.Load<Rgb24>(fileBytes))
+            {
+                byte[] imageBytes = new byte[image.Width * image.Height * Unsafe.SizeOf<Rgb24>()];
+                image.CopyPixelDataTo(imageBytes);
+
+                return new PicoLLMImage(image.Width, image.Height, imageBytes);
+            }
         }
     }
 }

@@ -21,35 +21,48 @@ models. picoLLM Inference Engine is:
 
 picoLLM Inference Engine supports the following open-weight models. The models are available for download on the [Picovoice Console](https://console.picovoice.ai/).
 
+- DeepSeek-OCR-2
+  - `deepseek-ocr-2`
+- EmbeddingGemma
+  - `embeddinggemma-300m`
 - Gemma
-    - `gemma-2b`
-    - `gemma-2b-it`
-    - `gemma-7b`
-    - `gemma-7b-it`
+  - `gemma-2b`
+  - `gemma-2b-it`
+  - `gemma-7b`
+  - `gemma-7b-it`
+- Gemma3
+  - `gemma-3-270m`
+  - `gemma-3-270m-it`
 - Llama-2
-    - `llama-2-7b`
-    - `llama-2-7b-chat`
-    - `llama-2-13b`
-    - `llama-2-13b-chat`
-    - `llama-2-70b`
-    - `llama-2-70b-chat`
+  - `llama-2-7b`
+  - `llama-2-7b-chat`
+  - `llama-2-13b`
+  - `llama-2-13b-chat`
+  - `llama-2-70b`
+  - `llama-2-70b-chat`
 - Llama-3
-    - `llama-3-8b`
-    - `llama-3-8b-instruct`
-    - `llama-3-70b`
-    - `llama-3-70b-instruct`
+  - `llama-3-8b`
+  - `llama-3-8b-instruct`
+  - `llama-3-70b`
+  - `llama-3-70b-instruct`
 - Llama-3.2
-    - `llama3.2-1b-instruct`
-    - `llama3.2-3b-instruct`
+  - `llama3.2-1b-instruct`
+  - `llama3.2-3b-instruct`
 - Mistral
-    - `mistral-7b-v0.1`
-    - `mistral-7b-instruct-v0.1`
-    - `mistral-7b-instruct-v0.2`
+  - `mistral-7b-v0.1`
+  - `mistral-7b-instruct-v0.1`
+  - `mistral-7b-instruct-v0.2`
 - Mixtral
-    - `mixtral-8x7b-v0.1`
-    - `mixtral-8x7b-instruct-v0.1`
+  - `mixtral-8x7b-v0.1`
+  - `mixtral-8x7b-instruct-v0.1`
 - Phi-2
   - `phi2`
+- Phi-3
+  - `phi3`
+- Phi-3.5
+  - `phi3.5`
+- Qwen3-VL
+  - `qwen3-vl-2b-it`
 
 ## AccessKey
 

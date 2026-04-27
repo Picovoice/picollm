@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is
     located in the "LICENSE" file accompanying this source.
@@ -41,6 +41,34 @@ class PicoLLMNative {
             float topP,
             int numTopChoices,
             PicoLLMStreamCallback streamCallback) throws PicoLLMException;
+
+    static native PicoLLMCompletion generateWithImage(
+            long object,
+            String prompt,
+            int imageWidth,
+            int imageHeight,
+            byte[] image,
+            int completionTokenLimit,
+            String[] stopPhrases,
+            int seed,
+            float presencePenalty,
+            float frequencyPenalty,
+            float temperature,
+            float topP,
+            int numTopChoices,
+            PicoLLMStreamCallback streamCallback,
+            PicoLLMProgressCallback promptProgressCallback) throws PicoLLMException;
+
+    static native float[] generateEmbeddings(long object, String prompt) throws PicoLLMException;
+
+    static native PicoLLMCompletion generateOCR(
+            long object,
+            int imageWidth,
+            int imageHeight,
+            byte[] image,
+            int completionTokenLimit,
+            PicoLLMStreamCallback streamCallback,
+            PicoLLMProgressCallback promptProgressCallback) throws PicoLLMException;
 
     static native void interrupt(long object) throws PicoLLMException;
 

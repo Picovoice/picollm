@@ -16,7 +16,7 @@ models. picoLLM Inference Engine is:
 ## Compatibility
 
 - Node.js 18+
-- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64, arm64), and Raspberry Pi (5 and 4).
+- Runs on Linux (x86_64), macOS (arm64, x86_64), Windows (x86_64, arm64), and Raspberry Pi (3, 4, 5).
 
 ## Installation
 
@@ -37,11 +37,18 @@ npm install --save @picovoice/picollm-node
 picoLLM Inference Engine supports the following open-weight models. The models are on
 [Picovoice Console](https://console.picovoice.ai/).
 
+- DeepSeek-OCR-2
+  - `deepseek-ocr-2`
+- EmbeddingGemma
+  - `embeddinggemma-300m`
 - Gemma
   - `gemma-2b`
   - `gemma-2b-it`
   - `gemma-7b`
   - `gemma-7b-it`
+- Gemma3
+  - `gemma-3-270m`
+  - `gemma-3-270m-it`
 - Llama-2
   - `llama-2-7b`
   - `llama-2-7b-chat`
@@ -70,6 +77,8 @@ picoLLM Inference Engine supports the following open-weight models. The models a
   - `phi3`
 - Phi-3.5
   - `phi3.5`
+- Qwen3-VL
+  - `qwen3-vl-2b-it`
 
 ## AccessKey
 

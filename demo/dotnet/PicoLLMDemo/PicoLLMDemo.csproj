@@ -2,7 +2,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <Configurations>ChatDemo.Debug;ChatDemo.Release;CompletionDemo.Debug;CompletionDemo.Release</Configurations>
+        <Configurations>ChatDemo.Debug;ChatDemo.Release;CompletionDemo.Debug;CompletionDemo.Release;OCRDemo.Debug;OCRDemo.Release</Configurations>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'ChatDemo.Debug' Or '$(Configuration)' == 'ChatDemo.Release'">
@@ -16,7 +16,15 @@
         <TargetName>PicoLLMCompletionDemo</TargetName>
         <AssemblyName>PicoLLMCompletionDemo</AssemblyName>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'OCRDemo.Debug' Or '$(Configuration)' == 'OCRDemo.Release'">
+        <StartupObject>PicoLLMDemo.OCRDemo</StartupObject>
+        <TargetName>PicoLLMOCRDemo</TargetName>
+        <AssemblyName>PicoLLMOCRDemo</AssemblyName>
+    </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="PicoLLM" Version="2.0.1" />
+        <PackageReference Include="PicoLLM" Version="2.1.0" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.13" />
     </ItemGroup>
 </Project>

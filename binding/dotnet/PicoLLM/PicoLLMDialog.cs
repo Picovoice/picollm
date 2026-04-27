@@ -1,5 +1,5 @@
 ﻿/*
-    Copyright 2025 Picovoice Inc.
+    Copyright 2025-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
     file accompanying this source.
@@ -370,4 +370,11 @@ namespace Pv
         }
     }
 
+    /// <summary>
+    /// Dialog helper for `gemma-3-270m-it`.
+    /// </summary>
+    public class Gemma3ChatDialog : GemmaChatDialog
+    {
+        public Gemma3ChatDialog(int? history = null, string system = null) : base(history, system) { }
+    }
 }

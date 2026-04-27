@@ -16,6 +16,7 @@
 		342500CE2D1F1F9E00D42622 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 342500CD2D1F1F9E00D42622 /* PicoLLM */; };
 		34AB73212D1F3D410075B421 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34AB73202D1F3D410075B421 /* PicoLLM */; };
 		34B26B822D1A069900C33299 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34B26B812D1A069900C33299 /* PicoLLM */; };
+		34CF34A12F9C08EA003C1097 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34CF34A02F9C08EA003C1097 /* PicoLLM */; };
 		C789D24B2BEA8E5D005FDB10 /* LoadModelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D24A2BEA8E5D005FDB10 /* LoadModelView.swift */; };
 		C789D24D2BEA8EAE005FDB10 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D24C2BEA8EAE005FDB10 /* ChatView.swift */; };
 		C789D2512BEAD752005FDB10 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C789D2502BEAD752005FDB10 /* Constants.swift */; };
@@ -47,6 +48,7 @@
 				E1E013842D162B3D00DB0C2F /* PicoLLM in Frameworks */,
 				074C41F62EF384BA00FEC19E /* PicoLLM in Frameworks */,
 				342500CE2D1F1F9E00D42622 /* PicoLLM in Frameworks */,
+				34CF34A12F9C08EA003C1097 /* PicoLLM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,7 +131,7 @@
 			);
 			mainGroup = 02A1193C268D39A700A2AC99;
 			packageReferences = (
-				074C41F42EF384BA00FEC19E /* XCRemoteSwiftPackageReference "picollm" */,
+				34CF349F2F9C08EA003C1097 /* XCRemoteSwiftPackageReference "picollm" */,
 			);
 			productRefGroup = 02A11946268D39A700A2AC99 /* Products */;
 			projectDirPath = "";
@@ -380,6 +382,14 @@
 				version = 1.2.3;
 			};
 		};
+		34CF349F2F9C08EA003C1097 /* XCRemoteSwiftPackageReference "picollm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/picovoice/picollm";
+			requirement = {
+				kind = exactVersion;
+				version = 2.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -404,6 +414,11 @@
 		34B26B812D1A069900C33299 /* PicoLLM */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 34B26B802D1A069900C33299 /* XCRemoteSwiftPackageReference "picollm" */;
+			productName = PicoLLM;
+		};
+		34CF34A02F9C08EA003C1097 /* PicoLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 34CF349F2F9C08EA003C1097 /* XCRemoteSwiftPackageReference "picollm" */;
 			productName = PicoLLM;
 		};
 		E1E0137D2D16114E00DB0C2F /* PicoLLM */ = {

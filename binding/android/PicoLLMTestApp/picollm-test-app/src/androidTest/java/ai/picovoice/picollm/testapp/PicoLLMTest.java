@@ -1,5 +1,5 @@
 /*
-    Copyright 2024 Picovoice Inc.
+    Copyright 2024-2026 Picovoice Inc.
 
     You may not use this file except in compliance with the license. A copy of the license is
     located in the "LICENSE" file accompanying this source.
@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
@@ -41,10 +43,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import ai.picovoice.picollm.GemmaChatDialog;
+import ai.picovoice.picollm.Gemma3ChatDialog;
 import ai.picovoice.picollm.Llama2ChatDialog;
 import ai.picovoice.picollm.Llama3ChatDialog;
 import ai.picovoice.picollm.Llama32ChatDialog;
@@ -58,6 +60,8 @@ import ai.picovoice.picollm.PicoLLMCompletion;
 import ai.picovoice.picollm.PicoLLMDialog;
 import ai.picovoice.picollm.PicoLLMException;
 import ai.picovoice.picollm.PicoLLMGenerateParams;
+import ai.picovoice.picollm.PicoLLMGenerateWithImageParams;
+import ai.picovoice.picollm.PicoLLMGenerateOCRParams;
 
 
 @RunWith(Enclosed.class)
@@ -65,39 +69,27 @@ public class PicoLLMTest {
 
     public static class StandardTests extends BaseTest {
 
-        PicoLLM picollm;
-
-        @Before
-        public void Setup() throws PicoLLMException {
-            picollm = new PicoLLM.Builder()
+        @Test
+        public void getConstants() throws PicoLLMException {
+            PicoLLM picollm = new PicoLLM.Builder()
                     .setAccessKey(accessKey)
                     .setModelPath(modelPath)
                     .setDevice(device)
                     .build();
-        }
 
-        @After
-        public void Teardown() {
-            if (picollm != null) {
-                picollm.delete();
-                picollm = null;
-            }
-        }
-
-        @Test
-        public void getConstants() throws PicoLLMException {
             assertTrue(PicoLLM.getMaxTopChoices() > 0);
             assertTrue(PicoLLM.getVersion() != null && !PicoLLM.getVersion().equals(""));
             assertEquals(picollm.getModel(), "phi2 [2.90 v1]");
             assertEquals(picollm.getContextLength(), 2048);
-        }
 
-        @Test
-        public void testInitFailWithInvalidAccessKey() {
             if (picollm != null) {
                 picollm.delete();
                 picollm = null;
             }
+        }
+
+        @Test
+        public void testInitFailWithInvalidAccessKey() {
             assertThrows(PicoLLMException.class, () ->
                     new PicoLLM.Builder()
                             .setAccessKey("invalid==")
@@ -180,8 +172,25 @@ public class PicoLLMTest {
             assertTrue(anyMatch);
         }
 
+        private boolean verifyOCRCompletionHelper(PicoLLMCompletion res, CompletionExpectation expectation) {
+            return res.getCompletion().equals(expectation.getCompletion());
+        }
+
+        public void verifyOCRCompletion(PicoLLMCompletion res, List<CompletionExpectation> expectations) {
+            boolean anyMatch = expectations.stream().anyMatch(
+                    expectation -> verifyOCRCompletionHelper(res, expectation)
+            );
+            assertTrue(anyMatch);
+        }
+
         @Test
         public void testGenerateDefault() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("default");
@@ -196,10 +205,21 @@ public class PicoLLMTest {
                     new PicoLLMGenerateParams.Builder().build());
 
             verifyCompletion(res, expectations);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithCompletionTokenLimit() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("with-completion-token-limit");
@@ -220,10 +240,21 @@ public class PicoLLMTest {
                             .build());
 
             verifyCompletion(res, expectations);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithStopPhrases() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("with-stop-phrases");
@@ -247,10 +278,21 @@ public class PicoLLMTest {
                             .build());
 
             verifyCompletion(res, expectations);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithPresencePenalty() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("with-presence-penalty");
@@ -271,10 +313,21 @@ public class PicoLLMTest {
                             .build());
 
             verifyCompletion(res, expectations);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithFrequencyPenalty() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("with-frequency-penalty");
@@ -295,10 +348,21 @@ public class PicoLLMTest {
                             .build());
 
             verifyCompletion(res, expectations);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithTemperature() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("with-temperature");
@@ -356,10 +420,21 @@ public class PicoLLMTest {
                             res2.getCompletion())));
 
             assertNotEquals(res.getCompletion(), res2.getCompletion());
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithTemperatureAndIdenticalSeeds() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("with-temperature-and-identical-seeds");
@@ -414,10 +489,21 @@ public class PicoLLMTest {
                             res2.getCompletion())));
 
             assertEquals(res.getCompletion(), res2.getCompletion());
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithTemperatureAndTopP() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("with-temperature-and-top-p");
@@ -467,10 +553,21 @@ public class PicoLLMTest {
                     .collect(Collectors.toList());
 
             verifyCompletion(res, expectations);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithTopChoices() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("with-top-choices");
@@ -491,10 +588,21 @@ public class PicoLLMTest {
                             .build());
 
             verifyCompletion(res, expectations);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGenerateWithStreamCallback() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("default");
@@ -515,10 +623,131 @@ public class PicoLLMTest {
             verifyCompletion(res, expectations);
 
             assertEquals(pieces.toString(), expectations.get(0).getCompletion());
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
+        }
+
+        @Test
+        public void testGenerateWithImage() throws Exception {
+            JsonObject currentTestData = testData
+                    .getAsJsonObject("generate_with_image");
+
+            int completionTokenLimit = currentTestData
+                    .getAsJsonObject("parameters")
+                    .get("completion-token-limit").getAsInt();
+
+            List<CompletionExpectation> expectations = new Gson().fromJson(
+                    currentTestData.get("expectations"),
+                    new TypeToken<List<CompletionExpectation>>() {
+                    }.getType());
+
+            PicoLLM imagePicollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(imageModelPath)
+                    .setDevice(device)
+                    .build();
+
+            PicoLLMCompletion res = imagePicollm.generateWithImage(
+                    currentTestData.get("prompt").getAsString(),
+                    smallImage.width,
+                    smallImage.height,
+                    smallImage.data,
+                    new PicoLLMGenerateWithImageParams.Builder()
+                            .setCompletionTokenLimit(completionTokenLimit)
+                            .build());
+
+            imagePicollm.delete();
+
+            verifyCompletion(res, expectations);
+        }
+
+        @Test
+        public void testGenerateEmbedding() throws Exception {
+            JsonObject currentTestData = testData
+                    .getAsJsonObject("generate_embedding");
+
+            PicoLLM embeddingPicollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(embeddingModelPath)
+                    .setDevice(device)
+                    .build();
+
+            float[] res = embeddingPicollm.generateEmbeddings(
+                    currentTestData.get("prompt").getAsString());
+
+            JsonArray expectations = currentTestData
+                    .getAsJsonArray("expectations");
+            for (JsonElement expectation : expectations) {
+                String doc = expectation
+                        .getAsJsonObject()
+                        .get("doc").getAsString();
+                float similarity = expectation
+                        .getAsJsonObject()
+                        .get("similarity").getAsFloat();
+
+                float[] ref = embeddingPicollm.generateEmbeddings(doc);
+
+                float sim = computeSimilarity(res, ref);
+
+                assertEquals(sim, similarity, 0.01f);
+            }
+
+            embeddingPicollm.delete();
+        }
+
+        public static float computeSimilarity(float[] x, float[] y) {
+            float sum = 0.0f;
+            for (int i = 0; i < x.length; i++) {
+                sum += x[i] * y[i];
+            }
+
+            return sum;
+        }
+
+        @Test
+        public void testGenerateOCR() throws Exception {
+            JsonObject currentTestData = testData
+                    .getAsJsonObject("generate_ocr");
+
+            int completionTokenLimit = currentTestData
+                    .getAsJsonObject("parameters")
+                    .get("completion-token-limit").getAsInt();
+
+            List<CompletionExpectation> expectations = new Gson().fromJson(
+                    currentTestData.get("expectations"),
+                    new TypeToken<List<CompletionExpectation>>() {
+                    }.getType());
+
+            PicoLLM ocrPicollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(ocrModelPath)
+                    .setDevice(device)
+                    .build();
+
+            PicoLLMCompletion res = ocrPicollm.generateOCR(
+                    smallImage.width,
+                    smallImage.height,
+                    smallImage.data,
+                    new PicoLLMGenerateOCRParams.Builder()
+                            .setCompletionTokenLimit(completionTokenLimit)
+                            .build());
+
+            ocrPicollm.delete();
+
+            verifyOCRCompletion(res, expectations);
         }
 
         @Test
         public void testInterrupt() throws Exception {
+            final PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("default");
@@ -544,10 +773,20 @@ public class PicoLLMTest {
             } finally {
                 executor.shutdown();
             }
+
+            if (picollm != null) {
+                picollm.delete();
+            }
         }
 
         @Test
         public void testTokenize() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             JsonObject currentTestData = testData
                     .getAsJsonObject("picollm")
                     .getAsJsonObject("tokenize");
@@ -565,10 +804,21 @@ public class PicoLLMTest {
                     false);
 
             assertArrayEquals(tokens, expectedTokens);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testForward() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             float[] logits = picollm.forward(79);
 
             assertTrue(logits.length > 0);
@@ -580,23 +830,50 @@ public class PicoLLMTest {
                 sum2 += Math.exp(logit);
             }
             assertEquals(sum1 / sum2, 1.0f, 0.000001);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testReset() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             float[] logits = picollm.forward(79);
 
             picollm.reset();
 
             assertArrayEquals(logits, picollm.forward(79), 0.0f);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
 
         @Test
         public void testGetDialog() throws Exception {
+            PicoLLM picollm = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .build();
+
             PicoLLMDialog dialog = picollm.getDialogBuilder().build();
             assertNotNull(dialog);
             PicoLLMDialog dialog2 = picollm.getDialogBuilder().setMode("chat").build();
             assertNotNull(dialog2);
+
+            if (picollm != null) {
+                picollm.delete();
+                picollm = null;
+            }
         }
     }
 
@@ -675,6 +952,8 @@ public class PicoLLMTest {
             switch (dialogName) {
                 case "gemma-chat-dialog":
                     return new GemmaChatDialog.Builder();
+                case "gemma3-chat-dialog":
+                    return new Gemma3ChatDialog.Builder();
                 case "llama-2-chat-dialog":
                     return new Llama2ChatDialog.Builder();
                 case "llama-3-chat-dialog":

@@ -207,6 +207,7 @@
     ],
     "prompts": {
       "gemma-chat-dialog": "<start_of_turn>user\nHi<end_of_turn>\n<start_of_turn>model\nHey<end_of_turn>\n<start_of_turn>user\nHola<end_of_turn>\n<start_of_turn>model\n¡Oye!<end_of_turn>\n<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
+      "gemma3-chat-dialog": "<start_of_turn>user\nHi<end_of_turn>\n<start_of_turn>model\nHey<end_of_turn>\n<start_of_turn>user\nHola<end_of_turn>\n<start_of_turn>model\n¡Oye!<end_of_turn>\n<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
       "llama-2-chat-dialog": "<s>[INST] Hi [/INST] Hey </s><s>[INST] Hola [/INST] ¡Oye! </s><s>[INST] Salut [/INST]",
       "llama-3-chat-dialog": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nHi<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nHey<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHola<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n¡Oye!<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
       "llama-3.2-chat-dialog": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nHi<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nHey<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHola<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n¡Oye!<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
@@ -218,6 +219,7 @@
     },
     "prompts-with-system": {
       "gemma-chat-dialog": "<start_of_turn>user\nHi<end_of_turn>\n<start_of_turn>model\nHey<end_of_turn>\n<start_of_turn>user\nHola<end_of_turn>\n<start_of_turn>model\n¡Oye!<end_of_turn>\n<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
+      "gemma3-chat-dialog": "<start_of_turn>user\nHi<end_of_turn>\n<start_of_turn>model\nHey<end_of_turn>\n<start_of_turn>user\nHola<end_of_turn>\n<start_of_turn>model\n¡Oye!<end_of_turn>\n<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
       "llama-2-chat-dialog": "<s>[INST] <<SYS>>\nrespond with ❤️ and \uD83E\uDEE1\n<</SYS>>\n\nHi [/INST] Hey </s><s>[INST] Hola [/INST] ¡Oye! </s><s>[INST] Salut [/INST]",
       "llama-3-chat-dialog": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nrespond with ❤️ and \uD83E\uDEE1<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHi<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nHey<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHola<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n¡Oye!<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
       "llama-3.2-chat-dialog": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nrespond with ❤️ and \uD83E\uDEE1<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHi<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nHey<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHola<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n¡Oye!<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
@@ -229,6 +231,7 @@
     },
     "prompts-with-history": {
       "gemma-chat-dialog": "<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
+      "gemma3-chat-dialog": "<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
       "llama-2-chat-dialog": "<s>[INST] Salut [/INST]",
       "llama-3-chat-dialog": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
       "llama-3.2-chat-dialog": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
@@ -240,6 +243,7 @@
     },
     "prompts-with-system-and-history": {
       "gemma-chat-dialog": "<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
+      "gemma3-chat-dialog": "<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
       "llama-2-chat-dialog": "<s>[INST] <<SYS>>\nrespond with ❤️ and \uD83E\uDEE1\n<</SYS>>\n\nSalut [/INST]",
       "llama-3-chat-dialog": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nrespond with ❤️ and \uD83E\uDEE1<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
       "llama-3.2-chat-dialog": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nrespond with ❤️ and \uD83E\uDEE1<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nSalut<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
@@ -249,5 +253,53 @@
       "phi3-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
       "phi3.5-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n"
     }
+  },
+  "generate_with_image": {
+    "image": "test_image.png",
+    "prompt": "Describe this image.",
+    "parameters": {
+      "completion-token-limit": 7
+    },
+    "expectations": [
+      {
+        "num-prompt-tokens": 4,
+        "num-completion-tokens": 7,
+        "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+        "num-top-choices": 0,
+        "completion": "This image is a screenshot of a"
+      }
+    ]
+  },
+  "generate_ocr": {
+    "image": "test_image.png",
+    "parameters": {
+      "completion-token-limit": 7
+    },
+    "expectations": [
+      {
+        "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+        "completion": "# In the news\n\n- **"
+      }
+    ]
+  },
+  "generate_ocr_large": {
+    "image": "test_image_large.png",
+    "parameters": {
+      "completion-token-limit": 7
+    },
+    "expectations": [
+      {
+        "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+        "completion": "# Welcome to Wikipedia\n\n## The"
+      }
+    ]
+  },
+  "generate_embedding": {
+    "prompt": "My name is Tom",
+    "expectations": [
+      {"doc": "I am Tom", "similarity": 0.543474},
+      {"doc": "Her name is Lily", "similarity": 0.449408},
+      {"doc": "This is an experiment", "similarity": 0.275385}
+    ]
   }
 }

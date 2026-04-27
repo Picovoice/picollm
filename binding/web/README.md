@@ -53,9 +53,16 @@ npm install --save @picovoice/picollm-web
 picoLLM Inference Engine on Web supports the following open-weight models. The models are on
 [Picovoice Console](https://console.picovoice.ai/).
 
+- DeepSeek-OCR-2
+  - `deepseek-ocr-2`
+- EmbeddingGemma
+  - `embeddinggemma-300m`
 - Gemma
   - `gemma-2b`
   - `gemma-2b-it`
+- Gemma3
+  - `gemma-3-270m`
+  - `gemma-3-270m-it`
 - Llama-2
   - `llama-2-7b`
   - `llama-2-7b-chat`
@@ -75,6 +82,8 @@ picoLLM Inference Engine on Web supports the following open-weight models. The m
   - `phi3`
 - Phi-3.5
   - `phi3.5`
+- Qwen3-VL
+  - `qwen3-vl-2b-it`
 
 **NOTE**: Only Gemma, Phi-2, and Phi-3 models have been tested on multiple browsers across different platforms.
 The rest of the models depend on the user's system in order to run properly.
@@ -146,7 +155,7 @@ or if the model file is too big (2GB or larger) consider using chunks:
 ```typescript
 const modelFile = [
   new Blob([new Uint8Array(/* model bytes part 1 */)]),
-  new Blob([new Uint8Array(/* model bytes part 2 */)]), 
+  new Blob([new Uint8Array(/* model bytes part 2 */)]),
   ... // add more parts if needed
 ];
 ```
@@ -154,8 +163,8 @@ const modelFile = [
 #### picoLLM Model
 
 `picoLLM` saves and caches your parameter model file (`.pllm`) in IndexedDB to be
-used by Web Assembly. Use a different `cacheFilePath` variable to hold and cache 
-multiple model values and set the `cacheFileOverwrite` value to true to force 
+used by Web Assembly. Use a different `cacheFilePath` variable to hold and cache
+multiple model values and set the `cacheFileOverwrite` value to true to force
 re-save the model file. If the model file changes, `cacheFileVersion` should be
 incremented to force the cached models to be updated. Use `numFetchRetries` to
 change the number of fetch retry attempts for the model file.
@@ -163,7 +172,7 @@ change the number of fetch retry attempts for the model file.
 ```typescript
 const picoLLMModel = {
   modelFile: modelFile, // Based on the sections before,
-  
+
   // Optional
   cacheFilePath: 'custom_model',
   cacheFileOverwrite: true,
@@ -185,7 +194,7 @@ const picoLLM = await PicoLLMWorker.create(
 
 Replace `${ACCESS_KEY}` with yours obtained from Picovoice Console.
 
-### Generate Completion
+### Generate Completion (Text Models)
 
 ```typescript
 const res = await picoLLM.generate(`${PROMPT}`);
@@ -214,7 +223,7 @@ print(res.completion)
 picoLLM.interrupt();
 ```
 
-This will stop text generation and if it was properly interrupted, it will set `res.completion.endpoint` 
+This will stop text generation and if it was properly interrupted, it will set `res.completion.endpoint`
 as an interrupted state.
 
 ### Clean Up
@@ -224,6 +233,53 @@ Clean up used resources by `picoLLM` or `picoLLMWorker`:
 ```typescript
 await picoLLM.release()
 ```
+
+### Vision models
+
+To run a VLM such as `qwen3-vl-2b-it`:
+
+```typescript
+const image: PicoLLMImage = {
+  width: ${IMAGE_NUM_PIXELS_WIDTH},
+  height: ${IMAGE_NUM_PIXELS_HEIGHT},
+  data: ${IMAGE_DATA},
+};
+
+const res = await picoLLM.generateWithImage(`${PROMPT}`, image);
+console.log(res.completion);
+```
+
+Replace `${PROMPT}` with a text prompt. For the image, you will need to get image height and width in number of pixels and the raw pixel values of the image in 8-bit, RGB format.
+
+### OCR models
+
+To run an OCR model such as `deepseek-ocr-2`:
+
+```typescript
+const image: PicoLLMImage = {
+  width: ${IMAGE_NUM_PIXELS_WIDTH},
+  height: ${IMAGE_NUM_PIXELS_HEIGHT},
+  data: ${IMAGE_DATA},
+};
+
+const res = await picoLLM.generateOCR(image);
+console.log(res.completion);
+```
+
+For the image, you will need to get image height and width in number of pixels and the raw pixel values of the image in 8-bit, RGB format.
+
+### Embedding models
+
+To run an embedding model such as `embeddinggemma-300m`:
+
+```typescript
+const res = await picoLLM.generateEmbeddings(`${PROMPT}`, image);
+res.embeddings.forEach(embedding => {
+  console.log(embedding);
+});
+```
+
+Replace `${PROMPT}` with a text prompt that you want to generate embeddings for.
 
 ## Demos
 

@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Picovoice Inc.
+// Copyright 2024-2026 Picovoice Inc.
 //
 // You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
 // file accompanying this source.
@@ -30,6 +30,7 @@ const PLATFORM_RASPBERRY_PI = 'raspberry-pi';
 const PLATFORM_WINDOWS = 'windows';
 
 const ARM_CPU_64 = '-aarch64';
+const ARM_CPU_CORTEX_A53 = 'cortex-a53';
 const ARM_CPU_CORTEX_A72 = 'cortex-a72';
 const ARM_CPU_CORTEX_A76 = 'cortex-a76';
 
@@ -52,6 +53,14 @@ SYSTEM_TO_LIBRARY_PATH.set(
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${X86_64}`,
   `${PLATFORM_LINUX}/x86_64/pv_picollm.node`
+);
+SYSTEM_TO_LIBRARY_PATH.set(
+  `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A53}`,
+  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A53}/pv_picollm.node`
+);
+SYSTEM_TO_LIBRARY_PATH.set(
+  `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A53}${ARM_CPU_64}`,
+  `${PLATFORM_RASPBERRY_PI}/${ARM_CPU_CORTEX_A53}${ARM_CPU_64}/pv_picollm.node`
 );
 SYSTEM_TO_LIBRARY_PATH.set(
   `${SYSTEM_LINUX}/${ARM_CPU_CORTEX_A72}`,
@@ -112,6 +121,8 @@ function getLinuxMachine(arch: string): string {
 
   const cpuPart = getCpuPart();
   switch (cpuPart) {
+    case '0xd03':
+      return ARM_CPU_CORTEX_A53 + archInfo;
     case '0xd08':
       return ARM_CPU_CORTEX_A72 + archInfo;
     case '0xd0b':

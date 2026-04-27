@@ -1,14 +1,16 @@
 {
   "name": "@picovoice/picollm-node-demo",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Picovoice PicoLLM Node.js chat and completion demos",
   "scripts": {
     "chat": "node chat.js",
-    "completion": "node completion.js"
+    "completion": "node completion.js",
+    "ocr": "node ocr.js"
   },
   "bin": {
     "picollm-chat-demo": "./chat.js",
-    "picollm-completion-demo": "./completion.js"
+    "picollm-completion-demo": "./completion.js",
+    "picollm-ocr-demo": "./ocr.js"
   },
   "keywords": [
     "node",
@@ -19,9 +21,10 @@
   "author": "Picovoice Inc.",
   "license": "Apache-2.0",
   "dependencies": {
-    "@picovoice/picollm-node": "2.0.1",
+    "@picovoice/picollm-node": "^2.1.0",
     "commander": "^6.1.0",
-    "prettier": "^2.6.2"
+    "prettier": "^2.6.2",
+    "sharp": "^0.32.6"
   },
   "devDependencies": {},
   "homepage": "https://picovoice.ai/products/picollm/",

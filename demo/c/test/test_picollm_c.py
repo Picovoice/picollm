@@ -102,7 +102,7 @@ class PicoLLMCTestCase(unittest.TestCase):
         self.assertEqual(process.poll(), 0)
         self.assertEqual(stderr.decode('utf-8'), '')
         similarity = stdout.decode('utf-8').strip()
-        self.assertIn("is 0.", similarity)
+        self.assertIn("is 0.543", similarity)
 
 
 if __name__ == '__main__':

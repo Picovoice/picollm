@@ -84,10 +84,6 @@ type PicoLLMResult = {
   status: PvStatus;
 };
 
-// TODO: remove these types above from the picollm.ts file
-// TODO: change the name of the web PicoLLM as well.
-// TODO: ensure we don't accidentally leave any unused functions.
-
 /**
  * Node.js binding for PicoLLM engine.
  *
@@ -487,8 +483,7 @@ export class PicoLLMInternal {
 
     let generateEmbeddingsResult: PicoLLMGenerateEmbeddingsResult | null = null;
     try {
-      // TODO: make this a sync call
-      generateEmbeddingsResult = await this._pvPicoLLM.generate_embeddings(this._handle, prompt);
+      generateEmbeddingsResult = this._pvPicoLLM.generate_embeddings(this._handle, prompt);
     } catch (err: any) {
       throw pvStatusToException(<PvStatus>err.code, err);
     }

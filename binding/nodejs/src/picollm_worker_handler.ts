@@ -9,7 +9,7 @@
 // specific language governing permissions and limitations under the License.
 //
 
-import { parentPort, workerData, MessagePort } from 'node:worker_threads';
+import { parentPort, MessagePort } from 'node:worker_threads';
 
 if (!parentPort) {
   throw new Error("This file must be run as a worker thread");
@@ -157,7 +157,7 @@ const generateOCRRequest = async (
 
 const interruptRequest = async (): Promise<void> => {
   if (picoLLM !== null) {
-    await picoLLM.interrupt();
+    picoLLM.interrupt();
   }
 };
 
@@ -167,7 +167,7 @@ const tokenizeRequest = async (
   if (picoLLM === null) {
     return notInitializedError;
   }
-  const tokens = await picoLLM.tokenize(
+  const tokens = picoLLM.tokenize(
     request.text,
     request.bos,
     request.eos
@@ -184,7 +184,7 @@ const forwardRequest = async (
   if (picoLLM === null) {
     return notInitializedError;
   }
-  const logits = await picoLLM.forward(request.token);
+  const logits = picoLLM.forward(request.token);
   return {
     command: 'ok',
     logits,
@@ -195,7 +195,7 @@ const resetRequest = async (): Promise<any> => {
   if (picoLLM === null) {
     return notInitializedError;
   }
-  await picoLLM.reset();
+  picoLLM.reset();
   return {
     command: 'ok',
   };
@@ -203,7 +203,7 @@ const resetRequest = async (): Promise<any> => {
 
 const releaseRequest = async (): Promise<any> => {
   if (picoLLM !== null) {
-    await picoLLM.release();
+    picoLLM.release();
     picoLLM = null;
   }
   return {

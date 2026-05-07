@@ -122,6 +122,7 @@ export class PicoLLM {
     const worker = new Worker(path.join(__dirname, "picollm_worker_handler.js"));
 
     const returnPromise: Promise<PicoLLM> = new Promise((resolve, reject) => {
+      worker.removeAllListeners("message");
       worker.on("message", (response: PicoLLMWorkerInitResponse): void => {
         switch (response.command) {
           case 'ok':
@@ -134,11 +135,15 @@ export class PicoLLM {
             break;
           case 'failed':
           case 'error':
-            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            PicoLLM.release(worker).then(_ => {
+              reject(pvStatusToException(response.status, response.message, response.messageStack));
+            });
             break;
           default:
-            // @ts-ignore
-            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+            PicoLLM.release(worker).then(_ => {
+              // @ts-ignore
+              reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+            });
         }
       });
     });
@@ -199,6 +204,7 @@ export class PicoLLM {
     } = options;
 
     const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
+      this._worker.removeAllListeners("message");
       this._worker.on("message", (response: PicoLLMWorkerGenerateResponse): void => {
         switch (response.command) {
           case 'ok':
@@ -298,6 +304,7 @@ export class PicoLLM {
     } = options;
 
     const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
+      this._worker.removeAllListeners("message");
       this._worker.on("message", (response: PicoLLMWorkerGenerateWithImageResponse): void => {
         switch (response.command) {
           case 'ok':
@@ -362,6 +369,7 @@ export class PicoLLM {
    */
   async generateEmbeddings(prompt: string): Promise<Float32Array> {
     const returnPromise: Promise<Float32Array> = new Promise((resolve, reject) => {
+      this._worker.removeAllListeners("message");
       this._worker.on("message", (response: PicoLLMWorkerGenerateEmbeddingsResponse): void => {
         switch (response.command) {
           case 'ok':
@@ -417,6 +425,7 @@ export class PicoLLM {
     } = options;
 
     const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
+      this._worker.removeAllListeners("message");
       this._worker.on("message", (response: PicoLLMWorkerGenerateOCRResponse): void => {
         switch (response.command) {
           case 'ok':
@@ -465,6 +474,7 @@ export class PicoLLM {
    */
   async tokenize(text: string, bos: boolean, eos: boolean): Promise<number[]> {
     const returnPromise: Promise<number[]> = new Promise((resolve, reject) => {
+      this._worker.removeAllListeners("message");
       this._worker.on("message", (response: PicoLLMWorkerTokenizeResponse): void => {
         switch (response.command) {
           case 'ok':
@@ -500,6 +510,7 @@ export class PicoLLM {
    */
   async forward(token: number): Promise<number[]> {
     const returnPromise: Promise<number[]> = new Promise((resolve, reject) => {
+      this._worker.removeAllListeners("message");
       this._worker.on("message", (response: PicoLLMWorkerForwardResponse): void => {
         switch (response.command) {
           case 'ok':
@@ -531,6 +542,7 @@ export class PicoLLM {
    */
   async reset(): Promise<void> {
     const returnPromise: Promise<void> = new Promise((resolve, reject) => {
+      this._worker.removeAllListeners("message");
       this._worker.on("message", (response: PicoLLMWorkerResetResponse): void => {
         switch (response.command) {
           case 'ok':
@@ -607,12 +619,18 @@ export class PicoLLM {
    * Releases resources acquired by picoLLM.
    */
   async release(): Promise<void> {
+    return PicoLLM.release(this._worker); 
+  }
+
+  static async release(worker: Worker): Promise<void> {
     const returnPromise: Promise<void> = new Promise((resolve, reject) => {
-      this._worker.on("message", (response: PicoLLMWorkerReleaseResponse): void => {
+      worker.removeAllListeners("message");
+      worker.on("message", (response: PicoLLMWorkerReleaseResponse): void => {
         switch (response.command) {
           case 'ok':
-            this._worker.terminate();
-            resolve();
+            worker.terminate().then(_ => {
+              resolve();
+            });
             break;
           case 'failed':
           case 'error':
@@ -625,7 +643,7 @@ export class PicoLLM {
       });
     });
 
-    this._worker.postMessage({
+    worker.postMessage({
       command: 'release',
     });
 

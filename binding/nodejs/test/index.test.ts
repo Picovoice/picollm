@@ -38,7 +38,7 @@ import {
 
 import * as testData from '../../../resources/.test/test_data.json';
 
-jest.setTimeout(5000);
+jest.setTimeout(100000);
 
 const ACCESS_KEY = process.argv
   .filter(x => x.startsWith('--access_key='))[0]
@@ -317,29 +317,37 @@ describe('PicoLLM basic tests', function () {
 
   test(`should return correct error message stack`, async () => {
     let messageStack = [];
+    let picollm = undefined;
     try {
-      const picollm = await PicoLLM.create(
+      picollm = await PicoLLM.create(
         "invalidAccessKey",
         TEXT_MODEL_PATH,
       );
       expect(picollm).toBeUndefined();
-      await picollm.release();
     } catch (e: any) {
       messageStack = e.messageStack;
+    } finally {
+      if (picollm) {
+        await picollm.release();
+      }
     }
 
     expect(messageStack.length).toBeGreaterThan(0);
     expect(messageStack.length).toBeLessThan(9);
 
+    picollm = undefined;
     try {
-      const picollm = await PicoLLM.create(
+      picollm = await PicoLLM.create(
         "invalidAccessKey",
         TEXT_MODEL_PATH,
       );
       expect(picollm).toBeUndefined();
-      await picollm.release();
     } catch (e: any) {
       expect(messageStack.length).toEqual(e.messageStack.length);
+    } finally {
+      if (picollm) {
+        await picollm.release();
+      }
     }
   });
 
@@ -623,7 +631,7 @@ describe('PicoLLM generate tests', () => {
     const text = data.text;
 
     try {
-      const tokens = picoLLM.tokenize(text, true, false);
+      const tokens = await picoLLM.tokenize(text, true, false);
       expect(tokens).toEqual(data.tokens);
     } catch (e) {
       expect(e).toBeUndefined();

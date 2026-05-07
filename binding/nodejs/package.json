@@ -10,7 +10,7 @@
     "build:types": "tsc --declaration --declarationMap --emitDeclarationOnly --outDir ./dist/types",
     "prepack": "npm run build",
     "prepare": "node copy.js",
-    "test": "rm dist -rf && tsc -p tsconfig-test.json && cp test/*.pllm dist/binding/nodejs/test/ && cp -r lib dist/binding/nodejs/ && jest --config jest-test.config.js --no-cache --detectOpenHandles",
+    "test": "bash test.sh",
     "lint": "eslint . --ext .js,.ts"
   },
   "repository": {

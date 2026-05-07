@@ -1,47 +1,49 @@
-/*
-  Copyright 2024-2026 Picovoice Inc.
+//
+// Copyright 2026 Picovoice Inc.
+//
+// You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
+// file accompanying this source.
+//
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+// an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+//
 
-  You may not use this file except in compliance with the license. A copy of the license is located in the "LICENSE"
-  file accompanying this source.
+import { parentPort, workerData, MessagePort } from 'node:worker_threads';
 
-  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-  an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-  specific language governing permissions and limitations under the License.
-*/
+if (!parentPort) {
+  throw new Error("This file must be run as a worker thread");
+}
 
-/// <reference no-default-lib="false"/>
-/// <reference lib="webworker" />
+const parent : MessagePort = parentPort;
 
-import { PicoLLM } from './picollm';
+import { PicoLLMInternal } from './picollm_internal';
 import {
   PicoLLMWorkerFailureResponse,
   PicoLLMWorkerForwardRequest,
   PicoLLMWorkerGenerateRequest,
   PicoLLMWorkerGenerateEmbeddingsRequest,
   PicoLLMWorkerGenerateOCRRequest,
-  PicoLLMWorkerInterruptRequest,
   PicoLLMWorkerInitRequest,
   PicoLLMWorkerRequest,
   PicoLLMWorkerTokenizeRequest,
-  PicoLLMImage,
-  PicoLLMGenerateWithImageOptions,
   PicoLLMWorkerGenerateWithImageRequest,
   PicoLLMWorkerResponse,
-  PvStatus,
 } from './types';
-import { PicoLLMError } from './picollm_errors';
+import PvStatus from './pv_status_t';
+import { PicoLLMInternalError } from './errors';
 
-let picoLLM: PicoLLM | null = null;
+let picoLLM: PicoLLMInternal | null = null;
 
-const streamingCallback = (token: string): void => {
-  self.postMessage({
+const streamCallback = (token: string): void => {
+  parent.postMessage({
     command: 'stream',
     token: token,
   });
 };
 
 const promptProgressCallback = (progress: number): void => {
-  self.postMessage({
+  parent.postMessage({
     command: 'progress',
     progress: progress,
   });
@@ -50,45 +52,43 @@ const promptProgressCallback = (progress: number): void => {
 const notInitializedError: PicoLLMWorkerFailureResponse = {
   command: 'error',
   status: PvStatus.INVALID_STATE,
-  shortMessage: 'picoLLM not initialized',
+  message: 'picoLLM not initialized',
   messageStack: [],
 };
 
 const checkError = (e: any): PicoLLMWorkerFailureResponse => {
-  if (e instanceof PicoLLMError) {
+  if (e instanceof PicoLLMInternalError) {
     return {
       command: 'error',
       status: e.status,
-      shortMessage: e.shortMessage,
+      message: e.message,
       messageStack: e.messageStack,
     };
   }
   return {
     command: 'error',
     status: PvStatus.RUNTIME_ERROR,
-    shortMessage: e.message,
+    message: e.message,
     messageStack: [],
   };
 };
 
-const initRequest = async (request: PicoLLMWorkerInitRequest): Promise<PicoLLMWorkerResponse> => {
+const initRequest = (request: PicoLLMWorkerInitRequest): PicoLLMWorkerResponse => {
   if (picoLLM !== null) {
     return {
       command: 'error',
       status: PvStatus.INVALID_STATE,
-      shortMessage: 'picoLLM already initialized',
+      message: 'picoLLM already initialized',
       messageStack: [],
     };
   }
 
-  PicoLLM.setWasmPThread(request.wasmPThread);
-  PicoLLM.setWasmPThreadLib(request.wasmPThreadLib);
-  PicoLLM.setSdk(request.sdk);
-  picoLLM = await PicoLLM._init(
+  picoLLM = new PicoLLMInternal(
     request.accessKey,
     request.modelPath,
     request.options
   );
+
   return {
     command: 'ok',
     contextLength: picoLLM.contextLength,
@@ -104,7 +104,7 @@ const generateRequest = async (
   if (picoLLM === null) {
     return notInitializedError;
   }
-  request.options.streamCallback = streamingCallback;
+  request.options.streamCallback = streamCallback;
   const completion = await picoLLM.generate(request.prompt, request.options);
   return {
     command: 'ok',
@@ -118,7 +118,7 @@ const generateWithImageRequest = async (
   if (picoLLM === null) {
     return notInitializedError;
   }
-  request.options.streamCallback = streamingCallback;
+  request.options.streamCallback = streamCallback;
   request.options.promptProgressCallback = promptProgressCallback;
   const completion = await picoLLM.generateWithImage(request.prompt, request.image, request.options);
   return {
@@ -146,7 +146,7 @@ const generateOCRRequest = async (
   if (picoLLM === null) {
     return notInitializedError;
   }
-  request.options.streamCallback = streamingCallback;
+  request.options.streamCallback = streamCallback;
   request.options.promptProgressCallback = promptProgressCallback;
   const completion = await picoLLM.generateOCR(request.image, request.options);
   return {
@@ -205,7 +205,6 @@ const releaseRequest = async (): Promise<any> => {
   if (picoLLM !== null) {
     await picoLLM.release();
     picoLLM = null;
-    close();
   }
   return {
     command: 'ok',
@@ -215,49 +214,51 @@ const releaseRequest = async (): Promise<any> => {
 /**
  * picoLLM worker handler.
  */
-self.onmessage = async function (
-  event: MessageEvent<PicoLLMWorkerRequest>
-): Promise<void> {
-  try {
-    switch (event.data.command) {
+parent.on('message',
+  async function (
+    event: PicoLLMWorkerRequest
+  ): Promise<void> {
+    try {
+      switch (event.command) {
       case 'init':
-        self.postMessage(await initRequest(event.data));
+        parent.postMessage(initRequest(event));
         break;
       case 'generate':
-        self.postMessage(await generateRequest(event.data));
+        parent.postMessage(await generateRequest(event));
         break;
       case 'generateWithImage':
-        self.postMessage(await generateWithImageRequest(event.data));
+        parent.postMessage(await generateWithImageRequest(event));
         break;
       case 'generateEmbeddings':
-        self.postMessage(await generateEmbeddingsRequest(event.data));
+        parent.postMessage(await generateEmbeddingsRequest(event));
         break;
       case 'generateOCR':
-        self.postMessage(await generateOCRRequest(event.data));
+        parent.postMessage(await generateOCRRequest(event));
         break;
       case 'interrupt':
         await interruptRequest();
         break;
       case 'tokenize':
-        self.postMessage(await tokenizeRequest(event.data));
+        parent.postMessage(await tokenizeRequest(event));
         break;
       case 'forward':
-        self.postMessage(await forwardRequest(event.data));
+        parent.postMessage(await forwardRequest(event));
         break;
       case 'reset':
-        self.postMessage(await resetRequest());
+        parent.postMessage(await resetRequest());
         break;
       case 'release':
-        self.postMessage(await releaseRequest());
+        parent.postMessage(await releaseRequest());
         break;
       default:
-        self.postMessage({
+        parent.postMessage({
           command: 'failed',
           // @ts-ignore
-          message: `Unrecognized command: ${event.data.command}`,
+          message: `Unrecognized command: ${event.command}`,
         });
+      }
+    } catch (error: any) {
+      parent.postMessage(checkError(error));
     }
-  } catch (error: any) {
-    self.postMessage(checkError(error));
   }
-};
+);

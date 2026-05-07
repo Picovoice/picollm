@@ -5,3 +5,8 @@ package-lock.json
 dist
 yarn-error.log
 test/phi2-290.pllm
+
+test/*.js
+test/*.js.map
+src/*.js
+src/*.js.map

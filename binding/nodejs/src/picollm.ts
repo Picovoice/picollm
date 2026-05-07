@@ -9,12 +9,11 @@
 // specific language governing permissions and limitations under the License.
 //
 
-import * as fs from 'fs';
+import { Worker } from 'node:worker_threads';
+import path from 'path';
 
 import PvStatus from './pv_status_t';
 import {
-  PicoLLMInvalidArgumentError,
-  PicoLLMInvalidStateError,
   PicoLLMRuntimeError,
   pvStatusToException,
 } from './errors';
@@ -28,153 +27,40 @@ import {
   PicoLLMImage,
   PicoLLMInputOptions,
   PicoLLMOptions,
+
+  PicoLLMWorkerInitResponse,
+  PicoLLMWorkerGenerateResponse,
+  PicoLLMWorkerGenerateWithImageResponse,
+  PicoLLMWorkerGenerateEmbeddingsResponse,
+  PicoLLMWorkerGenerateOCRResponse,
+  PicoLLMWorkerTokenizeResponse,
+  PicoLLMWorkerForwardResponse,
+  PicoLLMWorkerResetResponse,
+  PicoLLMWorkerReleaseResponse,
 } from './types';
 
 import { getSystemLibraryPath } from './platforms';
 
-type PicoLLMInitResult = {
-  handle: any;
-  status: PvStatus
-};
-type PicoLLMGenerateResult = {
-  completion: {
-    usage: {
-      prompt_tokens: number;
-      completion_tokens: number;
-    };
-    endpoint: number;
-    completion_tokens: {
-      token: {
-        token: string;
-        log_prob: number;
-      }
-      top_choices: {
-        token: string;
-        log_prob: number;
-      }[];
-    }[] | null;
-    completion: string;
-  };
-  status: PvStatus;
-};
-type PicoLLMGenerateOCRResult = {
-  completion: {
-    endpoint: number;
-    completion: string;
-  };
-  status: PvStatus;
-};
-type PicoLLMGenerateEmbeddingsResult = {
-  embeddings: Float32Array;
-};
-type PicoLLMTokenizeResult = {
-  tokens: number[];
-  status: PvStatus;
-};
-type PicoLLMForwardResult = {
-  logits: number[];
-  status: PvStatus;
-};
-type PicoLLMModelResult = {
-  model: string;
-  status: PvStatus;
-};
-type PicoLLMContextLengthResult = {
-  context_length: number;
-  status: PvStatus;
-};
-type PicoLLMHardwareDevicesResult = {
-  hardware_devices: string[];
-  status: PvStatus;
-};
-type PicoLLMResult = {
-  status: PvStatus;
-};
-
 /**
  * Node.js binding for PicoLLM engine.
  *
- * Performs the calls to the PicoLLM node library. Does some basic parameter validation to prevent
- * errors occurring in the library layer. Provides clearer error messages in native JavaScript.
+ * Performs calls to the PicoLLM node library by messaging a worker thread. The Worker thread does some basic parameter
+ * validation which prevents errors occurring in the library layer. Provides clearer error messages in native JavaScript.
  */
 export class PicoLLM {
-  private _pvPicoLLM: any;
-
-  private _handle: any;
+  private readonly _worker: Worker;
 
   private readonly _contextLength: number;
   private readonly _maxTopChoices: number;
   private readonly _model: string;
   private readonly _version: string;
 
-  /**
-   * Creates an instance of picoLLM.
-   *
-   * @param accessKey AccessKey obtained from Picovoice Console (https://console.picovoice.ai/)
-   * @param modelPath Absolute path to the file containing LLM parameters.
-   * @param options Optional init configuration arguments, see PicoLLMInitOptions for details.
-   * @param options.device String representation of the device (e.g., CPU or GPU) to use for inference. If set to `best`,
-   * picoLLM picks the most suitable device. If set to `gpu`, the engine uses the first available GPU device. To
-   * select a specific GPU device, set this argument to `gpu:${GPU_INDEX}`, where `${GPU_INDEX}` is the index of the
-   * target GPU. If set to `cpu`, the engine will run on the CPU with the default number of threads. To specify the
-   * number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of
-   * threads.
-   * @param options.libraryPath Absolute path to picoLLM's dynamic library.
-   *
-   * @returns An instance of the PicoLLM.
-   */
-  constructor(accessKey: string, modelPath: string, options: PicoLLMOptions = {}) {
-    if (
-      accessKey === null ||
-      accessKey === undefined ||
-      accessKey.length === 0
-    ) {
-      throw new PicoLLMInvalidArgumentError(`No AccessKey provided to PicoLLM`);
-    }
-
-    const {
-      libraryPath = getSystemLibraryPath(),
-      device = "best",
-    } = options;
-
-    if (!fs.existsSync(libraryPath)) {
-      throw new PicoLLMInvalidArgumentError(
-        `File not found at 'libraryPath': ${libraryPath}`
-      );
-    }
-
-    if (!fs.existsSync(modelPath)) {
-      throw new PicoLLMInvalidArgumentError(
-        `File not found at 'modelPath': ${modelPath}`
-      );
-    }
-
-    const pvPicoLLM = require(libraryPath); // eslint-disable-line
-    this._pvPicoLLM = pvPicoLLM;
-
-    let picoLLMInitResult: PicoLLMInitResult | null = null;
-    try {
-      pvPicoLLM.set_sdk('nodejs');
-
-      picoLLMInitResult = pvPicoLLM.init(
-        accessKey,
-        modelPath,
-        device
-      );
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
-
-    const status = picoLLMInitResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to initialize');
-    }
-
-    this._handle = picoLLMInitResult!.handle;
-    this._contextLength = this.getContextLength();
-    this._maxTopChoices = pvPicoLLM.max_top_choices();
-    this._model = this.getModel();
-    this._version = pvPicoLLM.version();
+  private constructor(worker: Worker, contextLength: number, maxTopChoices: number, model: string, version: string) {
+    this._worker = worker;
+    this._contextLength = contextLength;
+    this._maxTopChoices = maxTopChoices;
+    this._model = model;
+    this._version = version;
   }
 
   /**
@@ -203,6 +89,68 @@ export class PicoLLM {
    */
   get version(): string {
     return this._version;
+  }
+
+  /**
+   * Get PicoLLM worker instance.
+   */
+  get worker(): Worker {
+    return this._worker;
+  }
+
+  /**
+   * Creates an instance of picoLLM.
+   *
+   * @param accessKey AccessKey obtained from Picovoice Console (https://console.picovoice.ai/)
+   * @param modelPath Absolute path to the file containing LLM parameters.
+   * @param options Optional init configuration arguments, see PicoLLMInitOptions for details.
+   * @param options.device String representation of the device (e.g., CPU or GPU) to use for inference. If set to `best`,
+   * picoLLM picks the most suitable device. If set to `gpu`, the engine uses the first available GPU device. To
+   * select a specific GPU device, set this argument to `gpu:${GPU_INDEX}`, where `${GPU_INDEX}` is the index of the
+   * target GPU. If set to `cpu`, the engine will run on the CPU with the default number of threads. To specify the
+   * number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of
+   * threads.
+   * @param options.libraryPath Absolute path to picoLLM's dynamic library.
+   *
+   * @returns An instance of the PicoLLM.
+   */
+  public static async create(
+      accessKey: string,
+      modelPath: string,
+      options: PicoLLMOptions = {}
+  ): Promise<PicoLLM> {
+    const worker = new Worker(path.join(__dirname, "picollm_worker_handler.js"));
+
+    const returnPromise: Promise<PicoLLM> = new Promise((resolve, reject) => {
+      worker.on("message", (response: PicoLLMWorkerInitResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            resolve(new PicoLLM(
+              worker,
+              response.contextLength,
+              response.maxTopChoices,
+              response.model,
+              response.version));
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
+
+    worker.postMessage({
+      command: 'init',
+      accessKey: accessKey,
+      modelPath: modelPath,
+      options: options
+    });
+
+    return returnPromise;
   }
 
   /**
@@ -238,79 +186,56 @@ export class PicoLLM {
    * @returns Completion result.
    */
   async generate(prompt: string, options: PicoLLMGenerateOptions = {}): Promise<PicoLLMCompletion> {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
-
     const {
       completionTokenLimit = -1,
-      stopPhrases = null,
+      stopPhrases = [],
       seed = -1,
-      presencePenalty = 0.0,
-      frequencyPenalty = 0.0,
-      temperature = 0.0,
+      presencePenalty = 0,
+      frequencyPenalty = 0,
+      temperature = 0,
       topP = 1,
       numTopChoices = 0,
-      streamCallback = null,
+      streamCallback,
     } = options;
 
-    const numStopPhrases = (stopPhrases !== null) ? stopPhrases.length : 0;
+    const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
+      this._worker.on("message", (response: PicoLLMWorkerGenerateResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            resolve(response.completion);
+            break;
+          case 'stream':
+            if (streamCallback) {
+              streamCallback(response.token);
+            }
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
 
-    if (prompt === undefined || prompt === null) {
-      throw new PicoLLMInvalidArgumentError(
-        `prompt provided to 'PicoLLM.generate()' is undefined or null`
-      );
-    }
-
-    let picollmGenerateResult: PicoLLMGenerateResult | null = null;
-    try {
-      picollmGenerateResult = await this._pvPicoLLM.generate(
-        this._handle,
-        prompt,
+    this._worker.postMessage({
+      command: 'generate',
+      prompt,
+      options: {
         completionTokenLimit,
         stopPhrases,
-        numStopPhrases,
         seed,
         presencePenalty,
         frequencyPenalty,
         temperature,
         topP,
         numTopChoices,
-        streamCallback);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
+      }
+    });
 
-    const status = picollmGenerateResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate');
-    }
-
-    const completion = picollmGenerateResult!.completion;
-    const completionTokens = completion.completion_tokens!.map(x => ({
-      token: {
-        token: x.token.token,
-        logProb: x.token.log_prob
-      },
-      topChoices: x.top_choices.map(t => ({
-        token: t.token,
-        logProb: t.log_prob,
-      })),
-    }));
-
-    return {
-      usage: {
-        promptTokens: completion.usage.prompt_tokens,
-        completionTokens: completion.usage.completion_tokens!,
-      },
-      endpoint: completion.endpoint,
-      completionTokens: completionTokens,
-      completion: completion.completion
-    };
+    return returnPromise;
   }
 
   /**
@@ -359,109 +284,72 @@ export class PicoLLM {
     image: PicoLLMImage,
     options: PicoLLMGenerateWithImageOptions = {}
   ): Promise<PicoLLMCompletion> {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
-
     const {
       completionTokenLimit = -1,
-      stopPhrases = null,
+      stopPhrases = [],
       seed = -1,
-      presencePenalty = 0.0,
-      frequencyPenalty = 0.0,
-      temperature = 0.0,
+      presencePenalty = 0,
+      frequencyPenalty = 0,
+      temperature = 0,
       topP = 1,
       numTopChoices = 0,
-      streamCallback = null,
-      promptProgressCallback = null,
+      streamCallback,
+      promptProgressCallback
     } = options;
 
-    const numStopPhrases = (stopPhrases !== null) ? stopPhrases.length : 0;
+    const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
+      this._worker.on("message", (response: PicoLLMWorkerGenerateWithImageResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            resolve(response.completion);
+            break;
+          case 'stream':
+            if (streamCallback) {
+              streamCallback(response.token);
+            }
+            break;
+          case 'progress':
+            if (promptProgressCallback) {
+              promptProgressCallback(response.progress);
+            }
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
 
-    if (prompt === undefined || prompt === null) {
-      throw new PicoLLMInvalidArgumentError(
-        `prompt provided to 'PicoLLM.generateWithImage()' is undefined or null`
-      );
-    }
-
-    let picollmGenerateResult: PicoLLMGenerateResult | null = null;
-    try {
-      picollmGenerateResult = await this._pvPicoLLM.generate_with_image(
-        this._handle,
-        prompt,
-        image.width,
-        image.height,
-        image.data,
+    this._worker.postMessage({
+      command: 'generateWithImage',
+      prompt,
+      image,
+      options: {
         completionTokenLimit,
         stopPhrases,
-        numStopPhrases,
         seed,
         presencePenalty,
         frequencyPenalty,
         temperature,
         topP,
         numTopChoices,
-        streamCallback,
-        promptProgressCallback);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
+      }
+    });
 
-    const status = picollmGenerateResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate with image');
-    }
-
-    const completion = picollmGenerateResult!.completion;
-    const completionTokens = completion.completion_tokens!.map(x => ({
-      token: {
-        token: x.token.token,
-        logProb: x.token.log_prob
-      },
-      topChoices: x.top_choices.map(t => ({
-        token: t.token,
-        logProb: t.log_prob,
-      })),
-    }));
-
-    return {
-      usage: {
-        promptTokens: completion.usage.prompt_tokens,
-        completionTokens: completion.usage.completion_tokens,
-      },
-      endpoint: completion.endpoint,
-      completionTokens: completionTokens,
-      completion: completion.completion
-    };
+    return returnPromise;
   }
 
   /**
    * Interrupts `generate()` and `generateWithImage()` if generation is in progress. Otherwise, it has no effect.
    */
   interrupt(): void {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
-
-    let picollmInterruptResult: PicoLLMResult | null = null;
-    try {
-      picollmInterruptResult = this._pvPicoLLM.interrupt(this._handle);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
-
-    const status = picollmInterruptResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to interrupt');
-    }
+    this._worker.postMessage({
+      command: 'interrupt',
+    });
   }
 
   /**
@@ -473,32 +361,29 @@ export class PicoLLM {
    * @returns Generated embeddings.
    */
   async generateEmbeddings(prompt: string): Promise<Float32Array> {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
+    const returnPromise: Promise<Float32Array> = new Promise((resolve, reject) => {
+      this._worker.on("message", (response: PicoLLMWorkerGenerateEmbeddingsResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            resolve(response.embeddings);
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
 
-    if (prompt === undefined || prompt === null) {
-      throw new PicoLLMInvalidArgumentError(
-        `prompt provided to 'PicoLLM.generateEmbeddings()' is undefined or null`
-      );
-    }
+    this._worker.postMessage({
+      command: 'generateEmbeddings',
+      prompt
+    });
 
-    let generateEmbeddingsResult: PicoLLMGenerateEmbeddingsResult | null = null;
-    try {
-      generateEmbeddingsResult = await this._pvPicoLLM.generate_embeddings(this._handle, prompt);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
-
-    if (generateEmbeddingsResult === null) {
-      this.handlePvStatusOptionalStack(PvStatus.RUNTIME_ERROR, 'PicoLLM failed to generate embeddings');
-    }
-
-    return generateEmbeddingsResult!.embeddings;
+    return returnPromise;
   }
 
   /**
@@ -525,43 +410,48 @@ export class PicoLLM {
     image: PicoLLMImage,
     options: PicoLLMGenerateOCROptions = {}
   ): Promise<PicoLLMCompletion> {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
-
     const {
       completionTokenLimit = -1,
-      streamCallback = null,
-      promptProgressCallback = null,
+      streamCallback,
+      promptProgressCallback
     } = options;
 
-    let picollmGenerateOCRResult: PicoLLMGenerateOCRResult | null = null;
-    try {
-      picollmGenerateOCRResult = await this._pvPicoLLM.generate_ocr(
-        this._handle,
-        image.width,
-        image.height,
-        image.data,
+    const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
+      this._worker.on("message", (response: PicoLLMWorkerGenerateOCRResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            resolve(response.completion);
+            break;
+          case 'stream':
+            if (streamCallback) {
+              streamCallback(response.token);
+            }
+            break;
+          case 'progress':
+            if (promptProgressCallback) {
+              promptProgressCallback(response.progress);
+            }
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
+
+    this._worker.postMessage({
+      command: 'generateOCR',
+      image,
+      options: {
         completionTokenLimit,
-        streamCallback,
-        promptProgressCallback);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
+      }
+    });
 
-    const status = picollmGenerateOCRResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate OCR');
-    }
-
-    return {
-      endpoint: picollmGenerateOCRResult!.completion.endpoint,
-      completion: picollmGenerateOCRResult!.completion.completion
-    };
+    return returnPromise;
   }
 
   /**
@@ -573,38 +463,32 @@ export class PicoLLM {
    * @param eos If set to `True`, the tokenizer appends the end of the sentence token to the result.
    * @returns Tokens representing the input text.
    */
-  tokenize(text: string, bos: boolean, eos: boolean): number[] {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
+  async tokenize(text: string, bos: boolean, eos: boolean): Promise<number[]> {
+    const returnPromise: Promise<number[]> = new Promise((resolve, reject) => {
+      this._worker.on("message", (response: PicoLLMWorkerTokenizeResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            resolve(response.tokens);
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
 
-    if (text === undefined || text === null) {
-      throw new PicoLLMInvalidArgumentError(
-        `text provided to 'PicoLLM.tokenize()' is undefined or null`
-      );
-    }
+    this._worker.postMessage({
+      command: 'tokenize',
+      text,
+      bos,
+      eos,
+    });
 
-    let picollmTokenizeResult: PicoLLMTokenizeResult | null = null;
-    try {
-      picollmTokenizeResult = this._pvPicoLLM.tokenize(
-        this._handle,
-        text,
-        bos,
-        eos);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
-
-    const status = picollmTokenizeResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to tokenize');
-    }
-
-    return picollmTokenizeResult!.tokens;
+    return returnPromise;
   }
 
   /**
@@ -614,28 +498,30 @@ export class PicoLLM {
    * @param token Input token.
    * @returns Logits.
    */
-  forward(token: number): number[] {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
+  async forward(token: number): Promise<number[]> {
+    const returnPromise: Promise<number[]> = new Promise((resolve, reject) => {
+      this._worker.on("message", (response: PicoLLMWorkerForwardResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            resolve(response.logits);
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
 
-    let picollmForwardResult: PicoLLMForwardResult | null = null;
-    try {
-      picollmForwardResult = this._pvPicoLLM.forward(this._handle, token);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
+    this._worker.postMessage({
+      command: 'forward',
+      token,
+    });
 
-    const status = picollmForwardResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to forward');
-    }
-
-    return picollmForwardResult!.logits;
+    return returnPromise;
   }
 
   /**
@@ -643,26 +529,29 @@ export class PicoLLM {
    * sequence of tokens. This is a low-level function for benchmarking and advanced usage. `.generate()` should be
    * used when possible.
    */
-  reset(): void {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
+  async reset(): Promise<void> {
+    const returnPromise: Promise<void> = new Promise((resolve, reject) => {
+      this._worker.on("message", (response: PicoLLMWorkerResetResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            resolve();
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
 
-    let picollmResetResult: PicoLLMResult | null = null;
-    try {
-      picollmResetResult = this._pvPicoLLM.reset(this._handle);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
+    this._worker.postMessage({
+      command: 'reset',
+    });
 
-    const status = picollmResetResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to reset');
-    }
+    return returnPromise;
   }
 
   /**
@@ -677,14 +566,6 @@ export class PicoLLM {
    * @returns Constructed dialog object.
    */
   getDialog(mode?: string, history: number = 0, system?: string): Dialog {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
-
     const model = this._model.split(' ')[0].toLowerCase();
     if (model && DIALOGS[model] === undefined) {
       throw new PicoLLMRuntimeError(
@@ -725,18 +606,30 @@ export class PicoLLM {
   /**
    * Releases resources acquired by picoLLM.
    */
-  release(): void {
-    if (this._handle !== 0) {
-      try {
-        this._pvPicoLLM.delete(this._handle);
-      } catch (err: any) {
-        pvStatusToException(<PvStatus>err.code, err);
-      }
-      this._handle = 0;
-    } else {
-      // eslint-disable-next-line no-console
-      console.warn('PicoLLM is not initialized');
-    }
+  async release(): Promise<void> {
+    const returnPromise: Promise<void> = new Promise((resolve, reject) => {
+      this._worker.on("message", (response: PicoLLMWorkerReleaseResponse): void => {
+        switch (response.command) {
+          case 'ok':
+            this._worker.terminate();
+            resolve();
+            break;
+          case 'failed':
+          case 'error':
+            reject(pvStatusToException(response.status, response.message, response.messageStack));
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${response.command}`));
+        }
+      });
+    });
+
+    this._worker.postMessage({
+      command: 'release',
+    });
+
+    return returnPromise;
   }
 
   /**
@@ -751,6 +644,11 @@ export class PicoLLM {
     } = options;
 
     const pvPicoLLM = require(libraryPath); // eslint-disable-line
+
+    type PicoLLMHardwareDevicesResult = {
+      hardware_devices: string[];
+      status: PvStatus;
+    };
 
     let picollmHardwareDevicesResult: PicoLLMHardwareDevicesResult | null = null;
     try {
@@ -770,71 +668,5 @@ export class PicoLLM {
     }
 
     return picollmHardwareDevicesResult!.hardware_devices;
-  }
-
-  private getContextLength(): number {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
-
-    let picollmContextLengthResult: PicoLLMContextLengthResult | null = null;
-    try {
-      picollmContextLengthResult = this._pvPicoLLM.context_length(this._handle);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
-
-    const status = picollmContextLengthResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to get model');
-    }
-
-    return picollmContextLengthResult!.context_length;
-  }
-
-  private getModel(): string {
-    if (
-      this._handle === 0 ||
-      this._handle === null ||
-      this._handle === undefined
-    ) {
-      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
-    }
-
-    let picollmModelResult: PicoLLMModelResult | null = null;
-    try {
-      picollmModelResult = this._pvPicoLLM.model(this._handle);
-    } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
-    }
-
-    const status = picollmModelResult!.status;
-    if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatus(status, 'PicoLLM failed to get model');
-    }
-
-    return picollmModelResult!.model;
-  }
-
-  private handlePvStatus(status: PvStatus, message: string): void {
-    const errorObject = this._pvPicoLLM.get_error_stack();
-    if (errorObject.status === PvStatus.SUCCESS) {
-      pvStatusToException(status, message, errorObject.message_stack);
-    } else {
-      pvStatusToException(status, 'Unable to get PicoLLM error state');
-    }
-  }
-
-  private handlePvStatusOptionalStack(status: PvStatus, message: string): void {
-    const errorObject = this._pvPicoLLM.get_error_stack();
-    if (errorObject.status === PvStatus.SUCCESS) {
-      pvStatusToException(status, message, errorObject.message_stack);
-    } else {
-      pvStatusToException(status, message, []);
-    }
   }
 }

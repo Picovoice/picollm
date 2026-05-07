@@ -59,39 +59,52 @@ export class PicoLLMActivationLimitReachedError extends PicoLLMError {}
 export class PicoLLMActivationThrottledError extends PicoLLMError {}
 export class PicoLLMActivationRefusedError extends PicoLLMError {}
 
+// TODO: update all references to this throw the return value if it makes sense
 export function pvStatusToException(
   pvStatus: PvStatus | string,
   errorMessage: string,
   messageStack: string[] = []
-): void {
+): PicoLLMError {
   const status = (typeof pvStatus === "string") ? PvStatus[pvStatus as any] : pvStatus;
 
   switch (status) {
     case PvStatus.OUT_OF_MEMORY:
-      throw new PicoLLMOutOfMemoryError(errorMessage, messageStack);
+      return new PicoLLMOutOfMemoryError(errorMessage, messageStack);
     case PvStatus.IO_ERROR:
-      throw new PicoLLMIOError(errorMessage, messageStack);
+      return new PicoLLMIOError(errorMessage, messageStack);
     case PvStatus.INVALID_ARGUMENT:
-      throw new PicoLLMInvalidArgumentError(errorMessage, messageStack);
+      return new PicoLLMInvalidArgumentError(errorMessage, messageStack);
     case PvStatus.STOP_ITERATION:
-      throw new PicoLLMStopIterationError(errorMessage, messageStack);
+      return new PicoLLMStopIterationError(errorMessage, messageStack);
     case PvStatus.KEY_ERROR:
-      throw new PicoLLMKeyError(errorMessage, messageStack);
+      return new PicoLLMKeyError(errorMessage, messageStack);
     case PvStatus.INVALID_STATE:
-      throw new PicoLLMInvalidStateError(errorMessage, messageStack);
+      return new PicoLLMInvalidStateError(errorMessage, messageStack);
     case PvStatus.RUNTIME_ERROR:
-      throw new PicoLLMRuntimeError(errorMessage, messageStack);
+      return new PicoLLMRuntimeError(errorMessage, messageStack);
     case PvStatus.ACTIVATION_ERROR:
-      throw new PicoLLMActivationError(errorMessage, messageStack);
+      return new PicoLLMActivationError(errorMessage, messageStack);
     case PvStatus.ACTIVATION_LIMIT_REACHED:
-      throw new PicoLLMActivationLimitReachedError(errorMessage, messageStack);
+      return new PicoLLMActivationLimitReachedError(errorMessage, messageStack);
     case PvStatus.ACTIVATION_THROTTLED:
-      throw new PicoLLMActivationThrottledError(errorMessage, messageStack);
+      return new PicoLLMActivationThrottledError(errorMessage, messageStack);
     case PvStatus.ACTIVATION_REFUSED:
-      throw new PicoLLMActivationRefusedError(errorMessage, messageStack);
+      return new PicoLLMActivationRefusedError(errorMessage, messageStack);
     default:
       // eslint-disable-next-line no-console
       console.warn(`Unmapped error code: ${status}`);
-      throw new PicoLLMError(errorMessage);
+      return new PicoLLMError(errorMessage);
   }
 }
+
+export class PicoLLMInternalError {
+  status: PvStatus;
+  message: string;
+  messageStack: string[];
+
+  constructor(status: PvStatus, message: string, messageStack: string[]) {
+    this.status = status;
+    this.message = message;
+    this.messageStack = messageStack;
+  }
+};

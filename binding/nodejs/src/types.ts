@@ -9,6 +9,8 @@
 // specific language governing permissions and limitations under the License.
 //
 
+import PvStatus from './pv_status_t';
+
 export enum PicoLLMEndpoint {
   END_OF_SENTENCE,
   COMPLETION_TOKEN_LIMIT_REACHED,
@@ -75,3 +77,160 @@ export type PicoLLMCompletion = {
   completionTokens?: PicoLLMCompletionToken[];
   completion: string;
 };
+
+// worker types ----------------------------
+
+// TODO: ensure all of these are being used properly
+
+export type PicoLLMWorkerInitRequest = {
+  command: 'init';
+  accessKey: string;
+  modelPath: string;
+  options: PicoLLMInitOptions;
+};
+
+export type PicoLLMWorkerGenerateRequest = {
+  command: 'generate';
+  prompt: string;
+  options: PicoLLMGenerateOptions;
+};
+
+export type PicoLLMWorkerGenerateWithImageRequest = {
+  command: 'generateWithImage';
+  prompt: string;
+  image: PicoLLMImage;
+  options: PicoLLMGenerateWithImageOptions;
+};
+
+export type PicoLLMWorkerGenerateEmbeddingsRequest = {
+  command: 'generateEmbeddings';
+  prompt: string;
+};
+
+export type PicoLLMWorkerGenerateOCRRequest = {
+  command: 'generateOCR';
+  image: PicoLLMImage;
+  options: PicoLLMGenerateOCROptions;
+};
+
+export type PicoLLMWorkerInterruptRequest = {
+  command: 'interrupt';
+};
+
+export type PicoLLMWorkerTokenizeRequest = {
+  command: 'tokenize';
+  text: string;
+  bos: boolean;
+  eos: boolean;
+};
+
+export type PicoLLMWorkerForwardRequest = {
+  command: 'forward';
+  token: number;
+};
+
+export type PicoLLMWorkerResetRequest = {
+  command: 'reset';
+};
+
+export type PicoLLMWorkerReleaseRequest = {
+  command: 'release';
+};
+
+export type PicoLLMWorkerRequest =
+  | PicoLLMWorkerInitRequest
+  | PicoLLMWorkerGenerateRequest
+  | PicoLLMWorkerGenerateWithImageRequest
+  | PicoLLMWorkerGenerateEmbeddingsRequest
+  | PicoLLMWorkerGenerateOCRRequest
+  | PicoLLMWorkerInterruptRequest
+  | PicoLLMWorkerTokenizeRequest
+  | PicoLLMWorkerForwardRequest
+  | PicoLLMWorkerResetRequest
+  | PicoLLMWorkerReleaseRequest;
+
+export type PicoLLMWorkerFailureResponse = {
+  command: 'failed' | 'error';
+  status: PvStatus;
+  message: string;
+  messageStack: string[];
+};
+
+export type PicoLLMWorkerInitResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+      contextLength: number;
+      maxTopChoices: number;
+      model: string;
+      version: string;
+    };
+
+export type PicoLLMWorkerGenerateResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+      completion: PicoLLMCompletion;
+    }
+  | {
+      command: 'stream',
+      token: string
+    };
+
+export type PicoLLMWorkerGenerateWithImageResponse =
+  | PicoLLMWorkerGenerateResponse
+  | {
+      command: 'progress',
+      progress: number
+    };
+
+export type PicoLLMWorkerGenerateEmbeddingsResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+      embeddings: Float32Array;
+    }
+
+export type PicoLLMWorkerGenerateOCRResponse =
+  | PicoLLMWorkerGenerateResponse
+  | {
+      command: 'progress',
+      progress: number
+    };
+
+export type PicoLLMWorkerTokenizeResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+      tokens: number[];
+    };
+
+export type PicoLLMWorkerForwardResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+      logits: number[];
+    };
+
+export type PicoLLMWorkerResetResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+    };
+
+export type PicoLLMWorkerReleaseResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+    };
+
+export type PicoLLMWorkerResponse =
+  | PicoLLMWorkerInitResponse
+  | PicoLLMWorkerGenerateResponse
+  | PicoLLMWorkerGenerateWithImageResponse
+  | PicoLLMWorkerGenerateEmbeddingsResponse
+  | PicoLLMWorkerGenerateOCRResponse
+  | PicoLLMWorkerTokenizeResponse
+  | PicoLLMWorkerForwardResponse
+  | PicoLLMWorkerResetResponse
+  | PicoLLMWorkerReleaseResponse;

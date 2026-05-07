@@ -98,7 +98,7 @@ const sleep = async (ms: number) => new Promise<void>(resolve => {
   }, ms);
 });
 
-const runInitTest = (
+const runInitTest = async (
   params: {
     accessKey?: string;
     modelPath?: string;
@@ -119,7 +119,7 @@ const runInitTest = (
   let picoLLM: PicoLLM | undefined = undefined;
 
   try {
-    picoLLM = new PicoLLM(
+    picoLLM = await PicoLLM.create(
       accessKey,
       modelPath,
       {
@@ -142,7 +142,7 @@ const runInitTest = (
     }
   } finally {
     if (picoLLM) {
-      picoLLM.release();
+      await picoLLM.release();
     }
   }
 
@@ -219,7 +219,7 @@ const runGenerateTest = async (
     streamCallback: () => {},
   },
 ) => {
-  const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+  const picoLLM = await PicoLLM.create(ACCESS_KEY, TEXT_MODEL_PATH, {
     device: DEVICE
   });
 
@@ -229,7 +229,7 @@ const runGenerateTest = async (
   } catch (e) {
     expect(e).toBeUndefined();
   } finally {
-    picoLLM.release();
+    await picoLLM.release();
   }
 };
 
@@ -241,7 +241,7 @@ const runGenerateOCRTest = async (
     promptProgressCallback: () => {},
   },
 ) => {
-  const picoLLM = new PicoLLM(ACCESS_KEY, OCR_MODEL_PATH, {
+  const picoLLM = await PicoLLM.create(ACCESS_KEY, OCR_MODEL_PATH, {
     device: DEVICE
   });
 
@@ -251,7 +251,7 @@ const runGenerateOCRTest = async (
   } catch (e) {
     expect(e).toBeUndefined();
   } finally {
-    picoLLM.release();
+    await picoLLM.release();
   }
 };
 
@@ -315,31 +315,39 @@ describe('PicoLLM basic tests', function () {
     expect(hardwareDevices.length).toBeGreaterThan(0);
   });
 
-  test(`should return correct error message stack`, () => {
+  test(`should return correct error message stack`, async () => {
     let messageStack = [];
+    let picollm = undefined;
     try {
-      const picollm = new PicoLLM(
+      picollm = await PicoLLM.create(
         "invalidAccessKey",
         TEXT_MODEL_PATH,
       );
       expect(picollm).toBeUndefined();
-      picollm.release();
     } catch (e: any) {
       messageStack = e.messageStack;
+    } finally {
+      if (picollm) {
+        await picollm.release();
+      }
     }
 
     expect(messageStack.length).toBeGreaterThan(0);
     expect(messageStack.length).toBeLessThan(9);
 
+    picollm = undefined;
     try {
-      const picollm = new PicoLLM(
+      picollm = await PicoLLM.create(
         "invalidAccessKey",
         TEXT_MODEL_PATH,
       );
       expect(picollm).toBeUndefined();
-      picollm.release();
     } catch (e: any) {
       expect(messageStack.length).toEqual(e.messageStack.length);
+    } finally {
+      if (picollm) {
+        await picollm.release();
+      }
     }
   });
 
@@ -427,12 +435,12 @@ describe('PicoLLM generate tests', () => {
     const seeds = data.parameters.seeds;
     const temperature = data.parameters.temperature;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
     try {
-      const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+      const numPromptTokens = (await picoLLM.tokenize(prompt, true, false)).length;
 
       const res = await picoLLM.generate(prompt, {
         completionTokenLimit: completionTokenLimit,
@@ -466,7 +474,7 @@ describe('PicoLLM generate tests', () => {
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 
@@ -481,12 +489,12 @@ describe('PicoLLM generate tests', () => {
     const seed = data.parameters.seed;
     const temperature = data.parameters.temperature;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
     try {
-      const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+      const numPromptTokens = (await picoLLM.tokenize(prompt, true, false)).length;
 
       const res = await picoLLM.generate(prompt, {
         completionTokenLimit: completionTokenLimit,
@@ -520,7 +528,7 @@ describe('PicoLLM generate tests', () => {
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 
@@ -537,11 +545,11 @@ describe('PicoLLM generate tests', () => {
     const topP = data.parameters['top-p'];
     const expectations = data.expectations;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
-    const numPromptTokens = (picoLLM.tokenize(prompt, true, false)).length;
+    const numPromptTokens = (await picoLLM.tokenize(prompt, true, false)).length;
 
     try {
       const res = await picoLLM.generate(prompt, {
@@ -561,7 +569,7 @@ describe('PicoLLM generate tests', () => {
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 
@@ -593,7 +601,7 @@ describe('PicoLLM generate tests', () => {
     const data = testData.picollm.default;
     const prompt = data.prompt;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -610,12 +618,12 @@ describe('PicoLLM generate tests', () => {
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 
-  test(`should be able to tokenize`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+  test(`should be able to tokenize`, async () => {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -623,22 +631,22 @@ describe('PicoLLM generate tests', () => {
     const text = data.text;
 
     try {
-      const tokens = picoLLM.tokenize(text, true, false);
+      const tokens = await picoLLM.tokenize(text, true, false);
       expect(tokens).toEqual(data.tokens);
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 
-  test(`should be able to forward`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+  test(`should be able to forward`, async () => {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
     try {
-      const logits = picoLLM.forward(79);
+      const logits = await picoLLM.forward(79);
       expect(logits.length).toBeGreaterThan(0);
 
       const sum = logits.reduce((acc, x) => acc + Math.exp(x), 0);
@@ -646,20 +654,20 @@ describe('PicoLLM generate tests', () => {
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 
-  test(`should be able to reset`, () => {
-    const picoLLM = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+  test(`should be able to reset`, async () => {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, TEXT_MODEL_PATH, {
       device: DEVICE
     });
 
     try {
-      const logits = picoLLM.forward(79);
-      picoLLM.reset();
+      const logits = await picoLLM.forward(79);
+      await picoLLM.reset();
 
-      const newLogits = picoLLM.forward(79);
+      const newLogits = await picoLLM.forward(79);
 
       if (DEVICE.includes('gpu')) {
         for (let i = 0; i < newLogits.length; i++) {
@@ -671,7 +679,7 @@ describe('PicoLLM generate tests', () => {
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 });
@@ -685,7 +693,7 @@ describe('PicoLLM generate with image tests', () => {
     const completionTokenLimit = data.parameters['completion-token-limit'];
     const expectations = data.expectations;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, VISION_MODEL_PATH, {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, VISION_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -698,7 +706,7 @@ describe('PicoLLM generate with image tests', () => {
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 });
@@ -735,7 +743,7 @@ describe('PicoLLM generate embeddings', () => {
     const prompt = data.prompt;
     const expectations = data.expectations;
 
-    const picoLLM = new PicoLLM(ACCESS_KEY, EMBEDDING_MODEL_PATH, {
+    const picoLLM = await PicoLLM.create(ACCESS_KEY, EMBEDDING_MODEL_PATH, {
       device: DEVICE
     });
 
@@ -748,7 +756,7 @@ describe('PicoLLM generate embeddings', () => {
     } catch (e) {
       expect(e).toBeUndefined();
     } finally {
-      picoLLM.release();
+      await picoLLM.release();
     }
   });
 });

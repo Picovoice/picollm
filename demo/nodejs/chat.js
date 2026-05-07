@@ -125,7 +125,6 @@ async function completionDemo() {
   const accessKey = program["access_key"];
   const libraryPath = program["library_path"];
   const modelPath = program["model_path"];
-  const prompt = program["prompt"];
   const device = program["device"];
   const completionTokenLimit = program["completion_token_limit"];
   const stopPhrases = program["stop_phrases"];
@@ -150,7 +149,7 @@ async function completionDemo() {
     process.exit();
   }
 
-  const picoLLM = new PicoLLM(
+  const picoLLM = await PicoLLM.create(
       accessKey,
       modelPath,
       {
@@ -169,10 +168,10 @@ async function completionDemo() {
     process.stdout.write(token);
   };
 
-  process.stdin.on("keypress", (key, str) => {
+  process.stdin.on("keypress", async (key, str) => {
     if (str.sequence === '\x03') {
       interrupted = true;
-      picoLLM.interrupt();
+      await picoLLM.interrupt();
     }
   });
 
@@ -200,7 +199,7 @@ async function completionDemo() {
   } catch (e) {
     console.error(e);
   } finally {
-    picoLLM.release();
+    await picoLLM.release();
     rl.close();
     process.exit();
   }

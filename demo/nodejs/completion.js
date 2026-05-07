@@ -147,7 +147,7 @@ async function completionDemo() {
     process.exit();
   }
 
-  const picoLLM = new PicoLLM(
+  const picoLLM = await PicoLLM.create(
     accessKey,
     modelPath,
     {
@@ -166,16 +166,16 @@ async function completionDemo() {
 
   const generateStartSec = [0];
 
-  process.stdin.on("keypress", (key, str) => {
+  process.stdin.on("keypress", async (key, str) => {
     if (str.sequence === '\r') {
-        picoLLM.interrupt();
+        await picoLLM.interrupt();
     } else if (str.sequence === '\x03') {
       if (generateStartSec[0] === 0) {
         process.stdin.setRawMode(false);
         console.log("\nGot CTRL+C -> Exiting...");
         process.kill(process.pid, 'SIGINT');
       } else {
-        picoLLM.interrupt();
+        await picoLLM.interrupt();
       }
     }
   });
@@ -189,8 +189,6 @@ async function completionDemo() {
   };
 
   try {
-    console.log(picoLLM);
-
     const startSec = performance.now();
     
     let res;
@@ -277,7 +275,7 @@ async function completionDemo() {
   } catch (e) {
     console.error(e);
   } finally {
-    picoLLM.release();
+    await picoLLM.release();
     process.exit();
   }
 }

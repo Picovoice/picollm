@@ -93,7 +93,7 @@ async function ocrDemo() {
     process.exit();
   }
 
-  const picoLLM = new PicoLLM(
+  const picoLLM = await PicoLLM.create(
     accessKey,
     modelPath,
     {
@@ -114,16 +114,16 @@ async function ocrDemo() {
 
   const generateStartSec = [0];
 
-  process.stdin.on("keypress", (key, str) => {
+  process.stdin.on("keypress", async (key, str) => {
     if (str.sequence === '\r') {
-        picoLLM.interrupt();
+        await picoLLM.interrupt();
     } else if (str.sequence === '\x03') {
       if (generateStartSec[0] === 0) {
         process.stdin.setRawMode(false);
         console.log("\nGot CTRL+C -> Exiting...");
         process.kill(process.pid, 'SIGINT');
       } else {
-        picoLLM.interrupt();
+        await picoLLM.interrupt();
       }
     }
   });
@@ -167,7 +167,6 @@ async function ocrDemo() {
   };
 
   try {
-    console.log(picoLLM);
     process.stdout.write("\nProcessing Image ...");
 
     const startSec = performance.now();
@@ -197,7 +196,7 @@ async function ocrDemo() {
   } catch (e) {
     console.error(e);
   } finally {
-    picoLLM.release();
+    await picoLLM.release();
     process.exit();
   }
 }

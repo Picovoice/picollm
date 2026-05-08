@@ -597,7 +597,7 @@ describe('PicoLLM Dialog tests', () => {
   });
 });
 
-const getImage = async (uri: str): any => {
+const getImage = async (uri: string): any => {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 

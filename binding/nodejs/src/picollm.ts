@@ -193,14 +193,14 @@ export class PicoLLM {
   async generate(prompt: string, options: PicoLLMGenerateOptions = {}): Promise<PicoLLMCompletion> {
     const {
       completionTokenLimit = -1,
-      stopPhrases = [],
+      stopPhrases = null,
       seed = -1,
-      presencePenalty = 0,
-      frequencyPenalty = 0,
-      temperature = 0,
+      presencePenalty = 0.0,
+      frequencyPenalty = 0.0,
+      temperature = 0.0,
       topP = 1,
       numTopChoices = 0,
-      streamCallback,
+      streamCallback = null,
     } = options;
 
     const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
@@ -292,15 +292,15 @@ export class PicoLLM {
   ): Promise<PicoLLMCompletion> {
     const {
       completionTokenLimit = -1,
-      stopPhrases = [],
+      stopPhrases = null,
       seed = -1,
-      presencePenalty = 0,
-      frequencyPenalty = 0,
-      temperature = 0,
+      presencePenalty = 0.0,
+      frequencyPenalty = 0.0,
+      temperature = 0.0,
       topP = 1,
       numTopChoices = 0,
-      streamCallback,
-      promptProgressCallback
+      streamCallback = null,
+      promptProgressCallback = null
     } = options;
 
     const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {
@@ -420,8 +420,8 @@ export class PicoLLM {
   ): Promise<PicoLLMCompletion> {
     const {
       completionTokenLimit = -1,
-      streamCallback,
-      promptProgressCallback
+      streamCallback = null,
+      promptProgressCallback = null
     } = options;
 
     const returnPromise: Promise<PicoLLMCompletion> = new Promise((resolve, reject) => {

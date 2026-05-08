@@ -382,15 +382,6 @@ export class PicoLLMWorker {
   }
 
   /**
-   * Interrupts `generate()` and `generateWithImage()` if generation is in progress. Otherwise, it has no effect.
-   */
-  public interrupt(): void {
-    this._worker.postMessage({
-      command: 'interrupt',
-    });
-  }
-
-  /**
    * Generates numerical vector representations of the input text prompt.
    *
    * For use with embedding models only.
@@ -492,6 +483,15 @@ export class PicoLLMWorker {
     });
 
     return returnPromise;
+  }
+
+  /**
+   * Interrupts `generate()` if generation is in progress. Otherwise, it has no effect.
+   */
+  public interrupt(): void {
+    this._worker.postMessage({
+      command: 'interrupt',
+    });
   }
 
   /**

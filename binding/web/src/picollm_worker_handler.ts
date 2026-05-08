@@ -71,13 +71,12 @@ const checkError = (e: any): PicoLLMWorkerFailureResponse => {
   };
 };
 
-const initRequest = async (request: PicoLLMWorkerInitRequest): Promise<PicoLLMWorkerResponse> => {
+const initRequest = async (request: PicoLLMWorkerInitRequest): Promise<any> => {
   if (picoLLM !== null) {
     return {
       command: 'error',
       status: PvStatus.INVALID_STATE,
       shortMessage: 'picoLLM already initialized',
-      messageStack: [],
     };
   }
 

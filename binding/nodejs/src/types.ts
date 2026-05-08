@@ -80,8 +80,6 @@ export type PicoLLMCompletion = {
 
 // worker types ----------------------------
 
-// TODO: ensure all of these are being used properly
-
 export type PicoLLMWorkerInitRequest = {
   command: 'init';
   accessKey: string;

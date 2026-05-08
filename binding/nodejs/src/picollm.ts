@@ -672,16 +672,16 @@ export class PicoLLM {
     try {
       picollmHardwareDevicesResult = pvPicoLLM.list_hardware_devices();
     } catch (err: any) {
-      pvStatusToException(<PvStatus>err.code, err);
+      throw pvStatusToException(<PvStatus>err.code, err);
     }
 
     const status = picollmHardwareDevicesResult!.status;
     if (status !== PvStatus.SUCCESS) {
       const errorObject = pvPicoLLM.get_error_stack();
       if (errorObject.status === PvStatus.SUCCESS) {
-        pvStatusToException(status, 'PicoLLM failed to get available devices', errorObject.message_stack);
+        throw pvStatusToException(status, 'PicoLLM failed to get available devices', errorObject.message_stack);
       } else {
-        pvStatusToException(status, 'Unable to get PicoLLM error state');
+        throw pvStatusToException(status, 'Unable to get PicoLLM error state');
       }
     }
 

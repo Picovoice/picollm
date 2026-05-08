@@ -31,7 +31,7 @@ import { getSystemLibraryPath } from './platforms';
 
 type PicoLLMInitResult = {
   handle: any;
-  status: PvStatus
+  status: PvStatus;
 };
 type PicoLLMGenerateResult = {
   completion: {
@@ -53,6 +53,7 @@ type PicoLLMGenerateResult = {
     completion: string;
   };
   status: PvStatus;
+  errorStack: string[];
 };
 type PicoLLMGenerateOCRResult = {
   completion: {
@@ -60,9 +61,11 @@ type PicoLLMGenerateOCRResult = {
     completion: string;
   };
   status: PvStatus;
+  errorStack: string[];
 };
 type PicoLLMGenerateEmbeddingsResult = {
   embeddings: Float32Array;
+  status: PvStatus;
 };
 type PicoLLMTokenizeResult = {
   tokens: number[];
@@ -260,7 +263,6 @@ export class PicoLLMInternal {
 
     let picollmGenerateResult: PicoLLMGenerateResult | null = null;
     try {
-      // TODO: make this a sync call
       picollmGenerateResult = await this._pvPicoLLM.generate(
         this._handle,
         prompt,
@@ -280,7 +282,7 @@ export class PicoLLMInternal {
 
     const status = picollmGenerateResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate');
+      throw pvStatusToException(status, 'PicoLLM failed to generate', picollmGenerateResult!.errorStack);
     }
 
     const completion = picollmGenerateResult!.completion;
@@ -383,7 +385,6 @@ export class PicoLLMInternal {
 
     let picollmGenerateResult: PicoLLMGenerateResult | null = null;
     try {
-      // TODO: make this a sync call
       picollmGenerateResult = await this._pvPicoLLM.generate_with_image(
         this._handle,
         prompt,
@@ -407,7 +408,7 @@ export class PicoLLMInternal {
 
     const status = picollmGenerateResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate with image');
+      throw pvStatusToException(status, 'PicoLLM failed to generate with image', picollmGenerateResult!.errorStack);
     }
 
     const completion = picollmGenerateResult!.completion;
@@ -488,8 +489,9 @@ export class PicoLLMInternal {
       throw pvStatusToException(<PvStatus>err.code, err);
     }
 
-    if (generateEmbeddingsResult === null) {
-      this.handlePvStatusOptionalStack(PvStatus.RUNTIME_ERROR, 'PicoLLM failed to generate embeddings');
+    const status = generateEmbeddingsResult!.status;
+    if (status !== PvStatus.SUCCESS) {
+      this.handlePvStatus(status, 'PicoLLM failed to generate embeddings');
     }
 
     return generateEmbeddingsResult!.embeddings;
@@ -535,7 +537,6 @@ export class PicoLLMInternal {
 
     let picollmGenerateOCRResult: PicoLLMGenerateOCRResult | null = null;
     try {
-      // TODO: make this a sync call
       picollmGenerateOCRResult = await this._pvPicoLLM.generate_ocr(
         this._handle,
         image.width,
@@ -550,7 +551,7 @@ export class PicoLLMInternal {
 
     const status = picollmGenerateOCRResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate OCR');
+      throw pvStatusToException(status, 'PicoLLM failed to generate OCR', picollmGenerateOCRResult!.errorStack);
     }
 
     return {
@@ -731,15 +732,6 @@ export class PicoLLMInternal {
       throw pvStatusToException(status, message, errorObject.message_stack);
     } else {
       throw pvStatusToException(status, 'Unable to get PicoLLM error state');
-    }
-  }
-
-  private handlePvStatusOptionalStack(status: PvStatus, message: string): void {
-    const errorObject = this._pvPicoLLM.get_error_stack();
-    if (errorObject.status === PvStatus.SUCCESS) {
-      throw pvStatusToException(status, message, errorObject.message_stack);
-    } else {
-      throw pvStatusToException(status, message, []);
     }
   }
 }

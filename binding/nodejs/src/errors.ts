@@ -59,7 +59,6 @@ export class PicoLLMActivationLimitReachedError extends PicoLLMError {}
 export class PicoLLMActivationThrottledError extends PicoLLMError {}
 export class PicoLLMActivationRefusedError extends PicoLLMError {}
 
-// TODO: update all references to this throw the return value if it makes sense
 export function pvStatusToException(
   pvStatus: PvStatus | string,
   errorMessage: string,

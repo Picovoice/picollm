@@ -9,7 +9,7 @@ on:
       - 'demo/dotnet/**'
       - '!demo/dotnet/README.md'
   pull_request:
-    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    branches: [ main, 'v[0-9]+.[0-9]+*' ]
     paths:
       - '.github/workflows/dotnet-demos.yml'
       - 'demo/dotnet/**'

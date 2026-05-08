@@ -95,15 +95,3 @@ export function pvStatusToException(
       return new PicoLLMError(errorMessage);
   }
 }
-
-export class PicoLLMInternalError {
-  status: PvStatus;
-  message: string;
-  messageStack: string[];
-
-  constructor(status: PvStatus, message: string, messageStack: string[]) {
-    this.status = status;
-    this.message = message;
-    this.messageStack = messageStack;
-  }
-};

@@ -17,7 +17,7 @@ if (!parentPort) {
 
 const parent : MessagePort = parentPort;
 
-import { PicoLLMInternal } from './picollm_internal';
+import { PicoLLMErrorInternal, PicoLLMInternal } from './picollm_internal';
 import {
   PicoLLMWorkerFailureResponse,
   PicoLLMWorkerForwardRequest,
@@ -31,7 +31,6 @@ import {
   PicoLLMWorkerResponse,
 } from './types';
 import PvStatus from './pv_status_t';
-import { PicoLLMInternalError } from './errors';
 
 let picoLLM: PicoLLMInternal | null = null;
 
@@ -57,7 +56,7 @@ const notInitializedError: PicoLLMWorkerFailureResponse = {
 };
 
 const checkError = (e: any): PicoLLMWorkerFailureResponse => {
-  if (e instanceof PicoLLMInternalError) {
+  if (e instanceof PicoLLMErrorInternal) {
     return {
       command: 'error',
       status: e.status,

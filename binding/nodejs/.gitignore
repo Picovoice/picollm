@@ -3,6 +3,7 @@ lib
 resources
 package-lock.json
 dist
+dist_test
 yarn-error.log
 test/phi2-290.pllm
 

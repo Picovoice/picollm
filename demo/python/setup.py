@@ -16,11 +16,15 @@ shutil.copy(
 shutil.copy(
     os.path.join(os.path.dirname(__file__), 'picollm_demo_completion.py'),
     os.path.join(package_folder, 'picollm_demo_completion.py'))
+shutil.copy(
+    os.path.join(os.path.dirname(__file__), 'picollm_demo_ocr.py'),
+    os.path.join(package_folder, 'picollm_demo_ocr.py'))
 
 with open(os.path.join(os.path.dirname(__file__), 'MANIFEST.in'), 'w') as f:
     f.write('include picollmdemo/LICENSE\n')
     f.write('include picollmdemo/picollm_demo_chat.py\n')
     f.write('include picollmdemo/picollm_demo_completion.py\n')
+    f.write('include picollmdemo/picollm_demo_ocr.py\n')
 
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
     long_description = f.read()

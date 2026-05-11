@@ -26,7 +26,6 @@ import {
   PicoLLMImage,
   PicoLLMGenerateWithImageOptions,
   PicoLLMWorkerGenerateWithImageRequest,
-  PicoLLMWorkerResponse,
   PvStatus,
 } from './types';
 import { PicoLLMError } from './picollm_errors';

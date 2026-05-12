@@ -64,8 +64,8 @@ jobs:
 
     - name: Test OCR Small
       if: ${{ matrix.machine != 'pv-windows-igpu' && matrix.machine != 'rpi4-32' && matrix.machine != 'rpi4-64' && matrix.machine != 'rpi5-32' }}
-      run: yarn test --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t 'should be able to generate OCR small'
+      run: yarn test --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t \'should be able to generate OCR small\'
 
     - name: Test OCR Large
       if: ${{ matrix.machine == 'pv-linux' && matrix.device == 'cpu' }}
-      run: yarn test --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t 'should be able to generate OCR large'
+      run: yarn test --access_key=${{secrets.PV_VALID_ACCESS_KEY}} --device=${{matrix.device}} -t \'should be able to generate OCR large\'

@@ -10,7 +10,7 @@
     "build:types": "tsc --declaration --declarationMap --emitDeclarationOnly --outDir ./dist/types",
     "prepack": "npm run build",
     "prepare": "node copy.js",
-    "test": "bash test.sh",
+    "test": "node test.js",
     "lint": "eslint . --ext .js,.ts"
   },
   "repository": {

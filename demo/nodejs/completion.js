@@ -219,8 +219,10 @@ async function completionDemo() {
 
         let filledLen = Math.trunc((progress / 100.0) * barWidth);
 
-        process.stdout.clearLine(0);
-        process.stdout.cursorTo(0);
+        if (process.stdin.isTTY) {
+            process.stdout.clearLine(0);
+            process.stdout.cursorTo(0);
+        }
 
         process.stdout.write("Processing Prompt [");
         for (let i = 0; i < barWidth; i++) {

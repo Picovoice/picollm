@@ -1,2 +1,3 @@
 .eslintrc.js
 src/wasm/pv_picollm*
+dist_test

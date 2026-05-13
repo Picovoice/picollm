@@ -12,6 +12,22 @@
 import * as fs from 'fs';
 
 import PvStatus from './pv_status_t';
+import { 
+  pvStatusToException,
+  PicoLLMInvalidArgumentError,
+  PicoLLMInvalidStateError
+} from './internal_errors';
+import {
+  PicoLLMInitResult,
+  PicoLLMGenerateResult,
+  PicoLLMResult,
+  PicoLLMGenerateEmbeddingsResult,
+  PicoLLMGenerateOCRResult,
+  PicoLLMTokenizeResult,
+  PicoLLMForwardResult,
+  PicoLLMContextLengthResult,
+  PicoLLMModelResult
+} from './internal_types';
 
 import {
   PicoLLMCompletion,
@@ -24,137 +40,6 @@ import {
 
 import { getSystemLibraryPath } from './platforms';
 
-export class PicoLLMErrorInternal extends Error {
-  private readonly _status: PvStatus;
-  private readonly _message: string;
-  private readonly _messageStack: string[];
-
-  constructor(status: PvStatus, message: string, messageStack: string[] = []) {
-    super();
-    this._status = status;
-    this._message = message;
-    this._messageStack = messageStack;
-  }
-
-  get status(): PvStatus {
-    return this._status;
-  }
-
-  get message(): string {
-    return this._message;
-  }
-
-  get messageStack(): string[] {
-    return this._messageStack;
-  }
-}
-
-export class PicoLLMOutOfMemoryError extends PicoLLMErrorInternal {}
-export class PicoLLMIOError extends PicoLLMErrorInternal {}
-export class PicoLLMInvalidArgumentError extends PicoLLMErrorInternal {}
-export class PicoLLMStopIterationError extends PicoLLMErrorInternal {}
-export class PicoLLMKeyError extends PicoLLMErrorInternal {}
-export class PicoLLMInvalidStateError extends PicoLLMErrorInternal {}
-export class PicoLLMRuntimeError extends PicoLLMErrorInternal {}
-export class PicoLLMActivationError extends PicoLLMErrorInternal {}
-export class PicoLLMActivationLimitReachedError extends PicoLLMErrorInternal {}
-export class PicoLLMActivationThrottledError extends PicoLLMErrorInternal {}
-export class PicoLLMActivationRefusedError extends PicoLLMErrorInternal {}
-
-export function pvStatusToException(
-  pvStatus: PvStatus | string,
-  errorMessage: string,
-  messageStack: string[] = []
-): PicoLLMErrorInternal {
-  const status = (typeof pvStatus === "string") ? PvStatus[pvStatus as any] : pvStatus;
-
-  switch (status) {
-    case PvStatus.OUT_OF_MEMORY:
-      return new PicoLLMOutOfMemoryError(status, errorMessage, messageStack);
-    case PvStatus.IO_ERROR:
-      return new PicoLLMIOError(status, errorMessage, messageStack);
-    case PvStatus.INVALID_ARGUMENT:
-      return new PicoLLMInvalidArgumentError(status, errorMessage, messageStack);
-    case PvStatus.STOP_ITERATION:
-      return new PicoLLMStopIterationError(status, errorMessage, messageStack);
-    case PvStatus.KEY_ERROR:
-      return new PicoLLMKeyError(status, errorMessage, messageStack);
-    case PvStatus.INVALID_STATE:
-      return new PicoLLMInvalidStateError(status, errorMessage, messageStack);
-    case PvStatus.RUNTIME_ERROR:
-      return new PicoLLMRuntimeError(status, errorMessage, messageStack);
-    case PvStatus.ACTIVATION_ERROR:
-      return new PicoLLMActivationError(status, errorMessage, messageStack);
-    case PvStatus.ACTIVATION_LIMIT_REACHED:
-      return new PicoLLMActivationLimitReachedError(status, errorMessage, messageStack);
-    case PvStatus.ACTIVATION_THROTTLED:
-      return new PicoLLMActivationThrottledError(status, errorMessage, messageStack);
-    case PvStatus.ACTIVATION_REFUSED:
-      return new PicoLLMActivationRefusedError(status, errorMessage, messageStack);
-    default:
-      // eslint-disable-next-line no-console
-      console.warn(`Unmapped error code: ${status}`);
-      return new PicoLLMErrorInternal(PvStatus.RUNTIME_ERROR, errorMessage);
-  }
-}
-
-type PicoLLMInitResult = {
-  handle: any;
-  status: PvStatus;
-};
-type PicoLLMGenerateResult = {
-  completion: {
-    usage: {
-      prompt_tokens: number;
-      completion_tokens: number;
-    };
-    endpoint: number;
-    completion_tokens: {
-      token: {
-        token: string;
-        log_prob: number;
-      }
-      top_choices: {
-        token: string;
-        log_prob: number;
-      }[];
-    }[] | null;
-    completion: string;
-  };
-  status: PvStatus;
-  errorStack: string[];
-};
-type PicoLLMGenerateOCRResult = {
-  completion: {
-    endpoint: number;
-    completion: string;
-  };
-  status: PvStatus;
-  errorStack: string[];
-};
-type PicoLLMGenerateEmbeddingsResult = {
-  embeddings: Float32Array;
-  status: PvStatus;
-};
-type PicoLLMTokenizeResult = {
-  tokens: number[];
-  status: PvStatus;
-};
-type PicoLLMForwardResult = {
-  logits: number[];
-  status: PvStatus;
-};
-type PicoLLMModelResult = {
-  model: string;
-  status: PvStatus;
-};
-type PicoLLMContextLengthResult = {
-  context_length: number;
-  status: PvStatus;
-};
-type PicoLLMResult = {
-  status: PvStatus;
-};
 
 /**
  * Node.js binding for PicoLLM engine.

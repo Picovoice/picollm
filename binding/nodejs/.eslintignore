@@ -3,3 +3,4 @@ dist
 lib
 resources
 .eslintrc.js
+dist_test

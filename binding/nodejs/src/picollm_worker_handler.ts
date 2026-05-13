@@ -17,7 +17,8 @@ if (!parentPort) {
 
 const parent : MessagePort = parentPort;
 
-import { PicoLLMErrorInternal, PicoLLMInternal } from './picollm_internal';
+import { PicoLLMErrorInternal } from './internal_errors';
+import { PicoLLMInternal } from './picollm_internal';
 import {
   PicoLLMWorkerFailureResponse,
   PicoLLMWorkerForwardRequest,

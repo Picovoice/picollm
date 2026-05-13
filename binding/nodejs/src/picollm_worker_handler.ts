@@ -155,7 +155,7 @@ const generateOCRRequest = async (
   };
 };
 
-const interruptRequest = () => {
+const interruptRequest = (): void => {
   if (picoLLM !== null) {
     picoLLM.interrupt();
   }
@@ -180,7 +180,7 @@ const tokenizeRequest = (
 
 const forwardRequest = (
   request: PicoLLMWorkerForwardRequest
-) => {
+): any => {
   if (picoLLM === null) {
     return notInitializedError;
   }
@@ -191,7 +191,7 @@ const forwardRequest = (
   };
 };
 
-const resetRequest = () => {
+const resetRequest = (): any => {
   if (picoLLM === null) {
     return notInitializedError;
   }
@@ -201,7 +201,7 @@ const resetRequest = () => {
   };
 };
 
-const releaseRequest = () => {
+const releaseRequest = (): any => {
   if (picoLLM !== null) {
     picoLLM.release();
     picoLLM = null;
@@ -220,42 +220,42 @@ parent.on('message',
   ): Promise<void> {
     try {
       switch (event.command) {
-      case 'init':
-        parent.postMessage(initRequest(event));
-        break;
-      case 'generate':
-        parent.postMessage(await generateRequest(event));
-        break;
-      case 'generateWithImage':
-        parent.postMessage(await generateWithImageRequest(event));
-        break;
-      case 'generateEmbeddings':
-        parent.postMessage(await generateEmbeddingsRequest(event));
-        break;
-      case 'generateOCR':
-        parent.postMessage(await generateOCRRequest(event));
-        break;
-      case 'interrupt':
-        interruptRequest();
-        break;
-      case 'tokenize':
-        parent.postMessage(tokenizeRequest(event));
-        break;
-      case 'forward':
-        parent.postMessage(forwardRequest(event));
-        break;
-      case 'reset':
-        parent.postMessage(resetRequest());
-        break;
-      case 'release':
-        parent.postMessage(releaseRequest());
-        break;
-      default:
-        parent.postMessage({
-          command: 'failed',
-          // @ts-ignore
-          message: `Unrecognized command: ${event.command}`,
-        });
+        case 'init':
+          parent.postMessage(initRequest(event));
+          break;
+        case 'generate':
+          parent.postMessage(await generateRequest(event));
+          break;
+        case 'generateWithImage':
+          parent.postMessage(await generateWithImageRequest(event));
+          break;
+        case 'generateEmbeddings':
+          parent.postMessage(await generateEmbeddingsRequest(event));
+          break;
+        case 'generateOCR':
+          parent.postMessage(await generateOCRRequest(event));
+          break;
+        case 'interrupt':
+          interruptRequest();
+          break;
+        case 'tokenize':
+          parent.postMessage(tokenizeRequest(event));
+          break;
+        case 'forward':
+          parent.postMessage(forwardRequest(event));
+          break;
+        case 'reset':
+          parent.postMessage(resetRequest());
+          break;
+        case 'release':
+          parent.postMessage(releaseRequest());
+          break;
+        default:
+          parent.postMessage({
+            command: 'failed',
+            // @ts-ignore
+            message: `Unrecognized command: ${event.command}`,
+          });
       }
     } catch (error: any) {
       parent.postMessage(checkError(error));

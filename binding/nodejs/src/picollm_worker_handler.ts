@@ -155,15 +155,15 @@ const generateOCRRequest = async (
   };
 };
 
-const interruptRequest = async (): Promise<void> => {
+const interruptRequest = () => {
   if (picoLLM !== null) {
     picoLLM.interrupt();
   }
 };
 
-const tokenizeRequest = async (
+const tokenizeRequest = (
   request: PicoLLMWorkerTokenizeRequest
-): Promise<any> => {
+): any => {
   if (picoLLM === null) {
     return notInitializedError;
   }
@@ -178,9 +178,9 @@ const tokenizeRequest = async (
   };
 };
 
-const forwardRequest = async (
+const forwardRequest = (
   request: PicoLLMWorkerForwardRequest
-): Promise<any> => {
+) => {
   if (picoLLM === null) {
     return notInitializedError;
   }
@@ -191,7 +191,7 @@ const forwardRequest = async (
   };
 };
 
-const resetRequest = async (): Promise<any> => {
+const resetRequest = () => {
   if (picoLLM === null) {
     return notInitializedError;
   }
@@ -201,7 +201,7 @@ const resetRequest = async (): Promise<any> => {
   };
 };
 
-const releaseRequest = async (): Promise<any> => {
+const releaseRequest = () => {
   if (picoLLM !== null) {
     picoLLM.release();
     picoLLM = null;
@@ -236,19 +236,19 @@ parent.on('message',
         parent.postMessage(await generateOCRRequest(event));
         break;
       case 'interrupt':
-        await interruptRequest();
+        interruptRequest();
         break;
       case 'tokenize':
-        parent.postMessage(await tokenizeRequest(event));
+        parent.postMessage(tokenizeRequest(event));
         break;
       case 'forward':
-        parent.postMessage(await forwardRequest(event));
+        parent.postMessage(forwardRequest(event));
         break;
       case 'reset':
-        parent.postMessage(await resetRequest());
+        parent.postMessage(resetRequest());
         break;
       case 'release':
-        parent.postMessage(await releaseRequest());
+        parent.postMessage(releaseRequest());
         break;
       default:
         parent.postMessage({

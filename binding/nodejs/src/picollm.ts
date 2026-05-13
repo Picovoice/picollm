@@ -115,9 +115,9 @@ export class PicoLLM {
    * @returns An instance of the PicoLLM.
    */
   public static async create(
-      accessKey: string,
-      modelPath: string,
-      options: PicoLLMOptions = {}
+    accessKey: string,
+    modelPath: string,
+    options: PicoLLMOptions = {}
   ): Promise<PicoLLM> {
     const worker = new Worker(path.join(__dirname, "picollm_worker_handler.js"));
 

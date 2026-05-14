@@ -11,7 +11,7 @@ on:
       - '.github/workflows/nodejs-demos.yml'
 
   pull_request:
-    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    branches: [ main, 'v[0-9]+.[0-9]+*' ]
     paths:
       - 'demo/nodejs/**'
       - '!demo/nodejs/README.md'
@@ -41,6 +41,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    # ************** REMOVE AFTER RELEASE ********************
+    - name: Build Local Packages
+      run: |
+        yarn install
+        yarn build
+      working-directory: binding/nodejs
+    # ********************************************************
 
     - name: Install dependencies
       run: yarn install

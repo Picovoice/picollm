@@ -34,6 +34,7 @@ import {
   PicoLLMEndpoint,
   PicoLLMImage,
   PicoLLMInvalidArgumentError,
+  PicoLLMError,
 } from '../src';
 
 import * as testData from '../../../resources/.test/test_data.json';
@@ -587,6 +588,29 @@ describe('PicoLLM generate tests', () => {
 
     await sleep(100);
     expect(pieces.join('')).toEqual(data.expectations[0].completion);
+  });
+
+  test(`should be able to show error stack during generate`, async () => {
+    const data = testData.picollm.default;
+    const prompt = data.prompt;
+
+    const picoLLM = new PicoLLM(ACCESS_KEY, OCR_MODEL_PATH, {
+        device: DEVICE
+    });
+
+    try {
+        await picoLLM.generate(prompt);
+        fail("generate should not succeed");
+    } catch (e) {
+        if (e instanceof PicoLLMError) {
+            expect(e.messageStack.length).toBeGreaterThan(0);
+            expect(e.messageStack.length).toBeLessThan(9);
+        } else {
+            expect(e).toBeUndefined();
+        }
+    } finally {
+        picoLLM.release();
+    }
   });
 
   test(`should be able to interrupt`, async () => {

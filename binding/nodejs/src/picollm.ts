@@ -56,6 +56,7 @@ type PicoLLMGenerateResult = {
     completion: string;
   };
   status: PvStatus;
+  errorStack: string[];
 };
 type PicoLLMGenerateOCRResult = {
   completion: {
@@ -63,6 +64,7 @@ type PicoLLMGenerateOCRResult = {
     completion: string;
   };
   status: PvStatus;
+  errorStack: string[];
 };
 type PicoLLMGenerateEmbeddingsResult = {
   embeddings: Float32Array;
@@ -287,7 +289,7 @@ export class PicoLLM {
 
     const status = picollmGenerateResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate');
+      pvStatusToException(status, 'PicoLLM failed to generate', picollmGenerateResult!.errorStack);
     }
 
     const completion = picollmGenerateResult!.completion;
@@ -413,7 +415,7 @@ export class PicoLLM {
 
     const status = picollmGenerateResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate with image');
+      pvStatusToException(status, 'PicoLLM failed to generate with image', picollmGenerateResult!.errorStack);
     }
 
     const completion = picollmGenerateResult!.completion;
@@ -555,7 +557,7 @@ export class PicoLLM {
 
     const status = picollmGenerateOCRResult!.status;
     if (status !== PvStatus.SUCCESS) {
-      this.handlePvStatusOptionalStack(status, 'PicoLLM failed to generate OCR');
+      pvStatusToException(status, 'PicoLLM failed to generate OCR', picollmGenerateOCRResult!.errorStack);
     }
 
     return {

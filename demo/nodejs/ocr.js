@@ -148,8 +148,10 @@ async function ocrDemo() {
 
     let filledLen = Math.trunc((progress / 100.0) * barWidth);
 
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
+    if (process.stdin.isTTY) {
+        process.stdout.clearLine(0);
+        process.stdout.cursorTo(0);
+    }
 
     process.stdout.write("Processing Image [");
     for (let i = 0; i < barWidth; i++) {
@@ -196,6 +198,7 @@ async function ocrDemo() {
     console.log(`Total time elapsed is ${(totalElapsedSec).toFixed(2)} seconds`);
   } catch (e) {
     console.error(e);
+    throw e;
   } finally {
     picoLLM.release();
     process.exit();

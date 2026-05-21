@@ -199,12 +199,12 @@ async function completionDemo() {
     }
   } catch (e) {
     console.error(e);
+    throw e;
   } finally {
     picoLLM.release();
     rl.close();
     process.exit();
   }
-
 }
 
 completionDemo();

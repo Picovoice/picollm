@@ -9,7 +9,7 @@ on:
       - 'binding/python/*.py'
       - 'demo/python/*.py'
   pull_request:
-    branches: [ main, 'v[0-9]+.[0-9]+' ]
+    branches: [ main, 'v[0-9]+.[0-9]+*' ]
     paths:
       - '.github/workflows/python-codestyle.yml'
       - 'binding/python/*.py'

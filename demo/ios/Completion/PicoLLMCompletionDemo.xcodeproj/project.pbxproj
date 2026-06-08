@@ -14,6 +14,7 @@
 		074C41F32EF384A200FEC19E /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 074C41F22EF384A200FEC19E /* PicoLLM */; };
 		079E1F872EF0E2E0005F6213 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 079E1F862EF0E2E0005F6213 /* PicoLLM */; };
 		342500D22D1F1FDF00D42622 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 342500D12D1F1FDF00D42622 /* PicoLLM */; };
+		346B4D202FD769A900EC175A /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 346B4D1F2FD769A900EC175A /* PicoLLM */; };
 		34AB73242D1F3D620075B421 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34AB73232D1F3D620075B421 /* PicoLLM */; };
 		34B26B852D1A070E00C33299 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34B26B842D1A070E00C33299 /* PicoLLM */; };
 		34CF349E2F9C08AF003C1097 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34CF349D2F9C08AF003C1097 /* PicoLLM */; };
@@ -49,6 +50,7 @@
 				34B26B852D1A070E00C33299 /* PicoLLM in Frameworks */,
 				34CF349E2F9C08AF003C1097 /* PicoLLM in Frameworks */,
 				34AB73242D1F3D620075B421 /* PicoLLM in Frameworks */,
+				346B4D202FD769A900EC175A /* PicoLLM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,7 +133,7 @@
 			);
 			mainGroup = 02A1193C268D39A700A2AC99;
 			packageReferences = (
-				34CF349C2F9C08AF003C1097 /* XCRemoteSwiftPackageReference "picollm" */,
+				346B4D1E2FD769A900EC175A /* XCRemoteSwiftPackageReference "picollm" */,
 			);
 			productRefGroup = 02A11946268D39A700A2AC99 /* Products */;
 			projectDirPath = "";
@@ -363,6 +365,14 @@
 				version = 2.0.1;
 			};
 		};
+		346B4D1E2FD769A900EC175A /* XCRemoteSwiftPackageReference "picollm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/picovoice/picollm";
+			requirement = {
+				kind = exactVersion;
+				version = 2.1.2;
+			};
+		};
 		34AB73222D1F3D620075B421 /* XCRemoteSwiftPackageReference "picollm" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/picovoice/picollm";
@@ -401,6 +411,11 @@
 		};
 		342500D12D1F1FDF00D42622 /* PicoLLM */ = {
 			isa = XCSwiftPackageProductDependency;
+			productName = PicoLLM;
+		};
+		346B4D1F2FD769A900EC175A /* PicoLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 346B4D1E2FD769A900EC175A /* XCRemoteSwiftPackageReference "picollm" */;
 			productName = PicoLLM;
 		};
 		34AB73232D1F3D620075B421 /* PicoLLM */ = {

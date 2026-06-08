@@ -24,7 +24,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="PicoLLM" Version="2.1.1" />
+        <!-- <PackageReference Include="PicoLLM" Version="2.1.2" /> -->
         <PackageReference Include="SixLabors.ImageSharp" Version="2.1.13" />
     </ItemGroup>
 </Project>

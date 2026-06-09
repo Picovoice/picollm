@@ -96,10 +96,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/retry/-/retry-0.4.2.tgz#1860473de7dfa1546767448f333db80cb0ff2161"
   integrity sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ==
 
-"@picovoice/picollm-web@2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@picovoice/picollm-web/-/picollm-web-2.1.1.tgz#4e289db99e6ed6f268aa7c32e13c44f560f642a4"
-  integrity sha512-ktDD/Rp1J/byahmvC/weHYUxNJXBxdFip7oPfiE6S/FJpZbdZBkH9JDKV5WkHHLDDAdWITJeeBV1ThWaoZnPXg==
+"@picovoice/picollm-web@2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@picovoice/picollm-web/-/picollm-web-2.1.2.tgz#cfcfa5f68be60cb1a0c850d97c16fc52cde2c2c6"
+  integrity sha512-WtNwOJFFfW42T8T4fqQDnwnU5QXUX2X7hjsH8yMs4VQxn+FtR20YJF3gmb+4SMBQS114POQZut5zs+Tp3w1ySg==
   dependencies:
     "@picovoice/web-utils" "~1.4.3"
 

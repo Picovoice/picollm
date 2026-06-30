@@ -219,7 +219,8 @@
       "phi2-chat-dialog": "Human: Hi\nAI: Hey\nHuman: Hola\nAI: ¡Oye!\nHuman: Salut\nAI:",
       "phi2-qa-dialog": "Instruct: Hi\nOutput: Hey\nInstruct: Hola\nOutput: ¡Oye!\nInstruct: Salut\nOutput:",
       "phi3-chat-dialog": "<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
-      "phi3.5-chat-dialog": "<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n"
+      "phi3.5-chat-dialog": "<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
+      "qwen2-chat-dialog": "<|im_start|>user\nHi<|im_end|>\n<|im_start|>assistant\nHey<|im_end|>\n<|im_start|>user\nHola<|im_end|>\n<|im_start|>assistant\n¡Oye!<|im_end|>\n<|im_start|>user\nSalut<|im_end|>\n<|im_start|>assistant\n"
     },
     "prompts-with-system": {
       "gemma-chat-dialog": "<start_of_turn>user\nHi<end_of_turn>\n<start_of_turn>model\nHey<end_of_turn>\n<start_of_turn>user\nHola<end_of_turn>\n<start_of_turn>model\n¡Oye!<end_of_turn>\n<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
@@ -231,7 +232,8 @@
       "phi2-chat-dialog": "Human: Hi\nAI: Hey\nHuman: Hola\nAI: ¡Oye!\nHuman: Salut\nAI:",
       "phi2-qa-dialog": "Instruct: Hi\nOutput: Hey\nInstruct: Hola\nOutput: ¡Oye!\nInstruct: Salut\nOutput:",
       "phi3-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
-      "phi3.5-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n"
+      "phi3.5-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nHi<|end|>\n<|assistant|>\nHey<|end|>\n<|user|>\nHola<|end|>\n<|assistant|>\n¡Oye!<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
+      "qwen2-chat-dialog": "<|im_start|>system\nrespond with ❤️ and \uD83E\uDEE1<|im_end|>\n<|im_start|>user\nHi<|im_end|>\n<|im_start|>assistant\nHey<|im_end|>\n<|im_start|>user\nHola<|im_end|>\n<|im_start|>assistant\n¡Oye!<|im_end|>\n<|im_start|>user\nSalut<|im_end|>\n<|im_start|>assistant\n"
     },
     "prompts-with-history": {
       "gemma-chat-dialog": "<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
@@ -243,7 +245,8 @@
       "phi2-chat-dialog": "Human: Salut\nAI:",
       "phi2-qa-dialog": "Instruct: Salut\nOutput:",
       "phi3-chat-dialog": "<|user|>\nSalut<|end|>\n<|assistant|>\n",
-      "phi3.5-chat-dialog": "<|user|>\nSalut<|end|>\n<|assistant|>\n"
+      "phi3.5-chat-dialog": "<|user|>\nSalut<|end|>\n<|assistant|>\n",
+      "qwen2-chat-dialog": "<|im_start|>user\nSalut<|im_end|>\n<|im_start|>assistant\n"
     },
     "prompts-with-system-and-history": {
       "gemma-chat-dialog": "<start_of_turn>user\nSalut<end_of_turn>\n<start_of_turn>model",
@@ -255,7 +258,8 @@
       "phi2-chat-dialog": "Human: Salut\nAI:",
       "phi2-qa-dialog": "Instruct: Salut\nOutput:",
       "phi3-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
-      "phi3.5-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n"
+      "phi3.5-chat-dialog": "<|system|>\nrespond with ❤️ and \uD83E\uDEE1<|end|>\n<|user|>\nSalut<|end|>\n<|assistant|>\n",
+      "qwen2-chat-dialog": "<|im_start|>system\nrespond with ❤️ and \uD83E\uDEE1<|im_end|>\n<|im_start|>user\nSalut<|im_end|>\n<|im_start|>assistant\n"
     }
   },
   "generate_with_image": {

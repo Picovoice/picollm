@@ -52,6 +52,7 @@ public class PicoLLM {
         DIALOGS.put("phi2", phi2Map);
         DIALOGS.put("phi3", Phi3ChatDialog.class);
         DIALOGS.put("phi3.5", Phi35ChatDialog.class);
+        DIALOGS.put("qwen-2.5-500m-instruct", Qwen2ChatDialog.class);
     }
 
     public static void setSdk(String sdk) {

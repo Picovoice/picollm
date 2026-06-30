@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -133,7 +133,7 @@
 			);
 			mainGroup = 02A1193C268D39A700A2AC99;
 			packageReferences = (
-				346B4D1E2FD769A900EC175A /* XCRemoteSwiftPackageReference "picollm" */,
+				3496C0E32FF459F10046E73D /* XCLocalSwiftPackageReference "../../../../picollm" */,
 			);
 			productRefGroup = 02A11946268D39A700A2AC99 /* Products */;
 			projectDirPath = "";
@@ -355,6 +355,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3496C0E32FF459F10046E73D /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../../picollm;
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
 		074C41F12EF384A200FEC19E /* XCRemoteSwiftPackageReference "picollm" */ = {

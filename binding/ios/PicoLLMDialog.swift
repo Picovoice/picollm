@@ -209,6 +209,50 @@ public class Phi35ChatDialog: Phi3ChatDialog {
 
 }
 
+/// Dialog helper for `qwen2`.
+public class Qwen2ChatDialog: BasePicoLLMDialog {
+    public override func prompt() throws -> String {
+        if self.humanRequests.count == self.llmResponses.count {
+            throw PicoLLMInvalidStateError("Only subclasses of PicoLLMDialog can return create prompts.")
+        }
+
+        let humanRequests = (self.history == nil) ?
+            self.humanRequests[...] :
+            self.humanRequests[(self.humanRequests.count - Int(self.history!) - 1)...]
+        let llmResponses = (self.history == nil) ?
+            self.llmResponses[...] :
+            self.llmResponses[(self.llmResponses.count - Int(self.history!))...]
+
+        var res = ""
+        if self.system != nil {
+            res += String(
+                format: "<|im_start|>system\n%@<|im_end|>\n",
+                self.system!.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+        }
+        for i in 0..<llmResponses.count {
+            res += String(
+                format: "<|im_start|>user\n%@<|im_end|>\n",
+                humanRequests[i].trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            res += String(
+                format: "<|im_start|>assistant\n%@<|im_end|>\n",
+                llmResponses[i].trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+        }
+
+        res += String(
+            format: "<|im_start|>user\n%@<|im_end|>\n",
+            humanRequests.last!.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+        res += String(
+            format: "<|im_start|>assistant\n"
+        )
+
+        return res
+    }
+}
+
 /// Dialog helper for `mistral-7b-instruct-v0.1` and `mistral-7b-instruct-v0.2`.
 public class MistralChatDialog: BasePicoLLMDialog {
     public override func prompt() throws -> String {

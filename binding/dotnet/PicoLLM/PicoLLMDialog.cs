@@ -383,7 +383,7 @@ namespace Pv
     /// </summary>
     public class Qwen2ChatDialog : PicoLLMDialog
     {
-        public Phi3ChatDialog(int? history = null, string system = null) : base(history, system) { }
+        public Qwen2ChatDialog(int? history = null, string system = null) : base(history, system) { }
 
         public override string Prompt()
         {

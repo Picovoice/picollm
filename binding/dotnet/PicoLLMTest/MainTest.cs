@@ -631,7 +631,8 @@ namespace PicoLLMTest
             { "phi2-chat-dialog", typeof(Phi2ChatDialog) },
             { "phi2-qa-dialog", typeof(Phi2QADialog) },
             { "phi3-chat-dialog", typeof(Phi3ChatDialog) },
-            { "phi3.5-chat-dialog", typeof(Phi35ChatDialog) }
+            { "phi3.5-chat-dialog", typeof(Phi35ChatDialog) },
+            { "qwen2-chat-dialog", typeof(Qwen2ChatDialog) }
         };
 
         private void TestPromptHelper(PicoLLMDialog dialog, List<List<string>> conversation, string expected)

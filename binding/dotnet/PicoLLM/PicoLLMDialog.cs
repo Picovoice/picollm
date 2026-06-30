@@ -377,4 +377,44 @@ namespace Pv
     {
         public Gemma3ChatDialog(int? history = null, string system = null) : base(history, system) { }
     }
+
+    /// <summary>
+    /// Dialog helper for `qwen2`.
+    /// </summary>
+    public class Qwen2ChatDialog : PicoLLMDialog
+    {
+        public Phi3ChatDialog(int? history = null, string system = null) : base(history, system) { }
+
+        public override string Prompt()
+        {
+            if (_humanRequests.Count == _llmResponses.Count)
+            {
+                throw new PicoLLMInvalidStateException("Only subclasses of IPicoLLMDialog can create prompts.");
+            }
+
+            List<string> humanRequests = _history == null
+                ? _humanRequests
+                : _humanRequests.Skip(_humanRequests.Count - (int)_history - 1).ToList();
+            List<string> llmResponses = _history == null
+                ? _llmResponses
+                : _llmResponses.Skip(_llmResponses.Count - (int)_history).ToList();
+
+            string result = "";
+            if (_system != null)
+            {
+                result += $"<|im_start|>system\n{_system.Trim()}<|im_end|>\n";
+            }
+
+            for (int i = 0; i < llmResponses.Count; i++)
+            {
+                result += $"<|im_start|>user\n{humanRequests[i].Trim()}<|im_end|>\n";
+                result += $"<|im_start|>assistant\n{llmResponses[i].Trim()}<|im_end|>\n";
+            }
+
+            result += $"<|im_start|>user\n{humanRequests.Last().Trim()}<|im_end|>\n";
+            result += "<|im_start|>assistant\n";
+
+            return result;
+        }
+    }
 }

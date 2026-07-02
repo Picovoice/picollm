@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,7 @@
 		02A1195F268D3FD600A2AC99 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A1195E268D3FD600A2AC99 /* ViewModel.swift */; };
 		074C41F32EF384A200FEC19E /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 074C41F22EF384A200FEC19E /* PicoLLM */; };
 		079E1F872EF0E2E0005F6213 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 079E1F862EF0E2E0005F6213 /* PicoLLM */; };
+		341C047B2FF6D9E100CFE81D /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 341C047A2FF6D9E100CFE81D /* PicoLLM */; };
 		342500D22D1F1FDF00D42622 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 342500D12D1F1FDF00D42622 /* PicoLLM */; };
 		346B4D202FD769A900EC175A /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 346B4D1F2FD769A900EC175A /* PicoLLM */; };
 		34AB73242D1F3D620075B421 /* PicoLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 34AB73232D1F3D620075B421 /* PicoLLM */; };
@@ -46,6 +47,7 @@
 				079E1F872EF0E2E0005F6213 /* PicoLLM in Frameworks */,
 				342500D22D1F1FDF00D42622 /* PicoLLM in Frameworks */,
 				E1E013812D1612E800DB0C2F /* PicoLLM in Frameworks */,
+				341C047B2FF6D9E100CFE81D /* PicoLLM in Frameworks */,
 				074C41F32EF384A200FEC19E /* PicoLLM in Frameworks */,
 				34B26B852D1A070E00C33299 /* PicoLLM in Frameworks */,
 				34CF349E2F9C08AF003C1097 /* PicoLLM in Frameworks */,
@@ -133,7 +135,7 @@
 			);
 			mainGroup = 02A1193C268D39A700A2AC99;
 			packageReferences = (
-				3496C0E32FF459F10046E73D /* XCLocalSwiftPackageReference "../../../../picollm" */,
+				341C04792FF6D9E100CFE81D /* XCRemoteSwiftPackageReference "picollm" */,
 			);
 			productRefGroup = 02A11946268D39A700A2AC99 /* Products */;
 			projectDirPath = "";
@@ -356,13 +358,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		3496C0E32FF459F10046E73D /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../../../picollm;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		074C41F12EF384A200FEC19E /* XCRemoteSwiftPackageReference "picollm" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -370,6 +365,14 @@
 			requirement = {
 				kind = exactVersion;
 				version = 2.0.1;
+			};
+		};
+		341C04792FF6D9E100CFE81D /* XCRemoteSwiftPackageReference "picollm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/picovoice/picollm";
+			requirement = {
+				kind = exactVersion;
+				version = 2.1.3;
 			};
 		};
 		346B4D1E2FD769A900EC175A /* XCRemoteSwiftPackageReference "picollm" */ = {
@@ -414,6 +417,11 @@
 		};
 		079E1F862EF0E2E0005F6213 /* PicoLLM */ = {
 			isa = XCSwiftPackageProductDependency;
+			productName = PicoLLM;
+		};
+		341C047A2FF6D9E100CFE81D /* PicoLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 341C04792FF6D9E100CFE81D /* XCRemoteSwiftPackageReference "picollm" */;
 			productName = PicoLLM;
 		};
 		342500D12D1F1FDF00D42622 /* PicoLLM */ = {

@@ -41,6 +41,7 @@ import {
   Phi2ChatDialog,
   Phi3ChatDialog,
   Phi35ChatDialog,
+  Qwen2ChatDialog,
 } from './dialog';
 
 import {
@@ -71,6 +72,7 @@ export {
   Phi2ChatDialog,
   Phi3ChatDialog,
   Phi35ChatDialog,
+  Qwen2ChatDialog,
   PicoLLMCompletion,
   PicoLLMCompletionToken,
   PicoLLMEndpoint,

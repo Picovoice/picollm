@@ -27,6 +27,7 @@ import {
   Phi2QADialog,
   Phi3ChatDialog,
   Phi35ChatDialog,
+  Qwen2ChatDialog,
   PicoLLM,
   PicoLLMGenerateOptions,
   PicoLLMGenerateOCROptions,
@@ -65,6 +66,7 @@ const DIALOG_CLASSES: { [key: string]: typeof Dialog } = {
   'phi2-qa-dialog': Phi2QADialog,
   'phi3-chat-dialog': Phi3ChatDialog,
   'phi3.5-chat-dialog': Phi35ChatDialog,
+  'qwen2-chat-dialog': Qwen2ChatDialog,
 };
 
 type CompletionExpectation = {

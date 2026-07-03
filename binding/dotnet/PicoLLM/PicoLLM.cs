@@ -1191,7 +1191,8 @@ namespace Pv
             { "mistral-7b-instruct-v0.2", typeof(MistralChatDialog) },
             { "mixtral-8x7b-instruct-v0.1", typeof(MixtralChatDialog) },
             { "phi3", typeof(Phi3ChatDialog) },
-            { "phi3.5", typeof(Phi35ChatDialog) }
+            { "phi3.5", typeof(Phi35ChatDialog) },
+            { "qwen-2.5-500m-instruct", typeof(Qwen2ChatDialog) }
         };
 
         private static readonly Dictionary<string, Type> phi2Dialogs = new Dictionary<string, Type>

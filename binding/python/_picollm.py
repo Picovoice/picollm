@@ -311,6 +311,33 @@ class Phi35Dialog(Phi3Dialog):
         super().__init__(history=history, system=system)
 
 
+class Qwen2Dialog(Dialog):
+    """
+    Dialog helper for `qwen-2.5-500m-instruct`.
+    """
+
+    def __init__(self, history: Optional[int] = None, system: Optional[str] = None) -> None:
+        super().__init__(history=history, system=system)
+
+    def prompt(self) -> str:
+        if len(self._human) == len(self._llm):
+            raise RuntimeError("Cannot create a prompt without an outstanding human request")
+
+        human = self._human if self._history is None else self._human[-(self._history + 1):]
+        llm = (list() if self._history == 0 else self._llm[-self._history:]) if self._history is not None else self._llm
+
+        res = list()
+        if self._system is not None:
+            res.append(f"<|im_start|>system\n{self._system.strip()}<|im_end|>\n")
+
+        for h, l in zip(human, llm):
+            res.append(f"<|im_start|>user\n{h}<|im_end|>\n")
+            res.append(f"<|im_start|>assistant\n{l}<|im_end|>\n")
+        res.append(f"<|im_start|>user\n{human[-1]}<|im_end|>\n<|im_start|>assistant\n")
+
+        return ''.join(res)
+
+
 class PicoLLMError(Exception):
     def __init__(self, message: str = '', message_stack: Optional[Sequence[str]] = None) -> None:
         super().__init__(message)
@@ -1307,7 +1334,8 @@ class PicoLLM(object):
             'chat': Phi2ChatDialog,
         },
         'phi3': Phi3Dialog,
-        'phi3.5': Phi35Dialog
+        'phi3.5': Phi35Dialog,
+        'qwen-2.5-500m-instruct': Qwen2Dialog
     }
 
     def get_dialog(
@@ -1366,6 +1394,7 @@ __all__ = [
     'Phi2QADialog',
     'Phi3Dialog',
     'Phi35Dialog',
+    'Qwen2Dialog',
     'PicoLLM',
     'PicoLLMActivationError',
     'PicoLLMActivationLimitError',

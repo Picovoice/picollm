@@ -44,6 +44,7 @@ from ._picollm import (
     Phi2QADialog,
     Phi3Dialog,
     Phi35Dialog,
+    Qwen2Dialog,
     PicoLLM,
     PicoLLMCompletion,
     PicoLLMEndpoints,
@@ -678,7 +679,8 @@ class DialogTestCase(unittest.TestCase):
             "phi2-chat-dialog": Phi2ChatDialog,
             "phi2-qa-dialog": Phi2QADialog,
             "phi3-chat-dialog": Phi3Dialog,
-            "phi3.5-chat-dialog": Phi35Dialog
+            "phi3.5-chat-dialog": Phi35Dialog,
+            "qwen2-chat-dialog": Qwen2Dialog
         }
 
         path = os.path.join(os.path.dirname(__file__), '../../resources/.test/test_data.json')

@@ -55,6 +55,7 @@ import ai.picovoice.picollm.Phi2ChatDialog;
 import ai.picovoice.picollm.Phi2QADialog;
 import ai.picovoice.picollm.Phi3ChatDialog;
 import ai.picovoice.picollm.Phi35ChatDialog;
+import ai.picovoice.picollm.Qwen2ChatDialog;
 import ai.picovoice.picollm.PicoLLM;
 import ai.picovoice.picollm.PicoLLMCompletion;
 import ai.picovoice.picollm.PicoLLMDialog;
@@ -970,6 +971,8 @@ public class PicoLLMTest {
                     return new Phi3ChatDialog.Builder();
                 case "phi3.5-chat-dialog":
                     return new Phi35ChatDialog.Builder();
+                case "qwen2-chat-dialog":
+                    return new Qwen2ChatDialog.Builder();
                 default:
                     return null;
             }

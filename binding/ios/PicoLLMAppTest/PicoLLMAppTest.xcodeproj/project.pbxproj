@@ -201,7 +201,7 @@
 			);
 			mainGroup = 1E7744A727CD9D7E00491D0B;
 			packageReferences = (
-				346B4D1A2FD7697000EC175A /* XCRemoteSwiftPackageReference "picollm" */,
+				341C04782FF6D9C700CFE81D /* XCRemoteSwiftPackageReference "picollm" */,
 			);
 			productRefGroup = 1E7744B127CD9D7E00491D0B /* Products */;
 			projectDirPath = "";
@@ -578,12 +578,12 @@
 				version = 2.0.1;
 			};
 		};
-		346B4D1A2FD7697000EC175A /* XCRemoteSwiftPackageReference "picollm" */ = {
+		341C04782FF6D9C700CFE81D /* XCRemoteSwiftPackageReference "picollm" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/picovoice/picollm";
 			requirement = {
 				kind = exactVersion;
-				version = 2.1.2;
+				version = 2.1.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

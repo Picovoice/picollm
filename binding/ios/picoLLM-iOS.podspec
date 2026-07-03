@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = 'picoLLM-iOS'
   s.module_name = 'PicoLLM'
-  s.version = '2.1.2'
+  s.version = '2.1.3'
   s.license = {:type => 'Apache 2.0'}
   s.summary = 'picoLLM Inference Engine'
   s.description =

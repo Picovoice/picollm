@@ -509,7 +509,8 @@ class PicoLLMAppTestUITests: BaseTest {
             "phi2-chat-dialog": Phi2ChatDialog.self,
             "phi2-qa-dialog": Phi2QADialog.self,
             "phi3-chat-dialog": Phi3ChatDialog.self,
-            "phi3.5-chat-dialog": Phi35ChatDialog.self
+            "phi3.5-chat-dialog": Phi35ChatDialog.self,
+            "qwen2-chat-dialog": Qwen2ChatDialog.self
         ]
         let dialogPrompts = self.dialogTestData![testName] as! [String: String]
         let conversation = self.dialogTestData!["conversation"] as! [[String]]

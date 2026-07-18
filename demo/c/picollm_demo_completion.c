@@ -327,7 +327,7 @@ int picovoice_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    pv_status_t (*pv_picollm_init_func)(const char *, const char *, const char *, pv_picollm_t **) =
+    pv_status_t (*pv_picollm_init_func)(const char *, const char *, const char *, bool, pv_picollm_t **) =
         load_symbol(dl_handle, "pv_picollm_init");
     if (!pv_picollm_init_func) {
         print_dl_error("failed to load `pv_picollm_init`");
@@ -536,6 +536,7 @@ int picovoice_main(int argc, char **argv) {
             access_key,
             model_path,
             device_string,
+            false,
             &picollm);
     if (status != PV_STATUS_SUCCESS) {
         fprintf(

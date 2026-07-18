@@ -434,6 +434,7 @@ pv_picollm_init(
     "${ACCESS_KEY}",
     "${MODEL_PATH}",
     "best",
+    false,
     &pllm);
 
 pv_picollm_usage_t usage;

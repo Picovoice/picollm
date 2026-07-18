@@ -106,17 +106,21 @@ public class PicoLLM {
      *                  `${GPU_INDEX}` is the index of the target GPU. If set to `cpu`, the engine will run on the
      *                  CPU with the default number of threads. To specify the number of threads, set this argument
      *                  to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of threads.
+     * @param enableContextCaching Enables context caching in the LLM if the model supports context caching. Context
+     *                             caching speeds up processing when consecutive prompts share a common prefix.
      * @throws PicoLLMException if initialization fails.
      */
     private PicoLLM(
             String accessKey,
             String modelPath,
-            String device) throws PicoLLMException {
+            String device,
+            boolean enableContextCaching) throws PicoLLMException {
         PicoLLMNative.setSdk(PicoLLM._sdk);
         handle = PicoLLMNative.init(
                 accessKey,
                 modelPath,
-                device);
+                device,
+                enableContextCaching);
         model = PicoLLMNative.getModel(handle);
         contextLength = PicoLLMNative.getContextLength(handle);
     }
@@ -289,6 +293,34 @@ public class PicoLLM {
     }
 
     /**
+     * Loads context cache from a file. This function will fail if the model does not support context
+     * caching or context caching is turned off.
+     *
+     * @param contextPath Absolute path to the file containing the context cache.
+     * @throws PicoLLMException if the context loading fails
+     */
+    public void contextLoad(
+            String contextPath) throws PicoLLMException {
+        PicoLLMNative.contextLoad(
+                handle,
+                contextPath);
+    }
+
+    /**
+     * Saves current context cache to a file. This function will fail if the model does not support context
+     * caching, context caching is turned off, or there is no context in the model to save.
+     *
+     * @param contextPath Absolute path to the file where the context cache will be saved.
+     * @throws PicoLLMException if the context saving fails
+     */
+    public void contextSave(
+            String contextPath) throws PicoLLMException {
+        PicoLLMNative.contextSave(
+                handle,
+                contextPath);
+    }
+
+    /**
      * Getter for model's name.
      *
      * @return Model's name.
@@ -435,6 +467,7 @@ public class PicoLLM {
         private String accessKey = null;
         private String modelPath = null;
         private String device = null;
+        private boolean enableContextCaching = false;
 
         /**
          * Sets the AccessKey.
@@ -477,6 +510,18 @@ public class PicoLLM {
         }
 
         /**
+         * Sets the enable context caching flag.
+         *
+         * @param enableContextCaching Enables context caching in the LLM if the model supports context caching. Context
+         *                             caching speeds up processing when consecutive prompts share a common prefix.
+         * @return Builder instance.
+         */
+        public Builder setEnableContextCaching(boolean enableContextCaching) {
+            this.enableContextCaching = enableContextCaching;
+            return this;
+        }
+
+        /**
          * Builds a new PicoLLM instance using values defined by the builder.
          *
          * @return Constructed PicoLLM instance.
@@ -511,7 +556,7 @@ public class PicoLLM {
                 }
             }
 
-            return new PicoLLM(accessKey, modelPath, device);
+            return new PicoLLM(accessKey, modelPath, device, enableContextCaching);
         }
     }
 }

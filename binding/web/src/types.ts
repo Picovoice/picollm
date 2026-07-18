@@ -39,8 +39,16 @@ export type PicoLLMModel = {
   numFetchRetries?: number;
 };
 
+export type PicoLLMContext = {
+  contextFile?: string | File | Blob | (string | File | Blob)[];
+  cacheFileVersion?: number;
+  cacheFileOverwrite?: boolean;
+  numFetchRetries?: number;
+};
+
 export type PicoLLMInitOptions = {
   device?: string;
+  enableContextCaching?: boolean;
 };
 
 export type PicoLLMGenerateOptions = {
@@ -151,6 +159,16 @@ export type PicoLLMWorkerResetRequest = {
   command: 'reset';
 };
 
+export type PicoLLMWorkerContextLoadRequest = {
+  command: 'contextLoad';
+  contextPath: string;
+};
+
+export type PicoLLMWorkerContextSaveRequest = {
+  command: 'contextSave';
+  contextPath: string;
+};
+
 export type PicoLLMWorkerReleaseRequest = {
   command: 'release';
 };
@@ -165,6 +183,8 @@ export type PicoLLMWorkerRequest =
   | PicoLLMWorkerTokenizeRequest
   | PicoLLMWorkerForwardRequest
   | PicoLLMWorkerResetRequest
+  | PicoLLMWorkerContextLoadRequest
+  | PicoLLMWorkerContextSaveRequest
   | PicoLLMWorkerReleaseRequest;
 
 export type PicoLLMWorkerFailureResponse = {
@@ -231,6 +251,18 @@ export type PicoLLMWorkerForwardResponse =
     };
 
 export type PicoLLMWorkerResetResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+    };
+
+export type PicoLLMWorkerContextLoadResponse =
+  | PicoLLMWorkerFailureResponse
+  | {
+      command: 'ok';
+    };
+
+export type PicoLLMWorkerContextSaveResponse =
   | PicoLLMWorkerFailureResponse
   | {
       command: 'ok';

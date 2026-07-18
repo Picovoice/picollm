@@ -18,6 +18,7 @@ export enum PicoLLMEndpoint {
 
 export type PicoLLMInitOptions = {
   device?: string;
+  enableContextCaching?: boolean;
 };
 
 export type PicoLLMInputOptions = {

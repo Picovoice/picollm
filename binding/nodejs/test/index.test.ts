@@ -615,6 +615,53 @@ describe('PicoLLM generate tests', () => {
     }
   });
 
+  test(`should be able to generate with context`, async () => {
+    const data = testData.picollm.default;
+    const prompt = data.prompt;
+    const expectations = data.expectations;
+
+    const picollm0 = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+        device: DEVICE,
+        contextCaching: true,
+    });
+
+    try {
+        const res0 = await picollm0.generate(prompt);
+        verifyCompletion(res0, expectations);
+
+        const res1 = await picollm0.generate(prompt);
+        verifyCompletion(res1, expectations);
+
+        picollm0.contextSave("context.bin");
+    } catch (e) {
+        expect(e).toBeUndefined();
+    } finally {
+        picollm0.release();
+    }
+
+    const picollm1 = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
+        device: DEVICE,
+        contextCaching: true,
+    });
+
+    try {
+        picollm1.contextLoad("context.bin");
+
+        const res0 = await picollm1.generate(prompt);
+        verifyCompletion(res0, expectations);
+
+        const res1 = await picollm1.generate(prompt);
+        verifyCompletion(res1, expectations);
+    } catch (e) {
+        expect(e).toBeUndefined();
+    } finally {
+        picollm1.release();
+    }
+
+    fs.unlinkSync("context.bin");
+  });
+
+
   test(`should be able to interrupt`, async () => {
     const data = testData.picollm.default;
     const prompt = data.prompt;

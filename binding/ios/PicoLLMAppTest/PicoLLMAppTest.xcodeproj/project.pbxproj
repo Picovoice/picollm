@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -201,7 +201,7 @@
 			);
 			mainGroup = 1E7744A727CD9D7E00491D0B;
 			packageReferences = (
-				341C04782FF6D9C700CFE81D /* XCRemoteSwiftPackageReference "picollm" */,
+				3445E4DE300ACB1800E704A3 /* XCLocalSwiftPackageReference "../../../../picollm" */,
 			);
 			productRefGroup = 1E7744B127CD9D7E00491D0B /* Products */;
 			projectDirPath = "";
@@ -563,6 +563,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		3445E4DE300ACB1800E704A3 /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../../picollm;
+		};
 		E1E013772D160CDE00DB0C2F /* XCLocalSwiftPackageReference "../../../../picollm" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../../picollm;
@@ -576,14 +580,6 @@
 			requirement = {
 				kind = exactVersion;
 				version = 2.0.1;
-			};
-		};
-		341C04782FF6D9C700CFE81D /* XCRemoteSwiftPackageReference "picollm" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/picovoice/picollm";
-			requirement = {
-				kind = exactVersion;
-				version = 2.1.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

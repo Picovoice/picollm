@@ -1,2 +1,2 @@
-picollm==2.1.3
+picollm==2.1.4
 pillow

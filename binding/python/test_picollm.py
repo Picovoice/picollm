@@ -155,6 +155,7 @@ class PicollmTextTestCase(PicollmTestCase):
             access_key=self._access_key,
             model_path=self._model_path,
             device=self._device,
+            context_caching=False,
             library_path=pv_library_path('../..'))
         self.data = self.data['picollm']
 
@@ -168,6 +169,7 @@ class PicollmTextTestCase(PicollmTestCase):
                     access_key='invalid==',
                     model_path=self._model_path,
                     device=self._device,
+                    context_caching=False,
                     library_path=pv_library_path('../..'))
 
     def test_init_with_invalid_model_path(self) -> None:
@@ -177,6 +179,7 @@ class PicollmTextTestCase(PicollmTestCase):
                     access_key=self._access_key,
                     model_path="/invalid.pllm",
                     device=self._device,
+                    context_caching=False,
                     library_path=pv_library_path('../..'))
 
     def test_init_with_invalid_device(self) -> None:
@@ -186,6 +189,7 @@ class PicollmTextTestCase(PicollmTestCase):
                     access_key=self._access_key,
                     model_path=self._model_path,
                     device='cpu:nan',
+                    context_caching=False,
                     library_path=pv_library_path('../..'))
 
     def test_init_with_invalid_library_path(self) -> None:
@@ -195,6 +199,7 @@ class PicollmTextTestCase(PicollmTestCase):
                     access_key=self._access_key,
                     model_path=self._model_path,
                     device=self._device,
+                    context_caching=False,
                     library_path="/invalid.so")
 
     def test_generate_default(self) -> None:
@@ -458,6 +463,7 @@ class PicollmTextTestCase(PicollmTestCase):
                 access_key=self._access_key,
                 model_path=self._model_path,
                 device="invalid",
+                context_caching=False,
                 library_path=pv_library_path(relative_path))
             self.assertIsNone(c)
         except PicoLLMError as e:
@@ -471,11 +477,50 @@ class PicollmTextTestCase(PicollmTestCase):
                 access_key=self._access_key,
                 model_path=self._model_path,
                 device="invalid",
+                context_caching=False,
                 library_path=pv_library_path(relative_path))
             self.assertIsNone(c)
         except PicoLLMError as e:
             self.assertEqual(len(error), len(e.message_stack))
             self.assertListEqual(list(error), list(e.message_stack))
+
+
+class PicollmWithContextTextTestCase(PicollmTestCase):
+    def setUp(self):
+        self.data = self.data['picollm']
+
+    def test_generate_with_context(self) -> None:
+        data = self.data["default"]
+        prompt = data["prompt"]
+        expectations = self._parse_expectations(data["expectations"])
+
+        picollm0 = PicoLLM(
+            access_key=self._access_key,
+            model_path=self._model_path,
+            device=self._device,
+            context_caching=True,
+            library_path=pv_library_path('../..'))
+
+        self._verify_completion(res=picollm0.generate(prompt=prompt), expectations=expectations)
+        self._verify_completion(res=picollm0.generate(prompt=prompt), expectations=expectations)
+
+        picollm0.context_save("context.bin")
+
+        picollm0.release()
+
+        picollm1 = PicoLLM(
+            access_key=self._access_key,
+            model_path=self._model_path,
+            device=self._device,
+            context_caching=True,
+            library_path=pv_library_path('../..'))
+        picollm1.context_load("context.bin")
+
+        self._verify_completion(res=picollm1.generate(prompt=prompt), expectations=expectations)
+        self._verify_completion(res=picollm1.generate(prompt=prompt), expectations=expectations)
+
+        picollm1.release()
+        os.remove("context.bin")
 
 
 class PicollmVlmTestCase(PicollmTestCase):
@@ -485,6 +530,7 @@ class PicollmVlmTestCase(PicollmTestCase):
             access_key=self._access_key,
             model_path=self._vlm_model_path,
             device=self._device,
+            context_caching=False,
             library_path=pv_library_path('../..'))
 
     def tearDown(self):
@@ -539,6 +585,7 @@ class PicollmOcrTestCase(PicollmTestCase):
             access_key=self._access_key,
             model_path=self._ocr_model_path,
             device=self._device,
+            context_caching=False,
             library_path=pv_library_path('../..'))
 
     def tearDown(self):
@@ -639,6 +686,7 @@ class PicollmEmbeddingTestCase(PicollmTestCase):
             access_key=self._access_key,
             model_path=self._embedding_model_path,
             device=self._device,
+            context_caching=False,
             library_path=pv_library_path('../..'))
 
     def tearDown(self):

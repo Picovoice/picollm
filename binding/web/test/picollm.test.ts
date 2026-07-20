@@ -323,7 +323,7 @@ const generateTests = () => {
           ACCESS_KEY,
           model,
           {
-            contextCaching: true,
+            enableContextCaching: true,
           }
         );
 
@@ -346,7 +346,7 @@ const generateTests = () => {
           ACCESS_KEY,
           model,
           {
-            contextCaching: true,
+            enableContextCaching: true,
           }
         );
 
@@ -373,7 +373,7 @@ const generateTests = () => {
           ACCESS_KEY,
           model,
           {
-            contextCaching: true,
+            enableContextCaching: true,
           }
         );
 

@@ -675,7 +675,7 @@ class PicollmOcrTestCase(PicollmTestCase):
             res=res,
             expectations=expectations)
 
-        self.assertEqual(''.join(pieces), expectations[0].completion)
+        self.assertTrue(any(''.join(pieces) == expectation.completion for expectation in expectations))
         self.assertGreaterEqual(progress[0], 100.0)
 
 

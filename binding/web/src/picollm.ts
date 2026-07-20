@@ -1559,7 +1559,7 @@ export class PicoLLM {
 
           if (this._module === undefined) {
             throw new PicoLLMErrors.PicoLLMInvalidStateError(
-              'Attempted to call PicoLLM contextSave after release.'
+              'Attempted to call PicoLLM contextLoad after release.'
             );
           }
 

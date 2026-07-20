@@ -622,7 +622,7 @@ describe('PicoLLM generate tests', () => {
 
     const picollm0 = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
         device: DEVICE,
-        contextCaching: true,
+        enableContextCaching: true,
     });
 
     try {
@@ -641,7 +641,7 @@ describe('PicoLLM generate tests', () => {
 
     const picollm1 = new PicoLLM(ACCESS_KEY, TEXT_MODEL_PATH, {
         device: DEVICE,
-        contextCaching: true,
+        enableContextCaching: true,
     });
 
     try {

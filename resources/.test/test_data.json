@@ -299,6 +299,10 @@
       {
         "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
         "completion": "# Wikipedia\n\n## WIKIP"
+      },
+      {
+        "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+        "completion": "# Wikipedia\n\n## Welcome to Wikipedia"
       }
     ]
   },

@@ -32,6 +32,7 @@ def create(
         access_key: str,
         model_path: str,
         device: Optional[str] = None,
+        enable_context_caching: bool = False,
         library_path: Optional[str] = None) -> PicoLLM:
     """
     Factory method for picoLLM inference engine.
@@ -44,6 +45,8 @@ def create(
     If set to `cpu`, the engine will run on the CPU with the default number of threads. To specify the number of
     threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of threads. If set
     to `None`, `best` device will be used.
+    :param enable_context_caching: Enables context caching in the LLM if the model supports context caching. Context
+    caching speeds up processing when consecutive prompts share a common prefix.
     :param library_path: Absolute path to picoLLM's dynamic library. If not set it will be set to the default location.
 
     :return: An instance of picoLLM inference engine.
@@ -59,6 +62,7 @@ def create(
         access_key=access_key,
         model_path=model_path,
         device=device,
+        enable_context_caching=enable_context_caching,
         library_path=library_path)
 
 

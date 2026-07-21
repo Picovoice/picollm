@@ -54,7 +54,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
 
 setuptools.setup(
     name="picollm",
-    version="2.1.3",
+    version="2.1.4",
     author="Picovoice",
     author_email="hello@picovoice.ai",
     description="picoLLM Inference Engine",

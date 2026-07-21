@@ -475,6 +475,38 @@ namespace PicoLLMTest
         }
 
         [TestMethod]
+        public void TestGenerateWithContext()
+        {
+            JToken data = _testJson["default"];
+            string prompt = data["prompt"].ToObject<string>();
+            List<CompletionExpectation> expectations = data["expectations"].ToObject<List<CompletionExpectation>>();
+
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device, true))
+            {
+                PicoLLMCompletion res0 = picoLLM.Generate(prompt);
+                VerifyCompletion(res0, expectations);
+
+                PicoLLMCompletion res1 = picoLLM.Generate(prompt);
+                VerifyCompletion(res1, expectations);
+
+                picoLLM.ContextSave("context.bin");
+            }
+
+            using (PicoLLM picoLLM = PicoLLM.Create(_accessKey, _modelPath, _device, true))
+            {
+                picoLLM.ContextLoad("context.bin");
+
+                PicoLLMCompletion res0 = picoLLM.Generate(prompt);
+                VerifyCompletion(res0, expectations);
+
+                PicoLLMCompletion res1 = picoLLM.Generate(prompt);
+                VerifyCompletion(res1, expectations);
+            }
+
+            File.Delete("context.bin");
+        }
+
+        [TestMethod]
         public void TestInterrupt()
         {
             JToken data = _testJson["default"];

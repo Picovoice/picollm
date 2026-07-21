@@ -121,6 +121,8 @@ export class PicoLLM {
    * target GPU. If set to `cpu`, the engine will run on the CPU with the default number of threads. To specify the
    * number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of
    * threads.
+   * @param options.enableContextCaching Enables context caching in the LLM if the model supports context caching.
+   * Context caching speeds up processing when consecutive prompts share a common prefix.
    * @param options.libraryPath Absolute path to picoLLM's dynamic library.
    *
    * @returns An instance of the PicoLLM.
@@ -137,6 +139,7 @@ export class PicoLLM {
     const {
       libraryPath = getSystemLibraryPath(),
       device = "best",
+      enableContextCaching = false,
     } = options;
 
     if (!fs.existsSync(libraryPath)) {
@@ -161,7 +164,8 @@ export class PicoLLM {
       picoLLMInitResult = pvPicoLLM.init(
         accessKey,
         modelPath,
-        device
+        device,
+        enableContextCaching
       );
     } catch (err: any) {
       pvStatusToException(<PvStatus>err.code, err);
@@ -664,6 +668,62 @@ export class PicoLLM {
     const status = picollmResetResult!.status;
     if (status !== PvStatus.SUCCESS) {
       this.handlePvStatus(status, 'PicoLLM failed to reset');
+    }
+  }
+
+  /**
+   * Loads context cache from a file. This function will fail if the model does not support context caching or context
+   * caching is turned off.
+   *
+   * @param contextPath Absolute path to the file containing the context cache.
+   */
+  contextLoad(contextPath: String): void {
+    if (
+      this._handle === 0 ||
+      this._handle === null ||
+      this._handle === undefined
+    ) {
+      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
+    }
+
+    let picollmResetResult: PicoLLMResult | null = null;
+    try {
+      picollmResetResult = this._pvPicoLLM.context_load(this._handle, contextPath);
+    } catch (err: any) {
+      pvStatusToException(<PvStatus>err.code, err);
+    }
+
+    const status = picollmResetResult!.status;
+    if (status !== PvStatus.SUCCESS) {
+      this.handlePvStatus(status, 'PicoLLM failed to load context');
+    }
+  }
+
+  /**
+   * Saves current context cache to a file. This function will fail if the model does not support context caching,
+   * context caching is turned off, or there is no context in the model to save.
+   *
+   * @param contextPath Absolute path to the file where the context cache will be saved.
+   */
+  contextSave(contextPath: String): void {
+    if (
+      this._handle === 0 ||
+      this._handle === null ||
+      this._handle === undefined
+    ) {
+      throw new PicoLLMInvalidStateError('PicoLLM is not initialized');
+    }
+
+    let picollmResetResult: PicoLLMResult | null = null;
+    try {
+      picollmResetResult = this._pvPicoLLM.context_save(this._handle, contextPath);
+    } catch (err: any) {
+      pvStatusToException(<PvStatus>err.code, err);
+    }
+
+    const status = picollmResetResult!.status;
+    if (status !== PvStatus.SUCCESS) {
+      this.handlePvStatus(status, 'PicoLLM failed to save context');
     }
   }
 

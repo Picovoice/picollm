@@ -25,7 +25,8 @@ class PicoLLMNative {
     static native long init(
             String accessKey,
             String modelPath,
-            String device) throws PicoLLMException;
+            String device,
+            boolean enableContextCaching) throws PicoLLMException;
 
     static native void delete(long object);
 
@@ -85,4 +86,8 @@ class PicoLLMNative {
     static native String getModel(long object) throws PicoLLMException;
 
     static native int getContextLength(long object) throws PicoLLMException;
+
+    static native void contextLoad(long object, String path) throws PicoLLMException;
+
+    static native void contextSave(long object, String path) throws PicoLLMException;
 }

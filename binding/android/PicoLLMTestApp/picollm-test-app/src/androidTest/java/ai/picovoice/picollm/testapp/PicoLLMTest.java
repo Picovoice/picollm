@@ -214,6 +214,66 @@ public class PicoLLMTest {
         }
 
         @Test
+        public void testGenerateWithContext() throws Exception {
+            JsonObject currentTestData = testData
+                    .getAsJsonObject("picollm")
+                    .getAsJsonObject("default");
+
+            List<CompletionExpectation> expectations = new Gson().fromJson(
+                    currentTestData.get("expectations"),
+                    new TypeToken<List<CompletionExpectation>>() {
+                    }.getType());
+
+            PicoLLM picollm0 = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .setEnableContextCaching(true)
+                    .build();
+
+            PicoLLMCompletion res0 = picollm0.generate(
+                    currentTestData.get("prompt").getAsString(),
+                    new PicoLLMGenerateParams.Builder().build());
+            verifyCompletion(res0, expectations);
+
+            PicoLLMCompletion res1 = picollm0.generate(
+                    currentTestData.get("prompt").getAsString(),
+                    new PicoLLMGenerateParams.Builder().build());
+            verifyCompletion(res1, expectations);
+
+            picollm0.contextSave(contextPath);
+
+            if (picollm0 != null) {
+                picollm0.delete();
+                picollm0 = null;
+            }
+
+            PicoLLM picollm1 = new PicoLLM.Builder()
+                    .setAccessKey(accessKey)
+                    .setModelPath(modelPath)
+                    .setDevice(device)
+                    .setEnableContextCaching(true)
+                    .build();
+
+            picollm1.contextLoad(contextPath);
+
+            PicoLLMCompletion res2 = picollm1.generate(
+                    currentTestData.get("prompt").getAsString(),
+                    new PicoLLMGenerateParams.Builder().build());
+            verifyCompletion(res2, expectations);
+
+            PicoLLMCompletion res3 = picollm1.generate(
+                    currentTestData.get("prompt").getAsString(),
+                    new PicoLLMGenerateParams.Builder().build());
+            verifyCompletion(res3, expectations);
+
+            if (picollm1 != null) {
+                picollm1.delete();
+                picollm1 = null;
+            }
+        }
+
+        @Test
         public void testGenerateWithCompletionTokenLimit() throws Exception {
             PicoLLM picollm = new PicoLLM.Builder()
                     .setAccessKey(accessKey)

@@ -56,6 +56,7 @@ public class BaseTest {
     static String imageModelPath;
     static String embeddingModelPath;
     static String ocrModelPath;
+    static String contextPath;
     static String device;
 
     static JsonObject testData;
@@ -142,6 +143,9 @@ public class BaseTest {
         ocrModelPath = new File(
                 externalFilesDir,
                 appContext.getString(R.string.pvTestingOcrModelName)).getAbsolutePath();
+        contextPath = new File(
+                externalFilesDir,
+                "context.bin").getAbsolutePath();
         device = appContext.getString(R.string.pvTestingDevice);
         testData = getTestData();
         smallImage = readImage("test_resources/test_image.png");

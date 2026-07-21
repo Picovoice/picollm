@@ -268,7 +268,7 @@ namespace Pv
             IntPtr accessKey,
             IntPtr modelPath,
             IntPtr device,
-            bool context_caching,
+            bool enable_context_caching,
             out IntPtr handle);
 
         [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
@@ -521,7 +521,7 @@ namespace Pv
             string accessKey,
             string modelPath,
             string device,
-            bool contextCaching)
+            bool enableContextCaching)
         {
             if (string.IsNullOrEmpty(accessKey))
             {
@@ -548,7 +548,7 @@ namespace Pv
                 accessKeyPtr,
                 modelPathPtr,
                 devicePtr,
-                contextCaching,
+                enableContextCaching,
                 out _libraryPointer);
 
             Marshal.FreeHGlobal(accessKeyPtr);

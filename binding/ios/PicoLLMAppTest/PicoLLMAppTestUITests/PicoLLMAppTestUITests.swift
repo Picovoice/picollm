@@ -144,6 +144,49 @@ class PicoLLMAppTestUITests: BaseTest {
         try verifyCompletion(res: result, expectations: testCase.expectations)
     }
 
+    func testGenerateWithContext() throws {
+        let testCase = PicollmTestCase(name: "default", data: self.picollmTestData!)
+
+        let tempDirectoryURL = FileManager.default.temporaryDirectory
+        let fileURL = tempDirectoryURL.appendingPathComponent("context.bin")
+        let contextPath = fileURL.path()
+
+        let result = try handle!.generate(prompt: testCase.prompt)
+        try verifyCompletion(res: result, expectations: testCase.expectations)
+
+        let handle0 = try PicoLLM.init(
+            accessKey: accessKey,
+            modelPath: modelPath,
+            device: device,
+            enableContextCache: true)
+
+        let result0 = try handle0.generate(prompt: testCase.prompt)
+        try verifyCompletion(res: result0, expectations: testCase.expectations)
+
+        let result1 = try handle0.generate(prompt: testCase.prompt)
+        try verifyCompletion(res: result1, expectations: testCase.expectations)
+
+        try handle0.contextSave(contextPath: contextPath)
+
+        handle0.delete()
+
+        let handle1 = try PicoLLM.init(
+            accessKey: accessKey,
+            modelPath: modelPath,
+            device: device,
+            enableContextCache: true)
+
+        try handle1.contextLoad(contextPath: contextPath)
+
+        let result2 = try handle1.generate(prompt: testCase.prompt)
+        try verifyCompletion(res: result2, expectations: testCase.expectations)
+
+        let result3 = try handle1.generate(prompt: testCase.prompt)
+        try verifyCompletion(res: result3, expectations: testCase.expectations)
+
+        handle1.delete()
+    }
+
     func testGenerateWithCompletionTokenLimit() throws {
         let testCase = PicollmTestCase(name: "with-completion-token-limit", data: self.picollmTestData!)
 

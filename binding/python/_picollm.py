@@ -577,6 +577,7 @@ class PicoLLM(object):
             access_key: str,
             model_path: str,
             device: str,
+            enable_context_caching: bool,
             library_path: str) -> None:
         """
         Constructor.
@@ -589,6 +590,8 @@ class PicoLLM(object):
         target GPU. If set to `cpu`, the engine will run on the CPU with the default number of threads. To specify the
         number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of
         threads.
+        :param enable_context_caching: Enables context caching in the LLM if the model supports context caching. Context
+        caching speeds up processing when consecutive prompts share a common prefix.
         :param library_path: Absolute path to picoLLM's dynamic library.
         """
 
@@ -620,6 +623,7 @@ class PicoLLM(object):
             c_char_p,
             c_char_p,
             c_char_p,
+            c_bool,
             POINTER(POINTER(self.CPicoLLM))
         ]
         init_func.restype = self.PicovoiceStatuses
@@ -629,6 +633,7 @@ class PicoLLM(object):
             access_key.encode(),
             model_path.encode(),
             device.encode(),
+            enable_context_caching,
             byref(self._handle))
         if status is not self.PicovoiceStatuses.SUCCESS:
             raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
@@ -780,6 +785,20 @@ class PicoLLM(object):
             POINTER(self.CPicoLLM),
         ]
         self._reset_func.restype = self.PicovoiceStatuses
+
+        self._context_load = library.pv_picollm_context_load
+        self._context_load.argtypes = [
+            POINTER(self.CPicoLLM),
+            c_char_p,
+        ]
+        self._context_load.restype = self.PicovoiceStatuses
+
+        self._context_save = library.pv_picollm_context_save
+        self._context_save.argtypes = [
+            POINTER(self.CPicoLLM),
+            c_char_p,
+        ]
+        self._context_save.restype = self.PicovoiceStatuses
 
         model_func = library.pv_picollm_model
         model_func.argtypes = [
@@ -1267,6 +1286,36 @@ class PicoLLM(object):
         if status is not self.PicovoiceStatuses.SUCCESS:
             raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
                 message="`pv_picollm_reset` failed.",
+                message_stack=self.get_error_stack()
+            )
+
+    def context_load(self, context_path: str) -> None:
+        """
+        Loads context cache from a file. This function will fail if the model does not support context caching or
+        context caching is turned off.
+
+        :param context_path: Absolute path to the file containing the context cache.
+        """
+
+        status = self._context_load(self._handle, context_path.encode("utf-8"))
+        if status is not self.PicovoiceStatuses.SUCCESS:
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message="`pv_picollm_context_load` failed.",
+                message_stack=self.get_error_stack()
+            )
+
+    def context_save(self, context_path: str) -> None:
+        """
+        Saves current context cache to a file. This function will fail if the model does not support context caching,
+        context caching is turned off, or there is no context in the model to save.
+
+        :param context_path: Absolute path to the file where the context cache will be saved.
+        """
+
+        status = self._context_save(self._handle, context_path.encode("utf-8"))
+        if status is not self.PicovoiceStatuses.SUCCESS:
+            raise self.PICOVOICE_STATUS_TO_EXCEPTION[status](
+                message="`pv_picollm_context_save` failed.",
                 message_stack=self.get_error_stack()
             )
 

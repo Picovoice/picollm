@@ -299,15 +299,19 @@
       {
         "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
         "completion": "# Wikipedia\n\n## WIKIP"
+      },
+      {
+        "endpoint": "COMPLETION_TOKEN_LIMIT_REACHED",
+        "completion": "# Wikipedia\n\n## Welcome to Wikipedia"
       }
     ]
   },
   "generate_embedding": {
     "prompt": "My name is Tom",
     "expectations": [
-      {"doc": "I am Tom", "similarity": 0.699591},
-      {"doc": "Her name is Lily", "similarity": 0.506983},
-      {"doc": "This is an experiment", "similarity": 0.291203}
+      {"doc": "I am Tom", "similarity": 0.711631},
+      {"doc": "Her name is Lily", "similarity": 0.500016},
+      {"doc": "This is an experiment", "similarity": 0.298841}
     ]
   }
 }

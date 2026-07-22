@@ -14,6 +14,7 @@ import { loadModel } from './utils';
 
 import {
   PicoLLMModel,
+  PicoLLMContext,
   PicoLLMCompletion,
   PicoLLMEmbeddingsCompletion,
   PicoLLMInitOptions,
@@ -26,6 +27,8 @@ import {
   PicoLLMWorkerTokenizeResponse,
   PicoLLMWorkerForwardResponse,
   PicoLLMWorkerResetResponse,
+  PicoLLMWorkerContextLoadResponse,
+  PicoLLMWorkerContextSaveResponse,
   PicoLLMWorkerReleaseResponse,
   PicoLLMImage,
   PicoLLMGenerateWithImageOptions,
@@ -111,6 +114,8 @@ export class PicoLLMWorker {
    * picoLLM picks the most suitable device. If set to `cpu`, the engine will run on the CPU with the default number of
    * threads. To specify the number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}`
    * is the desired number of threads. The number of threads is capped at the max available cores determined by the browser.
+   * @param options.enableContextCaching Enables context caching in the LLM if the model supports context caching.
+   * Context caching speeds up processing when consecutive prompts share a common prefix.
    *
    * @returns An instance of the PicoLLMWorker.
    */
@@ -119,7 +124,10 @@ export class PicoLLMWorker {
     model: PicoLLMModel,
     options: PicoLLMInitOptions = {}
   ): Promise<PicoLLMWorker> {
-    const { device } = options;
+    const {
+        device,
+        enableContextCaching
+    } = options;
     const modelPath = await loadModel(model);
 
     const worker = new PvWorker();
@@ -155,6 +163,7 @@ export class PicoLLMWorker {
       modelPath: modelPath,
       options: {
         device: device,
+        enableContextCaching: enableContextCaching,
       },
       wasmPThread: this._wasmPThread,
       wasmPThreadLib: this._wasmPThreadLib,
@@ -596,6 +605,90 @@ export class PicoLLMWorker {
 
     this._worker.postMessage({
       command: 'reset',
+    });
+
+    return returnPromise;
+  }
+
+  /**
+   * Loads context cache from a file. This function will fail if the model does not support context caching or context
+   * caching is turned off.
+   *
+   * @param contextPath Absolute path to the file containing the context cache.
+   * @param context PicoLLM context representation, see PicoLLMContext for details.
+   */
+  public async contextLoad(contextPath: string, context: PicoLLMContext = {}): Promise<void> {
+    const returnPromise: Promise<void> = new Promise((resolve, reject) => {
+      this._worker.onmessage = (event: MessageEvent<PicoLLMWorkerContextLoadResponse>): void => {
+        switch (event.data.command) {
+          case 'ok':
+            resolve();
+            break;
+          case 'failed':
+          case 'error':
+            const error = pvStatusToException(event.data.status, event.data.shortMessage, event.data.messageStack);
+            reject(error);
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${event.data.command}`));
+        }
+      };
+    });
+
+    const {
+        contextFile = null,
+        cacheFileVersion = 0,
+        cacheFileOverwrite = false,
+        numFetchRetries = 0,
+    } = context;
+
+    if (contextFile !== null) {
+        await loadModel({
+            modelFile: contextFile,
+            cacheFilePath: contextPath,
+            cacheFileVersion: cacheFileVersion,
+            cacheFileOverwrite: cacheFileOverwrite,
+            numFetchRetries: numFetchRetries
+        });
+    }
+
+    this._worker.postMessage({
+      command: 'contextLoad',
+      contextPath: contextPath,
+    });
+
+    return returnPromise;
+  }
+
+  /**
+   * Saves current context cache to a file. This function will fail if the model does not support context caching,
+   * context caching is turned off, or there is no context in the model to save.
+   *
+   * @param contextPath Absolute path to the file where the context cache will be saved.
+   */
+  public async contextSave(contextPath: string): Promise<void> {
+    const returnPromise: Promise<void> = new Promise((resolve, reject) => {
+      this._worker.onmessage = (event: MessageEvent<PicoLLMWorkerContextSaveResponse>): void => {
+        switch (event.data.command) {
+          case 'ok':
+            resolve();
+            break;
+          case 'failed':
+          case 'error':
+            const error = pvStatusToException(event.data.status, event.data.shortMessage, event.data.messageStack);
+            reject(error);
+            break;
+          default:
+            // @ts-ignore
+            reject(pvStatusToException(PvStatus.RUNTIME_ERROR, `Unrecognized command: ${event.data.command}`));
+        }
+      };
+    });
+
+    this._worker.postMessage({
+      command: 'contextSave',
+      contextPath: contextPath,
     });
 
     return returnPromise;

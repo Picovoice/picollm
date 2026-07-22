@@ -38,6 +38,8 @@ typedef struct pv_picollm pv_picollm_t;
  * GPU device, set this argument to `gpu:${GPU_INDEX}`, where `${GPU_INDEX}` is the index of the target GPU. If set to
  * `cpu`, the engine will run on the CPU with the default number of threads. To specify the number of threads, set this
  * argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of threads.
+ * @param enable_context_caching Enables context caching in the LLM if the model supports context caching. Context caching
+ * speeds up processing when consecutive prompts share a common prefix.
  * @param[out] object Constructed instance of picoLLM.
  * @return Status code. Returns `PV_STATUS_OUT_OF_MEMORY`, `PV_STATUS_IO_ERROR`, `PV_STATUS_INVALID_ARGUMENT`,
  * `PV_STATUS_RUNTIME_ERROR`, `PV_STATUS_ACTIVATION_ERROR`, `PV_STATUS_ACTIVATION_LIMIT_REACHED`,
@@ -47,6 +49,7 @@ PV_API pv_status_t pv_picollm_init(
         const char *access_key,
         const char *model_path,
         const char *device,
+        bool enable_context_caching,
         pv_picollm_t **object);
 
 /**
@@ -429,6 +432,33 @@ PV_API const char *pv_picollm_version(void);
  * @return Maximum number of top choices.
  */
 PV_API int32_t pv_picollm_max_top_choices(void);
+
+/**
+ * Loads context cache from a file. This function will fail if the model does
+ * not support context caching or context caching is turned off.
+ * 
+ * @param object picoLLM object.
+ * @param context_path Absolute path to the file containing the context cache.
+ * @return Status code. Returns `PV_STATUS_OUT_OF_MEMORY`, `PV_STATUS_IO_ERROR`,
+ * `PV_STATUS_INVALID_ARGUMENT`, or `PV_STATUS_RUNTIME_ERROR` on failure.
+ */
+PV_API pv_status_t pv_picollm_context_load(
+        pv_picollm_t *object,
+        const char *context_path);
+
+/**
+ * Saves current context cache to a file. This function will fail if the model
+ * does not support context caching, context caching is turned off, or there is
+ * no context in the model to save.
+ * 
+ * @param object picoLLM object.
+ * @param context_path Absolute path to the file where the context cache will be saved.
+ * @return Status code. Returns `PV_STATUS_OUT_OF_MEMORY`, `PV_STATUS_IO_ERROR`,
+ * `PV_STATUS_INVALID_ARGUMENT`, or `PV_STATUS_RUNTIME_ERROR` on failure.
+ */
+PV_API pv_status_t pv_picollm_context_save(
+        pv_picollm_t *object,
+        const char *context_path);
 
 /**
  * Gets a list of hardware devices that can be specified when calling `pv_picollm_init`

@@ -27,6 +27,8 @@ import {
   PicoLLMGenerateWithImageOptions,
   PicoLLMWorkerGenerateWithImageRequest,
   PvStatus,
+  PicoLLMWorkerContextLoadRequest,
+  PicoLLMWorkerContextSaveRequest,
 } from './types';
 import { PicoLLMError } from './picollm_errors';
 
@@ -199,6 +201,30 @@ const resetRequest = async (): Promise<any> => {
   };
 };
 
+const contextLoadRequest = async (
+    request: PicoLLMWorkerContextLoadRequest
+): Promise<any> => {
+  if (picoLLM === null) {
+    return notInitializedError;
+  }
+  await picoLLM.contextLoad(request.contextPath);
+  return {
+    command: 'ok',
+  };
+};
+
+const contextSaveRequest = async (
+    request: PicoLLMWorkerContextSaveRequest
+): Promise<any> => {
+  if (picoLLM === null) {
+    return notInitializedError;
+  }
+  await picoLLM.contextSave(request.contextPath);
+  return {
+    command: 'ok',
+  };
+};
+
 const releaseRequest = async (): Promise<any> => {
   if (picoLLM !== null) {
     await picoLLM.release();
@@ -244,6 +270,12 @@ self.onmessage = async function (
         break;
       case 'reset':
         self.postMessage(await resetRequest());
+        break;
+      case 'contextLoad':
+        self.postMessage(await contextLoadRequest(event.data));
+        break;
+      case 'contextSave':
+        self.postMessage(await contextSaveRequest(event.data));
         break;
       case 'release':
         self.postMessage(await releaseRequest());

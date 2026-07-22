@@ -143,11 +143,14 @@ public class PicoLLM {
     ///         index of the target GPU. If set to `cpu`, the engine will run on the CPU with the default number of
     ///         threads. To specify the number of threads, set this argument to `cpu:${NUM_THREADS}`, where
     ///         `${NUM_THREADS}` is the desired number of threads.
+    ///   - enableContextCache: Enables context caching in the LLM if the model supports context caching. Context
+    ///         caching speeds up processing when consecutive prompts share a common prefix.
     /// - Throws: PicoLLMError
     public init(
         accessKey: String,
         modelPath: String,
-        device: String = "best"
+        device: String = "best",
+        enableContextCache: Bool = false
     ) throws {
 
         if accessKey.isEmpty {
@@ -168,6 +171,7 @@ public class PicoLLM {
             accessKey,
             modelPath,
             device,
+            enableContextCache,
             &handle)
         if status != PV_STATUS_SUCCESS {
             let messageStack = try PicoLLM.getMessageStack()
@@ -668,6 +672,43 @@ public class PicoLLM {
         if status != PV_STATUS_SUCCESS {
             let messageStack = try PicoLLM.getMessageStack()
             throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM reset failed", messageStack)
+        }
+    }
+
+    /// Loads context cache from a file. This function will fail if the model
+    /// does not support context caching or context caching is turned off.
+    ///
+    /// - Parameters:
+    ///   - contextPath: Absolute path to the file containing the context cache.
+    /// - Throws: PicoLLMError
+    public func contextLoad(contextPath: String) throws {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling contextLoad")
+        }
+
+        let status = pv_picollm_context_load(self.handle, contextPath)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM context load failed", messageStack)
+        }
+    }
+
+    /// Saves current context cache to a file. This function will fail if the
+    /// model does not support context caching, context caching is turned off,
+    /// or there is no context in the model to save.
+    ///
+    /// - Parameters:
+    ///   - contextPath: Absolute path to the file where the context cache will be saved.
+    /// - Throws: PicoLLMError
+    public func contextSave(contextPath: String) throws {
+        if handle == nil {
+            throw PicoLLMInvalidStateError("PicoLLM must be initialized before calling contextSave")
+        }
+
+        let status = pv_picollm_context_save(self.handle, contextPath)
+        if status != PV_STATUS_SUCCESS {
+            let messageStack = try PicoLLM.getMessageStack()
+            throw PicoLLM.pvStatusToPicoLLMError(status, "PicoLLM context save failed", messageStack)
         }
     }
 

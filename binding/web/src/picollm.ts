@@ -26,6 +26,7 @@ import createModulePThread from "./lib/pv_picollm_pthread";
 
 import {
   PicoLLMModel,
+  PicoLLMContext,
   PvStatus,
   PicoLLMCompletion,
   PicoLLMInitOptions,
@@ -54,6 +55,7 @@ type pv_picollm_init_type = (
   accessKey: number,
   modelPath: number,
   device: number,
+  enableContextCaching: number,
   object: number
 ) => number;
 type pv_picollm_delete_type = (object: number) => void;
@@ -152,6 +154,8 @@ type pv_picollm_context_length_type = (
 ) => number;
 type pv_picollm_version_type = () => number;
 type pv_picollm_max_top_choices_type = () => number;
+type pv_picollm_context_load_type = (object: number, contextPath: number) => number;
+type pv_picollm_context_save_type = (object: number, contextPath: number) => number;
 type pv_picollm_list_hardware_devices_type = (
   hardwareDevices: number,
   numHardwareDevices: number
@@ -190,6 +194,9 @@ type PicoLLMModule = EmscriptenModule & {
   _pv_picollm_version: pv_picollm_version_type;
   _pv_picollm_max_top_choices: pv_picollm_max_top_choices_type;
 
+  _pv_picollm_context_load: pv_picollm_context_load_type;
+  _pv_picollm_context_save: pv_picollm_context_save_type;
+
   _pv_picollm_list_hardware_devices: pv_picollm_list_hardware_devices_type;
   _pv_picollm_free_hardware_devices: pv_picollm_free_hardware_devices_type;
 
@@ -211,6 +218,8 @@ type PicoLLMWasmOutput = {
   pv_picollm_generate_embeddings: pv_picollm_generate_embeddings_type,
   pv_picollm_generate_ocr: pv_picollm_generate_ocr_type,
   pv_picollm_forward: pv_picollm_forward_type,
+  pv_picollm_context_load: pv_picollm_context_load_type,
+  pv_picollm_context_save: pv_picollm_context_save_type,
 
   contextLength: number;
   maxTopChoices: number;
@@ -288,6 +297,8 @@ export class PicoLLM {
   private readonly _pv_picollm_generate_embeddings: pv_picollm_generate_embeddings_type;
   private readonly _pv_picollm_generate_ocr: pv_picollm_generate_ocr_type;
   private readonly _pv_picollm_forward: pv_picollm_forward_type;
+  private readonly _pv_picollm_context_load: pv_picollm_context_load_type;
+  private readonly _pv_picollm_context_save: pv_picollm_context_save_type;
 
   private readonly _functionMutex: Mutex;
 
@@ -318,6 +329,8 @@ export class PicoLLM {
     this._pv_picollm_generate_embeddings = handleWasm.pv_picollm_generate_embeddings;
     this._pv_picollm_generate_ocr = handleWasm.pv_picollm_generate_ocr;
     this._pv_picollm_forward = handleWasm.pv_picollm_forward;
+    this._pv_picollm_context_load = handleWasm.pv_picollm_context_load;
+    this._pv_picollm_context_save = handleWasm.pv_picollm_context_save;
 
     this._contextLength = handleWasm.contextLength;
     this._maxTopChoices = handleWasm.maxTopChoices;
@@ -386,7 +399,8 @@ export class PicoLLM {
    * @param options.device String representation of the device to use for inference. If set to `best`,
    * picoLLM picks the most suitable device. If set to `cpu`, the engine will run on the CPU with the default number of
    * threads. To specify the number of threads, set this argument to `cpu:${NUM_THREADS}`, where `${NUM_THREADS}`
-   * is the desired number of threads. The number of threads is capped at the max available cores determined by the browser.
+   * @param options.enableContextCaching Enables context caching in the LLM if the model supports context caching.
+   * Context caching speeds up processing when consecutive prompts share a common prefix.
    *
    * @returns An instance of the PicoLLM.
    */
@@ -438,7 +452,10 @@ export class PicoLLM {
       throw new PicoLLMErrors.PicoLLMRuntimeError('Unsupported Browser');
     }
 
-    const { device = DEFAULT_DEVICE } = options;
+    const {
+        device = DEFAULT_DEVICE,
+        enableContextCaching = false,
+    } = options;
 
     if (!isAccessKeyValid(accessKey)) {
       throw new PicoLLMErrors.PicoLLMInvalidArgumentError('Invalid AccessKey');
@@ -468,6 +485,7 @@ export class PicoLLM {
             accessKey,
             modelPath,
             device,
+            enableContextCaching,
             this._wasmPThread,
             this._wasmPThreadLib,
             createModulePThread,
@@ -1484,7 +1502,7 @@ export class PicoLLM {
         .runExclusive(async () => {
           if (this._module === undefined) {
             throw new PicoLLMErrors.PicoLLMInvalidStateError(
-              'Attempted to call PicoLLM forward after release.'
+              'Attempted to call PicoLLM reset after release.'
             );
           }
           const status = this._module._pv_picollm_reset(this._objectAddress);
@@ -1500,6 +1518,128 @@ export class PicoLLM {
             );
 
             throw pvStatusToException(status, 'Reset failed', messageStack);
+          }
+        })
+        .then(() => {
+          resolve();
+        })
+        .catch((error: any) => {
+          reject(error);
+        });
+    });
+  }
+
+  /**
+   * Loads context cache from a file. This function will fail if the model does not support context caching or context
+   * caching is turned off.
+   *
+   * @param contextPath Absolute path to the file containing the context cache.
+   * @param context PicoLLM context representation, see PicoLLMContext for details.
+   */
+  public async contextLoad(contextPath: string, context: PicoLLMContext = {}): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._functionMutex
+        .runExclusive(async () => {
+          const {
+            contextFile = null,
+            cacheFileVersion = 0,
+            cacheFileOverwrite = false,
+            numFetchRetries = 0,
+          } = context;
+
+          if (contextFile !== null) {
+            await loadModel({
+              modelFile: contextFile,
+              cacheFilePath: contextPath,
+              cacheFileVersion: cacheFileVersion,
+              cacheFileOverwrite: cacheFileOverwrite,
+              numFetchRetries: numFetchRetries
+            });
+          }
+
+          if (this._module === undefined) {
+            throw new PicoLLMErrors.PicoLLMInvalidStateError(
+              'Attempted to call PicoLLM contextLoad after release.'
+            );
+          }
+
+          const contextPathEncoded = new TextEncoder().encode(contextPath);
+
+          const contextPathAddress = this._module._malloc((contextPathEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
+          if (contextPathAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for contextPath'
+            );
+          }
+          this._module.HEAPU8.set(contextPathEncoded, contextPathAddress);
+          this._module.HEAPU8[contextPathAddress + contextPathEncoded.length] = 0;
+
+          const status = await this._pv_picollm_context_load(this._objectAddress, contextPathAddress);
+          this._module._pv_free(contextPathAddress);
+
+          if (status !== PvStatus.SUCCESS) {
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
+              this._messageStackAddressAddressAddress,
+              this._messageStackDepthAddress,
+              this._module.HEAP32,
+              this._module.HEAPU8
+            );
+
+            throw pvStatusToException(status, 'ContextLoad failed', messageStack);
+          }
+        })
+        .then(() => {
+          resolve();
+        })
+        .catch((error: any) => {
+          reject(error);
+        });
+    });
+  }
+
+  /**
+   * Saves current context cache to a file. This function will fail if the model does not support context caching,
+   * context caching is turned off, or there is no context in the model to save.
+   *
+   * @param contextPath Absolute path to the file where the context cache will be saved.
+   */
+  public async contextSave(contextPath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._functionMutex
+        .runExclusive(async () => {
+          if (this._module === undefined) {
+            throw new PicoLLMErrors.PicoLLMInvalidStateError(
+              'Attempted to call PicoLLM contextSave after release.'
+            );
+          }
+
+          const contextPathEncoded = new TextEncoder().encode(contextPath);
+
+          const contextPathAddress = this._module._malloc((contextPathEncoded.length + 1) * Uint8Array.BYTES_PER_ELEMENT);
+          if (contextPathAddress === 0) {
+            throw new PicoLLMErrors.PicoLLMOutOfMemoryError(
+              'malloc failed: Cannot allocate memory for contextPath'
+            );
+          }
+          this._module.HEAPU8.set(contextPathEncoded, contextPathAddress);
+          this._module.HEAPU8[contextPathAddress + contextPathEncoded.length] = 0;
+
+          const status = await this._pv_picollm_context_save(this._objectAddress, contextPathAddress);
+          this._module._pv_free(contextPathAddress);
+
+          if (status !== PvStatus.SUCCESS) {
+            const messageStack = PicoLLM.getMessageStack(
+              this._module._pv_get_error_stack,
+              this._module._pv_free_error_stack,
+              this._messageStackAddressAddressAddress,
+              this._messageStackDepthAddress,
+              this._module.HEAP32,
+              this._module.HEAPU8
+            );
+
+            throw pvStatusToException(status, 'ContextSave failed', messageStack);
           }
         })
         .then(() => {
@@ -1687,6 +1827,7 @@ export class PicoLLM {
     accessKey: string,
     modelPath: string,
     device: string,
+    enableContextCaching: boolean,
     wasmBase64: string,
     wasmLibBase64: string,
     createModuleFunc: any
@@ -1701,12 +1842,14 @@ export class PicoLLM {
     });
 
     // setup async functions
-    const pv_picollm_init: pv_picollm_init_type = this.wrapAsyncFunction(module, "pv_picollm_init", 4);
+    const pv_picollm_init: pv_picollm_init_type = this.wrapAsyncFunction(module, "pv_picollm_init", 5);
     const pv_picollm_generate: pv_picollm_generate_type = this.wrapAsyncFunction(module, "pv_picollm_generate", 18);
     const pv_picollm_generate_with_image: pv_picollm_generate_with_image_type = this.wrapAsyncFunction(module, "pv_picollm_generate_with_image", 23);
     const pv_picollm_generate_embeddings: pv_picollm_generate_embeddings_type = this.wrapAsyncFunction(module, "pv_picollm_generate_embeddings", 4);
     const pv_picollm_generate_ocr: pv_picollm_generate_ocr_type = this.wrapAsyncFunction(module, "pv_picollm_generate_ocr", 11);
     const pv_picollm_forward: pv_picollm_forward_type = this.wrapAsyncFunction(module, "pv_picollm_forward", 6);
+    const pv_picollm_context_load: pv_picollm_context_load_type = this.wrapAsyncFunction(module, "pv_picollm_context_load", 2);
+    const pv_picollm_context_save: pv_picollm_context_save_type = this.wrapAsyncFunction(module, "pv_picollm_context_save", 2);
 
     const objectAddressAddress = module._malloc(Int32Array.BYTES_PER_ELEMENT);
     if (objectAddressAddress === 0) {
@@ -1777,6 +1920,7 @@ export class PicoLLM {
       accessKeyAddress,
       modelPathAddress,
       deviceAddress,
+      enableContextCaching ? 1 : 0,
       objectAddressAddress
     );
 
@@ -1879,6 +2023,8 @@ export class PicoLLM {
       pv_picollm_generate_embeddings: pv_picollm_generate_embeddings,
       pv_picollm_generate_ocr: pv_picollm_generate_ocr,
       pv_picollm_forward: pv_picollm_forward,
+      pv_picollm_context_load: pv_picollm_context_load,
+      pv_picollm_context_save: pv_picollm_context_save,
 
       contextLength: contextLength,
       maxTopChoices: maxTopChoices,

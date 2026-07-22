@@ -24,6 +24,10 @@ import modelData from '../cypress/fixtures/model_data.json';
 // @ts-ignore
 import testData from './test_data.json';
 
+import {
+    open
+} from "@picovoice/web-utils";
+
 const defaultGenerateModel = "phi2-290";
 const defaultGenerateWithImageModel = "qwen3-vl-2b-it-329";
 const defaultGenerateEmbeddingModel = "embeddinggemma-300m-137";
@@ -304,6 +308,87 @@ const generateTests = () => {
       const prompt = data.prompt;
 
       await runGenerateTest(picoLLM, prompt, data.expectations);
+    });
+  });
+
+  it(`should be able to generate with context`, () => {
+    const data = testData.picollm.default;
+    const prompt = data.prompt;
+    const expectations = data.expectations;
+
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
+      try {
+        const model: PicoLLMModel = { modelFile: chunks, cacheFilePath: defaultGenerateModel, cacheFileOverwrite: false };
+        const picoLLM = await PicoLLMWorker.create(
+          ACCESS_KEY,
+          model,
+          {
+            enableContextCaching: true,
+          }
+        );
+
+        const res0 = await picoLLM.generate(prompt);
+        verifyCompletion(res0, expectations);
+
+        const res1 = await picoLLM.generate(prompt);
+        verifyCompletion(res1, expectations);
+
+        await picoLLM.contextSave("context.bin");
+      } catch (e) {
+        expect(e).to.be.undefined;
+      }
+    });
+
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
+      try {
+        const model: PicoLLMModel = { modelFile: chunks, cacheFilePath: defaultGenerateModel, cacheFileOverwrite: false };
+        const picoLLM = await PicoLLMWorker.create(
+          ACCESS_KEY,
+          model,
+          {
+            enableContextCaching: true,
+          }
+        );
+
+        await picoLLM.contextLoad("context.bin");
+
+        const res0 = await picoLLM.generate(prompt);
+        verifyCompletion(res0, expectations);
+
+        const res1 = await picoLLM.generate(prompt);
+        verifyCompletion(res1, expectations);
+      } catch (e) {
+        expect(e).to.be.undefined;
+      }
+    });
+
+    cy.loadModel(defaultGenerateModel).then(async chunks => {
+      try {
+        const file = await open("context.bin", "r")
+        const data = await file.read(1, file.meta!.size);
+        const blob = new Blob([data as Uint8Array<ArrayBuffer>], {"type": "application/octet-stream"});
+
+        const model: PicoLLMModel = { modelFile: chunks, cacheFilePath: defaultGenerateModel, cacheFileOverwrite: false };
+        const picoLLM = await PicoLLMWorker.create(
+          ACCESS_KEY,
+          model,
+          {
+            enableContextCaching: true,
+          }
+        );
+
+        await picoLLM.contextLoad("context2.bin", {
+            contextFile: blob
+        });
+
+        const res0 = await picoLLM.generate(prompt);
+        verifyCompletion(res0, expectations);
+
+        const res1 = await picoLLM.generate(prompt);
+        verifyCompletion(res1, expectations);
+      } catch (e) {
+        expect(e).to.be.undefined;
+      }
     });
   });
 

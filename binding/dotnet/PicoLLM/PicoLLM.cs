@@ -268,6 +268,7 @@ namespace Pv
             IntPtr accessKey,
             IntPtr modelPath,
             IntPtr device,
+            bool enable_context_caching,
             out IntPtr handle);
 
         [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
@@ -393,6 +394,12 @@ namespace Pv
         private static extern int pv_picollm_max_top_choices();
 
         [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PvStatus pv_picollm_context_load(IntPtr handle, IntPtr context_path);
+
+        [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern PvStatus pv_picollm_context_save(IntPtr handle, IntPtr context_path);
+
+        [DllImport(LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         private static extern PvStatus pv_picollm_list_hardware_devices(
             out IntPtr hardwareDevices,
             out int numHardwareDevices);
@@ -479,16 +486,22 @@ namespace Pv
         /// `cpu`, the engine will run on the CPU with the default number of threads.To specify the number of threads, set this
         /// argument to `cpu:${ NUM_THREADS}`, where `${NUM_THREADS}` is the desired number of threads.
         /// </param>
+        /// <param name="enableContextCaching">
+        /// Enables context caching in the LLM if the model supports context caching. Context caching speeds up
+        /// processing when consecutive prompts share a common prefix.
+        /// </param>
         /// <exception cref="PicoLLMException">Thrown when an error occurs during the init process.</exception>
         public static PicoLLM Create(
             string accessKey,
             string modelPath,
-            string device = null)
+            string device = null,
+            bool enableContextCaching = false)
         {
             return new PicoLLM(
                 accessKey,
                 modelPath,
-                device ?? "best");
+                device ?? "best",
+                enableContextCaching);
         }
 
         /// <summary>
@@ -507,7 +520,8 @@ namespace Pv
         private PicoLLM(
             string accessKey,
             string modelPath,
-            string device)
+            string device,
+            bool enableContextCaching)
         {
             if (string.IsNullOrEmpty(accessKey))
             {
@@ -534,6 +548,7 @@ namespace Pv
                 accessKeyPtr,
                 modelPathPtr,
                 devicePtr,
+                enableContextCaching,
                 out _libraryPointer);
 
             Marshal.FreeHGlobal(accessKeyPtr);
@@ -1142,6 +1157,67 @@ namespace Pv
                     "picoLLM reset failed",
                     GetMessageStack());
             }
+        }
+
+        /// <summary>
+        /// Loads context cache from a file. This function will fail if the model does not support context caching or
+        /// context caching is turned off.
+        /// </summary>
+        /// <param name="contextPath">Absolute path to the file containing the context cache.</param>
+        /// <exception cref="PicoLLMException">Thrown when an error occurs.</exception>
+
+        public void ContextLoad(string contextPath)
+        {
+            if (string.IsNullOrEmpty(contextPath))
+            {
+                throw new PicoLLMInvalidArgumentException("No context path provided to picoLLM");
+            }
+
+            if (!File.Exists(contextPath))
+            {
+                throw new PicoLLMIOException($"Couldn't find context file at '{contextPath}'");
+            }
+
+            IntPtr contextPathPtr = Utils.GetPtrFromUtf8String(contextPath);
+
+            PvStatus status = pv_picollm_context_load(_libraryPointer, contextPathPtr);
+            if (status != PvStatus.SUCCESS)
+            {
+                throw PvStatusToException(
+                    status,
+                    "picoLLM context load failed",
+                    GetMessageStack());
+            }
+
+            Marshal.FreeHGlobal(contextPathPtr);
+        }
+
+        /// <summary>
+        /// Saves current context cache to a file. This function will fail if the model does not support context
+        /// caching, context caching is turned off, or there is no context in the model to save.
+        /// </summary>
+        /// <param name="contextPath">Absolute path to the file where the context cache will be saved.</param>
+        /// <exception cref="PicoLLMException">Thrown when an error occurs.</exception>
+
+        public void ContextSave(string contextPath)
+        {
+            if (string.IsNullOrEmpty(contextPath))
+            {
+                throw new PicoLLMInvalidArgumentException("No context path provided to picoLLM");
+            }
+
+            IntPtr contextPathPtr = Utils.GetPtrFromUtf8String(contextPath);
+
+            PvStatus status = pv_picollm_context_save(_libraryPointer, contextPathPtr);
+            if (status != PvStatus.SUCCESS)
+            {
+                throw PvStatusToException(
+                    status,
+                    "picoLLM context save failed",
+                    GetMessageStack());
+            }
+
+            Marshal.FreeHGlobal(contextPathPtr);
         }
 
         /// <summary>

@@ -39,13 +39,9 @@ jobs:
       fail-fast: false
       matrix:
         device: [ best ]
-        machine: [ rpi4-32, rpi4-64, rpi5-32, rpi5-64, pv-windows-arm64 ]
+        machine: [ rpi4-64, rpi5-64, pv-windows-arm64 ]
         include:
-        - machine: rpi4-32
-          make_file: "Unix Makefiles"
         - machine: rpi4-64
-          make_file: "Unix Makefiles"
-        - machine: rpi5-32
           make_file: "Unix Makefiles"
         - machine: rpi5-64
           make_file: "Unix Makefiles"

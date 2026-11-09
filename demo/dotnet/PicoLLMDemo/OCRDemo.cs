@@ -18,8 +18,7 @@ using System.Threading.Tasks;
 
 using Pv;
 
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using StbImageSharp;
 
 namespace PicoLLMDemo
 {
@@ -320,13 +319,10 @@ namespace PicoLLMDemo
 
         private static PicoLLMImage LoadImageAbsolutePath(string absolutePath)
         {
-            byte[] fileBytes = File.ReadAllBytes(absolutePath);
-            using (Image<Rgb24> image = Image.Load<Rgb24>(fileBytes))
+            using (FileStream stream = File.OpenRead(absolutePath))
             {
-                byte[] imageBytes = new byte[image.Width * image.Height * Unsafe.SizeOf<Rgb24>()];
-                image.CopyPixelDataTo(imageBytes);
-
-                return new PicoLLMImage(image.Width, image.Height, imageBytes);
+                ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlue);
+                return new PicoLLMImage(image.Width, image.Height, image.Data);
             }
         }
 

@@ -25,8 +25,7 @@ using Newtonsoft.Json.Linq;
 
 using Pv;
 
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using StbImageSharp;
 
 namespace PicoLLMTest
 {
@@ -892,13 +891,10 @@ namespace PicoLLMTest
         private static PicoLLMImage LoadImage(string name)
         {
             string path = Path.Combine(ROOT_DIR, String.Format("resources/.test/images/{0}", name));
-            byte[] fileBytes = File.ReadAllBytes(path);
-            using (Image<Rgb24> image = Image.Load<Rgb24>(fileBytes))
+            using (FileStream stream = File.OpenRead(path))
             {
-                byte[] imageBytes = new byte[image.Width * image.Height * Unsafe.SizeOf<Rgb24>()];
-                image.CopyPixelDataTo(imageBytes);
-
-                return new PicoLLMImage(image.Width, image.Height, imageBytes);
+                ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlue);
+                return new PicoLLMImage(image.Width, image.Height, image.Data);
             }
         }
     }
